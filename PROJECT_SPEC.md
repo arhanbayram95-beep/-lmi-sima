@@ -1,22 +1,49 @@
-# Ilm-i Sima: Medieval Mystic Face Reader 🔮✨
+# Product Specification & Architecture Document (PRD)
+## Project Name: Ilm-i Sima (Medieval Mystic Face Reader)
+**Tech Blueprint:** React Native + TypeScript (Frontend) | Claude 3.5 Sonnet (AI Core)
 
-An interactive, hyper-engaging mobile application that blends traditional Ottoman/Medieval physiognomy (İlm-i Sima) with modern multi-modal AI, wrapped inside an immersive, playful "medieval fortune-teller" experience.
+---
 
-⚠️ **Strict Framing Note:** This application is built exclusively for entertainment, cultural novelty, and satirical self-reflection. It contains zero scientific validation, does not perform biometric tracking, and uses absolute playful/mystical disclaimers across all layers.
+## 1. Visual & Interactive Concept (HCI & Aesthetics)
+The core value of this app lies in its *experience delivery*. It must feel like interacting with a mystical medieval contraption rather than a standard flat utility app.
 
-## 🌟 The Experience & HCI Principles
-* **Visual Identity:** Dark, mystical medieval aesthetic (midnight black, deep velvet purple, gold foil accents, parchment textures, and vintage alchemical icons).
-* **High-Fidelity Interaction:** Immersive UI animations (parchment scrolls unfolding, scanning cosmic grids over faces) combined with mechanical sound effects (clicking gears, mystical chimes, whispering scrolls).
-* **The Triple-Expression Flow:** Users must submit three distinct facial expressions: **Neutral**, **Smiling**, and **Frowning/Stern** to feed the AI alchemy engine.
-* **Tone of Voice:** Sincere, warm, slightly dramatic, and theatrical—completely avoiding clinical or definitive psychological jargon.
+* **Gamified Viewports:** Buttons should mimic vintage parchment blocks or glowing runes. Transitions use fading smoke or sliding leather scroll vectors.
+* **Audio Feedback Ecosystem:** 
+  * Audio cues on capture confirmation (e.g., a heavy iron shutter click followed by a low mystical bell chime).
+  * Shuffling card/parchment loop sounds during the analysis processing screen.
+* **Satirical Transparency:** The visual design intentionally leans so heavily into medieval wizardry, star charts, and alchemical diagrams that no user or app store reviewer could mistake it for a real medical or psychiatric assessment tool.
 
-## 🛠️ Technical Stack
-* **Frontend:** React Native (TypeScript) via Expo.
-* **State Management:** Zustand (for multi-step image caching and audio state control).
-* **Sound & Feedback:** `expo-av` for audio soundscapes and haptic engine hooks.
-* **Backend Bridge:** Node.js (TypeScript) or FastAPI acting as a secure gateway to the Claude API.
-* **AI Engine:** Claude 3.5 Sonnet (Vision Multi-modal API).
-* **Monetization:** RevenueCat integration for premium deep-dive alchemical charts and weekly subscriptions.
+---
 
-## 🚀 Quick Start (Local Development)
-Commands and environment variables will be populated as infrastructure tasks complete in `IMPLEMENTATION_PLAN.md`.
+## 2. Core User Flow & The Triple Capture Mechanics
+
+### 2.1 The Onboarding Crypt
+* Strict age gate (+18 check) presented inside a stylized "Guardian Oath" screen.
+* Revocable explicit checkbox for image processing, backed by a warm, human-centric privacy statement: *"Your face is processed using temporary digital alchemy and instantly forgotten. We store no images."*
+
+### 2.2 The Ritual of Three Faces (Sequential Camera UI)
+The interface enforces three distinct snapshots to build dynamic context for Claude Vision:
+1. **The Slate (Neutral):** Captures foundational biological features under a calm medieval framing overlay.
+2. **The Sun (Smiling):** Triggers joyful line movement around eyes and lips. A friendly sound chime prompts the user.
+3. **The Tempest (Frowning/Stern):** Triggers contraction points along the brow line.
+*Validation:* A local on-device check rejects frames without a single identifiable face before hitting the API to conserve server load.
+
+---
+
+## 3. Architecture & Data Flow
+
+```text
+[React Native App] 
+   │  (1) Captures 3 Base64 Images locally in Zustand cache
+   │  (2) Executes Audio & Haptic confirmation cues
+   V
+[Secure Serverless Backend Bridge]
+   │  (3) Validates active token via RevenueCat SDK
+   │  (4) Wraps images into a single payload with the Mystic System Prompt
+   V
+[Claude 3.5 Sonnet Vision API]
+   │  (5) Generates structured cultural text response matching JSON format
+   V
+[React Native UI] 
+   │  (6) Purges local memory of images instantly
+   │  (7) Unfolds the Narrative Scroll UI with Instagram-friendly Share Card
