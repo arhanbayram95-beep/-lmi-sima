@@ -1,22 +1,42 @@
-# Ilm-i Sima: Medieval Mystic Face Reader 🔮✨
+# Ilm-i Sima *(working title)* 🔮✨
+### A Cosmic Face Reading Experience
 
-An interactive, hyper-engaging mobile application that blends traditional Ottoman/Medieval physiognomy (İlm-i Sima) with modern multi-modal AI, wrapped inside an immersive, playful "medieval fortune-teller" experience.
+An interactive, mobile face-reading app that blends AI vision with a modern,
+"cosmic fortune-teller" experience — in the spirit of apps like Co-Star, Nebula,
+and Faladdin — built for the US & EU entertainment/mystic-app market.
 
-⚠️ **Strict Framing Note:** This application is built exclusively for entertainment, cultural novelty, and satirical self-reflection. It contains zero scientific validation, does not perform biometric tracking, and uses absolute playful/mystical disclaimers across all layers.
+⚠️ **Strict Framing Note:** This application is built exclusively for
+entertainment and self-reflection. It has zero scientific or clinical validity,
+performs no biometric identification, and carries clear, always-visible
+disclaimers across every screen.
 
 ## 🌟 The Experience & HCI Principles
-* **Visual Identity:** Dark, mystical medieval aesthetic (midnight black, deep velvet purple, gold foil accents, parchment textures, and vintage alchemical icons).
-* **High-Fidelity Interaction:** Immersive UI animations (parchment scrolls unfolding, scanning cosmic grids over faces) combined with mechanical sound effects (clicking gears, mystical chimes, whispering scrolls).
-* **The Triple-Expression Flow:** Users must submit three distinct facial expressions: **Neutral**, **Smiling**, and **Frowning/Stern** to feed the AI alchemy engine.
-* **Tone of Voice:** Sincere, warm, slightly dramatic, and theatrical—completely avoiding clinical or definitive psychological jargon.
+* **Visual Identity:** Deep cosmic gradients (midnight indigo, violet, magenta),
+  glowing celestial motifs, glassmorphic cards, holographic accents. Premium,
+  modern-mystic — closer to a meditation/astrology app than a medieval RPG.
+* **High-Fidelity Interaction:** Soft particle shimmer transitions, gentle
+  ambient audio (light chimes, cosmic twinkles), haptic feedback on capture.
+* **The Triple-Expression Flow:** Users submit three expressions — **Calm**,
+  **Bright**, **Deep** — to feed the AI reading engine.
+* **Tone of Voice:** Warm, a little playful, unmistakably "for fun." Short,
+  punchy copy — think horoscope-app energy, not fortune-teller-in-a-tent.
 
 ## 🛠️ Technical Stack
 * **Frontend:** React Native (TypeScript) via Expo.
-* **State Management:** Zustand (for multi-step image caching and audio state control).
-* **Sound & Feedback:** `expo-av` for audio soundscapes and haptic engine hooks.
-* **Backend Bridge:** Node.js (TypeScript) or FastAPI acting as a secure gateway to the Claude API.
-* **AI Engine:** Claude 3.5 Sonnet (Vision Multi-modal API).
-* **Monetization:** RevenueCat integration for premium deep-dive alchemical charts and weekly subscriptions.
+* **State Management:** Zustand.
+* **Sound & Feedback:** `expo-av` for audio, native haptics API.
+* **Backend Bridge:** Node.js (TypeScript) or FastAPI, acting as a secure gateway
+  to the Claude API.
+* **AI Engine:** Claude Sonnet 5 (vision, via the Messages API), structured
+  output via tool-use JSON schema.
+* **Monetization:** RevenueCat — weekly/monthly subscription for deep-dive
+  readings, built with a frictionless native cancel flow.
+
+## 🌍 Target Market
+Primary: US and EU, positioned in the mainstream astrology/mystic entertainment
+app category. Branding and copy should read naturally in English first, with
+localization planned for key EU languages post-MVP.
 
 ## 🚀 Quick Start (Local Development)
-Commands and environment variables will be populated as infrastructure tasks complete in `IMPLEMENTATION_PLAN.md`.
+Commands and environment variables will be populated as infrastructure tasks
+complete in `IMPLEMENTATION_PLAN.md`.
