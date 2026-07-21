@@ -7,7 +7,7 @@ category, within a strict entertainment framing.
 ---
 
 ## Phase 1: Local Environment & Audio-Visual Asset Prep
-- [ ] **1.1 Expo Initialization Verification**
+- [x] **1.1 Expo Initialization Verification**
   - Ensure the `/frontend` directory contains a compile-ready TypeScript blank template.
   - Test run via `npm run android` or `npm run ios`.
 - [ ] **1.2 Asset Gathering (Cosmic Mystic)**
