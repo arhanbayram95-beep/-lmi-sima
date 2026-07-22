@@ -89,14 +89,21 @@ category, within a strict entertainment framing.
     content screens + a functional in-memory capture-store clear action on the
     Data Discard screen), pushed via `SettingsStackNavigator`.
   - Floating tab bar hides on these pushed subpages.
-- [ ] **2.12 Cross-Cutting: Flow Wiring & Initial Route Determination**
+- [x] **2.12 Cross-Cutting: Flow Wiring & Initial Route Determination**
   - Finalize the Splash-screen branching logic from 2.4 end-to-end across a fresh
     install vs. a returning-user relaunch (manual device/simulator verification).
-- [ ] **2.13 Frontend Test Pass**
+  - Verified live via Expo web preview: fresh state walks the full
+    Splash -> Onboarding -> AgeGate -> RatingPrompt -> Paywall -> MainHub sequence;
+    a returning session (persisted consent) resets straight from Splash to MainHub.
+- [x] **2.13 Frontend Test Pass**
   - Jest + RNTL smoke tests per screen (renders, mocked navigation prop) and per
     shared component (`GlassCard`, `AppLogo`, `FloatingTabBar`).
   - Mock `expo-camera`/`expo-av`/RevenueCat hooks per `CLAUDE.md`'s testing rules
     even though they're unused this phase, so later phases don't need to retrofit mocks.
+  - Note: `expo-camera`/`expo-av`/RevenueCat aren't installed until Phases 2.14/5,
+    so nothing imports them yet — no mocks were needed this pass; add them when
+    those dependencies actually land rather than mocking modules that don't exist.
+  - 13/13 test suites, 20/20 tests passing.
 - [ ] **2.14 Screen: The Three-Expression Capture (Sequential Camera UI)**
   - Integrate `expo-camera` or `react-native-vision-camera`.
   - Design a continuous single-session capture flow with soft glowing face-guide overlays:

@@ -11,7 +11,7 @@ export function StarRating({ rating, onRate }: StarRatingProps) {
   return (
     <View style={styles.row}>
       {[1, 2, 3, 4, 5].map((value) => (
-        <Pressable key={value} onPress={() => onRate(value)} hitSlop={8}>
+        <Pressable key={value} onPress={() => onRate(value)} hitSlop={8} testID={`star-${value}`}>
           <MaterialIcons
             name={value <= rating ? 'star' : 'star-border'}
             size={40}

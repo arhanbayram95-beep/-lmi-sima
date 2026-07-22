@@ -10,7 +10,7 @@ export type ConsentCheckboxProps = {
 
 export function ConsentCheckbox({ checked, onToggle, label }: ConsentCheckboxProps) {
   return (
-    <Pressable onPress={onToggle} style={styles.row}>
+    <Pressable onPress={onToggle} style={styles.row} testID="consent-checkbox">
       <View style={[styles.box, checked && styles.boxChecked]}>
         {checked && <MaterialIcons name="check" size={16} color={Theme.colors.background.start} />}
       </View>
