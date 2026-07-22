@@ -7,7 +7,7 @@ A modern, high-quality, HCI-focused React Native mobile application that provide
 ## 🚀 Core Features
 
 * **3-Expression Sequential Capture:** Guided camera flow taking snapshots across Calm, Bright, and Deep facial expressions.
-* **Multimodal AI Vision:** Powered by Claude 3.5 Sonnet Vision via a secure Fastify API gateway.
+* **Multimodal AI Vision:** .
 * **Privacy-First Architecture (Process-and-Discard):** Images live in memory only during processing and are immediately purged upon response generation.
 * **Aesthetic 9:16 Share Cards:** Generate story-ready export cards for social media sharing via `react-native-view-shot`.
 * **Monetization (Aura Pro Access):** In-app weekly and monthly subscriptions managed via RevenueCat.
