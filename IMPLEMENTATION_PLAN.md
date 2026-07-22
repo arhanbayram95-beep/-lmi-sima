@@ -20,28 +20,92 @@ category, within a strict entertainment framing.
 
 ---
 
-## Phase 2: Frontend Navigation & The Reading Flow UX (HCI Focus)
-- [ ] **2.1 Global State & Core Theming (`Zustand`)**
-  - Install Zustand (`npm install zustand`) to manage global state:
-    - User age certification status (+18 gate).
-    - Base64 image cache array (max 3: Calm, Bright, Deep).
-    - Active paywall status derived from RevenueCat hooks.
-  - Setup a master theme palette in `frontend/src/ui/theme.ts`:
-    - Background: midnight indigo → violet → magenta gradient
-    - Accent: holographic/iridescent foil (animated gradient shimmer)
-    - Text: warm off-white / soft lavender for secondary text
-    - Card surfaces: glassmorphic (blur + low-opacity white overlay + soft glow border)
-- [ ] **2.2 Screen 1: Onboarding & Age Gate**
-  - Build a clean, cosmic-gradient welcome carousel with +18 age gate verification.
-  - Add explicit checkbox for image-processing consent with a warm, plain-language
-    disclaimer (see PROJECT_SPEC §2.1).
-- [ ] **2.3 Screen 2: The Three-Expression Capture (Sequential Camera UI)**
+## Phase 2: Frontend Navigation Shell & Design System Harmonization
+- [x] **2.0 Merge & Dependency Bootstrap**
+  - Merge `origin/main` (DESIGN.md, CLAUDE.md, README.md, stitch_designs/) into this branch.
+  - Install navigation deps: `@react-navigation/native`, `@react-navigation/native-stack`,
+    `@react-navigation/bottom-tabs`, `react-native-screens`, `react-native-safe-area-context`.
+  - Install `zustand`, `@react-native-async-storage/async-storage`.
+  - Install `expo-linear-gradient`, `expo-blur`, `expo-font`,
+    `@expo-google-fonts/manrope`, `@expo-google-fonts/hanken-grotesk`, `@expo-google-fonts/geist`,
+    `expo-store-review`, `@expo/vector-icons`.
+  - Update `PROJECT_SPEC.md`'s tech stack section with the full dependency list + rationale.
+- [x] **2.1 Design System Foundation**
+  - Port `DESIGN.md`'s `Theme.colors` verbatim into `frontend/src/ui/theme.ts`.
+  - Extend `theme.ts` with `Theme.typography` (Manrope/Hanken Grotesk/Geist roles) and
+    `Theme.spacing` (8px base scale).
+  - Build `GradientBackground.tsx`, `GlassCard.tsx` (two-layer gradient-border trick,
+    no `react-native-masked-view` dependency needed), `PrimaryButton.tsx` (filled/ghost
+    variants), `Disclaimer.tsx`, `AppLogo.tsx` (placeholder-glyph variant with a
+    swappable `source` prop for when final art arrives).
+- [x] **2.2 Navigation Shell**
+  - Build `navigation/types.ts` (RootStackParamList, MainTabParamList, SettingsStackParamList).
+  - Build `RootNavigator.tsx` (native-stack, `headerShown: false`).
+  - Build `FloatingTabBar.tsx` matching the `BottomTabBarProps` custom-tabBar signature,
+    styled per code2.html's floating pill (Analyze/Results/Settings, `MaterialIcons`
+    glyphs `face`/`assessment`/`settings`), hiding on pushed Settings subpages.
+  - Build `MainTabNavigator.tsx` wiring `FloatingTabBar` as the custom `tabBar`.
+  - Build `SettingsStackNavigator.tsx` for Privacy/Terms/Data-discard subpages.
+- [x] **2.3 Zustand Store Bootstrap**
+  - Build `useConsentStore.ts`, `useCaptureStore.ts`, `useEntitlementStore.ts`.
+  - Wire `persist` middleware + AsyncStorage on `useConsentStore` only — consent
+    persists across restarts so returning users skip straight to Main Hub.
+  - `useCaptureStore` is explicitly never persisted (process-and-discard invariant).
+- [x] **2.4 Screen: Splash**
+  - Build `SplashScreen.tsx`: animated logo (`AppLogo`), shimmer/progress bar,
+    cycling status text, cosmic gradient background.
+  - Gate navigation on `useFonts()` resolving + `useConsentStore` hydrating from storage.
+  - Branch: completed onboarding+age-gate before -> `navigation.reset` to `MainHub`;
+    else -> `Onboarding`.
+- [x] **2.5 Screen: Onboarding Carousel**
+  - Build `OnboardingScreen.tsx`: paging `ScrollView`, 3 slides (Calm/Bright/Deep
+    explanation), `PaginationDots.tsx`.
+  - "Skip Introduction" and final-slide "Next" both route to `AgeGate`.
+- [x] **2.6 Screen: Age Gate & Consent**
+  - Build `AgeGateScreen.tsx`: self-attestation buttons, `ConsentCheckbox.tsx`,
+    disabled-until-both-affirmed Continue CTA.
+  - Build the "under 18" dead-end branch (`AgeDeclinedScreen.tsx`).
+  - Disable swipe-back gesture on this route.
+- [x] **2.7 Screen: Rating Prompt**
+  - Build `RatingPromptScreen.tsx` + `StarRating.tsx` (5-star tap widget).
+  - Wire the compliant review-gate pattern: 4-5 stars -> `expo-store-review`'s
+    `requestReview()`; 1-3 stars -> lightweight in-app feedback capture, never an
+    external App Store deep link.
+- [x] **2.8 Screen: Paywall**
+  - Build `PaywallScreen.tsx` + `PricingTierCard.tsx` (Weekly Pass w/ crimson highlight
+    tag, Annual Pass w/ gold "SAVE 60%" tag), sticky CTA, feature list.
+  - `onSelect`/CTA handlers are stubs (`markPaywallSeen()` only) — no RevenueCat call yet.
+  - Persistent, legible disclaimer footer (`Disclaimer.tsx`).
+- [x] **2.9 Screen: Main Hub — Analyze Tab**
+  - Build `AnalyzeScreen.tsx`: top app bar (logo, PRO badge), hero section
+    ("3-Expression Face Reading" + Start Analysis CTA — stubbed, no camera wiring),
+    4-card feature grid matching code2.html's icon set.
+- [x] **2.10 Screen: Main Hub — Results/Log Tab**
+  - Build `ResultsScreen.tsx`: new UI (no Stitch mapping) — reading history empty state,
+    shareable-card affordance deferred to Phase 4 (`react-native-view-shot`).
+- [x] **2.11 Screen: Main Hub — Settings Tab & Subpages**
+  - Build `SettingsScreen.tsx` (list of nav rows: Privacy, Terms, Data Discard).
+  - Build `PrivacyScreen.tsx`, `TermsScreen.tsx`, `DataDiscardScreen.tsx` (static
+    content screens + a functional in-memory capture-store clear action on the
+    Data Discard screen), pushed via `SettingsStackNavigator`.
+  - Floating tab bar hides on these pushed subpages.
+- [ ] **2.12 Cross-Cutting: Flow Wiring & Initial Route Determination**
+  - Finalize the Splash-screen branching logic from 2.4 end-to-end across a fresh
+    install vs. a returning-user relaunch (manual device/simulator verification).
+- [ ] **2.13 Frontend Test Pass**
+  - Jest + RNTL smoke tests per screen (renders, mocked navigation prop) and per
+    shared component (`GlassCard`, `AppLogo`, `FloatingTabBar`).
+  - Mock `expo-camera`/`expo-av`/RevenueCat hooks per `CLAUDE.md`'s testing rules
+    even though they're unused this phase, so later phases don't need to retrofit mocks.
+- [ ] **2.14 Screen: The Three-Expression Capture (Sequential Camera UI)**
   - Integrate `expo-camera` or `react-native-vision-camera`.
   - Design a continuous single-session capture flow with soft glowing face-guide overlays:
     - Step 1: **Calm** → capture, triggers `capture_chime.mp3` + light haptic.
     - Step 2: **Bright** → prompt "Show us your glow ✨", triggers `prompt_chime.mp3`.
     - Step 3: **Deep** → prompt "Now give us your mysterious side 🌙", final capture.
   - Implement on-device face bounding verification (reject non-face frames locally).
+  - Wire `AnalyzeScreen`'s "Start Analysis" CTA to launch this flow, writing into
+    `useCaptureStore`.
 
 ---
 
@@ -80,9 +144,11 @@ category, within a strict entertainment framing.
 
 ## Phase 5: Monetization & Final Deploy
 - [ ] **5.1 RevenueCat Hook Integration**
-  - Setup the paywall component inside the frontend app.
-  - Lock deep-dive interpretations and reading history behind a weekly/monthly
-    subscription — cancel flow must be equally frictionless as sign-up.
+  - Wire real `react-native-purchases` calls into the existing `PaywallScreen.tsx`
+    (built in Phase 2.8) and `useEntitlementStore` (built in Phase 2.3) — no new
+    screen work, only replacing the stubbed `onSelect`/purchase handlers with live
+    RevenueCat calls and syncing `CustomerInfo` into the store's shape.
+  - Cancel flow must be equally frictionless as sign-up.
 - [ ] **5.2 End-to-End Testing Matrix**
   - Run `backend/tests/unit` to verify JSON payload handling.
   - Run edge-case checks: non-face photo, apparent-minor photo (graceful,

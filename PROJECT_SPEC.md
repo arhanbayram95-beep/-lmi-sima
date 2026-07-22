@@ -116,3 +116,41 @@ Flag this as a pre-launch decision point, not a blocker for build-out.
   translation" for a lighter tone.
 * Recommend a short legal review of paywall copy and disclaimers per target
   market before launch — this is a one-time cost worth paying early.
+
+---
+
+## 7. Frontend Navigation & Dependencies (Phase 2 additions)
+
+The locked screen sequence is: **Splash → 3-slide Onboarding carousel → Age Gate
+& Consent → App Store Rating Prompt → Paywall ("Aura Pro Access") → Main Hub**
+(bottom-tab: Analyze / Results / Settings, Settings nesting Privacy/Terms/Data
+Discard subpages).
+
+Dependencies added to `frontend/` to build this shell:
+
+* `@react-navigation/native`, `@react-navigation/native-stack`,
+  `@react-navigation/bottom-tabs`, `react-native-screens`,
+  `react-native-safe-area-context` — navigation shell. The bottom tab bar uses
+  a custom `tabBar` render prop (`FloatingTabBar`) to match the floating-pill
+  visual from the Stitch export, while keeping `bottom-tabs`' focus/back/deep-link
+  state machine rather than hand-rolling it.
+* `zustand`, `@react-native-async-storage/async-storage` — state management;
+  AsyncStorage persistence is used for the consent/age-gate store only. The
+  capture store (holding in-flight image URIs) is never persisted, per the
+  process-and-discard privacy architecture in §3.
+* `expo-linear-gradient`, `expo-blur` — replace the WebGL/CSS gradients and
+  `backdrop-filter: blur` glassmorphism from the Stitch HTML exports; no RN
+  equivalent to WebGL shaders exists, so backgrounds are static/animated
+  gradients instead.
+* `expo-font` + `@expo-google-fonts/manrope` + `@expo-google-fonts/hanken-grotesk`
+  + `@expo-google-fonts/geist` — typography system (Manrope headlines, Hanken
+  Grotesk body, Geist labels; 8px spacing base), resolved from the majority
+  pattern across the 5 Stitch mockups, since only the color palette is locked
+  by `DESIGN.md`.
+* `expo-store-review` — the Rating Prompt screen must call the native
+  `requestReview()` API for 4–5 star ratings rather than linking out to the
+  App Store, per Apple/Google review-prompt compliance rules. 1–3 star ratings
+  route to in-app feedback capture instead.
+* Icons use Expo's bundled `@expo/vector-icons` (`MaterialIcons`) rather than a
+  new icon package — the Stitch exports' "Material Symbols" ligature names map
+  1:1 to `MaterialIcons` glyph names.
