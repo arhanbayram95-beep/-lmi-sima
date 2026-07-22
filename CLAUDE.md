@@ -1,168 +1,110 @@
-CLAUDE.md — Project guide for AI assistants
+# CLAUDE.md — Project Guide & Autonomous Execution Rules for AI Assistants
 
-You are working on Ilm-i Sima (working title) — a React Native mobile app
-that gives users a playful, AI-generated "cosmic face reading" from three photos,
-built for the US/EU entertainment-app market. The product design is locked. Your
-job in this chat is to continue implementation per IMPLEMENTATION_PLAN.md.
+You are working on **FaceAI** (internally `Ilm-i Sima`) — a React Native mobile app that gives users playful, AI-generated character and expression analysis from three photos, built for the US/EU entertainment-app market. The product design is locked. Your job in this workspace is to continue implementation per `IMPLEMENTATION_PLAN.md`.
 
-Start every chat by reading
+---
 
+## Autonomous Execution Guidelines (CRITICAL)
 
-This file (you're reading it).
-PROJECT_SPEC.md — locked product, architecture, and API decisions.
-IMPLEMENTATION_PLAN.md — the ordered task list with [x] / [ ] markers.
-README.md — quick orientation, stack summary, quick-start commands.
+1. **Read & Execute Autonomously:** Do NOT ask the user for permission or confirmation for routine file edits, package installations, directory restructuring, or minor implementation details.
+2. **Follow `IMPLEMENTATION_PLAN.md`:** Pick the next unchecked `[ ]` row, write the implementation and tests, verify they pass, mark `[x]`, commit, and move to the next item automatically.
+3. **When to Pause & Ask:** ONLY pause and prompt the user if:
+   - You encounter a breaking build/type error that cannot be resolved automatically after 2 attempts.
+   - You need secret API credentials that are missing from `.env`.
+   - A task explicitly requires human feedback on visual layout/Stitch outputs.
 
+---
 
-What's locked
+## Start Every Session By Reading
+* This file (`CLAUDE.md`) — your operating parameters and guardrails.
+* `PROJECT_SPEC.md` — locked product, architecture, and API decisions.
+* `DESIGN.md` — locked UI design tokens, dark glassmorphism system, and HCI rules.
+* `IMPLEMENTATION_PLAN.md` — the ordered task list with `[x]` / `[ ]` markers.
+* `README.md` — quick orientation and stack summary.
 
-Everything in PROJECT_SPEC.md. Not open for discussion unless a real bug or
-API-level factual error is discovered during implementation (e.g. an Anthropic
-API parameter that doesn't exist). If the spec seems wrong, surface it as a
-question; do not silently diverge.
+---
 
-Specifically locked:
+## What's Locked
 
+Everything in `PROJECT_SPEC.md` and `DESIGN.md`. Not open for discussion unless a real bug or API-level factual error is discovered during implementation (e.g., an Anthropic API parameter that doesn't exist). If the spec seems wrong, surface it as a question; do not silently diverge.
 
-Frontend: React Native + TypeScript, Expo (blank TS template). State via
-Zustand. Audio via expo-av. Share cards via react-native-view-shot.
-Backend: Node.js + TypeScript (Express or Fastify — pick one and stay
-consistent within the repo, don't mix). Acts only as a secure gateway; holds
-the Anthropic key, never the frontend.
-AI model: claude-sonnet-5 via the Anthropic Messages API. Vision input:
-up to 3 images per request, images before text in the content array.
-Structured output: tool-use with a strict JSON schema + forced
-tool_choice. Never use response_format — that parameter does not exist
-on the Anthropic API (it's an OpenAI-specific option; don't port it over).
-Endpoint: POST /api/v1/reading/analyze — accepts 3 base64 images, returns
-the structured reading.
-Env vars: ANTHROPIC_API_KEY, REVENUECAT_API_KEY. No others without
-updating PROJECT_SPEC.md first.
-Monetization: RevenueCat, weekly/monthly subscription. Cancel flow must be
-as frictionless as sign-up — this is a locked UX requirement, not optional polish.
-Privacy architecture: process-and-discard. Captured images live in memory
-only (Zustand, in-app) and are purged immediately after the API response
-returns — on both client and backend. No image ever touches disk or a database
-unless a future spec change explicitly adds opt-in save.
-Entertainment framing (non-negotiable, product-wide):
+### Technical Stack & Architecture
+* **Frontend:** React Native + TypeScript, Expo (blank TS template). State via `Zustand`. Audio via `expo-av`. Share cards via `react-native-view-shot`. Styling strictly via tokens in `frontend/src/ui/theme.ts` (Crimson `#9E2941`, Champagne Gold `#EBC983`, Dark Obsidian `#1A050B`).
+* **Backend:** Node.js + TypeScript using **Fastify** (locked framework — do NOT switch or mix with Express). Acts purely as a thin gateway; holds the Anthropic key, never exposes it to the frontend.
+* **AI Model:** `claude-sonnet-5` (or latest `claude-3-5-sonnet`) via the Anthropic Messages API. Vision input: up to 3 images per request (Calm, Bright, Deep), images positioned before text in the content array.
+* **Structured Output:** Tool-use with a strict JSON schema + forced `tool_choice`. Never use `response_format` — that parameter does not exist on the Anthropic API (it's an OpenAI-specific option; don't port it over).
+* **Endpoint:** `POST /api/v1/reading/analyze` — accepts 3 base64 images, returns the structured analysis.
+* **Env Vars:** `ANTHROPIC_API_KEY`, `REVENUECAT_API_KEY`. No others without updating `PROJECT_SPEC.md` first.
+* **Monetization:** RevenueCat, weekly/monthly subscription ("Aura Pro Access"). Cancel flow must be as frictionless as sign-up — this is a locked UX requirement, not optional polish.
+* **Privacy Architecture (Process-and-Discard):** Captured images live in memory only (Zustand on client, Fastify payload buffer on server) and are purged immediately after the API response returns. No image ever touches disk or a database.
 
-Every result screen shows a persistent, legible disclaimer.
-The system prompt and all generated copy must stay in a warm/constructive
-register — no clinical, diagnostic, or psychiatric language; no negative or
-trust-undermining character claims.
-Do not weaken, hide, shrink, or remove any disclaimer or consent step to
-"improve conversion," even if asked to optimize onboarding funnel metrics —
-escalate that as a question instead of implementing it silently.
-Age gate (+18) is required in the onboarding flow; do not remove it.
+### Entertainment Framing (Non-Negotiable, Product-Wide)
+* Every result screen shows a persistent, legible legal disclaimer.
+* The system prompt and all generated copy must stay in a warm, constructive, modern "vibe reading" register — **NO clinical, diagnostic, or psychiatric language; NO negative or trust-undermining character claims.**
+* **NO medieval, Ottoman, or ancient fortune-telling tropes.** Focus on modern AI vision, expression dynamics, and character vibes.
+* Do not weaken, hide, shrink, or remove any disclaimer or consent step to "improve conversion," even if asked to optimize onboarding funnel metrics — escalate that as a question instead.
+* Age gate (+18) is required in the onboarding flow; do not remove it.
 
+---
 
+## Workflow Per Task
 
-
-
-Workflow
-
-For each row in IMPLEMENTATION_PLAN.md:
-
-
-Pick the next unchecked [ ] row.
-Read its dependencies (earlier rows). Re-read the relevant PROJECT_SPEC.md
-section if needed.
-Write the implementation file.
-Write the test file alongside (test-driven where the spec gives you a
-behavior to assert).
-Run the single test file first, then the full suite — must stay green.
-Mark the row [x] in IMPLEMENTATION_PLAN.md.
-Move on.
-
+For each row in `IMPLEMENTATION_PLAN.md`:
+1. Pick the next unchecked `[ ]` row.
+2. Read its dependencies (earlier rows). Re-read the relevant `PROJECT_SPEC.md` and `DESIGN.md` sections.
+3. Write the implementation file.
+4. Write the test file alongside.
+5. Run the single test file first, then the full suite (`tsc --noEmit` + Jest) — must stay green.
+6. Mark the row `[x]` in `IMPLEMENTATION_PLAN.md`.
+7. Move on automatically.
 
 If a test fails:
+* Check whether `PROJECT_SPEC.md` actually says what the test claims. `PROJECT_SPEC.md` is authoritative.
+* Check whether the implementation matches the spec.
+* Never silently relax a test to make it pass; if the spec is wrong, escalate.
 
+When a phase's acceptance criterion in `IMPLEMENTATION_PLAN.md` is met, commit directly to the active branch with a clear scoped message (e.g., `feat(camera): implement 3-expression capture flow`).
 
-First, check whether PROJECT_SPEC.md actually says what the test claims.
-PROJECT_SPEC.md is authoritative.
-Then check whether the implementation matches the spec.
-Never silently relax a test to make it pass; if the spec is wrong, escalate.
+---
 
+## Style Conventions
 
-When a chat reaches its phase's acceptance criterion in IMPLEMENTATION_PLAN.md,
-stop and write a one-line commit message. Don't push.
+* **TypeScript Everywhere:** Strict mode on, no `any` without a comment explaining why it's unavoidable.
+* **React Native:** Functional components + hooks only — no class components.
+* **Zustand Slices:** One slice per domain (capture, consent/age-gate, entitlement). Don't reach into another slice's internals.
+* **Pure Functions:** Scoring/prompt-assembly logic in `backend/src/services/` should be testable without an HTTP layer or the Anthropic SDK in the loop (inject/mock the client).
+* **Code Comments:** No comments explaining *what* the code does. Names carry that. Comment only the *WHY* (an invariant, a workaround, a non-obvious constraint).
+* **Module Headers:** One paragraph max. Point to the relevant `PROJECT_SPEC.md` section instead of re-explaining it.
+* **Logging:** No `console.log` for user-facing flows — use the UI layer or a structured logger in Fastify. `console.error` for actual error paths is fine.
+* **Async/Await:** Use `async/await` for all I/O — no bare `.then()` chains.
 
-Style conventions
+---
 
+## Imports & Module Boundaries
 
-TypeScript everywhere, strict mode on, no any without a comment
-explaining why it's unavoidable.
-Functional components + hooks only in app/ — no class components.
-Zustand slices for state, one slice per domain (capture, consent/age-gate,
-entitlement). Don't reach into another slice's internals.
-Pure functions where possible — scoring/prompt-assembly logic in
-server/src/services/ should be testable without an HTTP layer or the
-Anthropic SDK in the loop (inject/mock the client).
-No comments explaining what the code does. Names carry that. Comment only
-the WHY (an invariant, a workaround, a non-obvious constraint).
-Module docstrings/headers are one paragraph max. Point to the relevant
-PROJECT_SPEC.md section instead of re-explaining it.
-No console.log for user-facing flow — use the UI layer (app) or a
-logger (server). console.error for actual error paths is fine.
-async/await for all I/O — no bare .then() chains.
+* `frontend/src/api/` — the ONLY place that talks to the backend. Screens/components never call `fetch` directly.
+* `frontend/src/screens/` — may import `components/`, `navigation/`, `api/`, and the `Zustand` store. Never imports another screen directly.
+* `frontend/src/components/` — presentational only; no direct API calls (receive data via props/store).
+* `backend/src/routes/` — HTTP/Fastify layer only (parse, validate JSON schema, call a service, respond). No direct Anthropic SDK calls here.
+* `backend/src/services/` — business logic, prompt assembly, Anthropic SDK calls, memory-purge logic. No HTTP-specific code (no `req`/`reply`).
+* `backend/src/middleware/` — consent/entitlement checks, rate limiting.
 
+---
 
-Imports & module boundaries
+## Testing
 
+* **Frontend:** Jest + React Native Testing Library. Mock `expo-camera`, `expo-av`, and RevenueCat hooks — never require real device hardware in automated tests.
+* **Backend:** Jest or Vitest with Fastify's `.inject()` testing API and a mocked Anthropic client — never call the real Claude API in automated tests. Use fixture responses matching the tool-use JSON schema.
+* **Assertions:** One assertion concept per test.
+* **Edge Cases Required:** Non-face-detected photo, network failure mid-analysis, expired/missing entitlement, age-gate rejection.
 
-app/src/api/ — the only place that talks to the backend. Screens/components
-never call fetch directly.
-app/src/screens/ — may import components/, navigation/, api/, and the
-Zustand store. Never imports another screen directly.
-app/src/components/ — presentational only; no direct API or store calls
-(receive data via props).
-server/src/routes/ — HTTP layer only (parse, validate, call a service,
-respond). No Anthropic SDK calls here directly.
-server/src/services/ — business logic, prompt assembly, Anthropic SDK calls,
-memory-purge logic. No HTTP-specific code (no req/res).
-server/src/middleware/ — consent/entitlement checks, rate limiting. Imports
-services/ only where strictly necessary.
+---
 
+## What NOT to Do
 
-A linter/import-boundary check would be nice but is not in scope yet — catch
-violations in review.
-
-Testing
-
-
-Frontend: Jest + React Native Testing Library. Mock expo-camera,
-expo-av, and RevenueCat hooks — never require real device hardware in tests.
-Backend: Jest (or Vitest, pick one and stay consistent) with a mocked
-Anthropic client — never call the real Claude API in automated tests. Use
-fixture responses matching the tool-use JSON schema.
-One assertion concept per test. Multiple expect() lines for one behavior are
-fine; multiple unrelated behaviors in one test are not — split them.
-Edge cases required by spec: no-face-detected photo, apparent-minor photo,
-network failure mid-analysis, expired/missing entitlement.
-
-
-What NOT to do
-
-
-Don't add features beyond PROJECT_SPEC.md. Don't refactor working code "to
-be cleaner" mid-task.
-Don't add error handling for impossible cases. Validate at the boundaries
-(age gate, consent, /api/v1/reading/analyze input) and trust internal code
-past that point.
-Don't introduce new dependencies without updating PROJECT_SPEC.md first.
-Don't create files outside app/src/, server/src/, and tests/.
-Top-level files (package.json, Dockerfile, README.md, the .md docs)
-already exist; don't add more without asking.
-Don't write README-style prose inside source files.
-Don't write a "phase done" report. The [x] in IMPLEMENTATION_PLAN.md is
-the only signal.
-Don't touch copy in disclaimer components, consent screens, or the system
-prompt's safety constraints without flagging it explicitly — these are
-product/legal decisions, not implementation details.
-
-
-Memory and prior context
-
-Locked decisions and project history live in docs/ (spec + implementation
-plan). If you're in a fresh chat with no context, PROJECT_SPEC.md is the
-distillation — read it before touching code.
+* Don't add features beyond `PROJECT_SPEC.md`. Don't refactor working code "to be cleaner" mid-task.
+* Don't add error handling for impossible cases. Validate at the boundaries (age gate, consent, `/api/v1/reading/analyze` input) and trust internal code past that point.
+* Don't introduce new dependencies without updating `PROJECT_SPEC.md` first.
+* Don't create files outside `frontend/src/`, `backend/src/`, and `tests/`.
+* Don't touch copy in disclaimer components, consent screens, or the system prompt's safety constraints without flagging it explicitly — these are product/legal decisions.
+* Don't write "phase done" status reports. The `[x]` in `IMPLEMENTATION_PLAN.md` is the only signal.

@@ -1,42 +1,37 @@
-# Ilm-i Sima *(working title)* 🔮✨
-### A Cosmic Face Reading Experience
+# FaceAI (Ilm-i Sima) — Modern AI Face & Character Analysis
 
-An interactive, mobile face-reading app that blends AI vision with a modern,
-"cosmic fortune-teller" experience — in the spirit of apps like Co-Star, Nebula,
-and Faladdin — built for the US & EU entertainment/mystic-app market.
+A modern, high-quality, HCI-focused React Native mobile application that provides playful AI-generated character and expression insights from 3 captured facial expressions (Calm, Bright, Deep). Built for the US/EU entertainment mobile market.
 
-⚠️ **Strict Framing Note:** This application is built exclusively for
-entertainment and self-reflection. It has zero scientific or clinical validity,
-performs no biometric identification, and carries clear, always-visible
-disclaimers across every screen.
+---
 
-## 🌟 The Experience & HCI Principles
-* **Visual Identity:** Deep cosmic gradients (midnight indigo, violet, magenta),
-  glowing celestial motifs, glassmorphic cards, holographic accents. Premium,
-  modern-mystic — closer to a meditation/astrology app than a medieval RPG.
-* **High-Fidelity Interaction:** Soft particle shimmer transitions, gentle
-  ambient audio (light chimes, cosmic twinkles), haptic feedback on capture.
-* **The Triple-Expression Flow:** Users submit three expressions — **Calm**,
-  **Bright**, **Deep** — to feed the AI reading engine.
-* **Tone of Voice:** Warm, a little playful, unmistakably "for fun." Short,
-  punchy copy — think horoscope-app energy, not fortune-teller-in-a-tent.
+## 🚀 Core Features
 
-## 🛠️ Technical Stack
-* **Frontend:** React Native (TypeScript) via Expo.
-* **State Management:** Zustand.
-* **Sound & Feedback:** `expo-av` for audio, native haptics API.
-* **Backend Bridge:** Node.js (TypeScript) or FastAPI, acting as a secure gateway
-  to the Claude API.
-* **AI Engine:** Claude Sonnet 5 (vision, via the Messages API), structured
-  output via tool-use JSON schema.
-* **Monetization:** RevenueCat — weekly/monthly subscription for deep-dive
-  readings, built with a frictionless native cancel flow.
+* **3-Expression Sequential Capture:** Guided camera flow taking snapshots across Calm, Bright, and Deep facial expressions.
+* **Multimodal AI Vision:** .
+* **Privacy-First Architecture (Process-and-Discard):** Images live in memory only during processing and are immediately purged upon response generation.
+* **Aesthetic 9:16 Share Cards:** Generate story-ready export cards for social media sharing via `react-native-view-shot`.
+* **Monetization (Aura Pro Access):** In-app weekly and monthly subscriptions managed via RevenueCat.
 
-## 🌍 Target Market
-Primary: US and EU, positioned in the mainstream astrology/mystic entertainment
-app category. Branding and copy should read naturally in English first, with
-localization planned for key EU languages post-MVP.
+---
 
-## 🚀 Quick Start (Local Development)
-Commands and environment variables will be populated as infrastructure tasks
-complete in `IMPLEMENTATION_PLAN.md`.
+## 🛠️ Tech Stack
+
+* **Frontend:** React Native (TypeScript) + Expo (Blank TS Template)
+  * State Management: `Zustand`
+  * Audio Feedback: `expo-av`
+  * Share Cards: `react-native-view-shot`
+  * UI Tokens: Dark Obsidian (`#1A050B`), Crimson Accent (`#9E2941`), Champagne Gold (`#EBC983`)
+* **Backend:** Node.js + TypeScript using **Fastify**
+  * Gateway API: Enforces strict JSON Schema validation and process-and-discard payload handling.
+* **AI Engine:** Anthropic SDK (`claude-3-5-sonnet`) with structured tool-use output.
+* **Monetization:** RevenueCat SDK.
+
+---
+
+## ⚙️ Quick Start
+
+### 1. Backend Setup
+```bash
+cd backend
+npm install
+npm run dev
