@@ -21,7 +21,7 @@ category, within a strict entertainment framing.
 ---
 
 ## Phase 2: Frontend Navigation & The Reading Flow UX (HCI Focus)
-- [ ] **2.1 Global State & Core Theming (`Zustand`)**
+- [x] **2.1 Global State & Core Theming (`Zustand`)**
   - Install Zustand (`npm install zustand`) to manage global state:
     - User age certification status (+18 gate).
     - Base64 image cache array (max 3: Calm, Bright, Deep).
@@ -31,7 +31,7 @@ category, within a strict entertainment framing.
     - Accent: holographic/iridescent foil (animated gradient shimmer)
     - Text: warm off-white / soft lavender for secondary text
     - Card surfaces: glassmorphic (blur + low-opacity white overlay + soft glow border)
-- [ ] **2.2 Screen 1: Onboarding & Age Gate**
+- [x] **2.2 Screen 1: Onboarding & Age Gate**
   - Build a clean, cosmic-gradient welcome carousel with +18 age gate verification.
   - Add explicit checkbox for image-processing consent with a warm, plain-language
     disclaimer (see PROJECT_SPEC §2.1).
