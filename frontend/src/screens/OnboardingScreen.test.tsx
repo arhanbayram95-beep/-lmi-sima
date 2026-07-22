@@ -21,6 +21,6 @@ describe('OnboardingScreen', () => {
 
     fireEvent.press(screen.getByTestId('consent-checkbox'));
     fireEvent.press(screen.getByText('Get Started'));
-    expect(useAppStore.getState().screen).toBe('review');
+    expect(useAppStore.getState().screen).toBe('capture');
   });
 });

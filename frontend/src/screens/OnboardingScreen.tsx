@@ -24,7 +24,7 @@ export default function OnboardingScreen() {
       return;
     }
     if (!canContinue) return;
-    goToScreen('review');
+    goToScreen('capture');
   };
 
   return (

@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import AppLogo from '../components/common/AppLogo';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
+import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
 const FEATURE_CARDS = [
@@ -36,6 +37,7 @@ const NAV_ITEMS = [
 
 export default function MainMenuScreen() {
   const [activeNav, setActiveNav] = React.useState<(typeof NAV_ITEMS)[number]['key']>('analyze');
+  const goToScreen = useAppStore((s) => s.goToScreen);
 
   return (
     <View style={styles.container} testID="main-menu-screen">
@@ -54,7 +56,7 @@ export default function MainMenuScreen() {
           <Text style={styles.heroBody}>
             Capture Calm, Bright, and Deep expressions to reveal your character vibe.
           </Text>
-          <PrimaryButton label="Start Analysis" onPress={() => {}} />
+          <PrimaryButton label="Start Analysis" onPress={() => goToScreen('capture')} />
         </GlassCard>
 
         <View style={styles.grid}>

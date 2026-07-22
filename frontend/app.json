@@ -25,6 +25,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "FaceAI uses your camera to capture the three expressions for your reading. Photos are processed in memory and never stored."
+        }
+      ]
+    ]
   }
 }
