@@ -1,54 +1,51 @@
-# Design System & UI/UX Specification: Ilm-i Sima
-**Version:** 1.0.0  
+# Design System & UI/UX Specification: FaceAI / Ilm-i Sima
+**Version:** 2.0.0  
 **Target Platform:** Mobile (iOS / Android — Expo React Native)  
-**Core Theme:** Modern Cosmic Mysticism x Medieval Ottoman Physiognomy
+**Core Theme:** Modern AI Mysticism x High-End Glassmorphic UX (Sleek, Cosmic, Modern AI Vibe)
 
 ---
 
 ## 1. Visual Identity & Brand Philosophy
 
-Ilm-i Sima merges medieval physiognomy folklore with a sleek, high-end "modern mystic" aesthetic (popular in US/EU astrology & entertainment apps). The app must **never** feel like a cheap utility or a flat administrative form. Every interaction is designed as an immersive, theatrical "ritual."
+FaceAI combines advanced multimodal AI vision with a sleek, modern "vibe reading" aesthetic. The interface is designed as an effortless, high-tech camera ritual with deep dark themes, glowing subtle accents, and fluid glassmorphic cards.
 
 ### Key Principles
-* **Glassmorphic Depth:** Translucent surfaces, subtle blurred overlays, and soft glowing borders create a multi-layered sense of mystery.
-* **Tactile & Auditory Rituals:** Every touch action is paired with custom haptic feedback and distinct audio cues (heavy iron shutter, cosmic chimes, parchment rustles).
-* **Parity Across Platforms:** Pixel-perfect visual identity on both iOS and Android using unified tokens.
+* **Glassmorphic Depth:** Translucent surfaces, subtle blurred overlays, and soft glowing crimson/gold borders create a multi-layered modern UI.
+* **Tactile & Auditory Rituals:** Every capture phase features distinct haptic feedback and custom audio cues (light shutter, cosmic chimes, subtle ambient shimmer).
+* **Parity Across Platforms:** Pixel-perfect visual identity on both iOS and Android using unified theme tokens.
 
 ---
 
-## 2. Design Tokens
-
-### 2.1 Color Palette (`frontend/src/ui/theme.ts`)
+## 2. Design Tokens (`frontend/src/ui/theme.ts`)
 
 ```typescript
 export const Theme = {
   colors: {
     // Background Gradients
     background: {
-      start: '#0A071B', // Deep Midnight Indigo
-      middle: '#140D2B', // Dark Violet
-      end: '#1B0922', // Muted Cosmic Magenta
+      start: '#1A050B', // Deep Obsidian Crimson
+      middle: '#2D0A12', // Dark Burgundy
+      end: '#0A071B',    // Midnight Violet Tint
     },
 
     // Card Surfaces (Glassmorphism)
     surface: {
       glassBackground: 'rgba(255, 255, 255, 0.05)',
-      glassBorder: 'rgba(235, 201, 131, 0.25)', // Subtle gold glow border
-      glassOverlay: 'rgba(10, 7, 27, 0.65)',
-      parchmentBackground: 'rgba(244, 235, 216, 0.08)',
+      glassBorder: 'rgba(158, 41, 65, 0.35)', // Subtle crimson glow border (#9E2941)
+      glassOverlay: 'rgba(26, 5, 11, 0.75)',
     },
 
     // Accents & Typography
     accent: {
-      goldPrimary: '#EBC983', // Celestial Gold
-      goldLight: '#FCEFD2', // Warm Highlight Gold
-      iridescentShimmer: '#C792EA', // Soft Holographic Violet
+      crimsonPrimary: '#9E2941', // Primary Crimson Accent
+      goldSecondary: '#EBC983',  // Champagne Gold Highlight
+      iridescentShimmer: '#C792EA',
     },
 
     text: {
-      primary: '#F5F3FF', // Warm Off-White
+      primary: '#F5F3FF',   // Warm Off-White
       secondary: '#B3B0CD', // Soft Lavender Gray
-      gold: '#EBC983',
+      accentGold: '#EBC983',
       muted: '#6E6A8A',
     },
 
