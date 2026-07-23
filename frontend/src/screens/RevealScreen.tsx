@@ -1,9 +1,11 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useRef } from 'react';
+import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { captureRef } from 'react-native-view-shot';
 import DisclaimerFooter from '../components/common/DisclaimerFooter';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
+import ShareCard from '../components/common/ShareCard';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
@@ -12,6 +14,17 @@ export default function RevealScreen() {
   const reading = useAppStore((s) => s.reading);
   const goToScreen = useAppStore((s) => s.goToScreen);
   const t = useTranslation();
+  const shareCardRef = useRef<View>(null);
+
+  const handleShare = async () => {
+    if (!shareCardRef.current) return;
+    try {
+      const uri = await captureRef(shareCardRef, { format: 'png', quality: 0.9 });
+      await Share.share({ url: uri });
+    } catch {
+      // Sharing is a nice-to-have — never block the reveal flow on failure.
+    }
+  };
 
   if (!reading) {
     return (
@@ -45,8 +58,13 @@ export default function RevealScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
+        <PrimaryButton label={t('reveal.shareButton')} variant="secondary" onPress={handleShare} testID="share-reading-button" />
         <PrimaryButton label={t('reveal.doneButton')} onPress={() => goToScreen('review')} />
         <DisclaimerFooter />
+      </View>
+
+      <View style={styles.offscreen} pointerEvents="none">
+        <ShareCard ref={shareCardRef} reading={reading} />
       </View>
     </View>
   );
@@ -99,5 +117,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Theme.spacing.containerPadding,
     paddingBottom: Theme.spacing.sm,
     gap: Theme.spacing.xs,
+  },
+  offscreen: {
+    position: 'absolute',
+    top: 0,
+    left: -9999,
   },
 });
