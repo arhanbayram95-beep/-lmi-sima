@@ -51,7 +51,7 @@ export default function PaywallScreen() {
 
   const startTrial = () => {
     setProActive(true);
-    goToScreen('mainMenu');
+    goToScreen('welcome');
   };
 
   return (

@@ -60,4 +60,14 @@ describe('ReviewScreen', () => {
 
     expect(useAppStore.getState().screen).toBe('settings');
   });
+
+  it('returns to Main Menu, not back to the just-finished reading, when opened from Reveal', () => {
+    useAppStore.getState().goToScreen('reveal');
+    useAppStore.getState().goToScreen('review');
+
+    render(<ReviewScreen />);
+    fireEvent.press(screen.getByText('Maybe Later'));
+
+    expect(useAppStore.getState().screen).toBe('mainMenu');
+  });
 });

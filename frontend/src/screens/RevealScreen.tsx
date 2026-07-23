@@ -16,7 +16,7 @@ export default function RevealScreen() {
   if (!reading) {
     return (
       <View style={styles.container} testID="reveal-screen">
-        <PrimaryButton label={t('reveal.doneButton')} onPress={() => goToScreen('mainMenu')} />
+        <PrimaryButton label={t('reveal.doneButton')} onPress={() => goToScreen('review')} />
       </View>
     );
   }
@@ -45,7 +45,7 @@ export default function RevealScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <PrimaryButton label={t('reveal.doneButton')} onPress={() => goToScreen('mainMenu')} />
+        <PrimaryButton label={t('reveal.doneButton')} onPress={() => goToScreen('review')} />
         <DisclaimerFooter />
       </View>
     </View>

@@ -11,6 +11,7 @@ import ResultsScreen from '../screens/ResultsScreen';
 import RevealScreen from '../screens/RevealScreen';
 import ReviewScreen from '../screens/ReviewScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import WelcomeScreen from '../screens/WelcomeScreen';
 import { AppScreen } from '../state/slices/navigationSlice';
 import { useAppStore } from '../state/useAppStore';
 
@@ -18,6 +19,7 @@ const SCREENS: Record<AppScreen, React.ComponentType> = {
   loading: LoadingScreen,
   onboarding: OnboardingScreen,
   paywall: PaywallScreen,
+  welcome: WelcomeScreen,
   mainMenu: MainMenuScreen,
   analyze: AnalyzeScreen,
   capture: CaptureScreen,

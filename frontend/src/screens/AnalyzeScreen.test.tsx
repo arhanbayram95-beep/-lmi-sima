@@ -18,4 +18,14 @@ describe('AnalyzeScreen', () => {
     render(<AnalyzeScreen />);
     expect(useAppStore.getState().screen).toBe('analyze');
   });
+
+  it('lists the relationship harmony and career match modules as coming soon, not yet navigable', () => {
+    render(<AnalyzeScreen />);
+    expect(screen.getByText('Relationship Harmony Analyzer')).toBeTruthy();
+    expect(screen.getByText('What Job Suits You')).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId('analyze-module-relationship-harmony'));
+    fireEvent.press(screen.getByTestId('analyze-module-career-match'));
+    expect(useAppStore.getState().screen).toBe('analyze');
+  });
 });

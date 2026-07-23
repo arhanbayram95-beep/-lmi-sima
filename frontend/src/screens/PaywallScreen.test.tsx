@@ -35,7 +35,7 @@ describe('PaywallScreen', () => {
 
     fireEvent.press(screen.getByText('Start Free Trial'));
     expect(useAppStore.getState().isProActive).toBe(true);
-    expect(useAppStore.getState().screen).toBe('mainMenu');
+    expect(useAppStore.getState().screen).toBe('welcome');
   });
 
   it('opens the privacy policy modal from the footer link', () => {

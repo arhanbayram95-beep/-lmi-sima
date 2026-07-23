@@ -18,12 +18,24 @@ interface SwipeablePagerProps extends PropsWithChildren {
 
 // Plain ScrollView + pagingEnabled — no react-native-pager-view dependency
 // needed for a simple linear carousel like onboarding.
+//
+// Tracks the current page via onScroll (continuous, ~60fps) rather than
+// onMomentumScrollEnd/onScrollEndDrag — those "gesture settled" events are
+// not reliably fired for every swipe on every platform/RN version (a
+// gentle drag can land on the next page without ever firing a momentum
+// event), which is what caused the progress dots to silently stop
+// tracking the current page. onScroll has no such gap.
 export default function SwipeablePager({ index, onIndexChange, children, style }: SwipeablePagerProps) {
   const scrollRef = useRef<ScrollView>(null);
   const [pageWidth, setPageWidth] = useState(() => Dimensions.get('window').width);
   const hasPositioned = useRef(false);
+  const isBeingDragged = useRef(false);
 
   useEffect(() => {
+    // Don't fight the user's finger — only programmatically reposition
+    // when the index changed for a reason other than an in-progress drag
+    // (e.g. the Next button).
+    if (isBeingDragged.current) return;
     scrollRef.current?.scrollTo({ x: index * pageWidth, animated: hasPositioned.current });
     hasPositioned.current = true;
   }, [index, pageWidth]);
@@ -35,7 +47,7 @@ export default function SwipeablePager({ index, onIndexChange, children, style }
     }
   };
 
-  const handleMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (pageWidth === 0) return;
     const newIndex = Math.round(event.nativeEvent.contentOffset.x / pageWidth);
     if (newIndex !== index) {
@@ -52,7 +64,13 @@ export default function SwipeablePager({ index, onIndexChange, children, style }
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={handleMomentumScrollEnd}
+        onScrollBeginDrag={() => {
+          isBeingDragged.current = true;
+        }}
+        onScrollEndDrag={() => {
+          isBeingDragged.current = false;
+        }}
+        onScroll={handleScroll}
         scrollEventThrottle={16}
       >
         {pages.map((page, i) => (

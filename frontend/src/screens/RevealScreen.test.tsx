@@ -29,9 +29,9 @@ describe('RevealScreen', () => {
     expect(screen.getByText(/entertainment purposes only/i)).toBeTruthy();
   });
 
-  it('returns to the main menu on Done', () => {
+  it('prompts for a rating after each completed reading instead of dropping straight back home', () => {
     render(<RevealScreen />);
     fireEvent.press(screen.getByText('Done'));
-    expect(useAppStore.getState().screen).toBe('mainMenu');
+    expect(useAppStore.getState().screen).toBe('review');
   });
 });

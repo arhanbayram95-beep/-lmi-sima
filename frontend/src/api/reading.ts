@@ -1,23 +1,8 @@
-import { API_BASE_URL } from './config';
+import { API_BASE_URL, USE_MOCK_API } from './config';
+import { analyzeReadingMock } from './mockReading';
+import { AnalyzeReadingPayload, ReadingResult } from './types';
 
-export type ExpressionLabel = 'calm' | 'bright' | 'deep';
-
-export interface ExpressionInsight {
-  expression: ExpressionLabel;
-  insight: string;
-}
-
-export interface ReadingResult {
-  headline: string;
-  expression_insights: ExpressionInsight[];
-  narrative: string;
-}
-
-export interface AnalyzeReadingPayload {
-  calm: string;
-  bright: string;
-  deep: string;
-}
+export type { ExpressionLabel, ExpressionInsight, ReadingResult, AnalyzeReadingPayload } from './types';
 
 export class ReadingApiError extends Error {}
 
@@ -25,6 +10,10 @@ export class ReadingApiError extends Error {}
 // frontend/src/api/ boundary. Screens must go through this, never fetch
 // directly.
 export async function analyzeReading(payload: AnalyzeReadingPayload): Promise<ReadingResult> {
+  if (USE_MOCK_API) {
+    return analyzeReadingMock(payload);
+  }
+
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}/api/v1/reading/analyze`, {

@@ -1,9 +1,9 @@
 import React, { PropsWithChildren } from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { Theme } from '../../ui/theme';
 
 interface GlassCardProps extends PropsWithChildren {
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 export default function GlassCard({ children, style }: GlassCardProps) {

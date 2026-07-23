@@ -39,9 +39,7 @@ describe('OnboardingScreen', () => {
     const pageWidth = 400;
     fireEvent(screen.getByTestId('swipeable-pager'), 'layout', { nativeEvent: { layout: { width: pageWidth } } });
     const scrollView = screen.UNSAFE_getByProps({ horizontal: true });
-    fireEvent(scrollView, 'momentumScrollEnd', {
-      nativeEvent: { contentOffset: { x: pageWidth }, contentSize: {}, layoutMeasurement: {} },
-    });
+    fireEvent(scrollView, 'scroll', { nativeEvent: { contentOffset: { x: pageWidth } } });
 
     expect(screen.getByText('Get Started')).toBeTruthy();
   });

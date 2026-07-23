@@ -45,4 +45,10 @@ describe('AppNavigator', () => {
     render(<AppNavigator />);
     expect(screen.getByTestId('reveal-screen')).toBeTruthy();
   });
+
+  it('renders the welcome screen when routed there', () => {
+    useAppStore.setState({ screen: 'welcome' });
+    render(<AppNavigator />);
+    expect(screen.getByTestId('welcome-screen')).toBeTruthy();
+  });
 });

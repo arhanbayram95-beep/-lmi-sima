@@ -18,8 +18,7 @@ interface AnalysisModule {
   available: boolean;
 }
 
-// Only one module ships today. This screen exists so more modules can be
-// added later as entries here without touching navigation elsewhere.
+// Add future modules here — nothing else needs to change to surface them.
 const MODULES: AnalysisModule[] = [
   {
     id: 'three-expression',
@@ -28,6 +27,22 @@ const MODULES: AnalysisModule[] = [
     glyph: '◐',
     targetScreen: 'capture',
     available: true,
+  },
+  {
+    id: 'relationship-harmony',
+    titleKey: 'analyze.module.relationshipHarmony.title',
+    descriptionKey: 'analyze.module.relationshipHarmony.description',
+    glyph: '♥',
+    targetScreen: 'capture',
+    available: false,
+  },
+  {
+    id: 'career-match',
+    titleKey: 'analyze.module.careerMatch.title',
+    descriptionKey: 'analyze.module.careerMatch.description',
+    glyph: '◆',
+    targetScreen: 'capture',
+    available: false,
   },
 ];
 
@@ -51,17 +66,25 @@ export default function AnalyzeScreen() {
                 onPress={() => module.available && goToScreen(module.targetScreen)}
                 accessibilityRole="button"
                 accessibilityLabel={title}
+                accessibilityState={{ disabled: !module.available }}
                 testID={`analyze-module-${module.id}`}
               >
-                <GlassCard style={styles.moduleCard}>
+                <GlassCard style={[styles.moduleCard, !module.available && styles.moduleCardDisabled]}>
                   <View style={styles.moduleIcon}>
                     <Text style={styles.moduleGlyph}>{module.glyph}</Text>
                   </View>
                   <View style={styles.moduleTextBlock}>
-                    <Text style={styles.moduleTitle}>{title}</Text>
+                    <View style={styles.moduleTitleRow}>
+                      <Text style={styles.moduleTitle}>{title}</Text>
+                      {!module.available && (
+                        <View style={styles.comingSoonBadge}>
+                          <Text style={styles.comingSoonBadgeText}>{t('analyze.comingSoonBadge')}</Text>
+                        </View>
+                      )}
+                    </View>
                     <Text style={styles.moduleDescription}>{t(module.descriptionKey)}</Text>
                   </View>
-                  <Text style={styles.moduleChevron}>›</Text>
+                  {module.available && <Text style={styles.moduleChevron}>›</Text>}
                 </GlassCard>
               </Pressable>
             </FadeInView>
@@ -110,6 +133,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Theme.spacing.sm,
   },
+  moduleCardDisabled: {
+    opacity: 0.55,
+  },
   moduleIcon: {
     width: 44,
     height: 44,
@@ -126,6 +152,11 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
+  moduleTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   moduleTitle: {
     ...Theme.typography.headlineMd,
     fontSize: 16,
@@ -139,6 +170,17 @@ const styles = StyleSheet.create({
   moduleChevron: {
     color: Theme.colors.text.muted,
     fontSize: 20,
+  },
+  comingSoonBadge: {
+    backgroundColor: 'rgba(235, 201, 131, 0.15)',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  comingSoonBadgeText: {
+    ...Theme.typography.labelSm,
+    fontSize: 9,
+    color: Theme.colors.accent.goldSecondary,
   },
   comingSoonCard: {
     alignItems: 'center',
