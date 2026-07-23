@@ -24,7 +24,7 @@ describe('ReviewScreen', () => {
     expect(screen.getByLabelText('Rate 4 stars')).toBeTruthy();
   });
 
-  it('triggers the native store review prompt and returns to the main menu', async () => {
+  it('triggers the native store review prompt and returns to the main menu by default', async () => {
     render(<ReviewScreen />);
     fireEvent.press(screen.getByText('Rate on App Store'));
 
@@ -39,5 +39,25 @@ describe('ReviewScreen', () => {
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('mainMenu'));
     expect(mockRequestReview).not.toHaveBeenCalled();
+  });
+
+  it('returns to Settings, not Main Menu, when Review was opened from Settings', async () => {
+    useAppStore.getState().goToScreen('settings');
+    useAppStore.getState().goToScreen('review');
+
+    render(<ReviewScreen />);
+    fireEvent.press(screen.getByLabelText('Close'));
+
+    expect(useAppStore.getState().screen).toBe('settings');
+  });
+
+  it('Maybe Later also returns to wherever Review was opened from', () => {
+    useAppStore.getState().goToScreen('settings');
+    useAppStore.getState().goToScreen('review');
+
+    render(<ReviewScreen />);
+    fireEvent.press(screen.getByText('Maybe Later'));
+
+    expect(useAppStore.getState().screen).toBe('settings');
   });
 });

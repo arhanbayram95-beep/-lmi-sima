@@ -14,23 +14,32 @@ jest.mock('../api/reading', () => {
   };
 });
 
+const mockStop = jest.fn().mockResolvedValue(undefined);
+jest.mock('../utils/sound', () => ({
+  startAmbientShimmerLoop: jest.fn().mockResolvedValue({ stop: () => mockStop() }),
+}));
+
 const PHOTOS = { calm: 'base64-calm', bright: 'base64-bright', deep: 'base64-deep' };
 const READING = { headline: 'Effortlessly Magnetic', expression_insights: [], narrative: 'n' };
 
 describe('AnalyzingScreen', () => {
   beforeEach(() => {
     mockAnalyzeReading.mockReset();
+    mockStop.mockClear();
     useAppStore.setState({ screen: 'analyzing', images: { ...PHOTOS }, reading: null });
   });
 
   it('sends the captured photos, stores the reading, clears images, and moves to the reveal', async () => {
     mockAnalyzeReading.mockResolvedValue(READING);
-    render(<AnalyzingScreen />);
+    const { unmount } = render(<AnalyzingScreen />);
 
     await waitFor(() => expect(mockAnalyzeReading).toHaveBeenCalledWith(PHOTOS));
     await waitFor(() => expect(useAppStore.getState().screen).toBe('reveal'));
     expect(useAppStore.getState().reading).toEqual(READING);
     expect(useAppStore.getState().images).toEqual({});
+
+    unmount();
+    await waitFor(() => expect(mockStop).toHaveBeenCalledTimes(1));
   });
 
   it('shows a retry option when the API call fails', async () => {

@@ -3,6 +3,12 @@ import React from 'react';
 import AppNavigator from './AppNavigator';
 import { useAppStore } from '../state/useAppStore';
 
+jest.mock('../utils/sound', () => ({
+  playCaptureChime: jest.fn().mockResolvedValue(undefined),
+  playPromptChime: jest.fn().mockResolvedValue(undefined),
+  startAmbientShimmerLoop: jest.fn().mockResolvedValue({ stop: jest.fn().mockResolvedValue(undefined) }),
+}));
+
 describe('AppNavigator', () => {
   it('renders the screen matching the current store state', () => {
     useAppStore.setState({ screen: 'mainMenu' });

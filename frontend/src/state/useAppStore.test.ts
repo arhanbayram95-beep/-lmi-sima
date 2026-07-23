@@ -4,6 +4,7 @@ describe('useAppStore', () => {
   beforeEach(() => {
     useAppStore.setState({
       screen: 'loading',
+      previousScreen: null,
       ageVerified: false,
       imageConsentGiven: false,
       images: {},
@@ -21,6 +22,18 @@ describe('useAppStore', () => {
   it('navigates between screens via goToScreen', () => {
     useAppStore.getState().goToScreen('onboarding');
     expect(useAppStore.getState().screen).toBe('onboarding');
+  });
+
+  it('goBack returns to wherever goToScreen was last called from', () => {
+    useAppStore.getState().goToScreen('settings');
+    useAppStore.getState().goToScreen('review');
+    useAppStore.getState().goBack();
+    expect(useAppStore.getState().screen).toBe('settings');
+  });
+
+  it('goBack falls back to mainMenu when there is nothing recorded to return to', () => {
+    useAppStore.getState().goBack();
+    expect(useAppStore.getState().screen).toBe('mainMenu');
   });
 
   it('tracks age verification and image consent independently', () => {

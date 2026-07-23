@@ -1,6 +1,6 @@
 import * as StoreReview from 'expo-store-review';
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
@@ -9,10 +9,39 @@ import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
 const STAR_COUNT = 5;
+const STAR_EMPTY_COLOR = 'rgba(228, 194, 125, 0.3)';
+
+function AnimatedStar({ filled, onPress, label }: { filled: boolean; onPress: () => void; label: string }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const colorProgress = useRef(new Animated.Value(filled ? 1 : 0)).current;
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    Animated.timing(colorProgress, { toValue: filled ? 1 : 0, duration: 150, useNativeDriver: false }).start();
+    Animated.sequence([
+      Animated.spring(scale, { toValue: 1.35, useNativeDriver: true, speed: 40, bounciness: 20 }),
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 20, bounciness: 10 }),
+    ]).start();
+    // React only to the filled transition, not to the identity of the animated values.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filled]);
+
+  const color = colorProgress.interpolate({ inputRange: [0, 1], outputRange: [STAR_EMPTY_COLOR, Theme.colors.accent.goldSecondary] });
+
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label}>
+      <Animated.Text style={[styles.star, { color, transform: [{ scale }] }]}>★</Animated.Text>
+    </Pressable>
+  );
+}
 
 export default function ReviewScreen() {
   const [rating, setRating] = useState(0);
-  const goToScreen = useAppStore((s) => s.goToScreen);
+  const goBack = useAppStore((s) => s.goBack);
   const t = useTranslation();
 
   const handleRateOnAppStore = async () => {
@@ -20,14 +49,14 @@ export default function ReviewScreen() {
     if (available) {
       await StoreReview.requestReview();
     }
-    goToScreen('mainMenu');
+    goBack();
   };
 
   return (
     <View style={styles.container} testID="review-screen">
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t('review.headerTitle')}</Text>
-        <Pressable onPress={() => goToScreen('mainMenu')} accessibilityRole="button" accessibilityLabel="Close">
+        <Pressable onPress={goBack} accessibilityRole="button" accessibilityLabel="Close">
           <Text style={styles.closeIcon}>✕</Text>
         </Pressable>
       </View>
@@ -42,24 +71,19 @@ export default function ReviewScreen() {
             <Text style={styles.body}>{t('review.body')}</Text>
 
             <View style={styles.starRow} testID="star-rating">
-              {Array.from({ length: STAR_COUNT }).map((_, index) => {
-                const filled = index < rating;
-                return (
-                  <Pressable
-                    key={index}
-                    onPress={() => setRating(index + 1)}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('review.starLabel', { n: index + 1 })}
-                  >
-                    <Text style={[styles.star, filled && styles.starFilled]}>★</Text>
-                  </Pressable>
-                );
-              })}
+              {Array.from({ length: STAR_COUNT }).map((_, index) => (
+                <AnimatedStar
+                  key={index}
+                  filled={index < rating}
+                  onPress={() => setRating(index + 1)}
+                  label={t('review.starLabel', { n: index + 1 })}
+                />
+              ))}
             </View>
 
             <View style={styles.actions}>
               <PrimaryButton label={t('review.rateButton')} onPress={handleRateOnAppStore} />
-              <Pressable onPress={() => goToScreen('mainMenu')} accessibilityRole="button">
+              <Pressable onPress={goBack} accessibilityRole="button">
                 <Text style={styles.maybeLater}>{t('review.maybeLater')}</Text>
               </Pressable>
             </View>
@@ -131,10 +155,6 @@ const styles = StyleSheet.create({
   },
   star: {
     fontSize: 32,
-    color: 'rgba(228, 194, 125, 0.3)',
-  },
-  starFilled: {
-    color: Theme.colors.accent.goldSecondary,
   },
   actions: {
     width: '100%',

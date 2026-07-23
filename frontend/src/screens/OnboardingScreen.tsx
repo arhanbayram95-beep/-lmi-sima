@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import AnimatedCheckbox from '../components/common/AnimatedCheckbox';
 import AppLogo from '../components/common/AppLogo';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
 import PrivacyPolicyModal from '../components/common/PrivacyPolicyModal';
+import SwipeablePager from '../components/common/SwipeablePager';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
@@ -46,43 +48,35 @@ export default function OnboardingScreen() {
             ))}
           </View>
 
-          {step === 0 ? (
+          <SwipeablePager index={step} onIndexChange={setStep} style={styles.pager}>
             <FadeInView key="step-0" style={styles.textBlock}>
               <Text style={styles.headline}>{t('onboarding.step0.headline')}</Text>
               <Text style={styles.body}>{t('onboarding.step0.body')}</Text>
             </FadeInView>
-          ) : (
+
             <FadeInView key="step-1" style={styles.textBlock}>
               <Text style={styles.headline}>{t('onboarding.step1.headline')}</Text>
               <Text style={styles.body}>{t('onboarding.step1.body')}</Text>
 
-              <Pressable
-                style={styles.checkboxRow}
-                onPress={() => setAgeVerified(!ageVerified)}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: ageVerified }}
+              <AnimatedCheckbox
+                checked={ageVerified}
+                onToggle={() => setAgeVerified(!ageVerified)}
+                label={t('onboarding.ageCheckbox')}
                 testID="age-gate-checkbox"
-              >
-                <View style={[styles.checkbox, ageVerified && styles.checkboxChecked]} />
-                <Text style={styles.checkboxLabel}>{t('onboarding.ageCheckbox')}</Text>
-              </Pressable>
+              />
 
-              <Pressable
-                style={styles.checkboxRow}
-                onPress={() => setImageConsentGiven(!imageConsentGiven)}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: imageConsentGiven }}
+              <AnimatedCheckbox
+                checked={imageConsentGiven}
+                onToggle={() => setImageConsentGiven(!imageConsentGiven)}
+                label={t('onboarding.consentCheckbox')}
                 testID="consent-checkbox"
-              >
-                <View style={[styles.checkbox, imageConsentGiven && styles.checkboxChecked]} />
-                <Text style={styles.checkboxLabel}>{t('onboarding.consentCheckbox')}</Text>
-              </Pressable>
+              />
 
               <Pressable onPress={() => setPrivacyVisible(true)} accessibilityRole="link">
                 <Text style={styles.privacyLink}>{t('onboarding.privacyLink')}</Text>
               </Pressable>
             </FadeInView>
-          )}
+          </SwipeablePager>
         </GlassCard>
       </View>
 
@@ -132,6 +126,9 @@ const styles = StyleSheet.create({
     height: 10,
     backgroundColor: Theme.colors.accent.crimsonPrimary,
   },
+  pager: {
+    height: 320,
+  },
   textBlock: {
     gap: Theme.spacing.sm,
   },
@@ -144,28 +141,6 @@ const styles = StyleSheet.create({
     ...Theme.typography.bodyMd,
     color: Theme.colors.text.secondary,
     textAlign: 'center',
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: Theme.colors.text.secondary,
-  },
-  checkboxChecked: {
-    backgroundColor: Theme.colors.accent.goldSecondary,
-    borderColor: Theme.colors.accent.goldSecondary,
-  },
-  checkboxLabel: {
-    ...Theme.typography.bodyMd,
-    fontSize: 14,
-    color: Theme.colors.text.primary,
-    flex: 1,
   },
   privacyLink: {
     ...Theme.typography.labelSm,

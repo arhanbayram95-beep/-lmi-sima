@@ -43,4 +43,15 @@ describe('PaywallScreen', () => {
     fireEvent.press(screen.getByText('Privacy Policy'));
     expect(screen.getByTestId('privacy-policy-modal')).toBeTruthy();
   });
+
+  it('closes back to Settings, not Main Menu, when reopened from Settings with an active entitlement', () => {
+    useAppStore.setState({ isProActive: true });
+    useAppStore.getState().goToScreen('settings');
+    useAppStore.getState().goToScreen('paywall');
+
+    render(<PaywallScreen />);
+    fireEvent.press(screen.getByTestId('paywall-close-button'));
+
+    expect(useAppStore.getState().screen).toBe('settings');
+  });
 });

@@ -8,6 +8,7 @@ import { TranslationKey } from '../i18n/translations';
 import { ExpressionLabel } from '../state/slices/captureSlice';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
+import { playCaptureChime, playPromptChime } from '../utils/sound';
 
 const STEPS: { expression: ExpressionLabel; titleKey: TranslationKey; promptKey: TranslationKey }[] = [
   { expression: 'calm', titleKey: 'capture.step.calm.title', promptKey: 'capture.step.calm.prompt' },
@@ -36,10 +37,19 @@ export default function CaptureScreen() {
     ).start();
   }, [pulse]);
 
+  useEffect(() => {
+    if (stepIndex > 0) {
+      playPromptChime();
+    }
+    // Only fire when the step actually changes, not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepIndex]);
+
   const handleCapture = async () => {
     if (isCapturing || !cameraRef.current) return;
     setIsCapturing(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    playCaptureChime();
 
     Animated.sequence([
       Animated.timing(flash, { toValue: 1, duration: 80, useNativeDriver: true }),

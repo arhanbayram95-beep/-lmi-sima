@@ -31,4 +31,18 @@ describe('OnboardingScreen', () => {
     fireEvent.press(screen.getByText('Read our Privacy Policy'));
     expect(screen.getByTestId('privacy-policy-modal')).toBeTruthy();
   });
+
+  it('swiping to the age-gate page flips the button to Get Started, same as tapping Next', () => {
+    render(<OnboardingScreen />);
+    expect(screen.getByText('Next')).toBeTruthy();
+
+    const pageWidth = 400;
+    fireEvent(screen.getByTestId('swipeable-pager'), 'layout', { nativeEvent: { layout: { width: pageWidth } } });
+    const scrollView = screen.UNSAFE_getByProps({ horizontal: true });
+    fireEvent(scrollView, 'momentumScrollEnd', {
+      nativeEvent: { contentOffset: { x: pageWidth }, contentSize: {}, layoutMeasurement: {} },
+    });
+
+    expect(screen.getByText('Get Started')).toBeTruthy();
+  });
 });

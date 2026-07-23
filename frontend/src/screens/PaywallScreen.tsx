@@ -44,6 +44,7 @@ export default function PaywallScreen() {
   const [selectedPlan, setSelectedPlan] = useState<PlanId>('weekly');
   const [privacyVisible, setPrivacyVisible] = useState(false);
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const goBack = useAppStore((s) => s.goBack);
   const isProActive = useAppStore((s) => s.isProActive);
   const setProActive = useAppStore((s) => s.setProActive);
   const t = useTranslation();
@@ -58,7 +59,7 @@ export default function PaywallScreen() {
       <View style={styles.header}>
         {isProActive && (
           <Pressable
-            onPress={() => goToScreen('mainMenu')}
+            onPress={goBack}
             accessibilityRole="button"
             accessibilityLabel="Close"
             style={styles.closeButton}

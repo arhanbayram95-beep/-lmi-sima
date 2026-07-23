@@ -24,10 +24,20 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'light' },
 }));
 
+const mockPlayCaptureChime = jest.fn().mockResolvedValue(undefined);
+const mockPlayPromptChime = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('../utils/sound', () => ({
+  playCaptureChime: () => mockPlayCaptureChime(),
+  playPromptChime: () => mockPlayPromptChime(),
+}));
+
 describe('CaptureScreen', () => {
   beforeEach(() => {
     mockTakePictureAsync.mockClear();
     mockRequestPermission.mockClear();
+    mockPlayCaptureChime.mockClear();
+    mockPlayPromptChime.mockClear();
     mockPermissionState = { granted: true };
     useAppStore.setState({ screen: 'capture', images: {} });
   });
@@ -56,5 +66,8 @@ describe('CaptureScreen', () => {
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
     expect(mockTakePictureAsync).toHaveBeenCalledTimes(3);
+    expect(mockPlayCaptureChime).toHaveBeenCalledTimes(3);
+    // Prompt chime greets Bright and Deep, not the opening Calm step.
+    expect(mockPlayPromptChime).toHaveBeenCalledTimes(2);
   });
 });

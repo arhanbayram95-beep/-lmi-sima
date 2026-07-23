@@ -6,6 +6,7 @@ import PrimaryButton from '../components/common/PrimaryButton';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
+import { AmbientLoopHandle, startAmbientShimmerLoop } from '../utils/sound';
 
 export default function AnalyzingScreen() {
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +41,24 @@ export default function AnalyzingScreen() {
     // Only re-run when explicitly retried — capturing `images` at mount time
     // is intentional, this effect is not meant to react to later changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    let handle: AmbientLoopHandle | null = null;
+    let cancelled = false;
+
+    startAmbientShimmerLoop().then((h) => {
+      if (cancelled) {
+        h.stop();
+      } else {
+        handle = h;
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      handle?.stop();
+    };
   }, []);
 
   useEffect(() => {
