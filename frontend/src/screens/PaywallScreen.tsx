@@ -49,7 +49,11 @@ export default function PaywallScreen() {
   const setProActive = useAppStore((s) => s.setProActive);
   const t = useTranslation();
 
-  const startTrial = () => {
+  // Subscribing and starting the trial land the user in the same place
+  // today (no real billing integration yet — see PROJECT_SPEC.md Phase
+  // 5.1). The trial is deliberately the smaller, secondary action so a
+  // full subscription is the path of least resistance.
+  const enterApp = () => {
     setProActive(true);
     goToScreen('welcome');
   };
@@ -77,17 +81,12 @@ export default function PaywallScreen() {
         </FadeInView>
 
         <FadeInView delay={80}>
-          <View style={styles.trialBanner}>
-            <Text style={styles.trialBannerText}>{t('paywall.trialBanner')}</Text>
-          </View>
-        </FadeInView>
-
-        <FadeInView delay={140}>
           <GlassCard style={styles.featureCard}>
+            <Text style={styles.featuresHeading}>{t('paywall.featuresHeading')}</Text>
             {FEATURE_KEYS.map((key) => (
               <View key={key} style={styles.featureRow}>
                 <View style={styles.featureIcon}>
-                  <Text style={styles.featureIconGlyph}>✦</Text>
+                  <Text style={styles.featureIconGlyph}>✓</Text>
                 </View>
                 <Text style={styles.featureText}>{t(key)}</Text>
               </View>
@@ -95,7 +94,7 @@ export default function PaywallScreen() {
           </GlassCard>
         </FadeInView>
 
-        <FadeInView delay={200} style={styles.plans}>
+        <FadeInView delay={160} style={styles.plans}>
           <PlanCard selected={selectedPlan === 'weekly'} onPress={() => setSelectedPlan('weekly')} testID="plan-weekly">
             <View style={styles.planBadge}>
               <Text style={styles.planBadgeText}>{t('paywall.mostPopular')}</Text>
@@ -133,7 +132,13 @@ export default function PaywallScreen() {
       </View>
 
       <View style={styles.footer}>
-        <PrimaryButton label={t('paywall.startTrial')} onPress={startTrial} />
+        <PrimaryButton label={t('paywall.subscribeNow')} onPress={enterApp} />
+        <Text style={styles.reassurance}>{t('paywall.reassurance')}</Text>
+
+        <Pressable onPress={enterApp} accessibilityRole="button" testID="paywall-trial-link">
+          <Text style={styles.trialLink}>{t('paywall.trialLink')}</Text>
+        </Pressable>
+
         <View style={styles.footerLinks}>
           <Text style={styles.footerLink}>{t('paywall.restorePurchases')}</Text>
           <Text style={styles.footerLinkDivider}>•</Text>
@@ -191,22 +196,14 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     textAlign: 'center',
   },
-  trialBanner: {
-    backgroundColor: 'rgba(235, 201, 131, 0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(235, 201, 131, 0.4)',
-    borderRadius: Theme.radius.lg,
-    paddingVertical: 10,
-    paddingHorizontal: Theme.spacing.sm,
-  },
-  trialBannerText: {
-    ...Theme.typography.bodyMd,
-    fontSize: 13,
-    color: Theme.colors.accent.goldSecondary,
-    textAlign: 'center',
-  },
   featureCard: {
     gap: Theme.spacing.sm,
+  },
+  featuresHeading: {
+    ...Theme.typography.labelSm,
+    color: Theme.colors.accent.goldSecondary,
+    textTransform: 'uppercase',
+    marginBottom: 2,
   },
   featureRow: {
     flexDirection: 'row',
@@ -219,10 +216,11 @@ const styles = StyleSheet.create({
     borderRadius: Theme.radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(158, 41, 65, 0.3)',
+    backgroundColor: 'rgba(129, 199, 132, 0.18)',
   },
   featureIconGlyph: {
-    color: Theme.colors.accent.goldSecondary,
+    color: Theme.colors.status.success,
+    fontWeight: '700',
   },
   featureText: {
     ...Theme.typography.bodyMd,
@@ -301,7 +299,21 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     paddingHorizontal: Theme.spacing.containerPadding,
     paddingBottom: Theme.spacing.sm,
-    gap: Theme.spacing.xs,
+    gap: 6,
+  },
+  reassurance: {
+    ...Theme.typography.labelSm,
+    fontSize: 11,
+    color: Theme.colors.text.muted,
+    textAlign: 'center',
+  },
+  trialLink: {
+    ...Theme.typography.labelSm,
+    fontSize: 11,
+    color: 'rgba(179, 176, 205, 0.55)',
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+    marginTop: 4,
   },
   footerLinks: {
     flexDirection: 'row',

@@ -29,11 +29,18 @@ describe('PaywallScreen', () => {
     expect(screen.getByTestId('paywall-close-button')).toBeTruthy();
   });
 
-  it('advertises the free trial and grants entitlement on Start Free Trial', () => {
+  it('leads with Subscribe Now as the primary path — no trial framing on the primary CTA', () => {
     render(<PaywallScreen />);
-    expect(screen.getAllByText(/3-day free trial/i).length).toBeGreaterThan(0);
 
-    fireEvent.press(screen.getByText('Start Free Trial'));
+    fireEvent.press(screen.getByText('Subscribe Now'));
+    expect(useAppStore.getState().isProActive).toBe(true);
+    expect(useAppStore.getState().screen).toBe('welcome');
+  });
+
+  it('still offers the free trial, but only as a secondary, de-emphasized link', () => {
+    render(<PaywallScreen />);
+
+    fireEvent.press(screen.getByTestId('paywall-trial-link'));
     expect(useAppStore.getState().isProActive).toBe(true);
     expect(useAppStore.getState().screen).toBe('welcome');
   });

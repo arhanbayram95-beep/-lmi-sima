@@ -348,6 +348,11 @@ export const translations = {
     ru: '🎁 3-дневная бесплатная пробная версия — отмените в любой момент до её окончания.',
     ur: '🎁 3 دن کا مفت ٹرائل — ختم ہونے سے پہلے کسی بھی وقت منسوخ کریں۔',
   },
+  'paywall.featuresHeading': {
+    en: 'Everything you unlock', zh: '解锁全部权益', hi: 'आपको जो कुछ मिलेगा', es: 'Todo lo que desbloqueas',
+    fr: 'Tout ce que vous débloquez', ar: 'كل ما ستحصل عليه', bn: 'আপনি যা যা আনলক করবেন', pt: 'Tudo o que desbloqueia',
+    ru: 'Всё, что вы получите', ur: 'وہ سب کچھ جو آپ کو ملے گا',
+  },
   'paywall.feature1': {
     en: 'Unlimited 3-Expression AI Character Readings', zh: '无限次三表情 AI 性格解读',
     hi: 'असीमित 3-एक्सप्रेशन AI कैरेक्टर रीडिंग', es: 'Lecturas de carácter con IA de 3 expresiones ilimitadas',
@@ -377,13 +382,29 @@ export const translations = {
     ar: 'اشتراك أسبوعي', bn: 'সাপ্তাহিক পাস', pt: 'Passe semanal', ru: 'Недельный абонемент', ur: 'ہفتہ وار پاس',
   },
   'paywall.weeklyDescription': {
-    en: '3-day free trial included', zh: '含3天免费试用', hi: '3-दिन का निःशुल्क ट्रायल शामिल', es: 'Incluye prueba gratuita de 3 días',
-    fr: "Essai gratuit de 3 jours inclus", ar: 'يشمل تجربة مجانية لمدة 3 أيام', bn: '৩-দিনের বিনামূল্যে ট্রায়াল অন্তর্ভুক্ত', pt: 'Inclui teste gratuito de 3 dias',
-    ru: 'Включена 3-дневная бесплатная пробная версия', ur: '3 دن کا مفت ٹرائل شامل ہے',
+    en: 'Full access, billed weekly', zh: '完全权限，按周计费', hi: 'पूर्ण एक्सेस, साप्ताहिक बिलिंग', es: 'Acceso completo, facturación semanal',
+    fr: 'Accès complet, facturation hebdomadaire', ar: 'وصول كامل، فوترة أسبوعية', bn: 'সম্পূর্ণ অ্যাক্সেস, সাপ্তাহিক বিলিং', pt: 'Acesso total, faturação semanal',
+    ru: 'Полный доступ, еженедельная оплата', ur: 'مکمل رسائی، ہفتہ وار بلنگ',
   },
   'paywall.weeklyCadence': {
-    en: '/WEEK AFTER TRIAL', zh: '/周（试用后）', hi: '/सप्ताह (ट्रायल के बाद)', es: '/SEMANA TRAS LA PRUEBA', fr: "/SEMAINE APRÈS L'ESSAI",
-    ar: '/أسبوعيًا بعد التجربة', bn: '/সপ্তাহ (ট্রায়ালের পর)', pt: '/SEMANA APÓS O TESTE', ru: '/НЕДЕЛЮ ПОСЛЕ ПРОБНОГО ПЕРИОДА', ur: '/ہفتہ (ٹرائل کے بعد)',
+    en: '/WEEK', zh: '/周', hi: '/सप्ताह', es: '/SEMANA', fr: '/SEMAINE',
+    ar: '/أسبوعيًا', bn: '/সপ্তাহ', pt: '/SEMANA', ru: '/НЕДЕЛЮ', ur: '/ہفتہ',
+  },
+  'paywall.subscribeNow': {
+    en: 'Subscribe Now', zh: '立即订阅', hi: 'अभी सब्सक्राइब करें', es: 'Suscribirse ahora', fr: "S'abonner maintenant",
+    ar: 'اشترك الآن', bn: 'এখনই সাবস্ক্রাইব করুন', pt: 'Subscrever agora', ru: 'Оформить подписку', ur: 'ابھی سبسکرائب کریں',
+  },
+  'paywall.trialLink': {
+    en: 'Prefer to try free for 3 days first?', zh: '想先免费试用3天吗？', hi: 'पहले 3 दिन मुफ़्त आज़माना चाहेंगे?',
+    es: '¿Prefieres probarlo gratis 3 días antes?', fr: "Préférez-vous essayer gratuitement pendant 3 jours d'abord ?",
+    ar: 'هل تفضل تجربته مجانًا لمدة 3 أيام أولاً؟', bn: 'প্রথমে ৩ দিন বিনামূল্যে চেষ্টা করতে চান?', pt: 'Prefere experimentar gratuitamente por 3 dias primeiro?',
+    ru: 'Хотите сначала попробовать бесплатно 3 дня?', ur: 'کیا آپ پہلے 3 دن مفت آزمانا چاہیں گے؟',
+  },
+  'paywall.reassurance': {
+    en: 'Cancel anytime · Secure payment', zh: '随时取消 · 安全支付', hi: 'कभी भी रद्द करें · सुरक्षित भुगतान',
+    es: 'Cancela cuando quieras · Pago seguro', fr: 'Annulez à tout moment · Paiement sécurisé',
+    ar: 'ألغِ في أي وقت · دفع آمن', bn: 'যেকোনো সময় বাতিল করুন · নিরাপদ পেমেন্ট', pt: 'Cancele quando quiser · Pagamento seguro',
+    ru: 'Отмена в любой момент · Безопасная оплата', ur: 'کسی بھی وقت منسوخ کریں · محفوظ ادائیگی',
   },
   'paywall.annualName': {
     en: 'Annual Pass', zh: '年度订阅', hi: 'वार्षिक पास', es: 'Pase anual', fr: 'Pass annuel', ar: 'اشتراك سنوي',
