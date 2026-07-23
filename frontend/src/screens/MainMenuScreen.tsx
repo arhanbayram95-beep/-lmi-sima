@@ -56,7 +56,7 @@ export default function MainMenuScreen() {
         </View>
       </ScrollView>
 
-      <BottomNavBar active="analyze" />
+      <BottomNavBar />
     </View>
   );
 }

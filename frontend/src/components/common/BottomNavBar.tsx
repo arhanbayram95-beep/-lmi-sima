@@ -13,7 +13,10 @@ const NAV_ITEMS = [
 type NavKey = (typeof NAV_ITEMS)[number]['key'];
 
 interface BottomNavBarProps {
-  active: NavKey;
+  // Optional: Main Menu is a Home screen, not one of these three tabs, so
+  // it renders this with no active item rather than falsely claiming to be
+  // "Analyze" (see MainMenuScreen).
+  active?: NavKey;
 }
 
 export default function BottomNavBar({ active }: BottomNavBarProps) {
@@ -38,6 +41,7 @@ export default function BottomNavBar({ active }: BottomNavBarProps) {
             style={[styles.navItem, isActive && styles.navItemActive]}
             accessibilityRole="button"
             accessibilityLabel={label}
+            accessibilityState={{ selected: isActive }}
           >
             <Text style={[styles.navGlyph, isActive && styles.navGlyphActive]}>{item.glyph}</Text>
             <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>{label}</Text>

@@ -13,4 +13,10 @@ describe('MainMenuScreen', () => {
     fireEvent.press(screen.getByText('Start Analysis'));
     expect(useAppStore.getState().screen).toBe('analyze');
   });
+
+  it('does not falsely highlight the Analyze tab — Main Menu is Home, not Analyze', () => {
+    render(<MainMenuScreen />);
+    const analyzeTab = screen.getByLabelText('Analyze');
+    expect(analyzeTab.props.accessibilityState?.selected).toBeFalsy();
+  });
 });

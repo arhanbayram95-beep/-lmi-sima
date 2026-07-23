@@ -25,4 +25,17 @@ describe('BottomNavBar', () => {
     fireEvent.press(screen.getByLabelText('Settings'));
     expect(useAppStore.getState().screen).toBe('settings');
   });
+
+  it('marks the given tab as selected and leaves the rest unselected', () => {
+    render(<BottomNavBar active="settings" />);
+    expect(screen.getByLabelText('Settings').props.accessibilityState.selected).toBe(true);
+    expect(screen.getByLabelText('Analyze').props.accessibilityState.selected).toBe(false);
+  });
+
+  it('marks no tab as selected when active is omitted', () => {
+    render(<BottomNavBar />);
+    expect(screen.getByLabelText('Analyze').props.accessibilityState.selected).toBe(false);
+    expect(screen.getByLabelText('Results').props.accessibilityState.selected).toBe(false);
+    expect(screen.getByLabelText('Settings').props.accessibilityState.selected).toBe(false);
+  });
 });
