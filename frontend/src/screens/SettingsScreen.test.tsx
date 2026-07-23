@@ -1,11 +1,26 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { Linking } from 'react-native';
 import React from 'react';
 import SettingsScreen from './SettingsScreen';
 import { useAppStore } from '../state/useAppStore';
 
+jest.mock('expo-constants', () => ({
+  expoConfig: { version: '1.0.0', ios: { buildNumber: '7' }, android: { versionCode: 7 } },
+}));
+
+jest.mock('expo-device', () => ({
+  osVersion: '18.0',
+  osBuildId: '22A123',
+}));
+
 describe('SettingsScreen', () => {
   beforeEach(() => {
-    useAppStore.setState({ screen: 'settings' });
+    useAppStore.setState({ screen: 'settings', languageCode: 'en', isProActive: false });
+    jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('renders the Subscription, General, and Legal sections', () => {
@@ -31,5 +46,34 @@ describe('SettingsScreen', () => {
     render(<SettingsScreen />);
     fireEvent.press(screen.getByTestId('settings-privacy-policy'));
     expect(screen.getByTestId('privacy-policy-modal')).toBeTruthy();
+  });
+
+  it('opens the terms modal from the Legal section', () => {
+    render(<SettingsScreen />);
+    fireEvent.press(screen.getByTestId('settings-terms'));
+    expect(screen.getByTestId('terms-modal')).toBeTruthy();
+  });
+
+  it('opens the language picker and updates the selected language', () => {
+    render(<SettingsScreen />);
+    fireEvent.press(screen.getByTestId('settings-language'));
+    expect(screen.getByTestId('language-picker-modal')).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId('language-option-es'));
+    expect(useAppStore.getState().languageCode).toBe('es');
+  });
+
+  it('opens the mail client with the support template on Contact Us', () => {
+    render(<SettingsScreen />);
+    fireEvent.press(screen.getByTestId('settings-contact-us'));
+
+    expect(Linking.openURL).toHaveBeenCalledTimes(1);
+    const url = (Linking.openURL as jest.Mock).mock.calls[0][0] as string;
+    expect(url).toMatch(/^mailto:fevzi\.bayram@boun\.edu\.tr\?/);
+
+    const body = decodeURIComponent(url.split('body=')[1]);
+    expect(body).toContain('PLEASE DO NOT DELETE THE INFORMATION BELOW');
+    expect(body).toContain('Premium: No');
+    expect(body).toContain('Language: en');
   });
 });

@@ -8,10 +8,16 @@ describe('BottomNavBar', () => {
     useAppStore.setState({ screen: 'mainMenu' });
   });
 
-  it('navigates to capture when Analyze is pressed', () => {
+  it('navigates to the analyze hub when Analyze is pressed', () => {
     render(<BottomNavBar active="analyze" />);
     fireEvent.press(screen.getByLabelText('Analyze'));
-    expect(useAppStore.getState().screen).toBe('capture');
+    expect(useAppStore.getState().screen).toBe('analyze');
+  });
+
+  it('navigates to results when Results is pressed', () => {
+    render(<BottomNavBar active="analyze" />);
+    fireEvent.press(screen.getByLabelText('Results'));
+    expect(useAppStore.getState().screen).toBe('results');
   });
 
   it('navigates to settings when Settings is pressed', () => {

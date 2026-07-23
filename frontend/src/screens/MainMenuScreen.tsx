@@ -52,7 +52,7 @@ export default function MainMenuScreen() {
             <Text style={styles.heroBody}>
               Capture Calm, Bright, and Deep expressions to reveal your character vibe.
             </Text>
-            <PrimaryButton label="Start Analysis" onPress={() => goToScreen('capture')} />
+            <PrimaryButton label="Start Analysis" onPress={() => goToScreen('analyze')} />
           </GlassCard>
         </FadeInView>
 

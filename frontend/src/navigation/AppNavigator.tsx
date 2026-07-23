@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing } from 'react-native';
+import AnalyzeScreen from '../screens/AnalyzeScreen';
 import CaptureScreen from '../screens/CaptureScreen';
 import LoadingScreen from '../screens/LoadingScreen';
 import MainMenuScreen from '../screens/MainMenuScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import PaywallScreen from '../screens/PaywallScreen';
+import ResultsScreen from '../screens/ResultsScreen';
 import ReviewScreen from '../screens/ReviewScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import { AppScreen } from '../state/slices/navigationSlice';
@@ -15,7 +17,9 @@ const SCREENS: Record<AppScreen, React.ComponentType> = {
   onboarding: OnboardingScreen,
   paywall: PaywallScreen,
   mainMenu: MainMenuScreen,
+  analyze: AnalyzeScreen,
   capture: CaptureScreen,
+  results: ResultsScreen,
   review: ReviewScreen,
   settings: SettingsScreen,
 };

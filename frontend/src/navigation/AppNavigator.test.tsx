@@ -15,4 +15,16 @@ describe('AppNavigator', () => {
     render(<AppNavigator />);
     expect(screen.getByTestId('settings-screen')).toBeTruthy();
   });
+
+  it('renders the analyze hub when routed there', () => {
+    useAppStore.setState({ screen: 'analyze' });
+    render(<AppNavigator />);
+    expect(screen.getByTestId('analyze-screen')).toBeTruthy();
+  });
+
+  it('renders the results screen when routed there', () => {
+    useAppStore.setState({ screen: 'results' });
+    render(<AppNavigator />);
+    expect(screen.getByTestId('results-screen')).toBeTruthy();
+  });
 });

@@ -47,4 +47,16 @@ describe('useAppStore', () => {
     useAppStore.getState().setProActive(true);
     expect(useAppStore.getState().isProActive).toBe(true);
   });
+
+  it('defaults to English and can switch language', () => {
+    expect(useAppStore.getState().languageCode).toBe('en');
+    useAppStore.getState().setLanguageCode('es');
+    expect(useAppStore.getState().languageCode).toBe('es');
+  });
+
+  it('generates a stable anonymous device ID for the session', () => {
+    const { anonymousId } = useAppStore.getState();
+    expect(anonymousId).toMatch(/^faceai-anon-/);
+    expect(useAppStore.getState().anonymousId).toBe(anonymousId);
+  });
 });

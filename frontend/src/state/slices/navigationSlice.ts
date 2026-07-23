@@ -5,7 +5,9 @@ export type AppScreen =
   | 'onboarding'
   | 'paywall'
   | 'mainMenu'
+  | 'analyze'
   | 'capture'
+  | 'results'
   | 'review'
   | 'settings';
 

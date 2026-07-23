@@ -1,11 +1,17 @@
+import Constants from 'expo-constants';
+import * as Device from 'expo-device';
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
+import LanguagePickerModal from '../components/common/LanguagePickerModal';
 import PrivacyPolicyModal from '../components/common/PrivacyPolicyModal';
+import TermsModal from '../components/common/TermsModal';
+import { SUPPORTED_LANGUAGES } from '../state/slices/localeSlice';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
+import { buildContactMailUrl } from '../utils/contactMail';
 
 interface SettingsRowConfig {
   label: string;
@@ -40,9 +46,61 @@ function SettingsSection({ title, rows, delay }: { title: string; rows: Settings
   );
 }
 
+function resolvePlatformLabel(): string {
+  if (Platform.OS === 'ios') return 'iOS';
+  if (Platform.OS === 'android') return 'Android';
+  return 'Web';
+}
+
+function resolveOsVersionLabel(): string {
+  if (!Device.osVersion) return 'Unknown';
+  if (Platform.OS === 'ios') {
+    return Device.osBuildId ? `Version ${Device.osVersion} (Build ${Device.osBuildId})` : `Version ${Device.osVersion}`;
+  }
+  if (Platform.OS === 'android') return `Android ${Device.osVersion}`;
+  return Device.osVersion;
+}
+
+function resolveSignOff(): string {
+  if (Platform.OS === 'ios') return 'Sent from my iPhone';
+  if (Platform.OS === 'android') return 'Sent from my Android device';
+  return 'Sent from FaceAI';
+}
+
+function resolveBuildNumber(): string | null {
+  const extra = Constants.expoConfig;
+  if (Platform.OS === 'ios') return extra?.ios?.buildNumber ?? null;
+  if (Platform.OS === 'android' && extra?.android?.versionCode != null) {
+    return String(extra.android.versionCode);
+  }
+  return null;
+}
+
 export default function SettingsScreen() {
   const [privacyVisible, setPrivacyVisible] = useState(false);
+  const [termsVisible, setTermsVisible] = useState(false);
+  const [languageVisible, setLanguageVisible] = useState(false);
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const anonymousId = useAppStore((s) => s.anonymousId);
+  const isProActive = useAppStore((s) => s.isProActive);
+  const languageCode = useAppStore((s) => s.languageCode);
+
+  const currentLanguageName =
+    SUPPORTED_LANGUAGES.find((language) => language.code === languageCode)?.englishName ?? 'English';
+
+  const handleContactUs = () => {
+    const url = buildContactMailUrl({
+      anonymousId,
+      isProActive,
+      languageCode,
+      appVersion: Constants.expoConfig?.version ?? '1.0.0',
+      buildNumber: resolveBuildNumber(),
+      platformLabel: resolvePlatformLabel(),
+      osVersionLabel: resolveOsVersionLabel(),
+      signOff: resolveSignOff(),
+    });
+    Linking.openURL(url);
+  };
 
   return (
     <View style={styles.container} testID="settings-screen">
@@ -64,7 +122,12 @@ export default function SettingsScreen() {
           title="General"
           delay={80}
           rows={[
-            { label: 'Language', value: 'English' },
+            {
+              label: 'Language',
+              value: currentLanguageName,
+              onPress: () => setLanguageVisible(true),
+              testID: 'settings-language',
+            },
             { label: 'Rate Us', onPress: () => goToScreen('review'), testID: 'settings-rate-us' },
             { label: 'Share App' },
           ]}
@@ -75,14 +138,16 @@ export default function SettingsScreen() {
           delay={160}
           rows={[
             { label: 'Privacy Policy', onPress: () => setPrivacyVisible(true), testID: 'settings-privacy-policy' },
-            { label: 'Terms & Conditions' },
-            { label: 'Contact Us' },
+            { label: 'Terms & Conditions', onPress: () => setTermsVisible(true), testID: 'settings-terms' },
+            { label: 'Contact Us', onPress: handleContactUs, testID: 'settings-contact-us' },
           ]}
         />
       </ScrollView>
 
       <BottomNavBar active="settings" />
       <PrivacyPolicyModal visible={privacyVisible} onClose={() => setPrivacyVisible(false)} />
+      <TermsModal visible={termsVisible} onClose={() => setTermsVisible(false)} />
+      <LanguagePickerModal visible={languageVisible} onClose={() => setLanguageVisible(false)} />
     </View>
   );
 }

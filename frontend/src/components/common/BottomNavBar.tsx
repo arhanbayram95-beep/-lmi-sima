@@ -19,9 +19,9 @@ export default function BottomNavBar({ active }: BottomNavBarProps) {
   const goToScreen = useAppStore((s) => s.goToScreen);
 
   const handlePress = (key: NavKey) => {
-    if (key === 'analyze') goToScreen('capture');
+    if (key === 'analyze') goToScreen('analyze');
+    if (key === 'results') goToScreen('results');
     if (key === 'settings') goToScreen('settings');
-    // 'results' has no dedicated screen yet — left inert until that phase is built.
   };
 
   return (
