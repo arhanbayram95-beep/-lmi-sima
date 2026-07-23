@@ -1,35 +1,45 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated } from 'react-native';
+import { Animated, Easing } from 'react-native';
 import CaptureScreen from '../screens/CaptureScreen';
 import LoadingScreen from '../screens/LoadingScreen';
 import MainMenuScreen from '../screens/MainMenuScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import PaywallScreen from '../screens/PaywallScreen';
 import ReviewScreen from '../screens/ReviewScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 import { AppScreen } from '../state/slices/navigationSlice';
 import { useAppStore } from '../state/useAppStore';
 
 const SCREENS: Record<AppScreen, React.ComponentType> = {
   loading: LoadingScreen,
   onboarding: OnboardingScreen,
-  capture: CaptureScreen,
-  review: ReviewScreen,
   paywall: PaywallScreen,
   mainMenu: MainMenuScreen,
+  capture: CaptureScreen,
+  review: ReviewScreen,
+  settings: SettingsScreen,
 };
 
 export default function AppNavigator() {
   const screen = useAppStore((s) => s.screen);
   const ActiveScreen = SCREENS[screen];
-  const fade = useRef(new Animated.Value(0)).current;
+  const progress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    fade.setValue(0);
-    Animated.timing(fade, { toValue: 1, duration: 220, useNativeDriver: true }).start();
-  }, [screen, fade]);
+    progress.setValue(0);
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: 280,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [screen, progress]);
+
+  const translateY = progress.interpolate({ inputRange: [0, 1], outputRange: [10, 0] });
+  const scale = progress.interpolate({ inputRange: [0, 1], outputRange: [0.98, 1] });
 
   return (
-    <Animated.View style={{ flex: 1, opacity: fade }}>
+    <Animated.View style={{ flex: 1, opacity: progress, transform: [{ translateY }, { scale }] }}>
       <ActiveScreen />
     </Animated.View>
   );

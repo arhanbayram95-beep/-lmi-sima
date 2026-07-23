@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
 import { useAppStore } from '../state/useAppStore';
@@ -15,12 +16,13 @@ export default function ReviewScreen() {
     <View style={styles.container} testID="review-screen">
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Rate Experience</Text>
-        <Pressable onPress={() => goToScreen('paywall')} accessibilityRole="button" accessibilityLabel="Close">
+        <Pressable onPress={() => goToScreen('mainMenu')} accessibilityRole="button" accessibilityLabel="Close">
           <Text style={styles.closeIcon}>✕</Text>
         </Pressable>
       </View>
 
       <View style={styles.content}>
+        <FadeInView>
         <GlassCard style={styles.card}>
           <View style={styles.emblem}>
             <Text style={styles.emblemGlyph}>✦</Text>
@@ -47,12 +49,13 @@ export default function ReviewScreen() {
           </View>
 
           <View style={styles.actions}>
-            <PrimaryButton label="Rate on App Store" onPress={() => goToScreen('paywall')} />
-            <Pressable onPress={() => goToScreen('paywall')} accessibilityRole="button">
+            <PrimaryButton label="Rate on App Store" onPress={() => goToScreen('mainMenu')} />
+            <Pressable onPress={() => goToScreen('mainMenu')} accessibilityRole="button">
               <Text style={styles.maybeLater}>Maybe Later</Text>
             </Pressable>
           </View>
         </GlassCard>
+        </FadeInView>
       </View>
     </View>
   );

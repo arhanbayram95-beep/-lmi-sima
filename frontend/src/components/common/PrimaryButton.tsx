@@ -1,33 +1,50 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
+import React, { useRef } from 'react';
+import { Animated, Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
 import { Theme } from '../../ui/theme';
 
 interface PrimaryButtonProps {
   label: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary';
+  disabled?: boolean;
   style?: ViewStyle;
 }
 
-export default function PrimaryButton({ label, onPress, variant = 'primary', style }: PrimaryButtonProps) {
+export default function PrimaryButton({
+  label,
+  onPress,
+  variant = 'primary',
+  disabled = false,
+  style,
+}: PrimaryButtonProps) {
   const isPrimary = variant === 'primary';
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const animateTo = (toValue: number) => {
+    Animated.spring(scale, { toValue, useNativeDriver: true, speed: 30, bounciness: 10 }).start();
+  };
+
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.button,
-        isPrimary ? styles.primary : styles.secondary,
-        pressed && styles.pressed,
-        style,
-      ]}
-    >
-      <Text style={isPrimary ? styles.primaryLabel : styles.secondaryLabel}>{label}</Text>
-    </Pressable>
+    <Animated.View style={[styles.wrapper, { transform: [{ scale }] }]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={onPress}
+        onPressIn={() => animateTo(0.96)}
+        onPressOut={() => animateTo(1)}
+        style={[styles.button, isPrimary ? styles.primary : styles.secondary, disabled && styles.disabled, style]}
+      >
+        <Text style={isPrimary ? styles.primaryLabel : styles.secondaryLabel}>{label}</Text>
+      </Pressable>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    width: '100%',
+  },
   button: {
     width: '100%',
     paddingVertical: 16,
@@ -47,9 +64,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Theme.colors.accent.crimsonPrimary,
   },
-  pressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
+  disabled: {
+    opacity: 0.4,
   },
   primaryLabel: {
     ...Theme.typography.headlineMd,

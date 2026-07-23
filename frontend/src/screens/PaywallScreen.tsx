@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import DisclaimerFooter from '../components/common/DisclaimerFooter';
+import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
+import PrivacyPolicyModal from '../components/common/PrivacyPolicyModal';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
@@ -14,97 +16,139 @@ const FEATURES = [
   'Full Reading History & High-Res Story Share Cards',
 ];
 
+function PlanCard({
+  selected,
+  onPress,
+  testID,
+  children,
+}: React.PropsWithChildren<{ selected: boolean; onPress: () => void; testID: string }>) {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (selected) {
+      Animated.sequence([
+        Animated.spring(scale, { toValue: 1.02, useNativeDriver: true, speed: 40, bounciness: 12 }),
+        Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 40, bounciness: 12 }),
+      ]).start();
+    }
+  }, [selected, scale]);
+
+  return (
+    <Pressable onPress={onPress} accessibilityRole="radio" accessibilityState={{ checked: selected }} testID={testID}>
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <GlassCard style={selected ? styles.planSelected : styles.plan}>{children}</GlassCard>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
 export default function PaywallScreen() {
   const [selectedPlan, setSelectedPlan] = useState<PlanId>('weekly');
+  const [privacyVisible, setPrivacyVisible] = useState(false);
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const isProActive = useAppStore((s) => s.isProActive);
+  const setProActive = useAppStore((s) => s.setProActive);
+
+  const startTrial = () => {
+    setProActive(true);
+    goToScreen('mainMenu');
+  };
 
   return (
     <View style={styles.container} testID="paywall-screen">
       <View style={styles.header}>
-        <Pressable
-          onPress={() => goToScreen('mainMenu')}
-          accessibilityRole="button"
-          accessibilityLabel="Close"
-          style={styles.closeButton}
-        >
-          <Text style={styles.closeIcon}>✕</Text>
-        </Pressable>
+        {isProActive && (
+          <Pressable
+            onPress={() => goToScreen('mainMenu')}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            style={styles.closeButton}
+            testID="paywall-close-button"
+          >
+            <Text style={styles.closeIcon}>✕</Text>
+          </Pressable>
+        )}
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.headline}>Unlock Full AI Face Insights</Text>
-        <Text style={styles.subtitle}>
-          Experience unlimited 3-expression analysis and deep personality reports.
-        </Text>
+        <FadeInView>
+          <Text style={styles.headline}>Unlock Full AI Face Insights</Text>
+          <Text style={styles.subtitle}>
+            Experience unlimited 3-expression analysis and deep personality reports.
+          </Text>
+        </FadeInView>
 
-        <GlassCard style={styles.featureCard}>
-          {FEATURES.map((feature) => (
-            <View key={feature} style={styles.featureRow}>
-              <View style={styles.featureIcon}>
-                <Text style={styles.featureIconGlyph}>✦</Text>
+        <FadeInView delay={80}>
+          <View style={styles.trialBanner}>
+            <Text style={styles.trialBannerText}>🎁 3-Day Free Trial — cancel anytime before it ends.</Text>
+          </View>
+        </FadeInView>
+
+        <FadeInView delay={140}>
+          <GlassCard style={styles.featureCard}>
+            {FEATURES.map((feature) => (
+              <View key={feature} style={styles.featureRow}>
+                <View style={styles.featureIcon}>
+                  <Text style={styles.featureIconGlyph}>✦</Text>
+                </View>
+                <Text style={styles.featureText}>{feature}</Text>
               </View>
-              <Text style={styles.featureText}>{feature}</Text>
+            ))}
+          </GlassCard>
+        </FadeInView>
+
+        <FadeInView delay={200} style={styles.plans}>
+          <PlanCard selected={selectedPlan === 'weekly'} onPress={() => setSelectedPlan('weekly')} testID="plan-weekly">
+            <View style={styles.planBadge}>
+              <Text style={styles.planBadgeText}>MOST POPULAR</Text>
             </View>
-          ))}
-        </GlassCard>
-
-        <View style={styles.plans}>
-          <Pressable
-            onPress={() => setSelectedPlan('weekly')}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: selectedPlan === 'weekly' }}
-            testID="plan-weekly"
-          >
-            <GlassCard style={selectedPlan === 'weekly' ? styles.planSelected : styles.plan}>
-              <View style={styles.planBadge}>
-                <Text style={styles.planBadgeText}>MOST POPULAR</Text>
+            <View style={styles.planRow}>
+              <View>
+                <Text style={styles.planName}>Weekly Pass</Text>
+                <Text style={styles.planDescription}>3-day free trial included</Text>
               </View>
-              <View style={styles.planRow}>
-                <View>
-                  <Text style={styles.planName}>Weekly Pass</Text>
-                  <Text style={styles.planDescription}>Unlimited full access</Text>
-                </View>
-                <View style={styles.planPriceBlock}>
-                  <Text style={styles.planPrice}>$4.99</Text>
-                  <Text style={styles.planCadence}>/WEEK</Text>
-                </View>
+              <View style={styles.planPriceBlock}>
+                <Text style={styles.planPrice}>$4.99</Text>
+                <Text style={styles.planCadence}>/WEEK AFTER TRIAL</Text>
               </View>
-            </GlassCard>
-          </Pressable>
+            </View>
+          </PlanCard>
 
-          <Pressable
-            onPress={() => setSelectedPlan('annual')}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: selectedPlan === 'annual' }}
-            testID="plan-annual"
-          >
-            <GlassCard style={selectedPlan === 'annual' ? styles.planSelected : styles.plan}>
-              <View style={styles.planRow}>
-                <View>
+          <PlanCard selected={selectedPlan === 'annual'} onPress={() => setSelectedPlan('annual')} testID="plan-annual">
+            <View style={styles.planRow}>
+              <View>
+                <View style={styles.planNameRow}>
                   <Text style={styles.planName}>Annual Pass</Text>
-                  <Text style={styles.planDescription}>Best value for enthusiasts</Text>
+                  <View style={styles.saveBadge}>
+                    <Text style={styles.saveBadgeText}>SAVE 60%</Text>
+                  </View>
                 </View>
-                <View style={styles.planPriceBlock}>
-                  <Text style={styles.planPrice}>$39.99</Text>
-                  <Text style={styles.planCadence}>($3.33/MO)</Text>
-                </View>
+                <Text style={styles.planDescription}>Best value for enthusiasts</Text>
               </View>
-            </GlassCard>
-          </Pressable>
-        </View>
+              <View style={styles.planPriceBlock}>
+                <Text style={styles.planPrice}>$39.99</Text>
+                <Text style={styles.planCadence}>($3.33/MO)</Text>
+              </View>
+            </View>
+          </PlanCard>
+        </FadeInView>
       </View>
 
       <View style={styles.footer}>
-        <PrimaryButton label="Continue & Unlock Pro" onPress={() => goToScreen('mainMenu')} />
+        <PrimaryButton label="Start Free Trial" onPress={startTrial} />
         <View style={styles.footerLinks}>
           <Text style={styles.footerLink}>Restore Purchases</Text>
           <Text style={styles.footerLinkDivider}>•</Text>
           <Text style={styles.footerLink}>Terms of Service</Text>
           <Text style={styles.footerLinkDivider}>•</Text>
-          <Text style={styles.footerLink}>Privacy Policy</Text>
+          <Pressable onPress={() => setPrivacyVisible(true)} accessibilityRole="link">
+            <Text style={styles.footerLink}>Privacy Policy</Text>
+          </Pressable>
         </View>
         <DisclaimerFooter />
       </View>
+
+      <PrivacyPolicyModal visible={privacyVisible} onClose={() => setPrivacyVisible(false)} />
     </View>
   );
 }
@@ -119,6 +163,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     paddingTop: Theme.spacing.xl,
     paddingHorizontal: Theme.spacing.gutter,
+    minHeight: Theme.spacing.xl + 40,
   },
   closeButton: {
     width: 40,
@@ -148,9 +193,22 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     textAlign: 'center',
   },
+  trialBanner: {
+    backgroundColor: 'rgba(235, 201, 131, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(235, 201, 131, 0.4)',
+    borderRadius: Theme.radius.lg,
+    paddingVertical: 10,
+    paddingHorizontal: Theme.spacing.sm,
+  },
+  trialBannerText: {
+    ...Theme.typography.bodyMd,
+    fontSize: 13,
+    color: Theme.colors.accent.goldSecondary,
+    textAlign: 'center',
+  },
   featureCard: {
     gap: Theme.spacing.sm,
-    marginTop: Theme.spacing.sm,
   },
   featureRow: {
     flexDirection: 'row',
@@ -196,6 +254,22 @@ const styles = StyleSheet.create({
     ...Theme.typography.labelSm,
     fontSize: 10,
     color: Theme.colors.text.primary,
+  },
+  planNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  saveBadge: {
+    backgroundColor: 'rgba(235, 201, 131, 0.2)',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  saveBadgeText: {
+    ...Theme.typography.labelSm,
+    fontSize: 10,
+    color: Theme.colors.accent.goldSecondary,
   },
   planRow: {
     flexDirection: 'row',

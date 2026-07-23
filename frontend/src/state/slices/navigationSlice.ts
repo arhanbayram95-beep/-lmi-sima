@@ -1,6 +1,13 @@
 import { StateCreator } from 'zustand';
 
-export type AppScreen = 'loading' | 'onboarding' | 'capture' | 'review' | 'paywall' | 'mainMenu';
+export type AppScreen =
+  | 'loading'
+  | 'onboarding'
+  | 'paywall'
+  | 'mainMenu'
+  | 'capture'
+  | 'review'
+  | 'settings';
 
 export interface NavigationSlice {
   screen: AppScreen;

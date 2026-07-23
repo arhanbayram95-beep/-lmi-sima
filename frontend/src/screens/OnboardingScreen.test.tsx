@@ -21,6 +21,14 @@ describe('OnboardingScreen', () => {
 
     fireEvent.press(screen.getByTestId('consent-checkbox'));
     fireEvent.press(screen.getByText('Get Started'));
-    expect(useAppStore.getState().screen).toBe('capture');
+    expect(useAppStore.getState().screen).toBe('paywall');
+  });
+
+  it('offers a privacy policy link on the age-gate step', () => {
+    render(<OnboardingScreen />);
+    fireEvent.press(screen.getByText('Next'));
+
+    fireEvent.press(screen.getByText('Read our Privacy Policy'));
+    expect(screen.getByTestId('privacy-policy-modal')).toBeTruthy();
   });
 });

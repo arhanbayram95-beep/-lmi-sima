@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import AppLogo from '../components/common/AppLogo';
+import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
+import PrivacyPolicyModal from '../components/common/PrivacyPolicyModal';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
@@ -10,6 +12,7 @@ const STEP_COUNT = 2;
 
 export default function OnboardingScreen() {
   const [step, setStep] = useState(0);
+  const [privacyVisible, setPrivacyVisible] = useState(false);
   const ageVerified = useAppStore((s) => s.ageVerified);
   const imageConsentGiven = useAppStore((s) => s.imageConsentGiven);
   const setAgeVerified = useAppStore((s) => s.setAgeVerified);
@@ -24,7 +27,7 @@ export default function OnboardingScreen() {
       return;
     }
     if (!canContinue) return;
-    goToScreen('capture');
+    goToScreen('paywall');
   };
 
   return (
@@ -42,16 +45,16 @@ export default function OnboardingScreen() {
           </View>
 
           {step === 0 ? (
-            <View style={styles.textBlock}>
+            <FadeInView key="step-0" style={styles.textBlock}>
               <Text style={styles.headline}>AI-Powered Expression Reading</Text>
               <Text style={styles.body}>
                 Capture three distinct facets of your character through our neural matrix:{' '}
                 <Text style={styles.highlight}>Calm</Text>, <Text style={styles.highlight}>Bright</Text>, and{' '}
                 <Text style={styles.highlight}>Deep</Text>.
               </Text>
-            </View>
+            </FadeInView>
           ) : (
-            <View style={styles.textBlock}>
+            <FadeInView key="step-1" style={styles.textBlock}>
               <Text style={styles.headline}>Before We Begin</Text>
               <Text style={styles.body}>
                 Your photos are analyzed instantly and never stored. This is for entertainment only.
@@ -80,7 +83,11 @@ export default function OnboardingScreen() {
                   I consent to my photos being processed for this entertainment reading.
                 </Text>
               </Pressable>
-            </View>
+
+              <Pressable onPress={() => setPrivacyVisible(true)} accessibilityRole="link">
+                <Text style={styles.privacyLink}>Read our Privacy Policy</Text>
+              </Pressable>
+            </FadeInView>
           )}
         </GlassCard>
       </View>
@@ -89,9 +96,11 @@ export default function OnboardingScreen() {
         <PrimaryButton
           label={step < STEP_COUNT - 1 ? 'Next' : 'Get Started'}
           onPress={handlePrimaryPress}
-          style={!canContinue ? styles.disabled : undefined}
+          disabled={!canContinue}
         />
       </View>
+
+      <PrivacyPolicyModal visible={privacyVisible} onClose={() => setPrivacyVisible(false)} />
     </View>
   );
 }
@@ -168,12 +177,15 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.primary,
     flex: 1,
   },
+  privacyLink: {
+    ...Theme.typography.labelSm,
+    color: Theme.colors.accent.goldSecondary,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
   footer: {
     paddingHorizontal: Theme.spacing.containerPadding,
     paddingBottom: Theme.spacing.lg,
     alignItems: 'center',
-  },
-  disabled: {
-    opacity: 0.4,
   },
 });

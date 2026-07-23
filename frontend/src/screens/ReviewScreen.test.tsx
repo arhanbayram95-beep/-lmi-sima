@@ -14,9 +14,9 @@ describe('ReviewScreen', () => {
     expect(screen.getByLabelText('Rate 4 stars')).toBeTruthy();
   });
 
-  it('navigates to the paywall after rating on the store', () => {
+  it('navigates back to the main menu after rating on the store', () => {
     render(<ReviewScreen />);
     fireEvent.press(screen.getByText('Rate on App Store'));
-    expect(useAppStore.getState().screen).toBe('paywall');
+    expect(useAppStore.getState().screen).toBe('mainMenu');
   });
 });

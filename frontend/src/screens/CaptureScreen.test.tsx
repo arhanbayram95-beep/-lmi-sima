@@ -39,7 +39,7 @@ describe('CaptureScreen', () => {
     expect(mockRequestPermission).toHaveBeenCalledTimes(1);
   });
 
-  it('captures all three expressions in order and stores them, then navigates to review', async () => {
+  it('captures all three expressions in order and stores them, then returns to the main menu', async () => {
     render(<CaptureScreen />);
 
     expect(screen.getByText('Calm')).toBeTruthy();
@@ -54,7 +54,7 @@ describe('CaptureScreen', () => {
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images.deep).toBe('mock-base64'));
 
-    await waitFor(() => expect(useAppStore.getState().screen).toBe('review'));
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('mainMenu'));
     expect(mockTakePictureAsync).toHaveBeenCalledTimes(3);
   });
 });

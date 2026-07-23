@@ -9,4 +9,10 @@ describe('AppNavigator', () => {
     render(<AppNavigator />);
     expect(screen.getByTestId('main-menu-screen')).toBeTruthy();
   });
+
+  it('renders the settings screen when routed there', () => {
+    useAppStore.setState({ screen: 'settings' });
+    render(<AppNavigator />);
+    expect(screen.getByTestId('settings-screen')).toBeTruthy();
+  });
 });
