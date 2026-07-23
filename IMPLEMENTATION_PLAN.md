@@ -46,17 +46,17 @@ category, within a strict entertainment framing.
 ---
 
 ## Phase 3: The Gateway Backend & Claude Vision Integration
-- [ ] **3.1 Backend Skeleton Framework (`FastAPI` or `Node.js`)**
+- [x] **3.1 Backend Skeleton Framework (`FastAPI` or `Node.js`)**
   - Initialize the server structure inside `/backend`.
   - Configure `.env` mapping `ANTHROPIC_API_KEY` and `REVENUECAT_API_KEY`.
-- [ ] **3.2 Payload Serialization (`backend/src/reading/protocol/`)**
+- [x] **3.2 Payload Serialization (`backend/src/reading/protocol/`)**
   - Construct an endpoint `/api/v1/reading/analyze` accepting 3 base64 strings in a JSON wrapper.
   - Embed the **system prompt** (warm cosmic-guide persona, defensive wording
     template, safety-first constructive-traits-only filter) into the Anthropic SDK call.
   - Use **Claude Sonnet 5** (`claude-sonnet-5`) with a **tool-use JSON schema**
     (not `response_format` — that param doesn't exist on the Anthropic API) to
     lock the output to the target schema. Force the tool via `tool_choice`.
-- [ ] **3.3 Privacy Shield Enforcement (`backend/src/reading/transport/`)**
+- [x] **3.3 Privacy Shield Enforcement (`backend/src/reading/transport/`)**
   - Implement an aggressive memory-clear function: the moment Claude returns the
     structured result, delete the base64 arrays from active memory
     (process-and-discard architecture).
