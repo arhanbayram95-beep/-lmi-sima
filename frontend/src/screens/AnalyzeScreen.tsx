@@ -3,14 +3,16 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
+import { useTranslation } from '../i18n/useTranslation';
+import { TranslationKey } from '../i18n/translations';
 import { AppScreen } from '../state/slices/navigationSlice';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
 interface AnalysisModule {
   id: string;
-  title: string;
-  description: string;
+  titleKey: TranslationKey;
+  descriptionKey: TranslationKey;
   glyph: string;
   targetScreen: AppScreen;
   available: boolean;
@@ -21,8 +23,8 @@ interface AnalysisModule {
 const MODULES: AnalysisModule[] = [
   {
     id: 'three-expression',
-    title: '3-Expression Face Reading',
-    description: 'Capture Calm, Bright, and Deep expressions for your AI character reading.',
+    titleKey: 'analyze.module.threeExpression.title',
+    descriptionKey: 'analyze.module.threeExpression.description',
     glyph: '◐',
     targetScreen: 'capture',
     available: true,
@@ -31,40 +33,44 @@ const MODULES: AnalysisModule[] = [
 
 export default function AnalyzeScreen() {
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const t = useTranslation();
 
   return (
     <View style={styles.container} testID="analyze-screen">
       <View style={styles.header}>
-        <Text style={styles.title}>Analyze</Text>
-        <Text style={styles.subtitle}>Choose a reading to run.</Text>
+        <Text style={styles.title}>{t('analyze.title')}</Text>
+        <Text style={styles.subtitle}>{t('analyze.subtitle')}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {MODULES.map((module, index) => (
-          <FadeInView key={module.id} delay={index * 80}>
-            <Pressable
-              onPress={() => module.available && goToScreen(module.targetScreen)}
-              accessibilityRole="button"
-              accessibilityLabel={module.title}
-              testID={`analyze-module-${module.id}`}
-            >
-              <GlassCard style={styles.moduleCard}>
-                <View style={styles.moduleIcon}>
-                  <Text style={styles.moduleGlyph}>{module.glyph}</Text>
-                </View>
-                <View style={styles.moduleTextBlock}>
-                  <Text style={styles.moduleTitle}>{module.title}</Text>
-                  <Text style={styles.moduleDescription}>{module.description}</Text>
-                </View>
-                <Text style={styles.moduleChevron}>›</Text>
-              </GlassCard>
-            </Pressable>
-          </FadeInView>
-        ))}
+        {MODULES.map((module, index) => {
+          const title = t(module.titleKey);
+          return (
+            <FadeInView key={module.id} delay={index * 80}>
+              <Pressable
+                onPress={() => module.available && goToScreen(module.targetScreen)}
+                accessibilityRole="button"
+                accessibilityLabel={title}
+                testID={`analyze-module-${module.id}`}
+              >
+                <GlassCard style={styles.moduleCard}>
+                  <View style={styles.moduleIcon}>
+                    <Text style={styles.moduleGlyph}>{module.glyph}</Text>
+                  </View>
+                  <View style={styles.moduleTextBlock}>
+                    <Text style={styles.moduleTitle}>{title}</Text>
+                    <Text style={styles.moduleDescription}>{t(module.descriptionKey)}</Text>
+                  </View>
+                  <Text style={styles.moduleChevron}>›</Text>
+                </GlassCard>
+              </Pressable>
+            </FadeInView>
+          );
+        })}
 
         <FadeInView delay={MODULES.length * 80}>
           <GlassCard style={styles.comingSoonCard}>
-            <Text style={styles.comingSoonText}>More reading modules are on the way ✦</Text>
+            <Text style={styles.comingSoonText}>{t('analyze.comingSoon')}</Text>
           </GlassCard>
         </FadeInView>
       </ScrollView>

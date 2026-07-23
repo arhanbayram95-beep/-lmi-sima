@@ -1,12 +1,13 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../state/useAppStore';
 import { Theme } from '../../ui/theme';
 
 const NAV_ITEMS = [
-  { key: 'analyze', label: 'Analyze', glyph: '◉' },
-  { key: 'results', label: 'Results', glyph: '▤' },
-  { key: 'settings', label: 'Settings', glyph: '⚙' },
+  { key: 'analyze', labelKey: 'nav.analyze', glyph: '◉' },
+  { key: 'results', labelKey: 'nav.results', glyph: '▤' },
+  { key: 'settings', labelKey: 'nav.settings', glyph: '⚙' },
 ] as const;
 
 type NavKey = (typeof NAV_ITEMS)[number]['key'];
@@ -17,6 +18,7 @@ interface BottomNavBarProps {
 
 export default function BottomNavBar({ active }: BottomNavBarProps) {
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const t = useTranslation();
 
   const handlePress = (key: NavKey) => {
     if (key === 'analyze') goToScreen('analyze');
@@ -28,16 +30,17 @@ export default function BottomNavBar({ active }: BottomNavBarProps) {
     <View style={styles.bottomNav}>
       {NAV_ITEMS.map((item) => {
         const isActive = item.key === active;
+        const label = t(item.labelKey);
         return (
           <Pressable
             key={item.key}
             onPress={() => handlePress(item.key)}
             style={[styles.navItem, isActive && styles.navItemActive]}
             accessibilityRole="button"
-            accessibilityLabel={item.label}
+            accessibilityLabel={label}
           >
             <Text style={[styles.navGlyph, isActive && styles.navGlyphActive]}>{item.glyph}</Text>
-            <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>{item.label}</Text>
+            <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>{label}</Text>
           </Pressable>
         );
       })}

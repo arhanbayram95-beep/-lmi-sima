@@ -5,34 +5,21 @@ import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
+import { useTranslation } from '../i18n/useTranslation';
+import { TranslationKey } from '../i18n/translations';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
-const FEATURE_CARDS = [
-  {
-    title: 'Vibe & Temperament',
-    body: 'Instant mood & energy check based on expression mapping.',
-    glyph: '◐',
-  },
-  {
-    title: 'Expression Dynamics',
-    body: 'Micro-expression shifts tracked across your 3-shot session.',
-    glyph: '⟡',
-  },
-  {
-    title: 'Face Symmetry',
-    body: 'Proportion & balance reading using Golden Ratio landmarks.',
-    glyph: '▦',
-  },
-  {
-    title: 'Daily Vibe Log',
-    body: 'Track mood patterns over time with historical AI insights.',
-    glyph: '✦',
-  },
+const FEATURE_CARDS: { titleKey: TranslationKey; bodyKey: TranslationKey; glyph: string }[] = [
+  { titleKey: 'mainMenu.feature.vibe.title', bodyKey: 'mainMenu.feature.vibe.body', glyph: '◐' },
+  { titleKey: 'mainMenu.feature.expression.title', bodyKey: 'mainMenu.feature.expression.body', glyph: '⟡' },
+  { titleKey: 'mainMenu.feature.symmetry.title', bodyKey: 'mainMenu.feature.symmetry.body', glyph: '▦' },
+  { titleKey: 'mainMenu.feature.dailyLog.title', bodyKey: 'mainMenu.feature.dailyLog.body', glyph: '✦' },
 ];
 
 export default function MainMenuScreen() {
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const t = useTranslation();
 
   return (
     <View style={styles.container} testID="main-menu-screen">
@@ -40,7 +27,7 @@ export default function MainMenuScreen() {
         <AppLogo />
         <View style={styles.headerRight}>
           <View style={styles.proBadge}>
-            <Text style={styles.proBadgeText}>PRO</Text>
+            <Text style={styles.proBadgeText}>{t('mainMenu.proBadge')}</Text>
           </View>
         </View>
       </View>
@@ -48,23 +35,21 @@ export default function MainMenuScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <FadeInView>
           <GlassCard style={styles.heroCard}>
-            <Text style={styles.heroTitle}>3-Expression Face Reading</Text>
-            <Text style={styles.heroBody}>
-              Capture Calm, Bright, and Deep expressions to reveal your character vibe.
-            </Text>
-            <PrimaryButton label="Start Analysis" onPress={() => goToScreen('analyze')} />
+            <Text style={styles.heroTitle}>{t('analyze.module.threeExpression.title')}</Text>
+            <Text style={styles.heroBody}>{t('analyze.module.threeExpression.description')}</Text>
+            <PrimaryButton label={t('common.startAnalysis')} onPress={() => goToScreen('analyze')} />
           </GlassCard>
         </FadeInView>
 
         <View style={styles.grid}>
           {FEATURE_CARDS.map((card, index) => (
-            <FadeInView key={card.title} delay={100 + index * 80}>
+            <FadeInView key={card.titleKey} delay={100 + index * 80}>
               <GlassCard style={styles.featureCard}>
                 <View style={styles.featureHeader}>
-                  <Text style={styles.featureTitle}>{card.title}</Text>
+                  <Text style={styles.featureTitle}>{t(card.titleKey)}</Text>
                   <Text style={styles.featureGlyph}>{card.glyph}</Text>
                 </View>
-                <Text style={styles.featureBody}>{card.body}</Text>
+                <Text style={styles.featureBody}>{t(card.bodyKey)}</Text>
               </GlassCard>
             </FadeInView>
           ))}

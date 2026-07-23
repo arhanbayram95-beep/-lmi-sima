@@ -5,6 +5,7 @@ import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
 import PrivacyPolicyModal from '../components/common/PrivacyPolicyModal';
+import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
@@ -18,6 +19,7 @@ export default function OnboardingScreen() {
   const setAgeVerified = useAppStore((s) => s.setAgeVerified);
   const setImageConsentGiven = useAppStore((s) => s.setImageConsentGiven);
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const t = useTranslation();
 
   const canContinue = step === 0 || (ageVerified && imageConsentGiven);
 
@@ -46,19 +48,13 @@ export default function OnboardingScreen() {
 
           {step === 0 ? (
             <FadeInView key="step-0" style={styles.textBlock}>
-              <Text style={styles.headline}>AI-Powered Expression Reading</Text>
-              <Text style={styles.body}>
-                Capture three distinct facets of your character through our neural matrix:{' '}
-                <Text style={styles.highlight}>Calm</Text>, <Text style={styles.highlight}>Bright</Text>, and{' '}
-                <Text style={styles.highlight}>Deep</Text>.
-              </Text>
+              <Text style={styles.headline}>{t('onboarding.step0.headline')}</Text>
+              <Text style={styles.body}>{t('onboarding.step0.body')}</Text>
             </FadeInView>
           ) : (
             <FadeInView key="step-1" style={styles.textBlock}>
-              <Text style={styles.headline}>Before We Begin</Text>
-              <Text style={styles.body}>
-                Your photos are analyzed instantly and never stored. This is for entertainment only.
-              </Text>
+              <Text style={styles.headline}>{t('onboarding.step1.headline')}</Text>
+              <Text style={styles.body}>{t('onboarding.step1.body')}</Text>
 
               <Pressable
                 style={styles.checkboxRow}
@@ -68,7 +64,7 @@ export default function OnboardingScreen() {
                 testID="age-gate-checkbox"
               >
                 <View style={[styles.checkbox, ageVerified && styles.checkboxChecked]} />
-                <Text style={styles.checkboxLabel}>I confirm I am 18 years of age or older.</Text>
+                <Text style={styles.checkboxLabel}>{t('onboarding.ageCheckbox')}</Text>
               </Pressable>
 
               <Pressable
@@ -79,13 +75,11 @@ export default function OnboardingScreen() {
                 testID="consent-checkbox"
               >
                 <View style={[styles.checkbox, imageConsentGiven && styles.checkboxChecked]} />
-                <Text style={styles.checkboxLabel}>
-                  I consent to my photos being processed for this entertainment reading.
-                </Text>
+                <Text style={styles.checkboxLabel}>{t('onboarding.consentCheckbox')}</Text>
               </Pressable>
 
               <Pressable onPress={() => setPrivacyVisible(true)} accessibilityRole="link">
-                <Text style={styles.privacyLink}>Read our Privacy Policy</Text>
+                <Text style={styles.privacyLink}>{t('onboarding.privacyLink')}</Text>
               </Pressable>
             </FadeInView>
           )}
@@ -94,7 +88,7 @@ export default function OnboardingScreen() {
 
       <View style={styles.footer}>
         <PrimaryButton
-          label={step < STEP_COUNT - 1 ? 'Next' : 'Get Started'}
+          label={step < STEP_COUNT - 1 ? t('onboarding.next') : t('onboarding.getStarted')}
           onPress={handlePrimaryPress}
           disabled={!canContinue}
         />
@@ -150,10 +144,6 @@ const styles = StyleSheet.create({
     ...Theme.typography.bodyMd,
     color: Theme.colors.text.secondary,
     textAlign: 'center',
-  },
-  highlight: {
-    color: Theme.colors.accent.crimsonPrimary,
-    fontWeight: '600',
   },
   checkboxRow: {
     flexDirection: 'row',

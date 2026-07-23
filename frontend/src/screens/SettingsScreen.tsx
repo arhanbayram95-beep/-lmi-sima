@@ -1,17 +1,22 @@
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import React, { useState } from 'react';
-import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import LanguagePickerModal from '../components/common/LanguagePickerModal';
 import PrivacyPolicyModal from '../components/common/PrivacyPolicyModal';
 import TermsModal from '../components/common/TermsModal';
+import { useTranslation } from '../i18n/useTranslation';
 import { SUPPORTED_LANGUAGES } from '../state/slices/localeSlice';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 import { buildContactMailUrl } from '../utils/contactMail';
+
+// No published store URL yet — add it here once FaceAI is live on the
+// App Store / Play Store so the share message includes a real link.
+const SHARE_MESSAGE = 'Check out FaceAI — playful AI character readings from your photos! ✦';
 
 interface SettingsRowConfig {
   label: string;
@@ -84,6 +89,7 @@ export default function SettingsScreen() {
   const anonymousId = useAppStore((s) => s.anonymousId);
   const isProActive = useAppStore((s) => s.isProActive);
   const languageCode = useAppStore((s) => s.languageCode);
+  const t = useTranslation();
 
   const currentLanguageName =
     SUPPORTED_LANGUAGES.find((language) => language.code === languageCode)?.englishName ?? 'English';
@@ -102,44 +108,52 @@ export default function SettingsScreen() {
     Linking.openURL(url);
   };
 
+  const handleShareApp = () => {
+    Share.share({ message: SHARE_MESSAGE });
+  };
+
   return (
     <View style={styles.container} testID="settings-screen">
       <View style={styles.header}>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={styles.title}>{t('settings.title')}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <SettingsSection
-          title="Subscription"
+          title={t('settings.section.subscription')}
           delay={0}
           rows={[
-            { label: 'Manage Subscription', onPress: () => goToScreen('paywall'), testID: 'settings-manage-subscription' },
-            { label: 'Restore Purchases' },
+            {
+              label: t('settings.row.manageSubscription'),
+              onPress: () => goToScreen('paywall'),
+              testID: 'settings-manage-subscription',
+            },
+            { label: t('settings.row.restorePurchases') },
           ]}
         />
 
         <SettingsSection
-          title="General"
+          title={t('settings.section.general')}
           delay={80}
           rows={[
             {
-              label: 'Language',
+              label: t('settings.row.language'),
               value: currentLanguageName,
               onPress: () => setLanguageVisible(true),
               testID: 'settings-language',
             },
-            { label: 'Rate Us', onPress: () => goToScreen('review'), testID: 'settings-rate-us' },
-            { label: 'Share App' },
+            { label: t('settings.row.rateUs'), onPress: () => goToScreen('review'), testID: 'settings-rate-us' },
+            { label: t('settings.row.shareApp'), onPress: handleShareApp, testID: 'settings-share-app' },
           ]}
         />
 
         <SettingsSection
-          title="Legal"
+          title={t('settings.section.legal')}
           delay={160}
           rows={[
-            { label: 'Privacy Policy', onPress: () => setPrivacyVisible(true), testID: 'settings-privacy-policy' },
-            { label: 'Terms & Conditions', onPress: () => setTermsVisible(true), testID: 'settings-terms' },
-            { label: 'Contact Us', onPress: handleContactUs, testID: 'settings-contact-us' },
+            { label: t('settings.row.privacyPolicy'), onPress: () => setPrivacyVisible(true), testID: 'settings-privacy-policy' },
+            { label: t('settings.row.termsConditions'), onPress: () => setTermsVisible(true), testID: 'settings-terms' },
+            { label: t('settings.row.contactUs'), onPress: handleContactUs, testID: 'settings-contact-us' },
           ]}
         />
       </ScrollView>

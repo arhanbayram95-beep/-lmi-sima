@@ -5,16 +5,14 @@ import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
 import PrivacyPolicyModal from '../components/common/PrivacyPolicyModal';
+import { useTranslation } from '../i18n/useTranslation';
+import { TranslationKey } from '../i18n/translations';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
 type PlanId = 'weekly' | 'annual';
 
-const FEATURES = [
-  'Unlimited 3-Expression AI Character Readings',
-  'Deep Personality & Vibe Reports',
-  'Full Reading History & High-Res Story Share Cards',
-];
+const FEATURE_KEYS: TranslationKey[] = ['paywall.feature1', 'paywall.feature2', 'paywall.feature3'];
 
 function PlanCard({
   selected,
@@ -48,6 +46,7 @@ export default function PaywallScreen() {
   const goToScreen = useAppStore((s) => s.goToScreen);
   const isProActive = useAppStore((s) => s.isProActive);
   const setProActive = useAppStore((s) => s.setProActive);
+  const t = useTranslation();
 
   const startTrial = () => {
     setProActive(true);
@@ -72,26 +71,24 @@ export default function PaywallScreen() {
 
       <View style={styles.content}>
         <FadeInView>
-          <Text style={styles.headline}>Unlock Full AI Face Insights</Text>
-          <Text style={styles.subtitle}>
-            Experience unlimited 3-expression analysis and deep personality reports.
-          </Text>
+          <Text style={styles.headline}>{t('paywall.headline')}</Text>
+          <Text style={styles.subtitle}>{t('paywall.subtitle')}</Text>
         </FadeInView>
 
         <FadeInView delay={80}>
           <View style={styles.trialBanner}>
-            <Text style={styles.trialBannerText}>🎁 3-Day Free Trial — cancel anytime before it ends.</Text>
+            <Text style={styles.trialBannerText}>{t('paywall.trialBanner')}</Text>
           </View>
         </FadeInView>
 
         <FadeInView delay={140}>
           <GlassCard style={styles.featureCard}>
-            {FEATURES.map((feature) => (
-              <View key={feature} style={styles.featureRow}>
+            {FEATURE_KEYS.map((key) => (
+              <View key={key} style={styles.featureRow}>
                 <View style={styles.featureIcon}>
                   <Text style={styles.featureIconGlyph}>✦</Text>
                 </View>
-                <Text style={styles.featureText}>{feature}</Text>
+                <Text style={styles.featureText}>{t(key)}</Text>
               </View>
             ))}
           </GlassCard>
@@ -100,16 +97,16 @@ export default function PaywallScreen() {
         <FadeInView delay={200} style={styles.plans}>
           <PlanCard selected={selectedPlan === 'weekly'} onPress={() => setSelectedPlan('weekly')} testID="plan-weekly">
             <View style={styles.planBadge}>
-              <Text style={styles.planBadgeText}>MOST POPULAR</Text>
+              <Text style={styles.planBadgeText}>{t('paywall.mostPopular')}</Text>
             </View>
             <View style={styles.planRow}>
               <View>
-                <Text style={styles.planName}>Weekly Pass</Text>
-                <Text style={styles.planDescription}>3-day free trial included</Text>
+                <Text style={styles.planName}>{t('paywall.weeklyName')}</Text>
+                <Text style={styles.planDescription}>{t('paywall.weeklyDescription')}</Text>
               </View>
               <View style={styles.planPriceBlock}>
                 <Text style={styles.planPrice}>$4.99</Text>
-                <Text style={styles.planCadence}>/WEEK AFTER TRIAL</Text>
+                <Text style={styles.planCadence}>{t('paywall.weeklyCadence')}</Text>
               </View>
             </View>
           </PlanCard>
@@ -118,16 +115,16 @@ export default function PaywallScreen() {
             <View style={styles.planRow}>
               <View>
                 <View style={styles.planNameRow}>
-                  <Text style={styles.planName}>Annual Pass</Text>
+                  <Text style={styles.planName}>{t('paywall.annualName')}</Text>
                   <View style={styles.saveBadge}>
-                    <Text style={styles.saveBadgeText}>SAVE 60%</Text>
+                    <Text style={styles.saveBadgeText}>{t('paywall.saveBadge')}</Text>
                   </View>
                 </View>
-                <Text style={styles.planDescription}>Best value for enthusiasts</Text>
+                <Text style={styles.planDescription}>{t('paywall.annualDescription')}</Text>
               </View>
               <View style={styles.planPriceBlock}>
                 <Text style={styles.planPrice}>$39.99</Text>
-                <Text style={styles.planCadence}>($3.33/MO)</Text>
+                <Text style={styles.planCadence}>{t('paywall.annualCadence')}</Text>
               </View>
             </View>
           </PlanCard>
@@ -135,14 +132,14 @@ export default function PaywallScreen() {
       </View>
 
       <View style={styles.footer}>
-        <PrimaryButton label="Start Free Trial" onPress={startTrial} />
+        <PrimaryButton label={t('paywall.startTrial')} onPress={startTrial} />
         <View style={styles.footerLinks}>
-          <Text style={styles.footerLink}>Restore Purchases</Text>
+          <Text style={styles.footerLink}>{t('paywall.restorePurchases')}</Text>
           <Text style={styles.footerLinkDivider}>•</Text>
-          <Text style={styles.footerLink}>Terms of Service</Text>
+          <Text style={styles.footerLink}>{t('paywall.termsOfService')}</Text>
           <Text style={styles.footerLinkDivider}>•</Text>
           <Pressable onPress={() => setPrivacyVisible(true)} accessibilityRole="link">
-            <Text style={styles.footerLink}>Privacy Policy</Text>
+            <Text style={styles.footerLink}>{t('paywall.privacyPolicy')}</Text>
           </Pressable>
         </View>
         <DisclaimerFooter />

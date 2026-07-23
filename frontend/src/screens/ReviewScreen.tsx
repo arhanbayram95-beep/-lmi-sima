@@ -1,8 +1,10 @@
+import * as StoreReview from 'expo-store-review';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
+import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
@@ -11,11 +13,20 @@ const STAR_COUNT = 5;
 export default function ReviewScreen() {
   const [rating, setRating] = useState(0);
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const t = useTranslation();
+
+  const handleRateOnAppStore = async () => {
+    const available = await StoreReview.isAvailableAsync();
+    if (available) {
+      await StoreReview.requestReview();
+    }
+    goToScreen('mainMenu');
+  };
 
   return (
     <View style={styles.container} testID="review-screen">
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Rate Experience</Text>
+        <Text style={styles.headerTitle}>{t('review.headerTitle')}</Text>
         <Pressable onPress={() => goToScreen('mainMenu')} accessibilityRole="button" accessibilityLabel="Close">
           <Text style={styles.closeIcon}>✕</Text>
         </Pressable>
@@ -23,38 +34,36 @@ export default function ReviewScreen() {
 
       <View style={styles.content}>
         <FadeInView>
-        <GlassCard style={styles.card}>
-          <View style={styles.emblem}>
-            <Text style={styles.emblemGlyph}>✦</Text>
-          </View>
-          <Text style={styles.headline}>Enjoying your insights with FaceAI?</Text>
-          <Text style={styles.body}>
-            Your feedback helps us train our AI models and improve your experience.
-          </Text>
+          <GlassCard style={styles.card}>
+            <View style={styles.emblem}>
+              <Text style={styles.emblemGlyph}>✦</Text>
+            </View>
+            <Text style={styles.headline}>{t('review.headline')}</Text>
+            <Text style={styles.body}>{t('review.body')}</Text>
 
-          <View style={styles.starRow} testID="star-rating">
-            {Array.from({ length: STAR_COUNT }).map((_, index) => {
-              const filled = index < rating;
-              return (
-                <Pressable
-                  key={index}
-                  onPress={() => setRating(index + 1)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Rate ${index + 1} stars`}
-                >
-                  <Text style={[styles.star, filled && styles.starFilled]}>★</Text>
-                </Pressable>
-              );
-            })}
-          </View>
+            <View style={styles.starRow} testID="star-rating">
+              {Array.from({ length: STAR_COUNT }).map((_, index) => {
+                const filled = index < rating;
+                return (
+                  <Pressable
+                    key={index}
+                    onPress={() => setRating(index + 1)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('review.starLabel', { n: index + 1 })}
+                  >
+                    <Text style={[styles.star, filled && styles.starFilled]}>★</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
 
-          <View style={styles.actions}>
-            <PrimaryButton label="Rate on App Store" onPress={() => goToScreen('mainMenu')} />
-            <Pressable onPress={() => goToScreen('mainMenu')} accessibilityRole="button">
-              <Text style={styles.maybeLater}>Maybe Later</Text>
-            </Pressable>
-          </View>
-        </GlassCard>
+            <View style={styles.actions}>
+              <PrimaryButton label={t('review.rateButton')} onPress={handleRateOnAppStore} />
+              <Pressable onPress={() => goToScreen('mainMenu')} accessibilityRole="button">
+                <Text style={styles.maybeLater}>{t('review.maybeLater')}</Text>
+              </Pressable>
+            </View>
+          </GlassCard>
         </FadeInView>
       </View>
     </View>

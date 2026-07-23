@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Linking } from 'react-native';
+import { Linking, Share } from 'react-native';
 import React from 'react';
 import SettingsScreen from './SettingsScreen';
 import { useAppStore } from '../state/useAppStore';
@@ -75,5 +75,24 @@ describe('SettingsScreen', () => {
     expect(body).toContain('PLEASE DO NOT DELETE THE INFORMATION BELOW');
     expect(body).toContain('Premium: No');
     expect(body).toContain('Language: en');
+  });
+
+  it('opens the native share sheet from Share App', () => {
+    jest.spyOn(Share, 'share').mockResolvedValue({ action: Share.sharedAction });
+    render(<SettingsScreen />);
+    fireEvent.press(screen.getByTestId('settings-share-app'));
+
+    expect(Share.share).toHaveBeenCalledTimes(1);
+    const [{ message }] = (Share.share as jest.Mock).mock.calls[0];
+    expect(message).toMatch(/FaceAI/);
+  });
+
+  it('re-renders every screen label in the newly selected language', () => {
+    useAppStore.setState({ languageCode: 'es' });
+    render(<SettingsScreen />);
+
+    expect(screen.getAllByText('Ajustes').length).toBeGreaterThan(0);
+    expect(screen.getByText('Suscripción')).toBeTruthy();
+    expect(screen.getByText('Idioma')).toBeTruthy();
   });
 });

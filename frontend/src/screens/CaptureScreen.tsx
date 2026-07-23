@@ -3,14 +3,16 @@ import * as Haptics from 'expo-haptics';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import PrimaryButton from '../components/common/PrimaryButton';
+import { useTranslation } from '../i18n/useTranslation';
+import { TranslationKey } from '../i18n/translations';
 import { ExpressionLabel } from '../state/slices/captureSlice';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
-const STEPS: { expression: ExpressionLabel; title: string; prompt: string }[] = [
-  { expression: 'calm', title: 'Calm', prompt: 'Hold a relaxed, neutral expression.' },
-  { expression: 'bright', title: 'Bright', prompt: 'Show us your glow ✨' },
-  { expression: 'deep', title: 'Deep', prompt: 'Now give us your mysterious side 🌙' },
+const STEPS: { expression: ExpressionLabel; titleKey: TranslationKey; promptKey: TranslationKey }[] = [
+  { expression: 'calm', titleKey: 'capture.step.calm.title', promptKey: 'capture.step.calm.prompt' },
+  { expression: 'bright', titleKey: 'capture.step.bright.title', promptKey: 'capture.step.bright.prompt' },
+  { expression: 'deep', titleKey: 'capture.step.deep.title', promptKey: 'capture.step.deep.prompt' },
 ];
 
 export default function CaptureScreen() {
@@ -23,6 +25,7 @@ export default function CaptureScreen() {
 
   const setImage = useAppStore((s) => s.setImage);
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const t = useTranslation();
 
   useEffect(() => {
     Animated.loop(
@@ -65,17 +68,15 @@ export default function CaptureScreen() {
   if (!permission.granted) {
     return (
       <View style={[styles.container, styles.permissionContainer]} testID="capture-screen">
-        <Text style={styles.headline}>Camera Access Needed</Text>
-        <Text style={styles.body}>
-          FaceAI needs your camera to capture the three expressions for your reading. Photos are
-          processed in memory and never stored.
-        </Text>
-        <PrimaryButton label="Allow Camera Access" onPress={requestPermission} />
+        <Text style={styles.headline}>{t('capture.permission.headline')}</Text>
+        <Text style={styles.body}>{t('capture.permission.body')}</Text>
+        <PrimaryButton label={t('capture.permission.button')} onPress={requestPermission} />
       </View>
     );
   }
 
   const currentStep = STEPS[stepIndex];
+  const currentTitle = t(currentStep.titleKey);
 
   return (
     <View style={styles.container} testID="capture-screen">
@@ -98,14 +99,14 @@ export default function CaptureScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.stepTitle}>{currentStep.title}</Text>
-          <Text style={styles.stepPrompt}>{currentStep.prompt}</Text>
+          <Text style={styles.stepTitle}>{currentTitle}</Text>
+          <Text style={styles.stepPrompt}>{t(currentStep.promptKey)}</Text>
 
           <Pressable
             onPress={handleCapture}
             disabled={isCapturing}
             accessibilityRole="button"
-            accessibilityLabel={`Capture ${currentStep.title} expression`}
+            accessibilityLabel={`Capture ${currentTitle} expression`}
             testID="shutter-button"
             style={styles.shutterOuter}
           >

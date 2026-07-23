@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from '../../i18n/useTranslation';
 import { SUPPORTED_LANGUAGES } from '../../state/slices/localeSlice';
 import { useAppStore } from '../../state/useAppStore';
 import { Theme } from '../../ui/theme';
@@ -12,12 +13,13 @@ interface LanguagePickerModalProps {
 export default function LanguagePickerModal({ visible, onClose }: LanguagePickerModalProps) {
   const languageCode = useAppStore((s) => s.languageCode);
   const setLanguageCode = useAppStore((s) => s.setLanguageCode);
+  const t = useTranslation();
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet} testID="language-picker-modal">
-          <Text style={styles.title}>Language</Text>
+          <Text style={styles.title}>{t('settings.row.language')}</Text>
           <ScrollView showsVerticalScrollIndicator={false}>
             {SUPPORTED_LANGUAGES.map((language) => {
               const selected = language.code === languageCode;

@@ -1,16 +1,15 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from '../../i18n/useTranslation';
 import { Theme } from '../../ui/theme';
 
 // Non-negotiable per CLAUDE.md "Entertainment Framing" — must stay legible
 // and present on every result/paywall surface. Do not shrink or hide.
 export default function DisclaimerFooter() {
+  const t = useTranslation();
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>
-        For entertainment purposes only. FaceAI does not provide clinical, psychological, or diagnostic
-        assessments. Photos are processed in memory and never stored.
-      </Text>
+      <Text style={styles.text}>{t('disclaimer.text')}</Text>
     </View>
   );
 }

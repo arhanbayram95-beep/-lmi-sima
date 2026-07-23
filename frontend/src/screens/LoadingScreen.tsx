@@ -1,17 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import AppLogo from '../components/common/AppLogo';
+import { useTranslation } from '../i18n/useTranslation';
+import { TranslationKey } from '../i18n/translations';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
 const AUTO_ADVANCE_MS = 2600;
 
-const STATUSES = [
-  'CALIBRATING VISION ENGINE...',
-  'DECRYPTING BIOMETRIC DATA...',
-  'OPTIMIZING NEURAL PATHWAYS...',
-  'ESTABLISHING SECURE PROTOCOLS...',
-  'SYNCHRONIZING COSMIC ARTIFACTS...',
+const STATUS_KEYS: TranslationKey[] = [
+  'loading.status1',
+  'loading.status2',
+  'loading.status3',
+  'loading.status4',
+  'loading.status5',
 ];
 
 export default function LoadingScreen() {
@@ -19,10 +21,11 @@ export default function LoadingScreen() {
   const spin = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const t = useTranslation();
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setStatusIndex((prev) => (prev + 1) % STATUSES.length);
+      setStatusIndex((prev) => (prev + 1) % STATUS_KEYS.length);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -56,14 +59,14 @@ export default function LoadingScreen() {
       <Animated.View style={{ transform: [{ scale: pulse }] }}>
         <AppLogo size="lg" />
       </Animated.View>
-      <Text style={styles.subtitle}>Initializing Neural Matrix</Text>
+      <Text style={styles.subtitle}>{t('loading.subtitle')}</Text>
 
       <View style={styles.progressWrap}>
         <View style={styles.shimmerTrack}>
           <View style={styles.shimmerFill} />
         </View>
         <Animated.View style={[styles.spinnerRing, { transform: [{ rotate: spinDeg }] }]} />
-        <Text style={styles.statusText}>{STATUSES[statusIndex]}</Text>
+        <Text style={styles.statusText}>{t(STATUS_KEYS[statusIndex])}</Text>
       </View>
     </View>
   );

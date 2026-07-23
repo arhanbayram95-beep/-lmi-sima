@@ -3,16 +3,18 @@ import { StyleSheet, Text, View } from 'react-native';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import PrimaryButton from '../components/common/PrimaryButton';
+import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
 export default function ResultsScreen() {
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const t = useTranslation();
 
   return (
     <View style={styles.container} testID="results-screen">
       <View style={styles.header}>
-        <Text style={styles.title}>Results</Text>
+        <Text style={styles.title}>{t('results.title')}</Text>
       </View>
 
       <View style={styles.content}>
@@ -20,11 +22,9 @@ export default function ResultsScreen() {
           <View style={styles.emblem}>
             <Text style={styles.emblemGlyph}>▤</Text>
           </View>
-          <Text style={styles.emptyTitle}>No Readings Yet</Text>
-          <Text style={styles.emptyBody}>
-            Your past readings will show up here once you complete your first analysis.
-          </Text>
-          <PrimaryButton label="Start Analysis" onPress={() => goToScreen('analyze')} />
+          <Text style={styles.emptyTitle}>{t('results.emptyTitle')}</Text>
+          <Text style={styles.emptyBody}>{t('results.emptyBody')}</Text>
+          <PrimaryButton label={t('common.startAnalysis')} onPress={() => goToScreen('analyze')} />
         </FadeInView>
       </View>
 

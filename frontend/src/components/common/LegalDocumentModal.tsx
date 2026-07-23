@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LegalSection } from '../../content/legalContent';
+import { useTranslation } from '../../i18n/useTranslation';
 import { Theme } from '../../ui/theme';
 import PrimaryButton from './PrimaryButton';
 
@@ -21,6 +22,7 @@ export default function LegalDocumentModal({
   sections,
   testID,
 }: LegalDocumentModalProps) {
+  const t = useTranslation();
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.backdrop}>
@@ -39,7 +41,7 @@ export default function LegalDocumentModal({
               PROJECT_SPEC.md §6) and may be updated before public launch.
             </Text>
           </ScrollView>
-          <PrimaryButton label="Close" onPress={onClose} />
+          <PrimaryButton label={t('common.close')} onPress={onClose} />
         </View>
       </View>
     </Modal>
