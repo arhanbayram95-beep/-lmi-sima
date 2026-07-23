@@ -1,0 +1,130 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
+import { analyzeReading, ReadingApiError } from '../api/reading';
+import AppLogo from '../components/common/AppLogo';
+import PrimaryButton from '../components/common/PrimaryButton';
+import { useTranslation } from '../i18n/useTranslation';
+import { useAppStore } from '../state/useAppStore';
+import { Theme } from '../ui/theme';
+
+export default function AnalyzingScreen() {
+  const [error, setError] = useState<string | null>(null);
+  const pulse = useRef(new Animated.Value(1)).current;
+  const spin = useRef(new Animated.Value(0)).current;
+
+  const images = useAppStore((s) => s.images);
+  const setReading = useAppStore((s) => s.setReading);
+  const clearImages = useAppStore((s) => s.clearImages);
+  const goToScreen = useAppStore((s) => s.goToScreen);
+  const t = useTranslation();
+
+  const runAnalysis = useCallback(async () => {
+    setError(null);
+    if (!images.calm || !images.bright || !images.deep) {
+      setError(t('analyzing.error.body'));
+      return;
+    }
+
+    try {
+      const result = await analyzeReading({ calm: images.calm, bright: images.bright, deep: images.deep });
+      setReading(result);
+      clearImages();
+      goToScreen('reveal');
+    } catch (cause) {
+      setError(cause instanceof ReadingApiError ? cause.message : t('analyzing.error.body'));
+    }
+  }, [images, setReading, clearImages, goToScreen, t]);
+
+  useEffect(() => {
+    runAnalysis();
+    // Only re-run when explicitly retried — capturing `images` at mount time
+    // is intentional, this effect is not meant to react to later changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1.06, duration: 1200, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 1200, useNativeDriver: true }),
+      ])
+    ).start();
+    Animated.loop(
+      Animated.timing(spin, { toValue: 1, duration: 2000, easing: Easing.linear, useNativeDriver: true })
+    ).start();
+  }, [pulse, spin]);
+
+  const spinDeg = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.errorContainer]} testID="analyzing-screen">
+        <Text style={styles.errorTitle}>{t('analyzing.error.title')}</Text>
+        <Text style={styles.errorBody}>{error}</Text>
+        <PrimaryButton label={t('analyzing.error.retry')} onPress={runAnalysis} testID="analyzing-retry-button" />
+        <PrimaryButton
+          label={t('analyzing.error.backHome')}
+          variant="secondary"
+          onPress={() => goToScreen('mainMenu')}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container} testID="analyzing-screen">
+      <Animated.View style={{ transform: [{ scale: pulse }] }}>
+        <AppLogo size="lg" />
+      </Animated.View>
+      <Text style={styles.headline}>{t('analyzing.headline')}</Text>
+      <Text style={styles.subtitle}>{t('analyzing.subtitle')}</Text>
+      <Animated.View style={[styles.spinnerRing, { transform: [{ rotate: spinDeg }] }]} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Theme.colors.background.start,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Theme.spacing.containerPadding,
+    gap: Theme.spacing.sm,
+  },
+  errorContainer: {
+    gap: Theme.spacing.sm,
+  },
+  headline: {
+    ...Theme.typography.headlineLg,
+    color: Theme.colors.accent.goldSecondary,
+    textAlign: 'center',
+    marginTop: Theme.spacing.sm,
+  },
+  subtitle: {
+    ...Theme.typography.bodyMd,
+    fontSize: 14,
+    color: Theme.colors.text.secondary,
+    textAlign: 'center',
+  },
+  spinnerRing: {
+    width: 44,
+    height: 44,
+    borderRadius: Theme.radius.full,
+    borderWidth: 2,
+    borderColor: 'rgba(158, 41, 65, 0.3)',
+    borderTopColor: Theme.colors.accent.goldSecondary,
+    marginTop: Theme.spacing.md,
+  },
+  errorTitle: {
+    ...Theme.typography.headlineLg,
+    color: Theme.colors.accent.goldSecondary,
+    textAlign: 'center',
+  },
+  errorBody: {
+    ...Theme.typography.bodyMd,
+    color: Theme.colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: Theme.spacing.sm,
+  },
+});

@@ -8,6 +8,7 @@ interface PrimaryButtonProps {
   variant?: 'primary' | 'secondary';
   disabled?: boolean;
   style?: ViewStyle;
+  testID?: string;
 }
 
 export default function PrimaryButton({
@@ -16,6 +17,7 @@ export default function PrimaryButton({
   variant = 'primary',
   disabled = false,
   style,
+  testID,
 }: PrimaryButtonProps) {
   const isPrimary = variant === 'primary';
   const scale = useRef(new Animated.Value(1)).current;
@@ -33,6 +35,7 @@ export default function PrimaryButton({
         onPress={onPress}
         onPressIn={() => animateTo(0.96)}
         onPressOut={() => animateTo(1)}
+        testID={testID}
         style={[styles.button, isPrimary ? styles.primary : styles.secondary, disabled && styles.disabled, style]}
       >
         <Text style={isPrimary ? styles.primaryLabel : styles.secondaryLabel}>{label}</Text>

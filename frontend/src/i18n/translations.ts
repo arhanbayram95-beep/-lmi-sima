@@ -425,6 +425,54 @@ export const translations = {
     en: 'Contact Us', zh: '联系我们', hi: 'हमसे संपर्क करें', es: 'Contáctanos', fr: 'Nous contacter', ar: 'اتصل بنا',
     bn: 'যোগাযোগ করুন', pt: 'Contacte-nos', ru: 'Связаться с нами', ur: 'ہم سے رابطہ کریں',
   },
+  'analyzing.headline': {
+    en: 'Reading Your Expressions', zh: '正在解读你的表情', hi: 'आपके एक्सप्रेशन पढ़े जा रहे हैं',
+    es: 'Leyendo tus expresiones', fr: 'Lecture de vos expressions', ar: 'جارٍ قراءة تعابيرك',
+    bn: 'আপনার এক্সপ্রেশন পড়া হচ্ছে', pt: 'A ler as suas expressões', ru: 'Анализ ваших выражений', ur: 'آپ کے تاثرات پڑھے جا رہے ہیں',
+  },
+  'analyzing.subtitle': {
+    en: 'Our AI is generating your character reading...', zh: '我们的 AI 正在生成你的性格解读……',
+    hi: 'हमारा AI आपकी कैरेक्टर रीडिंग तैयार कर रहा है...', es: 'Nuestra IA está generando tu lectura de carácter...',
+    fr: 'Notre IA génère votre lecture de caractère...', ar: 'يقوم الذكاء الاصطناعي بإنشاء قراءة شخصيتك...',
+    bn: 'আমাদের AI আপনার ক্যারেক্টার রিডিং তৈরি করছে...', pt: 'A nossa IA está a gerar a sua leitura de caráter...',
+    ru: 'Наш ИИ создаёт анализ вашего характера...', ur: 'ہمارا AI آپ کی کریکٹر ریڈنگ تیار کر رہا ہے...',
+  },
+  'analyzing.error.title': {
+    en: 'Something Went Wrong', zh: '出错了', hi: 'कुछ गलत हो गया', es: 'Algo salió mal', fr: "Une erreur s'est produite",
+    ar: 'حدث خطأ ما', bn: 'কিছু ভুল হয়েছে', pt: 'Algo correu mal', ru: 'Что-то пошло не так', ur: 'کچھ غلط ہو گیا',
+  },
+  'analyzing.error.body': {
+    en: "We couldn't generate your reading. Please check your connection and try again.",
+    zh: '我们无法生成你的解读。请检查网络连接后重试。',
+    hi: 'हम आपकी रीडिंग तैयार नहीं कर सके। कृपया अपना कनेक्शन जांचें और फिर से कोशिश करें।',
+    es: 'No pudimos generar tu lectura. Comprueba tu conexión e inténtalo de nuevo.',
+    fr: "Nous n'avons pas pu générer votre lecture. Vérifiez votre connexion et réessayez.",
+    ar: 'تعذر إنشاء قراءتك. يرجى التحقق من اتصالك والمحاولة مرة أخرى.',
+    bn: 'আমরা আপনার রিডিং তৈরি করতে পারিনি। আপনার সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।',
+    pt: 'Não foi possível gerar a sua leitura. Verifique a sua ligação e tente novamente.',
+    ru: 'Не удалось создать ваш анализ. Проверьте соединение и попробуйте снова.',
+    ur: 'ہم آپ کی ریڈنگ تیار نہیں کر سکے۔ براہ کرم اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔',
+  },
+  'analyzing.error.retry': {
+    en: 'Try Again', zh: '重试', hi: 'फिर से कोशिश करें', es: 'Intentar de nuevo', fr: 'Réessayer', ar: 'إعادة المحاولة',
+    bn: 'আবার চেষ্টা করুন', pt: 'Tentar novamente', ru: 'Повторить', ur: 'دوبارہ کوشش کریں',
+  },
+  'analyzing.error.backHome': {
+    en: 'Back to Main Menu', zh: '返回主菜单', hi: 'मुख्य मेनू पर वापस जाएं', es: 'Volver al menú principal',
+    fr: "Retour au menu principal", ar: 'العودة إلى القائمة الرئيسية', bn: 'মূল মেনুতে ফিরে যান', pt: 'Voltar ao menu principal',
+    ru: 'Назад в главное меню', ur: 'مرکزی مینو پر واپس جائیں',
+  },
+  'reveal.title': {
+    en: 'Your Reading', zh: '你的解读', hi: 'आपकी रीडिंग', es: 'Tu lectura', fr: 'Votre lecture', ar: 'قراءتك',
+    bn: 'আপনার রিডিং', pt: 'A sua leitura', ru: 'Ваш анализ', ur: 'آپ کی ریڈنگ',
+  },
+  'reveal.doneButton': {
+    en: 'Done', zh: '完成', hi: 'पूर्ण', es: 'Listo', fr: 'Terminé', ar: 'تم', bn: 'সম্পন্ন', pt: 'Concluído', ru: 'Готово', ur: 'مکمل',
+  },
+  'reveal.shareButton': {
+    en: 'Share Reading', zh: '分享解读', hi: 'रीडिंग शेयर करें', es: 'Compartir lectura', fr: 'Partager la lecture',
+    ar: 'مشاركة القراءة', bn: 'রিডিং শেয়ার করুন', pt: 'Partilhar leitura', ru: 'Поделиться анализом', ur: 'ریڈنگ شیئر کریں',
+  },
   'mainMenu.proBadge': {
     en: 'PRO', zh: '专业版', hi: 'प्रो', es: 'PRO', fr: 'PRO', ar: 'برو', bn: 'প্রো', pt: 'PRO', ru: 'ПРО', ur: 'پرو',
   },

@@ -7,6 +7,8 @@ export type AppScreen =
   | 'mainMenu'
   | 'analyze'
   | 'capture'
+  | 'analyzing'
+  | 'reveal'
   | 'results'
   | 'review'
   | 'settings';

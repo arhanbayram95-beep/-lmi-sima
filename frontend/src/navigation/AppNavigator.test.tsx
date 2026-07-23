@@ -27,4 +27,16 @@ describe('AppNavigator', () => {
     render(<AppNavigator />);
     expect(screen.getByTestId('results-screen')).toBeTruthy();
   });
+
+  it('renders the analyzing screen when routed there', () => {
+    useAppStore.setState({ screen: 'analyzing', images: {} });
+    render(<AppNavigator />);
+    expect(screen.getByTestId('analyzing-screen')).toBeTruthy();
+  });
+
+  it('renders the reveal screen when routed there', () => {
+    useAppStore.setState({ screen: 'reveal', reading: null });
+    render(<AppNavigator />);
+    expect(screen.getByTestId('reveal-screen')).toBeTruthy();
+  });
 });

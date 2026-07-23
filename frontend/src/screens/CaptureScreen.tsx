@@ -56,7 +56,7 @@ export default function CaptureScreen() {
       if (stepIndex < STEPS.length - 1) {
         setStepIndex(stepIndex + 1);
       } else {
-        goToScreen('mainMenu');
+        goToScreen('analyzing');
       }
     }
   };

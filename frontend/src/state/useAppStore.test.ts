@@ -59,4 +59,13 @@ describe('useAppStore', () => {
     expect(anonymousId).toMatch(/^faceai-anon-/);
     expect(useAppStore.getState().anonymousId).toBe(anonymousId);
   });
+
+  it('holds the most recent reading result and can clear it', () => {
+    expect(useAppStore.getState().reading).toBeNull();
+    const reading = { headline: 'h', expression_insights: [], narrative: 'n' };
+    useAppStore.getState().setReading(reading);
+    expect(useAppStore.getState().reading).toEqual(reading);
+    useAppStore.getState().setReading(null);
+    expect(useAppStore.getState().reading).toBeNull();
+  });
 });

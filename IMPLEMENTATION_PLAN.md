@@ -68,7 +68,7 @@ category, within a strict entertainment framing.
   - While the backend call is in flight (3–6s), loop `ambient_shimmer.mp3` softly.
   - Render a scanning animation — soft particles/light traversing the captured
     faces, or a subtle constellation-forming effect.
-- [ ] **4.2 Screen 4: The Reading (Results Architecture)**
+- [x] **4.2 Screen 4: The Reading (Results Architecture)**
   - Reveal a glassmorphic card UI displaying: `headline`, `expression_insights`, `narrative`.
   - Mount a persistent, clearly legible `footer_disclaimer` component on every result layout.
 - [ ] **4.3 The Viral Catalyst (Share Card Compilation)**
