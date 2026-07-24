@@ -51,4 +51,16 @@ describe('POST /api/v1/reading/analyze', () => {
 
     expect(response.statusCode).toBe(502);
   });
+
+  it('rejects a single oversized field before calling the model', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/reading/analyze',
+      payload: { ...VALID_BODY, calm: 'a'.repeat(1_000_001) },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(generateContent).not.toHaveBeenCalled();
+  });
+
 });

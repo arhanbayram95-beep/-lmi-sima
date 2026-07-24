@@ -65,6 +65,66 @@ source read of every screen in `frontend/src/screens/`. Backend verified via
   hook in `AnalyzingScreen`, so 6.1 has somewhere real to route into once
   it lands.
 
+---
+
+## Security Review — 2026-07-24 (Gemini backend integration)
+
+Scope: the backend's switch from Anthropic to Google Gemini (`fada92b`) —
+checked for hardcoded/logged/committed keys, client-side key exposure,
+missing rate limiting, missing input validation, and error handling that
+leaks internals, per standard practice for reviewing a new third-party AI
+API integration.
+
+- [x] **SEC-1: Confirmed no API key ever entered git history**
+  Searched all branches/commits for the Google key prefix (`git log --all -p
+  -S "AIza"`) and for `api_key.txt` specifically (`git log --all
+  --full-history`) — zero hits either way. The key lives only in
+  `backend/.env` (gitignored) and is loaded via `process.env.GEMINI_API_KEY`
+  in `config/env.ts`; the frontend has zero references to it. No rotation
+  needed. (The commit message for `fada92b` already notes a loose
+  `api_key.txt` was gitignored before ever being committed — verified that
+  claim rather than taking it on faith.)
+
+- [x] **SEC-2: No response leaks the raw Gemini SDK error to the client**
+  Traced every failure path in `readingService.ts` — each one wraps the
+  underlying error in a `ReadingServiceError` with a static, hand-written
+  message; the real `cause` is attached to the Error object for internal
+  use only and is never serialized into the HTTP response. No fix needed,
+  confirmed by reading, not just assuming.
+
+- [x] **SEC-3: No per-field size cap on the analyze request body**
+  `analyzeBodySchema` only had `minLength: 1` on `calm`/`bright`/`deep` —
+  Fastify's global 1 MiB `bodyLimit` was the only backstop, which doesn't
+  catch a single field stuffed with a disproportionate amount of that 1 MiB
+  budget before a paid Gemini call gets made. Fixed: added `maxLength:
+  1_000_000` per field in `backend/src/routes/reading.ts` — defense in
+  depth, not a replacement for the global limit.
+
+- [x] **SEC-4: No sanitized fallback for genuinely unexpected errors**
+  Every *expected* failure was already sanitized (SEC-2), but nothing
+  guarded the fallback path if something unanticipated ever threw outside
+  those wrapped call sites — Fastify's default error handler would echo
+  `error.message` straight back to the client. Fixed: added a
+  `setErrorHandler` in `backend/src/app.ts` that passes Fastify's own
+  (already-safe) validation errors through unchanged, logs anything else
+  server-side via `console.error`, and returns a generic message to the
+  client instead.
+
+### Flagged for your judgment — not fixed
+- **No rate limiting on `/api/v1/reading/analyze`.** Combined with
+  `requireActiveEntitlement` still being a permissive stub (by design,
+  pending Phase 5.1's RevenueCat integration), anyone who can reach the
+  server can currently call the paid Gemini endpoint unlimited times. A
+  proper fix (`@fastify/rate-limit`) is a new dependency, which
+  `CLAUDE.md` requires updating `PROJECT_SPEC.md` for first — your call
+  on whether to add it now or track it as a pre-launch blocker alongside
+  Phase 5.1/5.2.
+- **AI provider is Gemini, not Claude, contrary to what `CLAUDE.md` used to
+  lock.** You'd already updated `CLAUDE.md`/`PROJECT_SPEC.md` yourself in
+  `fada92b` to describe this as an explicit, dated, "under evaluation, not
+  final" decision — noting here only so it's visible in this file's record,
+  not because it's unresolved.
+
 ### Minor / cosmetic (not tracked as checklist items — no action taken)
 - Several `Animated`-driven components trigger React "not wrapped in
   act(...)" warnings under Jest — test hygiene, not a functional issue.
