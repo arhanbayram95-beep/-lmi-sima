@@ -4,6 +4,14 @@ import AnalyzingScreen from './AnalyzingScreen';
 import { ReadingApiError } from '../api/reading';
 import { useAppStore } from '../state/useAppStore';
 
+// AnalyzingScreen runs two continuous Animated.loop calls with no native
+// driver available under Jest, so they fall back to real JS timers — on a
+// loaded dev machine that reliably pushes this file past Jest's 5000ms
+// default per-test timeout even though the actual assertions resolve fine
+// given more time. Not a fix for slowness, a correction to an unrealistic
+// default for a component that never stops animating during the test.
+jest.setTimeout(20000);
+
 const mockAnalyzeReading = jest.fn();
 
 jest.mock('../api/reading', () => {
@@ -26,20 +34,37 @@ describe('AnalyzingScreen', () => {
   beforeEach(() => {
     mockAnalyzeReading.mockReset();
     mockStop.mockClear();
-    useAppStore.setState({ screen: 'analyzing', images: { ...PHOTOS }, reading: null });
+    useAppStore.setState({
+      screen: 'analyzing',
+      images: { ...PHOTOS },
+      reading: null,
+      selectedModule: 'three-expression',
+    });
   });
 
-  it('sends the captured photos, stores the reading, clears images, and moves to the reveal', async () => {
+  it('sends the captured photos and selected module, stores the reading, clears images, and moves to the reveal', async () => {
     mockAnalyzeReading.mockResolvedValue(READING);
     const { unmount } = render(<AnalyzingScreen />);
 
-    await waitFor(() => expect(mockAnalyzeReading).toHaveBeenCalledWith(PHOTOS));
+    await waitFor(() =>
+      expect(mockAnalyzeReading).toHaveBeenCalledWith({ ...PHOTOS, module: 'three-expression' })
+    );
     await waitFor(() => expect(useAppStore.getState().screen).toBe('reveal'));
     expect(useAppStore.getState().reading).toEqual(READING);
     expect(useAppStore.getState().images).toEqual({});
 
     unmount();
     await waitFor(() => expect(mockStop).toHaveBeenCalledTimes(1));
+  });
+
+  it('sends whichever module was selected on the Analyze hub', async () => {
+    useAppStore.setState({ selectedModule: 'career-match' });
+    mockAnalyzeReading.mockResolvedValue(READING);
+    render(<AnalyzingScreen />);
+
+    await waitFor(() =>
+      expect(mockAnalyzeReading).toHaveBeenCalledWith({ ...PHOTOS, module: 'career-match' })
+    );
   });
 
   it('shows a retry option when the API call fails', async () => {

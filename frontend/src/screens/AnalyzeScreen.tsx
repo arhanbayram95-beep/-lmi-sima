@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
+import { ReadingModuleId } from '../api/types';
 import { useTranslation } from '../i18n/useTranslation';
 import { TranslationKey } from '../i18n/translations';
 import { AppScreen } from '../state/slices/navigationSlice';
@@ -10,7 +11,7 @@ import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
 interface AnalysisModule {
-  id: string;
+  id: ReadingModuleId;
   titleKey: TranslationKey;
   descriptionKey: TranslationKey;
   glyph: string;
@@ -19,6 +20,8 @@ interface AnalysisModule {
 }
 
 // Add future modules here — nothing else needs to change to surface them.
+// Each `id` must have a matching system prompt in
+// backend/src/services/systemPrompt.ts (see READING_SYSTEM_PROMPTS).
 const MODULES: AnalysisModule[] = [
   {
     id: 'three-expression',
@@ -34,7 +37,7 @@ const MODULES: AnalysisModule[] = [
     descriptionKey: 'analyze.module.relationshipHarmony.description',
     glyph: '♥',
     targetScreen: 'capture',
-    available: false,
+    available: true,
   },
   {
     id: 'career-match',
@@ -42,12 +45,13 @@ const MODULES: AnalysisModule[] = [
     descriptionKey: 'analyze.module.careerMatch.description',
     glyph: '◆',
     targetScreen: 'capture',
-    available: false,
+    available: true,
   },
 ];
 
 export default function AnalyzeScreen() {
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const setSelectedModule = useAppStore((s) => s.setSelectedModule);
   const t = useTranslation();
 
   return (
@@ -63,7 +67,11 @@ export default function AnalyzeScreen() {
           return (
             <FadeInView key={module.id} delay={index * 80}>
               <Pressable
-                onPress={() => module.available && goToScreen(module.targetScreen)}
+                onPress={() => {
+                  if (!module.available) return;
+                  setSelectedModule(module.id);
+                  goToScreen(module.targetScreen);
+                }}
                 accessibilityRole="button"
                 accessibilityLabel={title}
                 accessibilityState={{ disabled: !module.available }}

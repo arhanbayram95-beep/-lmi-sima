@@ -131,3 +131,42 @@ architecture change than the rest of the plan, deliberately sequenced last.
     `PROJECT_SPEC.md` §2.2 (privacy + cost control) — route straight to
     `NoFaceDetectedScreen` rather than letting a bad frame reach the backend.
   - Requires an EAS dev-client build (no longer testable in plain Expo Go).
+
+---
+
+## Phase 7: Reading Modules (Relationship Harmony & Career Match)
+Added 2026-07-24, not in the original spec — the Analyze hub had shipped
+`Relationship Harmony Analyzer` and `Career Match` as frontend-only "COMING
+SOON" teaser cards (`available: false`, routed nowhere) with zero backend
+support: no per-module prompt, no request parameter, nothing in
+PROJECT_SPEC.md. Product decision: build real per-module differentiation
+rather than just flip the flag, since the card copy already promises
+relationship/career-specific content a generic reading wouldn't deliver.
+Same 3-expression capture mechanic for every module (per PROJECT_SPEC.md
+§2.2's "same underlying mechanic" precedent) — only the AI system prompt
+and resulting reading content differ per module.
+- [x] **7.1 Backend: per-module system prompts + request routing**
+  - `ReadingModuleId` type (`three-expression` | `relationship-harmony` |
+    `career-match`) in `backend/src/services/readingSchema.ts`.
+  - `READING_SYSTEM_PROMPTS` map in `backend/src/services/systemPrompt.ts` —
+    each module's prompt shares the same `SAFETY_RULES` block (entertainment-
+    only, no clinical language, no negative traits, non-face/minor
+    fallbacks) so a future edit can't silently apply to only one module.
+    Relationship Harmony is framed as the user's own connection style, never
+    a compatibility match against a specific other person (we only ever see
+    one person's photos). Career Match is framed as an entertainment vibe
+    read, never a real psychometric assessment.
+  - `POST /api/v1/reading/analyze` accepts an optional `module` field
+    (defaults to `three-expression` for backward compatibility) and forwards
+    it to `generateReading`.
+  - **Flagged for product owner review** (same as the original system
+    prompt draft): the two new prompts are first drafts, not legally
+    reviewed — read them before this ships to real users.
+- [x] **7.2 Frontend: module selection threaded through capture → reading**
+  - `CaptureSlice.selectedModule` (Zustand) set by `AnalyzeScreen` when a
+    module card is tapped, read by `AnalyzingScreen` when calling
+    `analyzeReading`.
+  - Both modules flipped to `available: true` on the Analyze hub; mock API
+    mode (`mockReading.ts`) returns a distinct canned reading per module so
+    `EXPO_PUBLIC_USE_MOCK_API=true` testing can verify the content actually
+    differs, not just that navigation works.

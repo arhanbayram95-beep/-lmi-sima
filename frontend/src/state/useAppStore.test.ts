@@ -73,6 +73,12 @@ describe('useAppStore', () => {
     expect(useAppStore.getState().anonymousId).toBe(anonymousId);
   });
 
+  it('defaults to the three-expression module and can switch it', () => {
+    expect(useAppStore.getState().selectedModule).toBe('three-expression');
+    useAppStore.getState().setSelectedModule('career-match');
+    expect(useAppStore.getState().selectedModule).toBe('career-match');
+  });
+
   it('holds the most recent reading result and can clear it', () => {
     expect(useAppStore.getState().reading).toBeNull();
     const reading = { headline: 'h', expression_insights: [], narrative: 'n' };

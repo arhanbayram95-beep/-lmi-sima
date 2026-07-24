@@ -54,6 +54,18 @@ Same underlying mechanic, restyled with lighter, universally legible copy:
 *Validation:* On-device face detection rejects non-face frames before any API call
 (privacy + cost control).
 
+### 2.3 Reading Modules (added 2026-07-24)
+The Analyze hub offers three reading modules, all sharing the identical
+Calm/Bright/Deep capture mechanic above — only the AI system prompt and
+resulting reading content differ per module (see §4 for how this is wired):
+* **3-Expression Face Reading** — the original general character/vibe reading.
+* **Relationship Harmony Analyzer** — reads the user's own connection/chemistry
+  style. Never a compatibility match against a specific partner — the app only
+  ever captures one person's photos, so nothing should imply an actual
+  two-person comparison.
+* **Career Match** ("What Job Suits You") — a fun career-archetype vibe read.
+  Never framed as a real psychometric or vocational assessment.
+
 ---
 
 ## 3. Architecture & Data Flow
@@ -105,6 +117,12 @@ Same underlying mechanic, restyled with lighter, universally legible copy:
   audience raised on Co-Star-style copy (short, punchy, a little cheeky). Passed
   via `config.systemInstruction` (Gemini's equivalent of Anthropic's `system`
   param) — unchanged in content from the Claude-era draft.
+* **Per-module prompts (added 2026-07-24):** `backend/src/services/systemPrompt.ts`
+  exports `READING_SYSTEM_PROMPTS`, a map keyed by `ReadingModuleId` (see §2.3)
+  — one prompt per reading module, sharing a single `SAFETY_RULES` block so the
+  entertainment-only/no-clinical-language/non-face/minor-fallback rules can't
+  drift out of sync across modules. `generateReading` selects the prompt from
+  the request's optional `module` field (defaults to `three-expression`).
 
 ---
 

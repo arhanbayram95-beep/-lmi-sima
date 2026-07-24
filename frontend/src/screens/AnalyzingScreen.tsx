@@ -14,6 +14,7 @@ export default function AnalyzingScreen() {
   const spin = useRef(new Animated.Value(0)).current;
 
   const images = useAppStore((s) => s.images);
+  const selectedModule = useAppStore((s) => s.selectedModule);
   const setReading = useAppStore((s) => s.setReading);
   const clearImages = useAppStore((s) => s.clearImages);
   const goToScreen = useAppStore((s) => s.goToScreen);
@@ -27,7 +28,12 @@ export default function AnalyzingScreen() {
     }
 
     try {
-      const result = await analyzeReading({ calm: images.calm, bright: images.bright, deep: images.deep });
+      const result = await analyzeReading({
+        calm: images.calm,
+        bright: images.bright,
+        deep: images.deep,
+        module: selectedModule,
+      });
       setReading(result);
       clearImages();
       goToScreen('reveal');
@@ -38,7 +44,7 @@ export default function AnalyzingScreen() {
       }
       setError(cause instanceof ReadingApiError ? cause.message : t('analyzing.error.body'));
     }
-  }, [images, setReading, clearImages, goToScreen, t]);
+  }, [images, selectedModule, setReading, clearImages, goToScreen, t]);
 
   useEffect(() => {
     runAnalysis();

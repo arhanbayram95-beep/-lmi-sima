@@ -51,4 +51,15 @@ describe('analyzeReading (pseudo-API mode)', () => {
     expect(result.expression_insights.length).toBeGreaterThan(0);
     expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  it('returns a different canned reading per module', async () => {
+    const { analyzeReading } = require('./reading');
+
+    const threeExpression = await analyzeReading({ ...PAYLOAD, module: 'three-expression' });
+    const relationship = await analyzeReading({ ...PAYLOAD, module: 'relationship-harmony' });
+    const career = await analyzeReading({ ...PAYLOAD, module: 'career-match' });
+
+    const headlines = new Set([threeExpression.headline, relationship.headline, career.headline]);
+    expect(headlines.size).toBe(3);
+  });
 });

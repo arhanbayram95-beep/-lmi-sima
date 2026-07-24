@@ -203,7 +203,8 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: Theme.spacing.containerPadding,
-    gap: Theme.spacing.sm,
+    paddingTop: Theme.spacing.xs,
+    gap: Theme.spacing.md,
   },
   headline: {
     ...Theme.typography.headlineLg,
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   plans: {
-    gap: Theme.spacing.xs,
+    gap: Theme.spacing.sm,
   },
   plan: {
     borderColor: 'rgba(255,255,255,0.1)',
@@ -318,8 +319,9 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: Theme.spacing.containerPadding,
+    paddingTop: Theme.spacing.sm,
     paddingBottom: Theme.spacing.sm,
-    gap: 6,
+    gap: Theme.spacing.xs,
   },
   reassurance: {
     ...Theme.typography.labelSm,
@@ -333,13 +335,11 @@ const styles = StyleSheet.create({
     color: 'rgba(179, 176, 205, 0.55)',
     textAlign: 'center',
     textDecorationLine: 'underline',
-    marginTop: 4,
   },
   footerLinks: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 12,
-    marginTop: 8,
   },
   footerLink: {
     ...Theme.typography.labelSm,

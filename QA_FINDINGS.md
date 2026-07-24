@@ -147,3 +147,23 @@ API integration.
   animation).
 - `@types/jest@30.0.0` vs Expo's expected `29.5.14` — version-mismatch
   warning at dev-server startup, nothing currently broken by it.
+
+---
+
+## Module Activation — 2026-07-24 (Relationship Harmony & Career Match)
+
+Scope: the Analyze hub's two "COMING SOON" module cards, which the product
+owner believed were built-but-gated. They weren't — pure frontend teaser
+cards with zero backend support. See Phase 7 in `IMPLEMENTATION_PLAN.md` and
+§2.3/§4 in `PROJECT_SPEC.md` for the full build.
+
+- [x] **MOD-1: Test-suite flakiness in `AnalyzingScreen.test.tsx`**
+  Found during this session's earlier UI/UX pass and again here after adding
+  a module-selection test to the same file: this screen runs two continuous
+  `Animated.loop` calls that fall back to real JS timers under Jest (no
+  native driver in the test environment), which reliably pushed the file
+  past Jest's 5000ms default timeout on this dev machine even though the
+  actual assertions resolved correctly given more time (12s observed vs 5s
+  default). Fixed properly this time: `jest.setTimeout(20000)` for this
+  file, rather than leaving it as a recurring false-red. Verified passing
+  standalone and as part of the full suite after the fix.
