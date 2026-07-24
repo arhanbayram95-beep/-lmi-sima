@@ -519,9 +519,9 @@ export const translations = {
     bn: 'আবার চেষ্টা করুন', pt: 'Tentar novamente', ru: 'Повторить', ur: 'دوبارہ کوشش کریں',
   },
   'analyzing.error.backHome': {
-    en: 'Back to Main Menu', zh: '返回主菜单', hi: 'मुख्य मेनू पर वापस जाएं', es: 'Volver al menú principal',
-    fr: "Retour au menu principal", ar: 'العودة إلى القائمة الرئيسية', bn: 'মূল মেনুতে ফিরে যান', pt: 'Voltar ao menu principal',
-    ru: 'Назад в главное меню', ur: 'مرکزی مینو پر واپس جائیں',
+    en: 'Back to Analyze', zh: '返回分析', hi: 'विश्लेषण पर वापस जाएं', es: 'Volver a Analizar',
+    fr: "Retour à Analyser", ar: 'العودة إلى التحليل', bn: 'বিশ্লেষণে ফিরে যান', pt: 'Voltar a Analisar',
+    ru: 'Назад к анализу', ur: 'تجزیہ پر واپس جائیں',
   },
   'reveal.narrativeHeading': {
     en: 'The Full Picture', zh: '整体画像', hi: 'पूरी तस्वीर', es: 'La imagen completa', fr: "Le tableau d'ensemble",
@@ -557,57 +557,6 @@ export const translations = {
   'welcome.cta': {
     en: "Let's Go", zh: '开始吧', hi: 'चलिए शुरू करें', es: 'Vamos', fr: 'Allons-y', ar: 'هيا بنا',
     bn: 'চলুন শুরু করি', pt: 'Vamos lá', ru: 'Поехали', ur: 'چلیں شروع کریں',
-  },
-  'mainMenu.proBadge': {
-    en: 'PRO', zh: '专业版', hi: 'प्रो', es: 'PRO', fr: 'PRO', ar: 'برو', bn: 'প্রো', pt: 'PRO', ru: 'ПРО', ur: 'پرو',
-  },
-  'mainMenu.feature.vibe.title': {
-    en: 'Vibe & Temperament', zh: '氛围与气质', hi: 'वाइब और स्वभाव', es: 'Vibra y temperamento', fr: 'Vibe et tempérament',
-    ar: 'الطاقة والمزاج', bn: 'ভাইব ও মেজাজ', pt: 'Vibe e temperamento', ru: 'Настроение и темперамент', ur: 'وائب اور مزاج',
-  },
-  'mainMenu.feature.vibe.body': {
-    en: 'Instant mood & energy check based on expression mapping.', zh: '基于表情映射的即时情绪与能量检测。',
-    hi: 'एक्सप्रेशन मैपिंग पर आधारित तत्काल मूड और एनर्जी जांच।', es: 'Comprobación instantánea del estado de ánimo y energía según tus expresiones.',
-    fr: "Vérification instantanée de l'humeur et de l'énergie basée sur la cartographie des expressions.",
-    ar: 'فحص فوري للمزاج والطاقة استنادًا إلى رسم التعابير.', bn: 'এক্সপ্রেশন ম্যাপিং ভিত্তিক তাৎক্ষণিক মেজাজ ও এনার্জি চেক।',
-    pt: 'Verificação instantânea de humor e energia com base no mapeamento de expressões.',
-    ru: 'Мгновенная проверка настроения и энергии на основе карты выражений.', ur: 'ایکسپریشن میپنگ پر مبنی فوری موڈ اور توانائی کی جانچ۔',
-  },
-  'mainMenu.feature.expression.title': {
-    en: 'Expression Dynamics', zh: '表情动态', hi: 'एक्सप्रेशन डायनामिक्स', es: 'Dinámica de expresiones', fr: 'Dynamique des expressions',
-    ar: 'ديناميكية التعابير', bn: 'এক্সপ্রেশন ডাইনামিক্স', pt: 'Dinâmica de expressões', ru: 'Динамика выражений', ur: 'ایکسپریشن ڈائنامکس',
-  },
-  'mainMenu.feature.expression.body': {
-    en: 'Micro-expression shifts tracked across your 3-shot session.', zh: '追踪三张照片过程中的微表情变化。',
-    hi: 'आपके 3-शॉट सेशन में माइक्रो-एक्सप्रेशन बदलाव ट्रैक किए जाते हैं।', es: 'Cambios de microexpresión registrados en tu sesión de 3 fotos.',
-    fr: 'Changements de micro-expressions suivis lors de votre session de 3 photos.',
-    ar: 'تتبع تغيرات التعابير الدقيقة عبر جلستك المكونة من 3 لقطات.', bn: 'আপনার ৩-শট সেশনে মাইক্রো-এক্সপ্রেশন পরিবর্তন ট্র্যাক করা হয়।',
-    pt: 'Alterações de micro-expressão monitorizadas na sua sessão de 3 fotos.',
-    ru: 'Отслеживание микровыражений на протяжении сессии из 3 снимков.', ur: 'آپ کے 3 شاٹ سیشن میں مائیکرو ایکسپریشن تبدیلیاں ٹریک کی جاتی ہیں۔',
-  },
-  'mainMenu.feature.symmetry.title': {
-    en: 'Face Symmetry', zh: '面部对称性', hi: 'फेस सिमेट्री', es: 'Simetría facial', fr: 'Symétrie du visage',
-    ar: 'تناظر الوجه', bn: 'ফেস সিমেট্রি', pt: 'Simetria facial', ru: 'Симметрия лица', ur: 'چہرے کی توازن',
-  },
-  'mainMenu.feature.symmetry.body': {
-    en: 'Proportion & balance reading using Golden Ratio landmarks.', zh: '基于黄金比例标志点的比例与平衡解读。',
-    hi: 'गोल्डन रेशियो लैंडमार्क्स का उपयोग कर प्रोपोर्शन और बैलेंस रीडिंग।', es: 'Lectura de proporción y equilibrio usando puntos de referencia de la proporción áurea.',
-    fr: "Lecture de la proportion et de l'équilibre à l'aide de repères du nombre d'or.",
-    ar: 'قراءة التناسب والتوازن باستخدام معالم النسبة الذهبية.', bn: 'গোল্ডেন রেশিও ল্যান্ডমার্ক ব্যবহার করে অনুপাত ও ভারসাম্য রিডিং।',
-    pt: 'Leitura de proporção e equilíbrio usando pontos de referência da proporção áurea.',
-    ru: 'Анализ пропорций и баланса по точкам золотого сечения.', ur: 'گولڈن ریشو لینڈ مارکس کا استعمال کرتے ہوئے تناسب اور توازن کی ریڈنگ۔',
-  },
-  'mainMenu.feature.dailyLog.title': {
-    en: 'Daily Vibe Log', zh: '每日氛围日志', hi: 'डेली वाइब लॉग', es: 'Registro diario de vibra', fr: 'Journal de vibe quotidien',
-    ar: 'سجل الطاقة اليومي', bn: 'দৈনিক ভাইব লগ', pt: 'Registo diário de vibe', ru: 'Ежедневный журнал настроения', ur: 'روزانہ وائب لاگ',
-  },
-  'mainMenu.feature.dailyLog.body': {
-    en: 'Track mood patterns over time with historical AI insights.', zh: '通过历史 AI 洞察追踪长期情绪模式。',
-    hi: 'ऐतिहासिक AI इनसाइट्स के साथ समय के साथ मूड पैटर्न ट्रैक करें।', es: 'Sigue tus patrones de ánimo a lo largo del tiempo con análisis históricos de IA.',
-    fr: "Suivez l'évolution de votre humeur dans le temps grâce aux analyses historiques de l'IA.",
-    ar: 'تتبع أنماط المزاج عبر الوقت باستخدام رؤى الذكاء الاصطناعي التاريخية.', bn: 'ঐতিহাসিক AI ইনসাইট দিয়ে সময়ের সাথে মেজাজের ধরণ ট্র্যাক করুন।',
-    pt: 'Acompanhe padrões de humor ao longo do tempo com análises históricas de IA.',
-    ru: 'Отслеживайте изменения настроения со временем с помощью исторической аналитики ИИ.', ur: 'تاریخی AI بصیرت کے ساتھ وقت کے ساتھ موڈ کے پیٹرن ٹریک کریں۔',
   },
   'common.close': {
     en: 'Close', zh: '关闭', hi: 'बंद करें', es: 'Cerrar', fr: 'Fermer', ar: 'إغلاق', bn: 'বন্ধ করুন', pt: 'Fechar', ru: 'Закрыть', ur: 'بند کریں',

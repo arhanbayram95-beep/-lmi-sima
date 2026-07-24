@@ -7,9 +7,9 @@ import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
-// The dedicated first-time landing moment after the paywall — deliberately
-// separate from MainMenuScreen, which is the ongoing home base reached
-// later from Reveal/Review, not a "you're in!" welcome moment.
+// The dedicated first-time landing moment after the paywall, before
+// handing off to the Analyze hub (the app's actual home base — there is
+// no separate main-menu/dashboard screen).
 export default function WelcomeScreen() {
   const goToScreen = useAppStore((s) => s.goToScreen);
   const t = useTranslation();
@@ -35,7 +35,7 @@ export default function WelcomeScreen() {
       </FadeInView>
 
       <View style={styles.footer}>
-        <PrimaryButton label={t('welcome.cta')} onPress={() => goToScreen('mainMenu')} />
+        <PrimaryButton label={t('welcome.cta')} onPress={() => goToScreen('analyze')} />
       </View>
     </View>
   );

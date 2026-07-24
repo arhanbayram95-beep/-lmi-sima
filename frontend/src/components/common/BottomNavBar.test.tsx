@@ -5,7 +5,7 @@ import { useAppStore } from '../../state/useAppStore';
 
 describe('BottomNavBar', () => {
   beforeEach(() => {
-    useAppStore.setState({ screen: 'mainMenu' });
+    useAppStore.setState({ screen: 'analyze' });
   });
 
   it('navigates to the analyze hub when Analyze is pressed', () => {
@@ -30,12 +30,5 @@ describe('BottomNavBar', () => {
     render(<BottomNavBar active="settings" />);
     expect(screen.getByLabelText('Settings').props.accessibilityState.selected).toBe(true);
     expect(screen.getByLabelText('Analyze').props.accessibilityState.selected).toBe(false);
-  });
-
-  it('marks no tab as selected when active is omitted', () => {
-    render(<BottomNavBar />);
-    expect(screen.getByLabelText('Analyze').props.accessibilityState.selected).toBe(false);
-    expect(screen.getByLabelText('Results').props.accessibilityState.selected).toBe(false);
-    expect(screen.getByLabelText('Settings').props.accessibilityState.selected).toBe(false);
   });
 });

@@ -31,9 +31,9 @@ describe('useAppStore', () => {
     expect(useAppStore.getState().screen).toBe('settings');
   });
 
-  it('goBack falls back to mainMenu when there is nothing recorded to return to', () => {
+  it('goBack falls back to the Analyze hub when there is nothing recorded to return to', () => {
     useAppStore.getState().goBack();
-    expect(useAppStore.getState().screen).toBe('mainMenu');
+    expect(useAppStore.getState().screen).toBe('analyze');
   });
 
   it('tracks age verification and image consent independently', () => {

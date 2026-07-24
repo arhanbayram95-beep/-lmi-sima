@@ -84,7 +84,7 @@ export default function AnalyzingScreen() {
         <PrimaryButton
           label={t('analyzing.error.backHome')}
           variant="secondary"
-          onPress={() => goToScreen('mainMenu')}
+          onPress={() => goToScreen('analyze')}
         />
       </View>
     );

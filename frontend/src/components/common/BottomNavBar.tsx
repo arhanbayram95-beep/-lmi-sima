@@ -13,10 +13,7 @@ const NAV_ITEMS = [
 type NavKey = (typeof NAV_ITEMS)[number]['key'];
 
 interface BottomNavBarProps {
-  // Optional: Main Menu is a Home screen, not one of these three tabs, so
-  // it renders this with no active item rather than falsely claiming to be
-  // "Analyze" (see MainMenuScreen).
-  active?: NavKey;
+  active: NavKey;
 }
 
 export default function BottomNavBar({ active }: BottomNavBarProps) {

@@ -10,12 +10,6 @@ jest.mock('../utils/sound', () => ({
 }));
 
 describe('AppNavigator', () => {
-  it('renders the screen matching the current store state', () => {
-    useAppStore.setState({ screen: 'mainMenu' });
-    render(<AppNavigator />);
-    expect(screen.getByTestId('main-menu-screen')).toBeTruthy();
-  });
-
   it('renders the settings screen when routed there', () => {
     useAppStore.setState({ screen: 'settings' });
     render(<AppNavigator />);

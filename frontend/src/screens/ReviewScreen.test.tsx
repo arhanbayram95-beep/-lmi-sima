@@ -24,12 +24,12 @@ describe('ReviewScreen', () => {
     expect(screen.getByLabelText('Rate 4 stars')).toBeTruthy();
   });
 
-  it('triggers the native store review prompt and returns to the main menu by default', async () => {
+  it('triggers the native store review prompt and returns to the Analyze hub by default', async () => {
     render(<ReviewScreen />);
     fireEvent.press(screen.getByText('Rate on App Store'));
 
     await waitFor(() => expect(mockRequestReview).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(useAppStore.getState().screen).toBe('mainMenu'));
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('analyze'));
   });
 
   it('skips the native prompt when it is unavailable on this device', async () => {
@@ -37,11 +37,11 @@ describe('ReviewScreen', () => {
     render(<ReviewScreen />);
     fireEvent.press(screen.getByText('Rate on App Store'));
 
-    await waitFor(() => expect(useAppStore.getState().screen).toBe('mainMenu'));
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('analyze'));
     expect(mockRequestReview).not.toHaveBeenCalled();
   });
 
-  it('returns to Settings, not Main Menu, when Review was opened from Settings', async () => {
+  it('returns to Settings, not the Analyze hub, when Review was opened from Settings', async () => {
     useAppStore.getState().goToScreen('settings');
     useAppStore.getState().goToScreen('review');
 
@@ -61,13 +61,13 @@ describe('ReviewScreen', () => {
     expect(useAppStore.getState().screen).toBe('settings');
   });
 
-  it('returns to Main Menu, not back to the just-finished reading, when opened from Reveal', () => {
+  it('returns to the Analyze hub, not back to the just-finished reading, when opened from Reveal', () => {
     useAppStore.getState().goToScreen('reveal');
     useAppStore.getState().goToScreen('review');
 
     render(<ReviewScreen />);
     fireEvent.press(screen.getByText('Maybe Later'));
 
-    expect(useAppStore.getState().screen).toBe('mainMenu');
+    expect(useAppStore.getState().screen).toBe('analyze');
   });
 });
