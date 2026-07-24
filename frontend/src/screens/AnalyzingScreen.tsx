@@ -32,6 +32,10 @@ export default function AnalyzingScreen() {
       clearImages();
       goToScreen('reveal');
     } catch (cause) {
+      if (cause instanceof ReadingApiError && cause.code === 'NO_FACE_DETECTED') {
+        goToScreen('noFaceDetected');
+        return;
+      }
       setError(cause instanceof ReadingApiError ? cause.message : t('analyzing.error.body'));
     }
   }, [images, setReading, clearImages, goToScreen, t]);

@@ -523,6 +523,32 @@ export const translations = {
     fr: "Retour à Analyser", ar: 'العودة إلى التحليل', bn: 'বিশ্লেষণে ফিরে যান', pt: 'Voltar a Analisar',
     ru: 'Назад к анализу', ur: 'تجزیہ پر واپس جائیں',
   },
+  'noFaceDetected.headline': {
+    en: "We Couldn't Find a Face", zh: '未检测到人脸', hi: 'चेहरा नहीं मिला', es: 'No pudimos encontrar un rostro',
+    fr: "Nous n'avons pas trouvé de visage", ar: 'لم نتمكن من العثور على وجه', bn: 'কোনো মুখ খুঁজে পাওয়া যায়নি',
+    pt: 'Não encontrámos um rosto', ru: 'Лицо не найдено', ur: 'کوئی چہرہ نہیں ملا',
+  },
+  'noFaceDetected.body': {
+    en: 'Make sure your face is clearly framed in good lighting, then give it another shot.',
+    zh: '请确保脸部在光线充足的情况下清晰入镜，然后再试一次。',
+    hi: 'सुनिश्चित करें कि आपका चेहरा अच्छी रोशनी में स्पष्ट रूप से फ्रेम में हो, फिर दोबारा कोशिश करें।',
+    es: 'Asegúrate de que tu rostro esté bien encuadrado y con buena luz, luego inténtalo de nuevo.',
+    fr: 'Assurez-vous que votre visage est bien cadré avec un bon éclairage, puis réessayez.',
+    ar: 'تأكد من أن وجهك ظاهر بوضوح وفي إضاءة جيدة، ثم حاول مرة أخرى.',
+    bn: 'ভালো আলোতে আপনার মুখ স্পষ্টভাবে ফ্রেমে আছে কিনা নিশ্চিত করুন, তারপর আবার চেষ্টা করুন।',
+    pt: 'Certifique-se de que o seu rosto está bem enquadrado com boa iluminação e tente novamente.',
+    ru: 'Убедитесь, что ваше лицо чётко видно при хорошем освещении, и попробуйте снова.',
+    ur: 'یقینی بنائیں کہ آپ کا چہرہ اچھی روشنی میں واضح طور پر فریم میں ہے، پھر دوبارہ کوشش کریں۔',
+  },
+  'noFaceDetected.retry': {
+    en: 'Retake Photos', zh: '重新拍照', hi: 'फिर से फ़ोटो लें', es: 'Repetir fotos', fr: 'Reprendre les photos',
+    ar: 'إعادة التقاط الصور', bn: 'আবার ছবি তুলুন', pt: 'Tirar fotos novamente', ru: 'Переснять фото', ur: 'دوبارہ تصاویر لیں',
+  },
+  'noFaceDetected.backHome': {
+    en: 'Back to Analyze', zh: '返回分析', hi: 'विश्लेषण पर वापस जाएं', es: 'Volver a Analizar',
+    fr: "Retour à Analyser", ar: 'العودة إلى التحليل', bn: 'বিশ্লেষণে ফিরে যান', pt: 'Voltar a Analisar',
+    ru: 'Назад к анализу', ur: 'تجزیہ پر واپس جائیں',
+  },
   'reveal.narrativeHeading': {
     en: 'The Full Picture', zh: '整体画像', hi: 'पूरी तस्वीर', es: 'La imagen completa', fr: "Le tableau d'ensemble",
     ar: 'الصورة الكاملة', bn: 'সম্পূর্ণ চিত্র', pt: 'A imagem completa', ru: 'Полная картина', ur: 'مکمل تصویر',

@@ -11,12 +11,13 @@ export type AppScreen =
   | 'reveal'
   | 'results'
   | 'review'
-  | 'settings';
+  | 'settings'
+  | 'noFaceDetected';
 
 // Transient, forward-only screens — never a sensible place for goBack() to
 // land on (you never want to "go back" into the camera, a loading spinner,
 // or a reading you already finished viewing).
-const NON_RETURNABLE_SCREENS = new Set<AppScreen>(['loading', 'analyzing', 'reveal', 'capture']);
+const NON_RETURNABLE_SCREENS = new Set<AppScreen>(['loading', 'analyzing', 'reveal', 'capture', 'noFaceDetected']);
 
 // The Analyze hub is the app's home base — there is no separate "main
 // menu" screen.

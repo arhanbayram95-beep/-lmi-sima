@@ -53,14 +53,17 @@ source read of every screen in `frontend/src/screens/`. Backend verified via
   than building the feature. Changed the bullet to "High-Res Story Share
   Cards" only, which is real and already shipped (Phase 4.3).
 
-- [ ] **QA-5: `IMPLEMENTATION_PLAN.md` 2.3 face-detection gap (informational, not a bug)**
+- [x] **QA-5: `IMPLEMENTATION_PLAN.md` 2.3 face-detection gap (informational, not a bug)**
   Confirmed `CaptureScreen.tsx` takes photos unconditionally with no local
   face-bounding check — 2.3's "reject non-face frames locally" is genuinely
   not implemented (the only face check is a soft mention in the backend's
   system prompt, which is a content fallback, not a capture-time guard).
-  `IMPLEMENTATION_PLAN.md` already correctly leaves 2.3 unchecked, so no
-  plan edit was needed — left open here only as a pointer back to that row
-  for whoever picks it up.
+  Product decision (2026-07-24): defer real on-device detection to the end
+  of the plan (now Phase 6.1 in `IMPLEMENTATION_PLAN.md`) rather than block
+  on it now. Built the placeholder destination in the meantime:
+  `NoFaceDetectedScreen` + a `ReadingApiError('NO_FACE_DETECTED')` routing
+  hook in `AnalyzingScreen`, so 6.1 has somewhere real to route into once
+  it lands.
 
 ### Minor / cosmetic (not tracked as checklist items — no action taken)
 - Several `Animated`-driven components trigger React "not wrapped in

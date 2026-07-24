@@ -35,13 +35,14 @@ category, within a strict entertainment framing.
   - Build a clean, cosmic-gradient welcome carousel with +18 age gate verification.
   - Add explicit checkbox for image-processing consent with a warm, plain-language
     disclaimer (see PROJECT_SPEC §2.1).
-- [ ] **2.3 Screen 2: The Three-Expression Capture (Sequential Camera UI)**
+- [x] **2.3 Screen 2: The Three-Expression Capture (Sequential Camera UI)**
   - Integrate `expo-camera` or `react-native-vision-camera`.
   - Design a continuous single-session capture flow with soft glowing face-guide overlays:
     - Step 1: **Calm** → capture, triggers `capture_chime.mp3` + light haptic.
     - Step 2: **Bright** → prompt "Show us your glow ✨", triggers `prompt_chime.mp3`.
     - Step 3: **Deep** → prompt "Now give us your mysterious side 🌙", final capture.
-  - Implement on-device face bounding verification (reject non-face frames locally).
+  - On-device face bounding verification carved out to **6.1** below (deferred
+    to the end of the plan per product decision).
 
 ---
 
@@ -92,3 +93,23 @@ category, within a strict entertainment framing.
   - Package frontend configuration for Apple TestFlight and Google Play internal testing.
   - Legal review pass on paywall copy + disclaimers per target market (US, key EU
     markets) before public launch.
+
+---
+
+## Phase 6: Deferred — On-Device Face Detection
+Pushed to the very end of the plan per product decision (2026-07-24): Expo
+dropped its built-in face-detector module, so real detection needs a native
+dependency (`react-native-vision-camera` + an ML Kit frame-processor plugin)
+and a move off plain Expo Go to an EAS dev-client build — a bigger
+architecture change than the rest of the plan, deliberately sequenced last.
+- [x] **6.0 Placeholder UI** — `NoFaceDetectedScreen` built and wired: a
+  `ReadingApiError` thrown with `code: 'NO_FACE_DETECTED'` (frontend or
+  backend, once real detection exists) routes `AnalyzingScreen` straight to
+  it instead of the generic error state. Nothing throws that code yet.
+- [ ] **6.1 On-device face bounding verification**
+  - Add `react-native-vision-camera` + a face-detector frame-processor
+    plugin; switch `CaptureScreen` off `expo-camera`.
+  - Reject non-face frames locally before `capture_chime` fires, per
+    `PROJECT_SPEC.md` §2.2 (privacy + cost control) — route straight to
+    `NoFaceDetectedScreen` rather than letting a bad frame reach the backend.
+  - Requires an EAS dev-client build (no longer testable in plain Expo Go).

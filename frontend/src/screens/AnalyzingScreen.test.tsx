@@ -54,4 +54,11 @@ describe('AnalyzingScreen', () => {
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('reveal'));
   });
+
+  it('routes to the no-face-detected screen on a NO_FACE_DETECTED error', async () => {
+    mockAnalyzeReading.mockRejectedValue(new ReadingApiError('No face found in one of the photos.', 'NO_FACE_DETECTED'));
+    render(<AnalyzingScreen />);
+
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('noFaceDetected'));
+  });
 });

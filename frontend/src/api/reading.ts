@@ -4,7 +4,21 @@ import { AnalyzeReadingPayload, ReadingResult } from './types';
 
 export type { ExpressionLabel, ExpressionInsight, ReadingResult, AnalyzeReadingPayload } from './types';
 
-export class ReadingApiError extends Error {}
+// 'NO_FACE_DETECTED' is a forward-compatible hook, not yet raised anywhere —
+// on-device face detection is deferred (see QA_FINDINGS.md QA-5 and
+// IMPLEMENTATION_PLAN.md 2.3). Once real detection lands, either the client
+// or the backend can throw this code and AnalyzingScreen will already route
+// to NoFaceDetectedScreen for it.
+export type ReadingApiErrorCode = 'NO_FACE_DETECTED';
+
+export class ReadingApiError extends Error {
+  code?: ReadingApiErrorCode;
+
+  constructor(message: string, code?: ReadingApiErrorCode) {
+    super(message);
+    this.code = code;
+  }
+}
 
 // The only place in the app that talks to the backend, per CLAUDE.md's
 // frontend/src/api/ boundary. Screens must go through this, never fetch

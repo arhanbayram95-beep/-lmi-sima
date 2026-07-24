@@ -45,4 +45,10 @@ describe('AppNavigator', () => {
     render(<AppNavigator />);
     expect(screen.getByTestId('welcome-screen')).toBeTruthy();
   });
+
+  it('renders the no-face-detected screen when routed there', () => {
+    useAppStore.setState({ screen: 'noFaceDetected' });
+    render(<AppNavigator />);
+    expect(screen.getByTestId('no-face-detected-screen')).toBeTruthy();
+  });
 });

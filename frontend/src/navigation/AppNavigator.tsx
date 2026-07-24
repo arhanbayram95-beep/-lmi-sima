@@ -4,6 +4,7 @@ import AnalyzeScreen from '../screens/AnalyzeScreen';
 import AnalyzingScreen from '../screens/AnalyzingScreen';
 import CaptureScreen from '../screens/CaptureScreen';
 import LoadingScreen from '../screens/LoadingScreen';
+import NoFaceDetectedScreen from '../screens/NoFaceDetectedScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import PaywallScreen from '../screens/PaywallScreen';
 import ResultsScreen from '../screens/ResultsScreen';
@@ -26,6 +27,7 @@ const SCREENS: Record<AppScreen, React.ComponentType> = {
   results: ResultsScreen,
   review: ReviewScreen,
   settings: SettingsScreen,
+  noFaceDetected: NoFaceDetectedScreen,
 };
 
 export default function AppNavigator() {
