@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import React, { useState } from 'react';
-import { Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
@@ -112,6 +112,13 @@ export default function SettingsScreen() {
     Share.share({ message: SHARE_MESSAGE });
   };
 
+  // No RevenueCat integration yet (Phase 5.1) — this can't look up real
+  // purchase history, so it honestly reports finding nothing rather than
+  // silently doing nothing when tapped.
+  const handleRestorePurchases = () => {
+    Alert.alert(t('settings.row.restorePurchases'), t('restorePurchases.alertBody'));
+  };
+
   return (
     <View style={styles.container} testID="settings-screen">
       <View style={styles.header}>
@@ -128,7 +135,11 @@ export default function SettingsScreen() {
               onPress: () => goToScreen('paywall'),
               testID: 'settings-manage-subscription',
             },
-            { label: t('settings.row.restorePurchases') },
+            {
+              label: t('settings.row.restorePurchases'),
+              onPress: handleRestorePurchases,
+              testID: 'settings-restore-purchases',
+            },
           ]}
         />
 

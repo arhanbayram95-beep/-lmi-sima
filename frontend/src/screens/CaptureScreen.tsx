@@ -26,6 +26,7 @@ export default function CaptureScreen() {
 
   const setImage = useAppStore((s) => s.setImage);
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const goBack = useAppStore((s) => s.goBack);
   const t = useTranslation();
 
   useEffect(() => {
@@ -78,6 +79,15 @@ export default function CaptureScreen() {
   if (!permission.granted) {
     return (
       <View style={[styles.container, styles.permissionContainer]} testID="capture-screen">
+        <Pressable
+          onPress={goBack}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          style={styles.closeButton}
+          testID="capture-close-button"
+        >
+          <Text style={styles.closeIcon}>✕</Text>
+        </Pressable>
         <Text style={styles.headline}>{t('capture.permission.headline')}</Text>
         <Text style={styles.body}>{t('capture.permission.body')}</Text>
         <PrimaryButton label={t('capture.permission.button')} onPress={requestPermission} />
@@ -138,6 +148,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Theme.spacing.sm,
     paddingHorizontal: Theme.spacing.containerPadding,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: Theme.spacing.xl,
+    right: Theme.spacing.gutter,
+    width: 40,
+    height: 40,
+    borderRadius: Theme.radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  closeIcon: {
+    color: Theme.colors.text.secondary,
+    fontSize: 16,
   },
   headline: {
     ...Theme.typography.headlineLg,

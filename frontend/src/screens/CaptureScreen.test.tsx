@@ -49,6 +49,17 @@ describe('CaptureScreen', () => {
     expect(mockRequestPermission).toHaveBeenCalledTimes(1);
   });
 
+  it('offers a way out when camera permission is denied, instead of a dead end', () => {
+    mockPermissionState = { granted: false };
+    useAppStore.getState().goToScreen('analyze');
+    useAppStore.getState().goToScreen('capture');
+
+    render(<CaptureScreen />);
+    fireEvent.press(screen.getByTestId('capture-close-button'));
+
+    expect(useAppStore.getState().screen).toBe('analyze');
+  });
+
   it('captures all three expressions in order and stores them, then moves to analysis', async () => {
     render(<CaptureScreen />);
 

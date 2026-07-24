@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import DisclaimerFooter from '../components/common/DisclaimerFooter';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
 import PrivacyPolicyModal from '../components/common/PrivacyPolicyModal';
+import TermsModal from '../components/common/TermsModal';
 import { useTranslation } from '../i18n/useTranslation';
 import { TranslationKey } from '../i18n/translations';
 import { useAppStore } from '../state/useAppStore';
@@ -43,6 +44,7 @@ function PlanCard({
 export default function PaywallScreen() {
   const [selectedPlan, setSelectedPlan] = useState<PlanId>('weekly');
   const [privacyVisible, setPrivacyVisible] = useState(false);
+  const [termsVisible, setTermsVisible] = useState(false);
   const goToScreen = useAppStore((s) => s.goToScreen);
   const goBack = useAppStore((s) => s.goBack);
   const isProActive = useAppStore((s) => s.isProActive);
@@ -56,6 +58,13 @@ export default function PaywallScreen() {
   const enterApp = () => {
     setProActive(true);
     goToScreen('welcome');
+  };
+
+  // No RevenueCat integration yet (Phase 5.1) — this can't look up real
+  // purchase history, so it honestly reports finding nothing rather than
+  // silently doing nothing when tapped.
+  const handleRestorePurchases = () => {
+    Alert.alert(t('paywall.restorePurchases'), t('restorePurchases.alertBody'));
   };
 
   return (
@@ -140,9 +149,13 @@ export default function PaywallScreen() {
         </Pressable>
 
         <View style={styles.footerLinks}>
-          <Text style={styles.footerLink}>{t('paywall.restorePurchases')}</Text>
+          <Pressable onPress={handleRestorePurchases} accessibilityRole="button" testID="paywall-restore-purchases">
+            <Text style={styles.footerLink}>{t('paywall.restorePurchases')}</Text>
+          </Pressable>
           <Text style={styles.footerLinkDivider}>•</Text>
-          <Text style={styles.footerLink}>{t('paywall.termsOfService')}</Text>
+          <Pressable onPress={() => setTermsVisible(true)} accessibilityRole="link" testID="paywall-terms-of-service">
+            <Text style={styles.footerLink}>{t('paywall.termsOfService')}</Text>
+          </Pressable>
           <Text style={styles.footerLinkDivider}>•</Text>
           <Pressable onPress={() => setPrivacyVisible(true)} accessibilityRole="link">
             <Text style={styles.footerLink}>{t('paywall.privacyPolicy')}</Text>
@@ -152,6 +165,7 @@ export default function PaywallScreen() {
       </View>
 
       <PrivacyPolicyModal visible={privacyVisible} onClose={() => setPrivacyVisible(false)} />
+      <TermsModal visible={termsVisible} onClose={() => setTermsVisible(false)} />
     </View>
   );
 }

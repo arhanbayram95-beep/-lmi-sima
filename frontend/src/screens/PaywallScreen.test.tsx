@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
+import { Alert } from 'react-native';
 import PaywallScreen from './PaywallScreen';
 import { useAppStore } from '../state/useAppStore';
 
@@ -16,6 +17,22 @@ describe('PaywallScreen', () => {
   it('offers a restore purchases path', () => {
     render(<PaywallScreen />);
     expect(screen.getByText('Restore Purchases')).toBeTruthy();
+  });
+
+  it('reports no purchases found when Restore Purchases is tapped', () => {
+    jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    render(<PaywallScreen />);
+
+    fireEvent.press(screen.getByTestId('paywall-restore-purchases'));
+
+    expect(Alert.alert).toHaveBeenCalledWith('Restore Purchases', expect.stringMatching(/no previous purchases/i));
+    (Alert.alert as jest.Mock).mockRestore();
+  });
+
+  it('opens the terms modal from the footer link', () => {
+    render(<PaywallScreen />);
+    fireEvent.press(screen.getByTestId('paywall-terms-of-service'));
+    expect(screen.getByTestId('terms-modal')).toBeTruthy();
   });
 
   it('is not skippable on first launch — no close button until entitlement is active', () => {

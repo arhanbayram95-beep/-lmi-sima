@@ -367,11 +367,11 @@ export const translations = {
     ru: 'Глубокие отчёты о личности и атмосфере', ur: 'گہری شخصیت اور وائب رپورٹس',
   },
   'paywall.feature3': {
-    en: 'Full Reading History & High-Res Story Share Cards', zh: '完整解读历史与高清故事分享卡',
-    hi: 'पूर्ण रीडिंग हिस्ट्री और हाई-रेस स्टोरी शेयर कार्ड्स', es: 'Historial completo de lecturas y tarjetas para compartir en alta resolución',
-    fr: "Historique complet des lectures et cartes de partage haute résolution", ar: 'سجل كامل للقراءات وبطاقات مشاركة عالية الدقة',
-    bn: 'সম্পূর্ণ রিডিং ইতিহাস ও উচ্চ-রেজোলিউশন শেয়ার কার্ড', pt: 'Histórico completo de leituras e cartões de partilha em alta resolução',
-    ru: 'Полная история анализов и карточки для сторис в высоком разрешении', ur: 'مکمل ریڈنگ ہسٹری اور ہائی ریزولوشن اسٹوری شیئر کارڈز',
+    en: 'High-Res Story Share Cards', zh: '高清故事分享卡',
+    hi: 'हाई-रेस स्टोरी शेयर कार्ड्स', es: 'Tarjetas para compartir en alta resolución',
+    fr: "Cartes de partage haute résolution", ar: 'بطاقات مشاركة عالية الدقة',
+    bn: 'উচ্চ-রেজোলিউশন শেয়ার কার্ড', pt: 'Cartões de partilha em alta resolução',
+    ru: 'Карточки для сторис в высоком разрешении', ur: 'ہائی ریزولوشن اسٹوری شیئر کارڈز',
   },
   'paywall.mostPopular': {
     en: 'MOST POPULAR', zh: '最受欢迎', hi: 'सबसे लोकप्रिय', es: 'MÁS POPULAR', fr: 'LE PLUS POPULAIRE',
@@ -560,6 +560,18 @@ export const translations = {
   },
   'common.close': {
     en: 'Close', zh: '关闭', hi: 'बंद करें', es: 'Cerrar', fr: 'Fermer', ar: 'إغلاق', bn: 'বন্ধ করুন', pt: 'Fechar', ru: 'Закрыть', ur: 'بند کریں',
+  },
+  'restorePurchases.alertBody': {
+    en: 'No previous purchases were found for this device.',
+    zh: '未在此设备上找到先前的购买记录。',
+    hi: 'इस डिवाइस के लिए कोई पिछली खरीदारी नहीं मिली।',
+    es: 'No se encontraron compras anteriores para este dispositivo.',
+    fr: "Aucun achat précédent n'a été trouvé pour cet appareil.",
+    ar: 'لم يتم العثور على مشتريات سابقة لهذا الجهاز.',
+    bn: 'এই ডিভাইসের জন্য কোনো পূর্ববর্তী ক্রয় পাওয়া যায়নি।',
+    pt: 'Não foram encontradas compras anteriores para este dispositivo.',
+    ru: 'Предыдущие покупки для этого устройства не найдены.',
+    ur: 'اس ڈیوائس کے لیے کوئی سابقہ خریداری نہیں ملی۔',
   },
 } satisfies Record<string, Record<LanguageCode, string>>;
 

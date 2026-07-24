@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Linking, Share } from 'react-native';
+import { Alert, Linking, Share } from 'react-native';
 import React from 'react';
 import SettingsScreen from './SettingsScreen';
 import { useAppStore } from '../state/useAppStore';
@@ -34,6 +34,16 @@ describe('SettingsScreen', () => {
     render(<SettingsScreen />);
     fireEvent.press(screen.getByTestId('settings-manage-subscription'));
     expect(useAppStore.getState().screen).toBe('paywall');
+  });
+
+  it('reports no purchases found when Restore Purchases is tapped', () => {
+    jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    render(<SettingsScreen />);
+
+    fireEvent.press(screen.getByTestId('settings-restore-purchases'));
+
+    expect(Alert.alert).toHaveBeenCalledWith('Restore Purchases', expect.stringMatching(/no previous purchases/i));
+    (Alert.alert as jest.Mock).mockRestore();
   });
 
   it('opens the review screen from Rate Us', () => {
