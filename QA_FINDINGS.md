@@ -167,3 +167,20 @@ cards with zero backend support. See Phase 7 in `IMPLEMENTATION_PLAN.md` and
   default). Fixed properly this time: `jest.setTimeout(20000)` for this
   file, rather than leaving it as a recurring false-red. Verified passing
   standalone and as part of the full suite after the fix.
+
+- [x] **MOD-2: Live-verified all three modules against the real Gemini API**
+  Product owner asked to confirm the real API (not mock mode) end to end.
+  Booted `backend/src/server.ts` against the real `GEMINI_API_KEY` and
+  posted a non-face test image (a UI screenshot, not a consented person's
+  photo) to `/api/v1/reading/analyze` for all three `module` values.
+  All three returned `200` with schema-valid JSON, and — genuinely useful
+  signal — all three correctly triggered `SAFETY_RULES`' non-face fallback
+  ("say so plainly and kindly... rather than fabricating an insight"),
+  each in its own module's voice (e.g. career-match: "we need a clear shot
+  of your calm gaze to find your inner strategist"; relationship-harmony:
+  "unlock your unique relational vibe"). Also re-verified the SEC-3/SEC-4
+  hardening against the live server, not just mocks: an invalid `module`
+  value correctly 400s with Fastify's own safe validation message, and a
+  malformed-image request 502s with the sanitized static message, no raw
+  Gemini error leaking through either way. `gemini-2.5-flash` responded
+  successfully on the current (free-tier) key — no `429`.
