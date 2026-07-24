@@ -1,6 +1,5 @@
 import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import {
-  Dimensions,
   LayoutChangeEvent,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -39,7 +38,13 @@ const SETTLE_GRACE_MS = 400;
 // aren't 100% reliable either.
 export default function SwipeablePager({ index, onIndexChange, children, style }: SwipeablePagerProps) {
   const scrollRef = useRef<ScrollView>(null);
-  const [pageWidth, setPageWidth] = useState(() => Dimensions.get('window').width);
+  // Starts at 0, not a Dimensions.get('window').width guess — this pager
+  // always renders inside a padded container, so the window width is never
+  // actually correct, and using it as a placeholder let an interaction that
+  // arrived before the first real onLayout measurement scroll to the wrong
+  // target (the reported "Next doesn't shift enough" bug). Nothing scrolls
+  // until a real measured width comes in.
+  const [pageWidth, setPageWidth] = useState(0);
   const hasPositioned = useRef(false);
   const isBeingDragged = useRef(false);
   const isSettling = useRef(false);
@@ -57,8 +62,9 @@ export default function SwipeablePager({ index, onIndexChange, children, style }
   useEffect(() => {
     // Don't fight the user's finger, or the native paging animation that
     // follows it — only programmatically reposition for an external index
-    // change (e.g. the Next button).
-    if (isBeingDragged.current || isSettling.current) return;
+    // change (e.g. the Next button). Also nothing to position against until
+    // a real layout measurement has arrived.
+    if (pageWidth === 0 || isBeingDragged.current || isSettling.current) return;
     scrollRef.current?.scrollTo({ x: index * pageWidth, animated: hasPositioned.current });
     hasPositioned.current = true;
   }, [index, pageWidth]);

@@ -130,4 +130,29 @@ describe('SwipeablePager', () => {
     scrollToSpy.mockRestore();
     jest.useRealTimers();
   });
+
+  it('never scrolls to a guessed width — waits for the real measured layout', () => {
+    const scrollToSpy = jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+    const onIndexChange = jest.fn();
+
+    // Index changes (e.g. a Next-button tap) before layout has ever fired —
+    // scrolling now would have to guess a width, which is exactly what
+    // produced the reported "starts sliding but doesn't reach the second
+    // page" bug (the app window is always wider than this pager's real,
+    // padded container).
+    render(
+      <SwipeablePager index={1} onIndexChange={onIndexChange}>
+        <Text>Page One</Text>
+        <Text>Page Two</Text>
+      </SwipeablePager>
+    );
+    expect(scrollToSpy).not.toHaveBeenCalled();
+
+    const pageWidth = 350;
+    fireEvent(screen.getByTestId('swipeable-pager'), 'layout', { nativeEvent: { layout: { width: pageWidth } } });
+
+    expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ x: pageWidth }));
+
+    scrollToSpy.mockRestore();
+  });
 });
