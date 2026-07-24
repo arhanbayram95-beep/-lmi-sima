@@ -10,13 +10,18 @@ category, within a strict entertainment framing.
 - [ ] **1.1 Expo Initialization Verification**
   - Ensure the `/frontend` directory contains a compile-ready TypeScript blank template.
   - Test run via `npm run android` or `npm run ios`.
-- [ ] **1.2 Asset Gathering (Cosmic Mystic)**
+- [x] **1.2 Asset Gathering (Cosmic Mystic)**
   - Source or generate 3 audio effect files (`.mp3`/`.wav`, `expo-av` compatible):
     - `capture_chime.mp3` (light camera-shutter click layered with a soft cosmic twinkle).
     - `prompt_chime.mp3` (gentle bell/sparkle cue for expression prompts).
     - `ambient_shimmer.mp3` (soft looping pad/shimmer for the loading screen).
   - Place assets under `frontend/assets/audio/` and cosmic-themed SVG icons
     (stars, moons, constellations, sparkles) under `frontend/assets/icons/`.
+  - Audio done (`frontend/assets/audio/*.wav`, wired via `utils/sound.ts`).
+    No dedicated SVG icon set was built — `DESIGN.md` v2.0.0 re-skinned the
+    app to the crimson/gold glassmorphic system, dropping the older
+    "Cosmic Mystic" star/moon iconography this row was written for; the app
+    uses emoji glyphs and simple vector shapes instead throughout.
 
 ---
 
@@ -65,10 +70,14 @@ category, within a strict entertainment framing.
 ---
 
 ## Phase 4: High-Fidelity Loading & The Reveal Screen
-- [ ] **4.1 Screen 3: Reading in Progress (Loading Core)**
+- [x] **4.1 Screen 3: Reading in Progress (Loading Core)**
   - While the backend call is in flight (3–6s), loop `ambient_shimmer.mp3` softly.
   - Render a scanning animation — soft particles/light traversing the captured
     faces, or a subtle constellation-forming effect.
+  - Implemented in `AnalyzingScreen.tsx`: `startAmbientShimmerLoop()` loops
+    the ambient audio for the call's duration; a pulsing logo + rotating
+    scan ring stand in for the literal particle effect (simplified, matches
+    the glassmorphic system rather than a separate particle engine).
 - [x] **4.2 Screen 4: The Reading (Results Architecture)**
   - Reveal a glassmorphic card UI displaying: `headline`, `expression_insights`, `narrative`.
   - Mount a persistent, clearly legible `footer_disclaimer` component on every result layout.
