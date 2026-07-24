@@ -131,26 +131,30 @@ const styles = StyleSheet.create({
   moduleCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Theme.spacing.sm,
+    gap: Theme.spacing.md,
+    paddingVertical: Theme.spacing.md,
+    minHeight: 108,
   },
   moduleCardDisabled: {
     opacity: 0.55,
   },
+  // Sized to comfortably host a real thumbnail image later — swap the
+  // glyph Text for an Image here once module artwork is ready.
   moduleIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: Theme.radius.md,
+    width: 76,
+    height: 76,
+    borderRadius: Theme.radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(158, 41, 65, 0.25)',
   },
   moduleGlyph: {
     color: Theme.colors.accent.crimsonPrimary,
-    fontSize: 22,
+    fontSize: 34,
   },
   moduleTextBlock: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   moduleTitleRow: {
     flexDirection: 'row',
@@ -159,17 +163,17 @@ const styles = StyleSheet.create({
   },
   moduleTitle: {
     ...Theme.typography.headlineMd,
-    fontSize: 16,
+    fontSize: 19,
     color: Theme.colors.text.primary,
   },
   moduleDescription: {
     ...Theme.typography.bodyMd,
-    fontSize: 13,
+    fontSize: 14,
     color: Theme.colors.text.secondary,
   },
   moduleChevron: {
     color: Theme.colors.text.muted,
-    fontSize: 20,
+    fontSize: 24,
   },
   comingSoonBadge: {
     backgroundColor: 'rgba(235, 201, 131, 0.15)',

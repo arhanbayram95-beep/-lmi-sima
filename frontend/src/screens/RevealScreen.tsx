@@ -7,8 +7,18 @@ import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
 import ShareCard from '../components/common/ShareCard';
 import { useTranslation } from '../i18n/useTranslation';
+import { ExpressionLabel } from '../api/types';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
+
+// A handful of distinct, uncrowded cards (one idea each) rather than a
+// single card cramming everything in — matches the reference layout's
+// icon+heading+content pattern without its density.
+const EXPRESSION_GLYPHS: Record<ExpressionLabel, string> = {
+  calm: '😌',
+  bright: '✨',
+  deep: '🌙',
+};
 
 export default function RevealScreen() {
   const reading = useAppStore((s) => s.reading);
@@ -42,17 +52,28 @@ export default function RevealScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <FadeInView>
-          <GlassCard style={styles.card}>
-            <Text style={styles.headline}>{reading.headline}</Text>
+          <Text style={styles.headline}>{reading.headline}</Text>
+        </FadeInView>
 
-            {reading.expression_insights.map((item) => (
-              <View key={item.expression} style={styles.insightRow}>
-                <Text style={styles.insightExpression}>{item.expression}</Text>
-                <Text style={styles.insightText}>{item.insight}</Text>
+        {reading.expression_insights.map((item, index) => (
+          <FadeInView key={item.expression} delay={80 + index * 60}>
+            <GlassCard style={styles.card}>
+              <View style={styles.cardHeaderRow}>
+                <Text style={styles.cardGlyph}>{EXPRESSION_GLYPHS[item.expression]}</Text>
+                <Text style={styles.cardHeading}>{item.expression}</Text>
               </View>
-            ))}
+              <Text style={styles.cardBody}>{item.insight}</Text>
+            </GlassCard>
+          </FadeInView>
+        ))}
 
-            <Text style={styles.narrative}>{reading.narrative}</Text>
+        <FadeInView delay={80 + reading.expression_insights.length * 60}>
+          <GlassCard style={styles.card}>
+            <View style={styles.cardHeaderRow}>
+              <Text style={styles.cardGlyph}>✦</Text>
+              <Text style={styles.cardHeading}>{t('reveal.narrativeHeading')}</Text>
+            </View>
+            <Text style={styles.cardBody}>{reading.narrative}</Text>
           </GlassCard>
         </FadeInView>
       </ScrollView>
@@ -87,31 +108,35 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Theme.spacing.containerPadding,
     paddingBottom: Theme.spacing.md,
-  },
-  card: {
     gap: Theme.spacing.sm,
   },
   headline: {
     ...Theme.typography.headlineMd,
     color: Theme.colors.text.primary,
+    textAlign: 'center',
+    marginBottom: Theme.spacing.xs,
   },
-  insightRow: {
-    gap: 2,
+  card: {
+    gap: Theme.spacing.xs,
   },
-  insightExpression: {
-    ...Theme.typography.labelSm,
-    color: Theme.colors.accent.crimsonPrimary,
-    textTransform: 'uppercase',
+  cardHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
-  insightText: {
+  cardGlyph: {
+    fontSize: 22,
+  },
+  cardHeading: {
+    ...Theme.typography.headlineMd,
+    fontSize: 16,
+    color: Theme.colors.accent.goldSecondary,
+    textTransform: 'capitalize',
+  },
+  cardBody: {
     ...Theme.typography.bodyMd,
     fontSize: 14,
     color: Theme.colors.text.secondary,
-  },
-  narrative: {
-    ...Theme.typography.bodyMd,
-    color: Theme.colors.text.primary,
-    marginTop: Theme.spacing.xs,
   },
   footer: {
     paddingHorizontal: Theme.spacing.containerPadding,

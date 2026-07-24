@@ -523,6 +523,10 @@ export const translations = {
     fr: "Retour au menu principal", ar: 'العودة إلى القائمة الرئيسية', bn: 'মূল মেনুতে ফিরে যান', pt: 'Voltar ao menu principal',
     ru: 'Назад в главное меню', ur: 'مرکزی مینو پر واپس جائیں',
   },
+  'reveal.narrativeHeading': {
+    en: 'The Full Picture', zh: '整体画像', hi: 'पूरी तस्वीर', es: 'La imagen completa', fr: "Le tableau d'ensemble",
+    ar: 'الصورة الكاملة', bn: 'সম্পূর্ণ চিত্র', pt: 'A imagem completa', ru: 'Полная картина', ur: 'مکمل تصویر',
+  },
   'reveal.title': {
     en: 'Your Reading', zh: '你的解读', hi: 'आपकी रीडिंग', es: 'Tu lectura', fr: 'Votre lecture', ar: 'قراءتك',
     bn: 'আপনার রিডিং', pt: 'A sua leitura', ru: 'Ваш анализ', ur: 'آپ کی ریڈنگ',
