@@ -7,12 +7,29 @@ const CAPTURE_CHIME = require('../../assets/audio/capture_chime.wav');
 const PROMPT_CHIME = require('../../assets/audio/prompt_chime.wav');
 const AMBIENT_SHIMMER = require('../../assets/audio/ambient_shimmer.wav');
 
+// Capture and prompt chimes fire back-to-back (shutter tap immediately
+// followed by the next step's prompt) — without this, the previous chime is
+// still ringing out when the next one starts, and the two overlap into a
+// mesh of sound. Only one one-shot chime plays at a time.
+let activeOneShot: Audio.Sound | null = null;
+
 async function playOneShot(source: number): Promise<void> {
   try {
+    if (activeOneShot) {
+      const previous = activeOneShot;
+      activeOneShot = null;
+      await previous.stopAsync().catch(() => {});
+      await previous.unloadAsync().catch(() => {});
+    }
+
     const { sound } = await Audio.Sound.createAsync(source);
+    activeOneShot = sound;
     sound.setOnPlaybackStatusUpdate((status) => {
       if (status.isLoaded && status.didJustFinish) {
         sound.unloadAsync();
+        if (activeOneShot === sound) {
+          activeOneShot = null;
+        }
       }
     });
     await sound.playAsync();

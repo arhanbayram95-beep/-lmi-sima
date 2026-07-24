@@ -27,6 +27,29 @@ describe('sound utilities', () => {
     expect(unloadAsync).toHaveBeenCalledTimes(1);
   });
 
+  it('stops the previous one-shot chime before starting the next, to avoid overlap', async () => {
+    const first = {
+      setOnPlaybackStatusUpdate: jest.fn(),
+      playAsync: jest.fn().mockResolvedValue(undefined),
+      stopAsync: jest.fn().mockResolvedValue(undefined),
+      unloadAsync: jest.fn().mockResolvedValue(undefined),
+    };
+    const second = {
+      setOnPlaybackStatusUpdate: jest.fn(),
+      playAsync: jest.fn().mockResolvedValue(undefined),
+      stopAsync: jest.fn().mockResolvedValue(undefined),
+      unloadAsync: jest.fn().mockResolvedValue(undefined),
+    };
+    mockCreateAsync.mockResolvedValueOnce({ sound: first }).mockResolvedValueOnce({ sound: second });
+
+    await playCaptureChime();
+    await playPromptChime();
+
+    expect(first.stopAsync).toHaveBeenCalledTimes(1);
+    expect(first.unloadAsync).toHaveBeenCalledTimes(1);
+    expect(second.playAsync).toHaveBeenCalledTimes(1);
+  });
+
   it('does not throw when playback fails to load', async () => {
     mockCreateAsync.mockRejectedValue(new Error('no audio device'));
     await expect(playPromptChime()).resolves.toBeUndefined();

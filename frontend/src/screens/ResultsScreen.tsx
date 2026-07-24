@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Theme.spacing.containerPadding,
   },
   emptyState: {
+    width: '100%',
     alignItems: 'center',
     gap: Theme.spacing.sm,
   },

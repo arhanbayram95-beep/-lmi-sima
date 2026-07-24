@@ -62,9 +62,6 @@ export default function LoadingScreen() {
       <Text style={styles.subtitle}>{t('loading.subtitle')}</Text>
 
       <View style={styles.progressWrap}>
-        <View style={styles.shimmerTrack}>
-          <View style={styles.shimmerFill} />
-        </View>
         <Animated.View style={[styles.spinnerRing, { transform: [{ rotate: spinDeg }] }]} />
         <Text style={styles.statusText}>{t(STATUS_KEYS[statusIndex])}</Text>
       </View>
@@ -93,18 +90,6 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     alignItems: 'center',
     gap: Theme.spacing.sm,
-  },
-  shimmerTrack: {
-    width: '100%',
-    height: 2,
-    borderRadius: Theme.radius.full,
-    backgroundColor: 'rgba(158, 41, 65, 0.2)',
-    overflow: 'hidden',
-  },
-  shimmerFill: {
-    width: '66%',
-    height: '100%',
-    backgroundColor: Theme.colors.accent.goldSecondary,
   },
   spinnerRing: {
     width: 44,

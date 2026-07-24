@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import DisclaimerFooter from '../components/common/DisclaimerFooter';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
@@ -83,6 +83,7 @@ export default function PaywallScreen() {
         )}
       </View>
 
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>
         <FadeInView>
           <Text style={styles.headline}>{t('paywall.headline')}</Text>
@@ -163,6 +164,7 @@ export default function PaywallScreen() {
         </View>
         <DisclaimerFooter />
       </View>
+      </ScrollView>
 
       <PrivacyPolicyModal visible={privacyVisible} onClose={() => setPrivacyVisible(false)} />
       <TermsModal visible={termsVisible} onClose={() => setTermsVisible(false)} />
@@ -193,6 +195,11 @@ const styles = StyleSheet.create({
   closeIcon: {
     color: Theme.colors.text.secondary,
     fontSize: 16,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
+    paddingBottom: Theme.spacing.sm,
   },
   content: {
     paddingHorizontal: Theme.spacing.containerPadding,
@@ -310,7 +317,6 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
   },
   footer: {
-    marginTop: 'auto',
     paddingHorizontal: Theme.spacing.containerPadding,
     paddingBottom: Theme.spacing.sm,
     gap: 6,
