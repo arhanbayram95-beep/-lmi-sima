@@ -1,4 +1,4 @@
-const PAYLOAD = { calm: 'base64-calm', bright: 'base64-bright', deep: 'base64-deep' };
+const PAYLOAD = { calm: 'base64-calm', bright: 'base64-bright', deep: 'base64-deep', module: 'three-expression' as const };
 
 describe('analyzeReading (real API mode)', () => {
   beforeEach(() => {

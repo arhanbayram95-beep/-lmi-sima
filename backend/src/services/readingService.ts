@@ -1,6 +1,6 @@
 import { ReadingModelClient } from './geminiClient';
-import { ExpressionInsight, ReadingResult, readingResponseSchema } from './readingSchema';
-import { READING_SYSTEM_PROMPT } from './systemPrompt';
+import { ExpressionInsight, ReadingModuleId, ReadingResult, readingResponseSchema } from './readingSchema';
+import { READING_SYSTEM_PROMPTS } from './systemPrompt';
 
 export interface ExpressionPhotos {
   calm: string;
@@ -19,7 +19,8 @@ const MODEL = 'gemini-2.5-flash';
 // process — there is no secure-wipe primitive to reach for here.
 export async function generateReading(
   client: ReadingModelClient,
-  photos: ExpressionPhotos
+  photos: ExpressionPhotos,
+  moduleId: ReadingModuleId = 'three-expression'
 ): Promise<ReadingResult> {
   let responseText: string | undefined;
   try {
@@ -37,7 +38,7 @@ export async function generateReading(
         },
       ],
       config: {
-        systemInstruction: READING_SYSTEM_PROMPT,
+        systemInstruction: READING_SYSTEM_PROMPTS[moduleId],
         responseMimeType: 'application/json',
         responseSchema: readingResponseSchema,
       },

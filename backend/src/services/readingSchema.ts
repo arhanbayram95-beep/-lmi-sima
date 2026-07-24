@@ -2,6 +2,12 @@ import { Schema, Type } from '@google/genai';
 
 export type ExpressionLabel = 'calm' | 'bright' | 'deep';
 
+// Each maps to its own system prompt (see systemPrompt.ts) — same response
+// shape below across all three, only the prompt framing differs.
+export type ReadingModuleId = 'three-expression' | 'relationship-harmony' | 'career-match';
+
+export const READING_MODULE_IDS: ReadingModuleId[] = ['three-expression', 'relationship-harmony', 'career-match'];
+
 export interface ExpressionInsight {
   expression: ExpressionLabel;
   insight: string;

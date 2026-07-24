@@ -63,4 +63,28 @@ describe('POST /api/v1/reading/analyze', () => {
     expect(generateContent).not.toHaveBeenCalled();
   });
 
+  it('accepts a valid module and forwards it to the reading service', async () => {
+    generateContent.mockResolvedValue(textResponse({ headline: 'h', expression_insights: [], narrative: 'n' }));
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/reading/analyze',
+      payload: { ...VALID_BODY, module: 'career-match' },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const [[callArgs]] = generateContent.mock.calls;
+    expect(callArgs.config.systemInstruction).toMatch(/career/i);
+  });
+
+  it('rejects an unknown module value', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/reading/analyze',
+      payload: { ...VALID_BODY, module: 'not-a-real-module' },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(generateContent).not.toHaveBeenCalled();
+  });
 });

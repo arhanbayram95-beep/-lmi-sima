@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { ReadingModelClient } from '../services/geminiClient';
 import { generateReading, ReadingServiceError } from '../services/readingService';
 import { requireActiveEntitlement } from '../middleware/entitlement';
+import { READING_MODULE_IDS, ReadingModuleId } from '../services/readingSchema';
 
 // maxLength guards against a single oversized field (e.g. abuse stuffing
 // megabytes into one photo) wasting a paid Gemini call before the request
@@ -15,6 +16,9 @@ const analyzeBodySchema = {
     calm: { type: 'string', minLength: 1, maxLength: 1_000_000 },
     bright: { type: 'string', minLength: 1, maxLength: 1_000_000 },
     deep: { type: 'string', minLength: 1, maxLength: 1_000_000 },
+    // Optional + defaulted rather than required, so older/mocked clients
+    // that never send it still get the original three-expression reading.
+    module: { type: 'string', enum: READING_MODULE_IDS },
   },
   additionalProperties: false,
 } as const;
@@ -23,6 +27,7 @@ interface AnalyzeRequestBody {
   calm: string;
   bright: string;
   deep: string;
+  module?: ReadingModuleId;
 }
 
 export function registerReadingRoutes(app: FastifyInstance, readingModelClient: ReadingModelClient): void {
@@ -31,7 +36,7 @@ export function registerReadingRoutes(app: FastifyInstance, readingModelClient: 
     { preHandler: requireActiveEntitlement, schema: { body: analyzeBodySchema } },
     async (request, reply) => {
       try {
-        const result = await generateReading(readingModelClient, request.body);
+        const result = await generateReading(readingModelClient, request.body, request.body.module);
         return reply.status(200).send(result);
       } catch (error) {
         if (error instanceof ReadingServiceError) {

@@ -1,5 +1,6 @@
 import { ReadingModelClient } from '../../src/services/geminiClient';
 import { generateReading, ReadingServiceError } from '../../src/services/readingService';
+import { READING_SYSTEM_PROMPTS } from '../../src/services/systemPrompt';
 
 const PHOTOS = { calm: 'base64-calm', bright: 'base64-bright', deep: 'base64-deep' };
 
@@ -80,4 +81,29 @@ describe('generateReading', () => {
 
     await expect(generateReading(makeClient(generateContent), PHOTOS)).rejects.toBeInstanceOf(ReadingServiceError);
   });
+
+  it('defaults to the three-expression system prompt when no module is given', async () => {
+    const generateContent = jest.fn().mockResolvedValue(
+      textResponse({ headline: 'h', expression_insights: [], narrative: 'n' })
+    );
+
+    await generateReading(makeClient(generateContent), PHOTOS);
+
+    const [[callArgs]] = generateContent.mock.calls;
+    expect(callArgs.config.systemInstruction).toBe(READING_SYSTEM_PROMPTS['three-expression']);
+  });
+
+  it.each(['three-expression', 'relationship-harmony', 'career-match'] as const)(
+    'uses the %s module\'s own system prompt',
+    async (moduleId) => {
+      const generateContent = jest.fn().mockResolvedValue(
+        textResponse({ headline: 'h', expression_insights: [], narrative: 'n' })
+      );
+
+      await generateReading(makeClient(generateContent), PHOTOS, moduleId);
+
+      const [[callArgs]] = generateContent.mock.calls;
+      expect(callArgs.config.systemInstruction).toBe(READING_SYSTEM_PROMPTS[moduleId]);
+    }
+  );
 });
