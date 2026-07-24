@@ -104,6 +104,16 @@ export default function SwipeablePager({ index, onIndexChange, children, style }
         onMomentumScrollBegin={() => {
           isSettling.current = true;
           clearSettleTimeout();
+          // onMomentumScrollEnd is not guaranteed to fire for every momentum
+          // phase on every native platform (a known RN inconsistency,
+          // especially for a programmatic scrollTo rather than a user drag
+          // release) — without this fallback, a single missed end event
+          // leaves isSettling stuck true forever, which permanently blocks
+          // the repositioning effect above from ever reacting to a future
+          // index change again (e.g. a second press of Next).
+          settleTimeout.current = setTimeout(() => {
+            isSettling.current = false;
+          }, SETTLE_GRACE_MS);
         }}
         onMomentumScrollEnd={() => {
           isSettling.current = false;

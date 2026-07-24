@@ -94,4 +94,40 @@ describe('SwipeablePager', () => {
 
     scrollToSpy.mockRestore();
   });
+
+  it('recovers from a missed onMomentumScrollEnd so a later index change still repositions', () => {
+    jest.useFakeTimers();
+    const scrollToSpy = jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+    const onIndexChange = jest.fn();
+
+    const { rerender } = render(
+      <SwipeablePager index={0} onIndexChange={onIndexChange}>
+        <Text>Page One</Text>
+        <Text>Page Two</Text>
+      </SwipeablePager>
+    );
+
+    const pageWidth = 400;
+    fireEvent(screen.getByTestId('swipeable-pager'), 'layout', { nativeEvent: { layout: { width: pageWidth } } });
+    const scrollView = screen.UNSAFE_getByProps({ horizontal: true });
+    scrollToSpy.mockClear();
+
+    // A momentum phase starts (e.g. from a prior programmatic scrollTo, like
+    // the Next button triggers) but never reports its end - a real, observed
+    // native inconsistency this component must not get permanently stuck on.
+    fireEvent(scrollView, 'momentumScrollBegin');
+    jest.advanceTimersByTime(500);
+
+    rerender(
+      <SwipeablePager index={1} onIndexChange={onIndexChange}>
+        <Text>Page One</Text>
+        <Text>Page Two</Text>
+      </SwipeablePager>
+    );
+
+    expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ x: pageWidth }));
+
+    scrollToSpy.mockRestore();
+    jest.useRealTimers();
+  });
 });
