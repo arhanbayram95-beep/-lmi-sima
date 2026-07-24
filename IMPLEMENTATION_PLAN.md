@@ -1,8 +1,9 @@
 # Implementation Plan: Ilm-i Sima *(working title)*
 **Version:** 1.1.0 (MVP Sprint Plan — US/EU Market Re-skin)
 **Objective:** Build a high-fidelity, immersive mobile app with a backend bridge
-to Claude Sonnet 5 Vision, styled for the mainstream US/EU "modern mystic" app
-category, within a strict entertainment framing.
+to an AI vision model (currently Google Gemini, see PROJECT_SPEC.md §4), styled
+for the mainstream US/EU "modern mystic" app category, within a strict
+entertainment framing.
 
 ---
 
@@ -51,10 +52,13 @@ category, within a strict entertainment framing.
 
 ---
 
-## Phase 3: The Gateway Backend & Claude Vision Integration
+## Phase 3: The Gateway Backend & AI Vision Integration
 - [x] **3.1 Backend Skeleton Framework (`FastAPI` or `Node.js`)**
   - Initialize the server structure inside `/backend`.
   - Configure `.env` mapping `ANTHROPIC_API_KEY` and `REVENUECAT_API_KEY`.
+  - **2026-07-24:** provider swapped to Gemini — `.env` now maps
+    `GEMINI_API_KEY` instead (see PROJECT_SPEC.md §4; pricing decision still
+    open between Gemini and Claude).
 - [x] **3.2 Payload Serialization (`backend/src/reading/protocol/`)**
   - Construct an endpoint `/api/v1/reading/analyze` accepting 3 base64 strings in a JSON wrapper.
   - Embed the **system prompt** (warm cosmic-guide persona, defensive wording
@@ -62,6 +66,11 @@ category, within a strict entertainment framing.
   - Use **Claude Sonnet 5** (`claude-sonnet-5`) with a **tool-use JSON schema**
     (not `response_format` — that param doesn't exist on the Anthropic API) to
     lock the output to the target schema. Force the tool via `tool_choice`.
+  - **2026-07-24:** rewritten for Gemini (`gemini-2.5-flash` via
+    `@google/genai`) — structured output now via `config.responseSchema` +
+    `responseMimeType: 'application/json'` instead of tool-use. Live-tested
+    end to end (real key, real schema, real images) — see
+    `backend/src/services/{geminiClient,readingService,readingSchema}.ts`.
 - [x] **3.3 Privacy Shield Enforcement (`backend/src/reading/transport/`)**
   - Implement an aggressive memory-clear function: the moment Claude returns the
     structured result, delete the base64 arrays from active memory

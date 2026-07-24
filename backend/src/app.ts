@@ -1,9 +1,9 @@
 import Fastify, { FastifyInstance } from 'fastify';
-import { AnthropicMessagesClient } from './services/anthropicClient';
+import { ReadingModelClient } from './services/geminiClient';
 import { registerReadingRoutes } from './routes/reading';
 
-export function buildApp(anthropicClient: AnthropicMessagesClient): FastifyInstance {
+export function buildApp(readingModelClient: ReadingModelClient): FastifyInstance {
   const app = Fastify({ logger: false });
-  registerReadingRoutes(app, anthropicClient);
+  registerReadingRoutes(app, readingModelClient);
   return app;
 }

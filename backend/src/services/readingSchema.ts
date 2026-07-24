@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { Schema, Type } from '@google/genai';
 
 export type ExpressionLabel = 'calm' | 'bright' | 'deep';
 
@@ -13,38 +13,32 @@ export interface ReadingResult {
   narrative: string;
 }
 
-export const SUBMIT_READING_TOOL_NAME = 'submit_reading';
-
-// Forced via tool_choice in readingService — see PROJECT_SPEC.md §4. The
-// Anthropic API has no response_format param; tool use is how we lock the
-// model to this shape.
-export const submitReadingTool: Anthropic.Tool = {
-  name: SUBMIT_READING_TOOL_NAME,
-  description: 'Submit the structured character reading generated from the three expression photos.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      headline: {
-        type: 'string',
-        description: 'A short, punchy one-line headline for the reading (roughly 4-8 words).',
-      },
-      expression_insights: {
-        type: 'array',
-        description: 'One insight per captured expression, in the order Calm, Bright, Deep.',
-        items: {
-          type: 'object',
-          properties: {
-            expression: { type: 'string', enum: ['calm', 'bright', 'deep'] },
-            insight: { type: 'string', description: 'A short, warm observation for this expression.' },
-          },
-          required: ['expression', 'insight'],
+// Forced via config.responseSchema + responseMimeType: 'application/json' in
+// geminiClient/readingService — see PROJECT_SPEC.md §4. Gemini's structured
+// output is schema + mime-type based, not tool-use like the Anthropic API.
+export const readingResponseSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    headline: {
+      type: Type.STRING,
+      description: 'A short, punchy one-line headline for the reading (roughly 4-8 words).',
+    },
+    expression_insights: {
+      type: Type.ARRAY,
+      description: 'One insight per captured expression, in the order Calm, Bright, Deep.',
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          expression: { type: Type.STRING, format: 'enum', enum: ['calm', 'bright', 'deep'] },
+          insight: { type: Type.STRING, description: 'A short, warm observation for this expression.' },
         },
-      },
-      narrative: {
-        type: 'string',
-        description: 'A short paragraph (2-4 sentences) tying the three insights into an overall character vibe.',
+        required: ['expression', 'insight'],
       },
     },
-    required: ['headline', 'expression_insights', 'narrative'],
+    narrative: {
+      type: Type.STRING,
+      description: 'A short paragraph (2-4 sentences) tying the three insights into an overall character vibe.',
+    },
   },
+  required: ['headline', 'expression_insights', 'narrative'],
 };

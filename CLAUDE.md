@@ -30,11 +30,11 @@ Everything in `PROJECT_SPEC.md` and `DESIGN.md`. Not open for discussion unless 
 
 ### Technical Stack & Architecture
 * **Frontend:** React Native + TypeScript, Expo (blank TS template). State via `Zustand`. Camera via `expo-camera`. Haptics via `expo-haptics`. Device/build info via `expo-constants` and `expo-device`. Anonymous ID generation via `expo-crypto`. Native rate-review prompt via `expo-store-review`. Audio via `expo-av`. Share cards via `react-native-view-shot`. In-app UI translation strings live in `frontend/src/i18n/` (lightweight custom dictionary, not a library — legal documents stay English-only pending professional translation). Styling strictly via tokens in `frontend/src/ui/theme.ts` (Crimson `#9E2941`, Champagne Gold `#EBC983`, Dark Obsidian `#1A050B`).
-* **Backend:** Node.js + TypeScript using **Fastify** (locked framework — do NOT switch or mix with Express). Acts purely as a thin gateway; holds the Anthropic key, never exposes it to the frontend.
-* **AI Model:** `claude-sonnet-5` (or latest `claude-3-5-sonnet`) via the Anthropic Messages API. Vision input: up to 3 images per request (Calm, Bright, Deep), images positioned before text in the content array.
-* **Structured Output:** Tool-use with a strict JSON schema + forced `tool_choice`. Never use `response_format` — that parameter does not exist on the Anthropic API (it's an OpenAI-specific option; don't port it over).
+* **Backend:** Node.js + TypeScript using **Fastify** (locked framework — do NOT switch or mix with Express). Acts purely as a thin gateway; holds the AI provider key, never exposes it to the frontend.
+* **AI Model:** Google Gemini (`gemini-2.5-flash`) via `@google/genai`'s `ai.models.generateContent`, as of 2026-07-24 — see PROJECT_SPEC.md §4. Provider is still under evaluation against Anthropic Claude on pricing, not a final decision; the AI-calling code stays isolated in `backend/src/services/` (client/service/schema split) so switching back stays contained. Vision input: up to 3 images per request (Calm, Bright, Deep), passed as `inlineData` parts before the text part.
+* **Structured Output:** `config.responseMimeType: 'application/json'` + `config.responseSchema` on the `generateContent` call — Gemini's native structured-output mechanism (an OpenAPI-subset schema using the `Type` enum). Not the same mechanism as Anthropic tool-use; don't port Anthropic's `tool_choice` pattern over if the provider changes again — check PROJECT_SPEC.md §4 for whichever provider is current.
 * **Endpoint:** `POST /api/v1/reading/analyze` — accepts 3 base64 images, returns the structured analysis.
-* **Env Vars:** `ANTHROPIC_API_KEY`, `REVENUECAT_API_KEY`. No others without updating `PROJECT_SPEC.md` first.
+* **Env Vars:** `GEMINI_API_KEY`, `REVENUECAT_API_KEY`. No others without updating `PROJECT_SPEC.md` first.
 * **Monetization:** RevenueCat, weekly/monthly subscription ("Aura Pro Access"). Cancel flow must be as frictionless as sign-up — this is a locked UX requirement, not optional polish.
 * **Privacy Architecture (Process-and-Discard):** Captured images live in memory only (Zustand on client, Fastify payload buffer on server) and are purged immediately after the API response returns. No image ever touches disk or a database.
 
@@ -72,7 +72,7 @@ When a phase's acceptance criterion in `IMPLEMENTATION_PLAN.md` is met, commit d
 * **TypeScript Everywhere:** Strict mode on, no `any` without a comment explaining why it's unavoidable.
 * **React Native:** Functional components + hooks only — no class components.
 * **Zustand Slices:** One slice per domain (capture, consent/age-gate, entitlement). Don't reach into another slice's internals.
-* **Pure Functions:** Scoring/prompt-assembly logic in `backend/src/services/` should be testable without an HTTP layer or the Anthropic SDK in the loop (inject/mock the client).
+* **Pure Functions:** Scoring/prompt-assembly logic in `backend/src/services/` should be testable without an HTTP layer or the AI provider's SDK in the loop (inject/mock the client).
 * **Code Comments:** No comments explaining *what* the code does. Names carry that. Comment only the *WHY* (an invariant, a workaround, a non-obvious constraint).
 * **Module Headers:** One paragraph max. Point to the relevant `PROJECT_SPEC.md` section instead of re-explaining it.
 * **Logging:** No `console.log` for user-facing flows — use the UI layer or a structured logger in Fastify. `console.error` for actual error paths is fine.
@@ -85,8 +85,8 @@ When a phase's acceptance criterion in `IMPLEMENTATION_PLAN.md` is met, commit d
 * `frontend/src/api/` — the ONLY place that talks to the backend. Screens/components never call `fetch` directly.
 * `frontend/src/screens/` — may import `components/`, `navigation/`, `api/`, and the `Zustand` store. Never imports another screen directly.
 * `frontend/src/components/` — presentational only; no direct API calls (receive data via props/store).
-* `backend/src/routes/` — HTTP/Fastify layer only (parse, validate JSON schema, call a service, respond). No direct Anthropic SDK calls here.
-* `backend/src/services/` — business logic, prompt assembly, Anthropic SDK calls, memory-purge logic. No HTTP-specific code (no `req`/`reply`).
+* `backend/src/routes/` — HTTP/Fastify layer only (parse, validate JSON schema, call a service, respond). No direct AI provider SDK calls here.
+* `backend/src/services/` — business logic, prompt assembly, AI provider SDK calls, memory-purge logic. No HTTP-specific code (no `req`/`reply`).
 * `backend/src/middleware/` — consent/entitlement checks, rate limiting.
 
 ---
@@ -94,7 +94,7 @@ When a phase's acceptance criterion in `IMPLEMENTATION_PLAN.md` is met, commit d
 ## Testing
 
 * **Frontend:** Jest + React Native Testing Library. Mock `expo-camera`, `expo-av`, and RevenueCat hooks — never require real device hardware in automated tests.
-* **Backend:** Jest or Vitest with Fastify's `.inject()` testing API and a mocked Anthropic client — never call the real Claude API in automated tests. Use fixture responses matching the tool-use JSON schema.
+* **Backend:** Jest or Vitest with Fastify's `.inject()` testing API and a mocked reading-model client — never call the real Gemini/Claude API in automated tests. Use fixture responses matching the current provider's structured-output schema.
 * **Assertions:** One assertion concept per test.
 * **Edge Cases Required:** Non-face-detected photo, network failure mid-analysis, expired/missing entitlement, age-gate rejection.
 

@@ -1,5 +1,5 @@
-import { AnthropicMessagesClient } from './anthropicClient';
-import { ExpressionInsight, ReadingResult, submitReadingTool, SUBMIT_READING_TOOL_NAME } from './readingSchema';
+import { ReadingModelClient } from './geminiClient';
+import { ExpressionInsight, ReadingResult, readingResponseSchema } from './readingSchema';
 import { READING_SYSTEM_PROMPT } from './systemPrompt';
 
 export interface ExpressionPhotos {
@@ -10,7 +10,7 @@ export interface ExpressionPhotos {
 
 export class ReadingServiceError extends Error {}
 
-const MODEL = 'claude-sonnet-5';
+const MODEL = 'gemini-2.5-flash';
 
 // process-and-discard per PROJECT_SPEC.md §3: this function never persists
 // the incoming base64 strings anywhere (no disk, no db, no in-memory cache
@@ -18,56 +18,58 @@ const MODEL = 'claude-sonnet-5';
 // returns. That is the extent "memory clearing" means in a Node/JS
 // process — there is no secure-wipe primitive to reach for here.
 export async function generateReading(
-  client: AnthropicMessagesClient,
+  client: ReadingModelClient,
   photos: ExpressionPhotos
 ): Promise<ReadingResult> {
-  let response;
+  let responseText: string | undefined;
   try {
-    response = await client.messages.create({
+    const response = await client.models.generateContent({
       model: MODEL,
-      max_tokens: 1024,
-      system: READING_SYSTEM_PROMPT,
-      tools: [submitReadingTool],
-      tool_choice: { type: 'tool', name: SUBMIT_READING_TOOL_NAME },
-      messages: [
+      contents: [
         {
           role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: photos.calm } },
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: photos.bright } },
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: photos.deep } },
-            {
-              type: 'text',
-              text: 'These are three photos in order: Calm, Bright, Deep. Generate the reading now.',
-            },
+          parts: [
+            { inlineData: { mimeType: 'image/jpeg', data: photos.calm } },
+            { inlineData: { mimeType: 'image/jpeg', data: photos.bright } },
+            { inlineData: { mimeType: 'image/jpeg', data: photos.deep } },
+            { text: 'These are three photos in order: Calm, Bright, Deep. Generate the reading now.' },
           ],
         },
       ],
+      config: {
+        systemInstruction: READING_SYSTEM_PROMPT,
+        responseMimeType: 'application/json',
+        responseSchema: readingResponseSchema,
+      },
     });
+    responseText = response.text;
   } catch (cause) {
-    throw new ReadingServiceError('Failed to reach the Anthropic API.', { cause });
+    throw new ReadingServiceError('Failed to reach the Gemini API.', { cause });
   }
 
-  const toolUseBlock = response.content.find(
-    (block): block is Extract<typeof block, { type: 'tool_use' }> => block.type === 'tool_use'
-  );
-
-  if (!toolUseBlock || toolUseBlock.name !== SUBMIT_READING_TOOL_NAME) {
-    throw new ReadingServiceError('Anthropic response did not include the expected submit_reading tool call.');
+  if (!responseText) {
+    throw new ReadingServiceError('Gemini response did not include any text output.');
   }
 
-  return validateReadingResult(toolUseBlock.input);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(responseText);
+  } catch (cause) {
+    throw new ReadingServiceError('Gemini response was not valid JSON.', { cause });
+  }
+
+  return validateReadingResult(parsed);
 }
 
 function validateReadingResult(input: unknown): ReadingResult {
   if (typeof input !== 'object' || input === null) {
-    throw new ReadingServiceError('submit_reading tool input was not an object.');
+    throw new ReadingServiceError('Gemini response body was not an object.');
   }
 
   const { headline, expression_insights: insights, narrative } = input as Record<string, unknown>;
 
   if (typeof headline !== 'string' || typeof narrative !== 'string' || !Array.isArray(insights)) {
-    throw new ReadingServiceError('submit_reading tool input did not match the expected schema.');
+    throw new ReadingServiceError('Gemini response body did not match the expected schema.');
   }
 
   return {

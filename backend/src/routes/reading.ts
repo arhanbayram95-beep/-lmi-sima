@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { AnthropicMessagesClient } from '../services/anthropicClient';
+import { ReadingModelClient } from '../services/geminiClient';
 import { generateReading, ReadingServiceError } from '../services/readingService';
 import { requireActiveEntitlement } from '../middleware/entitlement';
 
@@ -20,13 +20,13 @@ interface AnalyzeRequestBody {
   deep: string;
 }
 
-export function registerReadingRoutes(app: FastifyInstance, anthropicClient: AnthropicMessagesClient): void {
+export function registerReadingRoutes(app: FastifyInstance, readingModelClient: ReadingModelClient): void {
   app.post<{ Body: AnalyzeRequestBody }>(
     '/api/v1/reading/analyze',
     { preHandler: requireActiveEntitlement, schema: { body: analyzeBodySchema } },
     async (request, reply) => {
       try {
-        const result = await generateReading(anthropicClient, request.body);
+        const result = await generateReading(readingModelClient, request.body);
         return reply.status(200).send(result);
       } catch (error) {
         if (error instanceof ReadingServiceError) {

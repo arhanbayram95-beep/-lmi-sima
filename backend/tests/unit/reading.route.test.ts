@@ -1,24 +1,21 @@
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/app';
-import { AnthropicMessagesClient } from '../../src/services/anthropicClient';
-import { SUBMIT_READING_TOOL_NAME } from '../../src/services/readingSchema';
+import { ReadingModelClient } from '../../src/services/geminiClient';
 
-function toolUseResponse(input: unknown) {
-  return {
-    content: [{ type: 'tool_use', id: 'tool_1', name: SUBMIT_READING_TOOL_NAME, input }],
-  };
+function textResponse(body: unknown) {
+  return { text: JSON.stringify(body) };
 }
 
 const VALID_BODY = { calm: 'base64-calm', bright: 'base64-bright', deep: 'base64-deep' };
 
 describe('POST /api/v1/reading/analyze', () => {
   let app: FastifyInstance;
-  let create: jest.Mock;
+  let generateContent: jest.Mock;
 
   beforeEach(() => {
-    create = jest.fn();
-    const anthropicClient: AnthropicMessagesClient = { messages: { create } };
-    app = buildApp(anthropicClient);
+    generateContent = jest.fn();
+    const readingModelClient: ReadingModelClient = { models: { generateContent } };
+    app = buildApp(readingModelClient);
   });
 
   afterEach(async () => {
@@ -26,8 +23,8 @@ describe('POST /api/v1/reading/analyze', () => {
   });
 
   it('returns 200 with the structured reading on success', async () => {
-    create.mockResolvedValue(
-      toolUseResponse({ headline: 'Effortlessly Magnetic', expression_insights: [], narrative: 'n' })
+    generateContent.mockResolvedValue(
+      textResponse({ headline: 'Effortlessly Magnetic', expression_insights: [], narrative: 'n' })
     );
 
     const response = await app.inject({ method: 'POST', url: '/api/v1/reading/analyze', payload: VALID_BODY });
@@ -44,11 +41,11 @@ describe('POST /api/v1/reading/analyze', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(create).not.toHaveBeenCalled();
+    expect(generateContent).not.toHaveBeenCalled();
   });
 
-  it('returns 502 when the Anthropic API call fails mid-analysis', async () => {
-    create.mockRejectedValue(new Error('network failure'));
+  it('returns 502 when the Gemini API call fails mid-analysis', async () => {
+    generateContent.mockRejectedValue(new Error('network failure'));
 
     const response = await app.inject({ method: 'POST', url: '/api/v1/reading/analyze', payload: VALID_BODY });
 

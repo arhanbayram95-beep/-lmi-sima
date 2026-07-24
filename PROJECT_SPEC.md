@@ -1,6 +1,6 @@
 # Product Specification & Architecture Document (PRD)
 ## Project Name: Ilm-i Sima *(working title — see §5 Naming Notes)*
-**Tech Blueprint:** React Native + TypeScript (Frontend) | Claude Sonnet 5 (AI Core)
+**Tech Blueprint:** React Native + TypeScript (Frontend) | Google Gemini (AI Core — see §4; provider still under evaluation against Anthropic Claude on pricing)
 **Target Market:** US & EU (primary), positioned in the mainstream "modern mystic" app category (Co-Star / Nebula / Sanctuary / Faladdin peer set)
 
 ---
@@ -77,18 +77,34 @@ Same underlying mechanic, restyled with lighter, universally legible copy:
 
 ---
 
-## 4. AI Integration Notes (corrected for current Anthropic API)
+## 4. AI Integration Notes (current: Google Gemini)
 
-* **Model:** `claude-sonnet-5` via the Messages API — supports multiple images in
-  one user turn (ordered sequence), which is exactly the 3-expression use case.
-* **Structured output:** there is no `response_format: json_object` parameter on
-  the Anthropic API (that's an OpenAI-specific option). Use **tool use** with a
-  strict JSON schema instead — define a single tool (e.g. `submit_reading`) with
-  the target schema, and force it via `tool_choice`. This is more reliable than
-  prompting for raw JSON and parsing it.
+* **Provider decision (2026-07-24):** switched to Google Gemini for active
+  development/testing, using a `GEMINI_API_KEY` the product owner is running
+  personally. Anthropic Claude remains a candidate — the choice between them is
+  still a pricing decision, not an architecture one — so keep the AI-calling
+  code isolated in `backend/src/services/` (client + service + schema) so a
+  future switch back stays a contained change, not a rewrite.
+* **Model:** `gemini-2.5-flash` via `@google/genai`'s `ai.models.generateContent`
+  — supports multiple images in one user turn (ordered sequence), which is
+  exactly the 3-expression use case. `gemini-2.0-flash` returned a `429`
+  (zero free-tier quota) on the current key; `gemini-2.5-flash` works on the
+  free tier as of this decision — re-check quota/pricing before assuming this
+  holds at production volume.
+* **Structured output:** Gemini has no Anthropic-style forced tool-use. Instead,
+  set `config.responseMimeType: 'application/json'` and `config.responseSchema`
+  (an OpenAPI-subset schema using the `Type` enum: `Type.OBJECT`, `Type.STRING`,
+  `Type.ARRAY`, etc. — see `backend/src/services/readingSchema.ts`) on the
+  `generateContent` call. This is Gemini's native structured-output mechanism,
+  not a workaround.
+* **Images:** passed as `{ inlineData: { mimeType: 'image/jpeg', data } }` parts
+  alongside a `{ text }` part, all within one `{ role: 'user', parts: [...] }`
+  content entry — analogous to Anthropic's image-blocks-before-text pattern.
 * **System prompt persona:** modernized "warm cosmic guide" voice rather than
   "16th-century court philosopher" — friendlier and more legible to a US/EU
-  audience raised on Co-Star-style copy (short, punchy, a little cheeky).
+  audience raised on Co-Star-style copy (short, punchy, a little cheeky). Passed
+  via `config.systemInstruction` (Gemini's equivalent of Anthropic's `system`
+  param) — unchanged in content from the Claude-era draft.
 
 ---
 
