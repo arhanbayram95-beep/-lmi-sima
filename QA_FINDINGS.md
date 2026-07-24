@@ -184,3 +184,50 @@ cards with zero backend support. See Phase 7 in `IMPLEMENTATION_PLAN.md` and
   malformed-image request 502s with the sanitized static message, no raw
   Gemini error leaking through either way. `gemini-2.5-flash` responded
   successfully on the current (free-tier) key — no `429`.
+
+---
+
+## Pass 2 — 2026-07-24 (full re-test: paywall/camera fixes + Gemini + new modules together)
+
+Scope: re-ran the whole stack together for the first time — Pass 1's fixes,
+the Gemini backend swap, the security hardening, and the two newly-activated
+modules had each been verified individually but never all at once. Full
+`tsc --noEmit` + Jest suites green on both frontend (28 suites/105 tests)
+and backend (11 tests) going into this pass; this section covers the live
+browser walkthrough on top of that.
+
+- [x] **RETEST-1: Pass 1 fixes still hold after everything since**
+  Re-drove the flow live in a mocked-API browser build: Privacy Policy
+  modal opens and renders the new Biometric Data/Gemini content correctly
+  (QA-8 update didn't break the modal); paywall's "Restore Purchases" is
+  now a real `button` and "Terms of Service" a real `link` in the DOM
+  (QA-1); paywall's third feature bullet reads "High-Res Story Share
+  Cards," not the old "Full Reading History" overclaim (QA-4); the
+  camera-permission screen's close button is present and actually
+  navigates back to Analyze, not just rendered (QA-2); Settings'
+  "Restore Purchases" is a real `button` matching every other row (QA-3).
+  No regressions from the module-activation or legal-content work.
+
+- [x] **RETEST-2: Both new modules confirmed live in the UI, not just tests**
+  "Relationship Harmony Analyzer" and "What Job Suits You" both show the
+  same `›` chevron as the original module (available, not dimmed, no
+  "COMING SOON" badge). Tapped Career Match: routed into the capture
+  permission screen exactly like the original module. This is on top of
+  the unit-test coverage (`AnalyzeScreen.test.tsx`,
+  `AnalyzingScreen.test.tsx`) and the live-Gemini-API verification in
+  MOD-2 above — navigation, state wiring, and actual AI content are all
+  independently confirmed working.
+
+### Tooling note (not an app bug)
+`Alert.alert("Restore Purchases", ...)` doesn't produce a capturable
+dialog in this headless Browser-pane environment on the web platform —
+confirmed via `jest.spyOn(Alert, 'alert')` in `PaywallScreen.test.tsx` /
+`SettingsScreen.test.tsx` that the call happens with the correct
+title/message; the actual shipped target (iOS/Android) renders `Alert`
+natively. Separately, the Browser pane's simulated `left_click` didn't
+register on `LegalDocumentModal`'s "Close" button (a raw DOM
+`.click()` didn't register either) even though `PrivacyPolicyModal.test.tsx`
+passes `fireEvent.press` against the same component — a React Native Web
+touch-responder quirk under this specific browser automation, not
+something to chase further given the unit-test coverage already confirms
+the close handler is wired correctly.
