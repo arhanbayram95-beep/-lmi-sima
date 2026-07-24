@@ -111,6 +111,19 @@ API integration.
   client instead.
 
 ### Flagged for your judgment — not fixed
+- **Gemini API key appears to be on the free tier, not paid.** Per the
+  `fada92b` commit message, `gemini-2.0-flash` 429'd with "zero free-tier
+  quota" and `gemini-2.5-flash` "works on the free tier." Google's own
+  docs (`ai.google.dev/gemini-api/docs/logs-policy`) state the free tier
+  is used to improve Google's products and may be seen by human
+  reviewers, for users outside the EEA/UK/Switzerland — only the paid
+  tier gets the "not used for training" guarantee. The updated Privacy
+  Policy (`legalContent.ts`) now states the no-training guarantee as
+  policy, which requires the production key to actually be on a
+  billing-enabled project before launch, or that claim is false for
+  non-EEA/UK/Swiss users. Your call on when to switch — probably fine to
+  stay on free tier through active development, but this needs to change
+  before any real user photos hit the endpoint.
 - **No rate limiting on `/api/v1/reading/analyze`.** Combined with
   `requireActiveEntitlement` still being a permissive stub (by design,
   pending Phase 5.1's RevenueCat integration), anyone who can reach the
