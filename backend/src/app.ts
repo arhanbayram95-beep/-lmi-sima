@@ -2,8 +2,15 @@ import Fastify, { FastifyError, FastifyInstance } from 'fastify';
 import { ReadingModelClient } from './services/geminiClient';
 import { registerReadingRoutes } from './routes/reading';
 
+// Fastify's own default bodyLimit is 1 MiB for the whole request — smaller
+// than even a single photo field's own 1,000,000-character allowance in
+// analyzeBodySchema (routes/reading.ts), so a real 3-photo request could
+// never succeed against the default. 8 MiB comfortably covers 3 photos at
+// that per-field cap plus JSON overhead, with headroom.
+const BODY_LIMIT_BYTES = 8 * 1024 * 1024;
+
 export function buildApp(readingModelClient: ReadingModelClient): FastifyInstance {
-  const app = Fastify({ logger: false });
+  const app = Fastify({ logger: false, bodyLimit: BODY_LIMIT_BYTES });
   registerReadingRoutes(app, readingModelClient);
 
   // Defense-in-depth: every expected failure path already responds with a
