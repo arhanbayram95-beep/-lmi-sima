@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Animated, Pressable, ScrollView, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
@@ -18,8 +18,14 @@ function PlanCard({
   selected,
   onPress,
   testID,
+  style,
   children,
-}: React.PropsWithChildren<{ selected: boolean; onPress: () => void; testID: string }>) {
+}: React.PropsWithChildren<{
+  selected: boolean;
+  onPress: () => void;
+  testID: string;
+  style?: StyleProp<ViewStyle>;
+}>) {
   const scale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -34,7 +40,7 @@ function PlanCard({
   return (
     <Pressable onPress={onPress} accessibilityRole="radio" accessibilityState={{ checked: selected }} testID={testID}>
       <Animated.View style={{ transform: [{ scale }] }}>
-        <GlassCard style={selected ? styles.planSelected : styles.plan}>{children}</GlassCard>
+        <GlassCard style={[selected ? styles.planSelected : styles.plan, style]}>{children}</GlassCard>
       </Animated.View>
     </Pressable>
   );
@@ -104,9 +110,16 @@ export default function PaywallScreen() {
         </FadeInView>
 
         <FadeInView delay={160} style={styles.plans}>
-          <PlanCard selected={selectedPlan === 'weekly'} onPress={() => setSelectedPlan('weekly')} testID="plan-weekly">
-            <View style={styles.planBadge}>
-              <Text style={styles.planBadgeText}>{t('paywall.mostPopular')}</Text>
+          <PlanCard
+            selected={selectedPlan === 'weekly'}
+            onPress={() => setSelectedPlan('weekly')}
+            testID="plan-weekly"
+            style={styles.planWithBadge}
+          >
+            <View style={styles.planBadgeSlot}>
+              <View style={styles.planBadge}>
+                <Text style={styles.planBadgeText}>{t('paywall.mostPopular')}</Text>
+              </View>
             </View>
             <View style={styles.planRow}>
               <View>
@@ -258,13 +271,27 @@ const styles = StyleSheet.create({
     borderColor: Theme.colors.accent.crimsonPrimary,
     backgroundColor: 'rgba(158, 41, 65, 0.1)',
   },
+  // In normal flow the badge pushed the plan row below the card's vertical
+  // centre, so the weekly card's name and price sat visibly lower than the
+  // annual card's. It now floats in reserved top padding of matching height,
+  // leaving the row centred in both cards.
+  planWithBadge: {
+    paddingVertical: Theme.spacing.lg,
+  },
+  planBadgeSlot: {
+    position: 'absolute',
+    top: 0,
+    left: Theme.spacing.md,
+    right: Theme.spacing.md,
+    height: Theme.spacing.lg,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
   planBadge: {
-    alignSelf: 'flex-end',
     backgroundColor: Theme.colors.accent.crimsonPrimary,
     borderRadius: Theme.radius.full,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    marginBottom: 6,
   },
   planBadgeText: {
     ...Theme.typography.labelSm,
