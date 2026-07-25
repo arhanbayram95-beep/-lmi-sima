@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import DisclaimerFooter from '../components/common/DisclaimerFooter';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
@@ -162,7 +161,6 @@ export default function PaywallScreen() {
             <Text style={styles.footerLink}>{t('paywall.privacyPolicy')}</Text>
           </Pressable>
         </View>
-        <DisclaimerFooter />
       </View>
       </ScrollView>
 
