@@ -14,9 +14,9 @@ import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 import { buildContactMailUrl } from '../utils/contactMail';
 
-// No published store URL yet — add it here once FaceAI is live on the
+// No published store URL yet — add it here once Face Reader is live on the
 // App Store / Play Store so the share message includes a real link.
-const SHARE_MESSAGE = 'Check out FaceAI — playful AI character readings from your photos! ✦';
+const SHARE_MESSAGE = 'Check out Face Reader — playful AI character readings from your photos! ✦';
 
 interface SettingsRowConfig {
   label: string;
@@ -69,7 +69,7 @@ function resolveOsVersionLabel(): string {
 function resolveSignOff(): string {
   if (Platform.OS === 'ios') return 'Sent from my iPhone';
   if (Platform.OS === 'android') return 'Sent from my Android device';
-  return 'Sent from FaceAI';
+  return 'Sent from Face Reader';
 }
 
 function resolveBuildNumber(): string | null {

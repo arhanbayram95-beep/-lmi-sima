@@ -231,3 +231,31 @@ passes `fireEvent.press` against the same component — a React Native Web
 touch-responder quirk under this specific browser automation, not
 something to chase further given the unit-test coverage already confirms
 the close handler is wired correctly.
+
+---
+
+## Rebrand — 2026-07-24 (Face Reader - AI Physiognomy Tool)
+
+- [x] **RENAME-1: Full app rename from FaceAI to Face Reader**
+  Token-swapped "FaceAI" → "Face Reader" everywhere it was user- or
+  model-facing (in-app copy across all 10 languages in `translations.ts`,
+  legal content, backend system prompts, error messages) plus `app.json`'s
+  `name` field and the camera-permission string. Renamed the first module
+  to "Character Analysis" per direction. Left the old Stitch-era design
+  mockup HTML files in `files_for_claude/` untouched — static reference
+  material, never rendered by the actual app.
+  **Flagged before starting, not silently applied** (see
+  `PROJECT_SPEC.md` §5): "physiognomy" is a specific historical
+  pseudo-scientific term (character-from-face-features, associated with
+  19th/20th-century scientific racism) that sits in tension with this
+  app's own locked Entertainment Framing rules (no scientific-validity
+  claims). Product owner confirmed proceeding with the name as specified.
+
+- [x] **RENAME-2: Global Jest timeout fix, not another one-off patch**
+  A *different* file (`SwipeablePager.test.tsx` / `OnboardingScreen.test.tsx`
+  this time) hit the same "passes in isolation, times out under full-suite
+  load" pattern already diagnosed for `AnalyzingScreen.test.tsx` earlier
+  this session. Rather than keep patching individual files as they each
+  happen to get unlucky, moved the fix to `jest.config.js`
+  (`testTimeout: 20000` globally) and removed the now-redundant per-file
+  `jest.setTimeout` override in `AnalyzingScreen.test.tsx`.

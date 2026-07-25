@@ -4,13 +4,8 @@ import AnalyzingScreen from './AnalyzingScreen';
 import { ReadingApiError } from '../api/reading';
 import { useAppStore } from '../state/useAppStore';
 
-// AnalyzingScreen runs two continuous Animated.loop calls with no native
-// driver available under Jest, so they fall back to real JS timers — on a
-// loaded dev machine that reliably pushes this file past Jest's 5000ms
-// default per-test timeout even though the actual assertions resolve fine
-// given more time. Not a fix for slowness, a correction to an unrealistic
-// default for a component that never stops animating during the test.
-jest.setTimeout(20000);
+// The 20000ms default test timeout (jest.config.js) covers this file's
+// continuous Animated.loop calls — see that config's comment for why.
 
 const mockAnalyzeReading = jest.fn();
 
@@ -68,7 +63,7 @@ describe('AnalyzingScreen', () => {
   });
 
   it('shows a retry option when the API call fails', async () => {
-    mockAnalyzeReading.mockRejectedValue(new ReadingApiError('Could not reach the FaceAI server. Check your connection and try again.'));
+    mockAnalyzeReading.mockRejectedValue(new ReadingApiError('Could not reach the Face Reader server. Check your connection and try again.'));
     render(<AnalyzingScreen />);
 
     await waitFor(() => expect(screen.getByTestId('analyzing-retry-button')).toBeTruthy());

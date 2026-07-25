@@ -35,9 +35,12 @@ export default function LanguagePickerModal({ visible, onClose }: LanguagePicker
                   testID={`language-option-${language.code}`}
                   style={styles.row}
                 >
-                  <View>
-                    <Text style={styles.rowLabel}>{language.englishName}</Text>
-                    <Text style={styles.rowSubLabel}>{language.nativeName}</Text>
+                  <View style={styles.rowLeft}>
+                    <Text style={styles.flag}>{language.flag}</Text>
+                    <View>
+                      <Text style={styles.rowLabel}>{language.englishName}</Text>
+                      <Text style={styles.rowSubLabel}>{language.nativeName}</Text>
+                    </View>
                   </View>
                   {selected && <Text style={styles.checkmark}>✓</Text>}
                 </Pressable>
@@ -80,6 +83,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: Theme.colors.surface.glassBorder,
+  },
+  rowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  flag: {
+    fontSize: 22,
   },
   rowLabel: {
     ...Theme.typography.bodyMd,

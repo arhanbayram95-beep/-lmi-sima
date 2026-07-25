@@ -36,11 +36,11 @@ export async function analyzeReading(payload: AnalyzeReadingPayload): Promise<Re
       body: JSON.stringify(payload),
     });
   } catch (cause) {
-    throw new ReadingApiError('Could not reach the FaceAI server. Check your connection and try again.');
+    throw new ReadingApiError('Could not reach the Face Reader server. Check your connection and try again.');
   }
 
   if (!response.ok) {
-    throw new ReadingApiError(`FaceAI server returned an error (${response.status}).`);
+    throw new ReadingApiError(`Face Reader server returned an error (${response.status}).`);
   }
 
   return (await response.json()) as ReadingResult;

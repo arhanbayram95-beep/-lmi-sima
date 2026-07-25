@@ -18,7 +18,7 @@ export function buildApp(readingModelClient: ReadingModelClient): FastifyInstanc
       reply.status(error.statusCode ?? 400).send({ error: error.message });
       return;
     }
-    console.error('Unhandled error in FaceAI backend:', error);
+    console.error('Unhandled error in Face Reader backend:', error);
     reply.status(500).send({ error: 'Something went wrong. Please try again.' });
   });
 

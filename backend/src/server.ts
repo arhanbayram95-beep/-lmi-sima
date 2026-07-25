@@ -9,10 +9,10 @@ async function main(): Promise<void> {
 
   // Port 3000, per project convention — the Expo frontend owns 8081.
   await app.listen({ port: env.port, host: '0.0.0.0' });
-  console.log(`FaceAI backend listening on port ${env.port}`);
+  console.log(`Face Reader backend listening on port ${env.port}`);
 }
 
 main().catch((error) => {
-  console.error('Failed to start FaceAI backend:', error);
+  console.error('Failed to start Face Reader backend:', error);
   process.exit(1);
 });

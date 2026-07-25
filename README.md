@@ -1,4 +1,4 @@
-# FaceAI (Ilm-i Sima) — Modern AI Face & Character Analysis
+# Face Reader - AI Physiognomy Tool (Ilm-i Sima) — Modern AI Face & Character Analysis
 
 A modern, high-quality, HCI-focused React Native mobile application that provides playful AI-generated character and expression insights from 3 captured facial expressions (Calm, Bright, Deep). Built for the US/EU entertainment mobile market.
 

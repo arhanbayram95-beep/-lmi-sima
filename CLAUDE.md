@@ -1,6 +1,6 @@
 # CLAUDE.md — Project Guide & Autonomous Execution Rules for AI Assistants
 
-You are working on **FaceAI** (internally `Ilm-i Sima`) — a React Native mobile app that gives users playful, AI-generated character and expression analysis from three photos, built for the US/EU entertainment-app market. The product design is locked. Your job in this workspace is to continue implementation per `IMPLEMENTATION_PLAN.md`.
+You are working on **Face Reader - AI Physiognomy Tool** (internally `Ilm-i Sima`) — a React Native mobile app that gives users playful, AI-generated character and expression analysis from photos, built for the US/EU entertainment-app market. The product design is locked. Your job in this workspace is to continue implementation per `IMPLEMENTATION_PLAN.md`.
 
 ---
 

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "frontend",
+    "name": "Face Reader - AI Physiognomy Tool",
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -30,7 +30,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "FaceAI uses your camera to capture the three expressions for your reading. Photos are processed in memory and never stored."
+          "cameraPermission": "Face Reader uses your camera to capture your photos for your reading. Photos are processed in memory and never stored."
         }
       ]
     ]

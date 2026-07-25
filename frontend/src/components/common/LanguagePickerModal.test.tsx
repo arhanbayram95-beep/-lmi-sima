@@ -14,6 +14,13 @@ describe('LanguagePickerModal', () => {
     expect(screen.getByText('Urdu')).toBeTruthy();
   });
 
+  it('shows a flag icon next to each language', () => {
+    render(<LanguagePickerModal visible onClose={jest.fn()} />);
+    expect(screen.getByText('🇺🇸')).toBeTruthy();
+    expect(screen.getByText('🇨🇳')).toBeTruthy();
+    expect(screen.getByText('🇵🇰')).toBeTruthy();
+  });
+
   it('updates the store and closes when a language is picked', () => {
     const onClose = jest.fn();
     render(<LanguagePickerModal visible onClose={onClose} />);

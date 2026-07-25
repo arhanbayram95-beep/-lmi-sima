@@ -1,5 +1,5 @@
 # Product Specification & Architecture Document (PRD)
-## Project Name: Ilm-i Sima *(working title — see §5 Naming Notes)*
+## Project Name: Face Reader - AI Physiognomy Tool *(internally `Ilm-i Sima` — see §5 Naming Notes)*
 **Tech Blueprint:** React Native + TypeScript (Frontend) | Google Gemini (AI Core — see §4; provider still under evaluation against Anthropic Claude on pricing)
 **Target Market:** US & EU (primary), positioned in the mainstream "modern mystic" app category (Co-Star / Nebula / Sanctuary / Faladdin peer set)
 
@@ -128,13 +128,20 @@ resulting reading content differ per module (see §4 for how this is wired):
 
 ## 5. Naming Notes
 
-"Ilm-i Sima" is a strong, evocative working title but leans heavily
-Ottoman/Turkish, which may undertranslate for US/EU App Store search and
-first-impression branding. Once ASO research is done, consider names that read
-instantly as "fun face/personality reading app" to an English-speaking audience —
-short, a little mystical, easy to say and share (e.g. single evocative words or
-light compound names, similar in spirit to Co-Star, Nebula, Faladdin, Sanctuary).
-Flag this as a pre-launch decision point, not a blocker for build-out.
+**Decision (2026-07-24):** the public-facing name is **"Face Reader - AI
+Physiognomy Tool"** — "Face Reader" as the short form used in-app (logo
+wordmark, tab bar, compact UI), the full string as the formal/App Store name.
+"Ilm-i Sima" remains the internal/working codename only (repo name, internal
+docs) and is not user-facing.
+
+Flagged explicitly when this was decided, not silently applied: "physiognomy"
+is a specific historical pseudo-scientific term (character-from-face-features)
+with a documented association with 19th/20th-century scientific racism, and
+naming the app after it sits in tension with this doc's own Entertainment
+Framing rules elsewhere (no clinical/scientific-validity claims, entertainment
+only) and with `CLAUDE.md`'s non-negotiable Entertainment Framing section.
+Product owner confirmed proceeding with the name as specified, accepting that
+tradeoff — noting it here for the record, not as an open question.
 
 ---
 

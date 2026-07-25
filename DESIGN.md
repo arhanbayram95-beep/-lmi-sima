@@ -1,4 +1,4 @@
-# Design System & UI/UX Specification: FaceAI / Ilm-i Sima
+# Design System & UI/UX Specification: Face Reader - AI Physiognomy Tool / Ilm-i Sima
 **Version:** 2.0.0  
 **Target Platform:** Mobile (iOS / Android — Expo React Native)  
 **Core Theme:** Modern AI Mysticism x High-End Glassmorphic UX (Sleek, Cosmic, Modern AI Vibe)
@@ -7,7 +7,7 @@
 
 ## 1. Visual Identity & Brand Philosophy
 
-FaceAI combines advanced multimodal AI vision with a sleek, modern "vibe reading" aesthetic. The interface is designed as an effortless, high-tech camera ritual with deep dark themes, glowing subtle accents, and fluid glassmorphic cards.
+Face Reader combines advanced multimodal AI vision with a sleek, modern "vibe reading" aesthetic. The interface is designed as an effortless, high-tech camera ritual with deep dark themes, glowing subtle accents, and fluid glassmorphic cards.
 
 ### Key Principles
 * **Glassmorphic Depth:** Translucent surfaces, subtle blurred overlays, and soft glowing crimson/gold borders create a multi-layered modern UI.

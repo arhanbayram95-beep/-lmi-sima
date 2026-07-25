@@ -7,7 +7,7 @@
 //   ships per-market, not machine translation. They stay English-only.
 // - The Contact Us diagnostic email body — it's addressed to a specific
 //   English-reading recipient (see utils/contactMail.ts).
-// - "FaceAI" itself — brand name, not translated.
+// - "Face Reader" itself — brand name, not translated.
 //
 // Also out of scope: RTL layout mirroring for Arabic/Urdu. Text renders
 // translated but the layout direction does not flip — a follow-up would
@@ -31,16 +31,16 @@ export const translations = {
     ar: 'الإعدادات', bn: 'সেটিংস', pt: 'Definições', ru: 'Настройки', ur: 'ترتیبات',
   },
   'disclaimer.text': {
-    en: 'For entertainment purposes only. FaceAI does not provide clinical, psychological, or diagnostic assessments. Photos are processed in memory and never stored.',
-    zh: '仅供娱乐使用。FaceAI 不提供任何临床、心理或诊断评估。照片仅在内存中处理，绝不会被存储。',
-    hi: 'केवल मनोरंजन हेतु। FaceAI कोई नैदानिक, मनोवैज्ञानिक या डायग्नोस्टिक मूल्यांकन प्रदान नहीं करता। फ़ोटो केवल मेमोरी में प्रोसेस होती हैं और कभी संग्रहीत नहीं की जातीं।',
-    es: 'Solo con fines de entretenimiento. FaceAI no ofrece evaluaciones clínicas, psicológicas ni de diagnóstico. Las fotos se procesan en memoria y nunca se almacenan.',
-    fr: 'À des fins de divertissement uniquement. FaceAI ne fournit aucune évaluation clinique, psychologique ou diagnostique. Les photos sont traitées en mémoire et ne sont jamais stockées.',
-    ar: 'لأغراض الترفيه فقط. لا يقدم FaceAI أي تقييمات سريرية أو نفسية أو تشخيصية. تتم معالجة الصور في الذاكرة فقط ولا يتم تخزينها أبدًا.',
-    bn: 'শুধুমাত্র বিনোদনের উদ্দেশ্যে। FaceAI কোনো ক্লিনিক্যাল, মনস্তাত্ত্বিক বা রোগনির্ণয়মূলক মূল্যায়ন প্রদান করে না। ছবিগুলো শুধু মেমোরিতে প্রক্রিয়া করা হয় এবং কখনো সংরক্ষণ করা হয় না।',
-    pt: 'Apenas para fins de entretenimento. O FaceAI não fornece avaliações clínicas, psicológicas ou de diagnóstico. As fotos são processadas na memória e nunca armazenadas.',
-    ru: 'Только в развлекательных целях. FaceAI не предоставляет клинических, психологических или диагностических заключений. Фото обрабатываются только в памяти и никогда не сохраняются.',
-    ur: 'صرف تفریحی مقاصد کے لیے۔ FaceAI کوئی طبی، نفسیاتی یا تشخیصی جائزہ فراہم نہیں کرتا۔ تصاویر صرف میموری میں پروسیس ہوتی ہیں اور کبھی محفوظ نہیں کی جاتیں۔',
+    en: 'For entertainment purposes only. Face Reader does not provide clinical, psychological, or diagnostic assessments. Photos are processed in memory and never stored.',
+    zh: '仅供娱乐使用。Face Reader 不提供任何临床、心理或诊断评估。照片仅在内存中处理，绝不会被存储。',
+    hi: 'केवल मनोरंजन हेतु। Face Reader कोई नैदानिक, मनोवैज्ञानिक या डायग्नोस्टिक मूल्यांकन प्रदान नहीं करता। फ़ोटो केवल मेमोरी में प्रोसेस होती हैं और कभी संग्रहीत नहीं की जातीं।',
+    es: 'Solo con fines de entretenimiento. Face Reader no ofrece evaluaciones clínicas, psicológicas ni de diagnóstico. Las fotos se procesan en memoria y nunca se almacenan.',
+    fr: 'À des fins de divertissement uniquement. Face Reader ne fournit aucune évaluation clinique, psychologique ou diagnostique. Les photos sont traitées en mémoire et ne sont jamais stockées.',
+    ar: 'لأغراض الترفيه فقط. لا يقدم Face Reader أي تقييمات سريرية أو نفسية أو تشخيصية. تتم معالجة الصور في الذاكرة فقط ولا يتم تخزينها أبدًا.',
+    bn: 'শুধুমাত্র বিনোদনের উদ্দেশ্যে। Face Reader কোনো ক্লিনিক্যাল, মনস্তাত্ত্বিক বা রোগনির্ণয়মূলক মূল্যায়ন প্রদান করে না। ছবিগুলো শুধু মেমোরিতে প্রক্রিয়া করা হয় এবং কখনো সংরক্ষণ করা হয় না।',
+    pt: 'Apenas para fins de entretenimento. O Face Reader não fornece avaliações clínicas, psicológicas ou de diagnóstico. As fotos são processadas na memória e nunca armazenadas.',
+    ru: 'Только в развлекательных целях. Face Reader не предоставляет клинических, психологических или диагностических заключений. Фото обрабатываются только в памяти и никогда не сохраняются.',
+    ur: 'صرف تفریحی مقاصد کے لیے۔ Face Reader کوئی طبی، نفسیاتی یا تشخیصی جائزہ فراہم نہیں کرتا۔ تصاویر صرف میموری میں پروسیس ہوتی ہیں اور کبھی محفوظ نہیں کی جاتیں۔',
   },
   'loading.subtitle': {
     en: 'Initializing Neural Matrix', zh: '正在初始化神经矩阵', hi: 'न्यूरल मैट्रिक्स आरंभ हो रहा है',
@@ -148,16 +148,16 @@ export const translations = {
     ru: 'Требуется доступ к камере', ur: 'کیمرے تک رسائی درکار ہے',
   },
   'capture.permission.body': {
-    en: 'FaceAI needs your camera to capture the three expressions for your reading. Photos are processed in memory and never stored.',
-    zh: 'FaceAI 需要使用你的相机来捕捉解读所需的三种表情。照片仅在内存中处理，绝不会被存储。',
-    hi: 'FaceAI को आपकी रीडिंग के लिए तीन एक्सप्रेशन कैप्चर करने हेतु आपके कैमरे की आवश्यकता है। फ़ोटो केवल मेमोरी में प्रोसेस होती हैं और कभी संग्रहीत नहीं की जातीं।',
-    es: 'FaceAI necesita tu cámara para capturar las tres expresiones de tu lectura. Las fotos se procesan en memoria y nunca se almacenan.',
-    fr: 'FaceAI a besoin de votre caméra pour capturer les trois expressions de votre lecture. Les photos sont traitées en mémoire et ne sont jamais stockées.',
-    ar: 'يحتاج FaceAI إلى كاميرتك لالتقاط التعابير الثلاثة لقراءتك. تتم معالجة الصور في الذاكرة فقط ولا يتم تخزينها أبدًا.',
-    bn: 'আপনার রিডিংয়ের জন্য তিনটি এক্সপ্রেশন ক্যাপচার করতে FaceAI-এর আপনার ক্যামেরা প্রয়োজন। ছবিগুলো শুধু মেমোরিতে প্রক্রিয়া করা হয় এবং কখনো সংরক্ষণ করা হয় না।',
-    pt: 'O FaceAI precisa da sua câmara para capturar as três expressões da sua leitura. As fotos são processadas na memória e nunca armazenadas.',
-    ru: 'FaceAI нужен доступ к камере, чтобы запечатлеть три выражения лица для вашего анализа. Фото обрабатываются только в памяти и никогда не сохраняются.',
-    ur: 'FaceAI کو آپ کی ریڈنگ کے لیے تین تاثرات کیپچر کرنے کے لیے آپ کے کیمرے کی ضرورت ہے۔ تصاویر صرف میموری میں پروسیس ہوتی ہیں اور کبھی محفوظ نہیں کی جاتیں۔',
+    en: 'Face Reader needs your camera to capture the three expressions for your reading. Photos are processed in memory and never stored.',
+    zh: 'Face Reader 需要使用你的相机来捕捉解读所需的三种表情。照片仅在内存中处理，绝不会被存储。',
+    hi: 'Face Reader को आपकी रीडिंग के लिए तीन एक्सप्रेशन कैप्चर करने हेतु आपके कैमरे की आवश्यकता है। फ़ोटो केवल मेमोरी में प्रोसेस होती हैं और कभी संग्रहीत नहीं की जातीं।',
+    es: 'Face Reader necesita tu cámara para capturar las tres expresiones de tu lectura. Las fotos se procesan en memoria y nunca se almacenan.',
+    fr: 'Face Reader a besoin de votre caméra pour capturer les trois expressions de votre lecture. Les photos sont traitées en mémoire et ne sont jamais stockées.',
+    ar: 'يحتاج Face Reader إلى كاميرتك لالتقاط التعابير الثلاثة لقراءتك. تتم معالجة الصور في الذاكرة فقط ولا يتم تخزينها أبدًا.',
+    bn: 'আপনার রিডিংয়ের জন্য তিনটি এক্সপ্রেশন ক্যাপচার করতে Face Reader-এর আপনার ক্যামেরা প্রয়োজন। ছবিগুলো শুধু মেমোরিতে প্রক্রিয়া করা হয় এবং কখনো সংরক্ষণ করা হয় না।',
+    pt: 'O Face Reader precisa da sua câmara para capturar as três expressões da sua leitura. As fotos são processadas na memória e nunca armazenadas.',
+    ru: 'Face Reader нужен доступ к камере, чтобы запечатлеть три выражения лица для вашего анализа. Фото обрабатываются только в памяти и никогда не сохраняются.',
+    ur: 'Face Reader کو آپ کی ریڈنگ کے لیے تین تاثرات کیپچر کرنے کے لیے آپ کے کیمرے کی ضرورت ہے۔ تصاویر صرف میموری میں پروسیس ہوتی ہیں اور کبھی محفوظ نہیں کی جاتیں۔',
   },
   'capture.permission.button': {
     en: 'Allow Camera Access', zh: '允许访问相机', hi: 'कैमरा एक्सेस की अनुमति दें', es: 'Permitir acceso a la cámara',
@@ -199,9 +199,9 @@ export const translations = {
     ru: 'Выберите анализ для запуска.', ur: 'چلانے کے لیے ایک ریڈنگ منتخب کریں۔',
   },
   'analyze.module.threeExpression.title': {
-    en: '3-Expression Face Reading', zh: '三表情面部解读', hi: '3-एक्सप्रेशन फेस रीडिंग', es: 'Lectura facial de 3 expresiones',
-    fr: 'Lecture faciale à 3 expressions', ar: 'قراءة الوجه بثلاث تعابير', bn: '৩-এক্সপ্রেশন ফেস রিডিং', pt: 'Leitura facial de 3 expressões',
-    ru: 'Анализ лица по 3 выражениям', ur: '3 تاثرات پر مبنی چہرے کی ریڈنگ',
+    en: 'Character Analysis', zh: '性格分析', hi: 'कैरेक्टर एनालिसिस', es: 'Análisis de Carácter',
+    fr: 'Analyse de Caractère', ar: 'تحليل الشخصية', bn: 'ক্যারেক্টার অ্যানালাইসিস', pt: 'Análise de Caráter',
+    ru: 'Анализ характера', ur: 'کریکٹر تجزیہ',
   },
   'analyze.module.threeExpression.description': {
     en: 'Capture Calm, Bright, and Deep expressions for your AI character reading.',
@@ -289,10 +289,10 @@ export const translations = {
     ar: 'تقييم التجربة', bn: 'অভিজ্ঞতা রেট করুন', pt: 'Avaliar experiência', ru: 'Оценить опыт', ur: 'تجربے کی درجہ بندی کریں',
   },
   'review.headline': {
-    en: 'Enjoying your insights with FaceAI?', zh: '喜欢 FaceAI 给你的洞察吗？', hi: 'FaceAI के साथ अपने इनसाइट्स का आनंद ले रहे हैं?',
-    es: '¿Disfrutando tus análisis con FaceAI?', fr: 'Vous appréciez vos analyses avec FaceAI ?',
-    ar: 'هل تستمتع برؤاك مع FaceAI؟', bn: 'FaceAI-এর সাথে আপনার ইনসাইট উপভোগ করছেন?', pt: 'A gostar das suas análises com o FaceAI?',
-    ru: 'Нравятся ваши результаты в FaceAI?', ur: 'کیا آپ FaceAI کے ساتھ اپنی بصیرت سے لطف اندوز ہو رہے ہیں؟',
+    en: 'Enjoying your insights with Face Reader?', zh: '喜欢 Face Reader 给你的洞察吗？', hi: 'Face Reader के साथ अपने इनसाइट्स का आनंद ले रहे हैं?',
+    es: '¿Disfrutando tus análisis con Face Reader?', fr: 'Vous appréciez vos analyses avec Face Reader ?',
+    ar: 'هل تستمتع برؤاك مع Face Reader؟', bn: 'Face Reader-এর সাথে আপনার ইনসাইট উপভোগ করছেন?', pt: 'A gostar das suas análises com o Face Reader?',
+    ru: 'Нравятся ваши результаты в Face Reader?', ur: 'کیا آپ Face Reader کے ساتھ اپنی بصیرت سے لطف اندوز ہو رہے ہیں؟',
   },
   'review.body': {
     en: 'Your feedback helps us train our AI models and improve your experience.',

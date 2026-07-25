@@ -32,6 +32,6 @@ export function buildContactMailUrl(ctx: ContactMailContext): string {
     ctx.signOff,
   ].join('\n');
 
-  const subject = 'FaceAI Support Request';
+  const subject = 'Face Reader Support Request';
   return `mailto:${LEGAL_CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }

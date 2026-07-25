@@ -15,7 +15,7 @@ export default function AppLogo({ size = 'sm' }: AppLogoProps) {
           <Text style={[styles.sparkle, isLarge && styles.sparkleLg]}>✦</Text>
         </View>
       </View>
-      <Text style={[styles.wordmark, isLarge && styles.wordmarkLg]}>FaceAI</Text>
+      <Text style={[styles.wordmark, isLarge && styles.wordmarkLg]}>Face Reader</Text>
     </View>
   );
 }
