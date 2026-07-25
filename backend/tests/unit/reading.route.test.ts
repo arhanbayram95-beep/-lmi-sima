@@ -78,7 +78,7 @@ describe('POST /api/v1/reading/analyze', () => {
     const response = await app.inject({
       method: 'POST',
       url: '/api/v1/reading/analyze',
-      payload: { photos: ['a'.repeat(1_000_001), PHOTOS_3[1], PHOTOS_3[2]] },
+      payload: { photos: ['a'.repeat(8_000_001), PHOTOS_3[1], PHOTOS_3[2]] },
     });
 
     expect(response.statusCode).toBe(400);
@@ -103,11 +103,12 @@ describe('POST /api/v1/reading/analyze', () => {
   it('accepts a realistic multi-photo payload larger than the default 1 MiB body limit', async () => {
     generateContent.mockResolvedValue(textResponse({ headline: 'h', insights: [], narrative: 'n' }));
 
-    // Three photos anywhere near their individual 1,000,000-char allowance
-    // already exceed Fastify's default 1 MiB *total* bodyLimit - this is
-    // what real camera photos hit in practice, not just a contrived edge
-    // case. Regression test for that gap.
-    const bigPhoto = 'A'.repeat(500_000);
+    // ~3MB per photo is in the realistic range for a real, uncapped-
+    // resolution phone photo at quality 0.6 (see CaptureScreen.tsx) -
+    // comfortably exceeds Fastify's default 1 MiB *total* bodyLimit even
+    // alone, which is what real camera captures hit in practice, not just
+    // a contrived edge case. Regression test for that gap.
+    const bigPhoto = 'A'.repeat(3_000_000);
     const response = await app.inject({
       method: 'POST',
       url: '/api/v1/reading/analyze',
