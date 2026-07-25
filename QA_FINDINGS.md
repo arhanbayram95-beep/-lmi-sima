@@ -259,3 +259,51 @@ the close handler is wired correctly.
   happen to get unlucky, moved the fix to `jest.config.js`
   (`testTimeout: 20000` globally) and removed the now-redundant per-file
   `jest.setTimeout` override in `AnalyzingScreen.test.tsx`.
+
+---
+
+## Per-Module Photo Counts — 2026-07-25
+
+Scope: product decision to give each reading module its own photo count
+(Character Analysis 3, Relationship Harmony 2 — one per person, Career
+Match 1) instead of every module sharing the original 3-expression
+mechanic. See Phase 7.3 in `IMPLEMENTATION_PLAN.md` for the full build.
+
+- [x] **PHOTO-1: Relationship Harmony now genuinely processes two real
+  people's photos — flagged before building, not silently expanded**
+  The module's original design ("Never a compatibility match... the app
+  only ever captures one person's photos") is exactly backwards under the
+  new spec. Two real people's photos being analyzed together is a
+  materially bigger privacy/legal footprint (reopens the GDPR Art.9/BIPA
+  analysis from the original Biometric Data section) and the module's
+  system prompt made claims that would now be false. Flagged to the
+  product owner before writing any code; decision: independent per-person
+  insights, never a compatibility score or a claim about the two people's
+  actual relationship (the safer of two options offered). Rewrote the
+  Relationship Harmony system prompt and the Biometric Data /
+  Acceptable-Use-adjacent language in `legalContent.ts` to match reality
+  instead of the stale one-person framing.
+
+- [x] **PHOTO-2: Generalized the reading schema instead of bolting on a
+  third shape**
+  Character Analysis (3 expression-keyed insights), Relationship Harmony
+  (2 person-keyed insights), and Career Match (2-3 facet-keyed insights)
+  don't share a single fixed insight shape — `expression: 'calm' |
+  'bright' | 'deep'` couldn't represent any of the other two. Rather than
+  add a second or third schema variant, generalized to `insights:
+  [{label: string, insight: string}]` on both backend
+  (`readingSchema.ts`) and frontend (`api/types.ts`), with the label's
+  actual meaning governed by each module's system prompt rather than a
+  fixed enum. `RevealScreen`'s Calm/Bright/Deep-keyed glyph lookup
+  (`EXPRESSION_GLYPHS`) is gone in favor of a module-agnostic glyph —
+  works unchanged for any label. Verified `ShareCard` needed zero changes
+  to already work across all three modules (it only ever rendered
+  `headline`/`narrative`, never per-insight data).
+
+- [x] **PHOTO-3: Camera facing follows what's actually being photographed**
+  Relationship Harmony's first capture step (the user's own photo) uses
+  the front camera like every other module's steps; its second step
+  (photographing another person) switches to the back camera — the user
+  can't usefully photograph someone else while looking at their own
+  selfie view. Not explicitly requested, but the feature wouldn't work
+  well in practice without it.

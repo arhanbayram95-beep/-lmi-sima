@@ -1,12 +1,6 @@
 import { ReadingModelClient } from './geminiClient';
-import { ExpressionInsight, ReadingModuleId, ReadingResult, readingResponseSchema } from './readingSchema';
+import { MODULE_PHOTO_COUNTS, ReadingInsight, ReadingModuleId, ReadingResult, readingResponseSchema } from './readingSchema';
 import { READING_SYSTEM_PROMPTS } from './systemPrompt';
-
-export interface ExpressionPhotos {
-  calm: string;
-  bright: string;
-  deep: string;
-}
 
 export class ReadingServiceError extends Error {}
 
@@ -19,9 +13,16 @@ const MODEL = 'gemini-2.5-flash';
 // process — there is no secure-wipe primitive to reach for here.
 export async function generateReading(
   client: ReadingModelClient,
-  photos: ExpressionPhotos,
+  photos: string[],
   moduleId: ReadingModuleId = 'three-expression'
 ): Promise<ReadingResult> {
+  const expectedCount = MODULE_PHOTO_COUNTS[moduleId];
+  if (photos.length !== expectedCount) {
+    throw new ReadingServiceError(
+      `The ${moduleId} reading needs exactly ${expectedCount} photo(s), got ${photos.length}.`
+    );
+  }
+
   let responseText: string | undefined;
   try {
     const response = await client.models.generateContent({
@@ -30,10 +31,8 @@ export async function generateReading(
         {
           role: 'user',
           parts: [
-            { inlineData: { mimeType: 'image/jpeg', data: photos.calm } },
-            { inlineData: { mimeType: 'image/jpeg', data: photos.bright } },
-            { inlineData: { mimeType: 'image/jpeg', data: photos.deep } },
-            { text: 'These are three photos in order: Calm, Bright, Deep. Generate the reading now.' },
+            ...photos.map((data) => ({ inlineData: { mimeType: 'image/jpeg', data } })),
+            { text: `These are ${photos.length} photo(s) captured for this reading, in order. Generate the reading now.` },
           ],
         },
       ],
@@ -67,7 +66,7 @@ function validateReadingResult(input: unknown): ReadingResult {
     throw new ReadingServiceError('Gemini response body was not an object.');
   }
 
-  const { headline, expression_insights: insights, narrative } = input as Record<string, unknown>;
+  const { headline, insights, narrative } = input as Record<string, unknown>;
 
   if (typeof headline !== 'string' || typeof narrative !== 'string' || !Array.isArray(insights)) {
     throw new ReadingServiceError('Gemini response body did not match the expected schema.');
@@ -76,6 +75,6 @@ function validateReadingResult(input: unknown): ReadingResult {
   return {
     headline,
     narrative,
-    expression_insights: insights as ExpressionInsight[],
+    insights: insights as ReadingInsight[],
   };
 }

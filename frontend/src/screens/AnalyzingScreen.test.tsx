@@ -22,8 +22,9 @@ jest.mock('../utils/sound', () => ({
   startAmbientShimmerLoop: jest.fn().mockResolvedValue({ stop: () => mockStop() }),
 }));
 
-const PHOTOS = { calm: 'base64-calm', bright: 'base64-bright', deep: 'base64-deep' };
-const READING = { headline: 'Effortlessly Magnetic', expression_insights: [], narrative: 'n' };
+const PHOTOS_3 = ['base64-calm', 'base64-bright', 'base64-deep'];
+const PHOTOS_1 = ['base64-solo'];
+const READING = { headline: 'Effortlessly Magnetic', insights: [], narrative: 'n' };
 
 describe('AnalyzingScreen', () => {
   beforeEach(() => {
@@ -31,7 +32,7 @@ describe('AnalyzingScreen', () => {
     mockStop.mockClear();
     useAppStore.setState({
       screen: 'analyzing',
-      images: { ...PHOTOS },
+      images: PHOTOS_3,
       reading: null,
       selectedModule: 'three-expression',
     });
@@ -42,24 +43,32 @@ describe('AnalyzingScreen', () => {
     const { unmount } = render(<AnalyzingScreen />);
 
     await waitFor(() =>
-      expect(mockAnalyzeReading).toHaveBeenCalledWith({ ...PHOTOS, module: 'three-expression' })
+      expect(mockAnalyzeReading).toHaveBeenCalledWith({ photos: PHOTOS_3, module: 'three-expression' })
     );
     await waitFor(() => expect(useAppStore.getState().screen).toBe('reveal'));
     expect(useAppStore.getState().reading).toEqual(READING);
-    expect(useAppStore.getState().images).toEqual({});
+    expect(useAppStore.getState().images).toEqual([]);
 
     unmount();
     await waitFor(() => expect(mockStop).toHaveBeenCalledTimes(1));
   });
 
-  it('sends whichever module was selected on the Analyze hub', async () => {
-    useAppStore.setState({ selectedModule: 'career-match' });
+  it('sends whichever module was selected on the Analyze hub, with that module\'s own photo count', async () => {
+    useAppStore.setState({ selectedModule: 'career-match', images: PHOTOS_1 });
     mockAnalyzeReading.mockResolvedValue(READING);
     render(<AnalyzingScreen />);
 
     await waitFor(() =>
-      expect(mockAnalyzeReading).toHaveBeenCalledWith({ ...PHOTOS, module: 'career-match' })
+      expect(mockAnalyzeReading).toHaveBeenCalledWith({ photos: PHOTOS_1, module: 'career-match' })
     );
+  });
+
+  it('shows an error instead of calling the API when the photo count does not match the module', async () => {
+    useAppStore.setState({ selectedModule: 'career-match', images: PHOTOS_3 });
+    render(<AnalyzingScreen />);
+
+    await waitFor(() => expect(screen.getByTestId('analyzing-retry-button')).toBeTruthy());
+    expect(mockAnalyzeReading).not.toHaveBeenCalled();
   });
 
   it('shows a retry option when the API call fails', async () => {

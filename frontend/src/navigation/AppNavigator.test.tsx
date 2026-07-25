@@ -29,7 +29,7 @@ describe('AppNavigator', () => {
   });
 
   it('renders the analyzing screen when routed there', () => {
-    useAppStore.setState({ screen: 'analyzing', images: {} });
+    useAppStore.setState({ screen: 'analyzing', images: [] });
     render(<AppNavigator />);
     expect(screen.getByTestId('analyzing-screen')).toBeTruthy();
   });

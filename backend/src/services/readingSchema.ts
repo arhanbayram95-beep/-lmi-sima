@@ -1,21 +1,33 @@
 import { Schema, Type } from '@google/genai';
 
-export type ExpressionLabel = 'calm' | 'bright' | 'deep';
-
-// Each maps to its own system prompt (see systemPrompt.ts) — same response
-// shape below across all three, only the prompt framing differs.
+// Each maps to its own system prompt (see systemPrompt.ts) and its own
+// expected photo count (see MODULE_PHOTO_COUNTS) — same response shape
+// below across all three, only the prompt framing and photo count differ.
 export type ReadingModuleId = 'three-expression' | 'relationship-harmony' | 'career-match';
 
 export const READING_MODULE_IDS: ReadingModuleId[] = ['three-expression', 'relationship-harmony', 'career-match'];
 
-export interface ExpressionInsight {
-  expression: ExpressionLabel;
+// Character Analysis: 3 (Calm/Bright/Deep, one person). Relationship
+// Harmony: 2 (one photo per person). Career Match: 1 (a single photo).
+export const MODULE_PHOTO_COUNTS: Record<ReadingModuleId, number> = {
+  'three-expression': 3,
+  'relationship-harmony': 2,
+  'career-match': 1,
+};
+
+// 'label' is free text rather than a fixed enum because its meaning varies
+// by module — an expression name for Character Analysis, a person
+// identifier for Relationship Harmony, a career facet for Career Match.
+// The system prompt for each module, not this schema, governs what a
+// sensible label looks like.
+export interface ReadingInsight {
+  label: string;
   insight: string;
 }
 
 export interface ReadingResult {
   headline: string;
-  expression_insights: ExpressionInsight[];
+  insights: ReadingInsight[];
   narrative: string;
 }
 
@@ -29,22 +41,26 @@ export const readingResponseSchema: Schema = {
       type: Type.STRING,
       description: 'A short, punchy one-line headline for the reading (roughly 4-8 words).',
     },
-    expression_insights: {
+    insights: {
       type: Type.ARRAY,
-      description: 'One insight per captured expression, in the order Calm, Bright, Deep.',
+      description:
+        'One insight per photo provided, in the same order the photos were given. How many and how to label them depends on which reading this is — follow the system prompt.',
       items: {
         type: Type.OBJECT,
         properties: {
-          expression: { type: Type.STRING, format: 'enum', enum: ['calm', 'bright', 'deep'] },
-          insight: { type: Type.STRING, description: 'A short, warm observation for this expression.' },
+          label: {
+            type: Type.STRING,
+            description: 'A short label for this insight — see the system prompt for what fits this reading.',
+          },
+          insight: { type: Type.STRING, description: 'A short, warm observation for this insight.' },
         },
-        required: ['expression', 'insight'],
+        required: ['label', 'insight'],
       },
     },
     narrative: {
       type: Type.STRING,
-      description: 'A short paragraph (2-4 sentences) tying the three insights into an overall character vibe.',
+      description: 'A short paragraph (2-4 sentences) tying the insights together into an overall read.',
     },
   },
-  required: ['headline', 'expression_insights', 'narrative'],
+  required: ['headline', 'insights', 'narrative'],
 };

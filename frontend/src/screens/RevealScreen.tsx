@@ -7,18 +7,8 @@ import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
 import ShareCard from '../components/common/ShareCard';
 import { useTranslation } from '../i18n/useTranslation';
-import { ExpressionLabel } from '../api/types';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
-
-// A handful of distinct, uncrowded cards (one idea each) rather than a
-// single card cramming everything in — matches the reference layout's
-// icon+heading+content pattern without its density.
-const EXPRESSION_GLYPHS: Record<ExpressionLabel, string> = {
-  calm: '😌',
-  bright: '✨',
-  deep: '🌙',
-};
 
 export default function RevealScreen() {
   const reading = useAppStore((s) => s.reading);
@@ -55,19 +45,19 @@ export default function RevealScreen() {
           <Text style={styles.headline}>{reading.headline}</Text>
         </FadeInView>
 
-        {reading.expression_insights.map((item, index) => (
-          <FadeInView key={item.expression} delay={80 + index * 60}>
+        {reading.insights.map((item, index) => (
+          <FadeInView key={`${item.label}-${index}`} delay={80 + index * 60}>
             <GlassCard style={styles.card}>
               <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardGlyph}>{EXPRESSION_GLYPHS[item.expression]}</Text>
-                <Text style={styles.cardHeading}>{item.expression}</Text>
+                <Text style={styles.cardGlyph}>✦</Text>
+                <Text style={styles.cardHeading}>{item.label}</Text>
               </View>
               <Text style={styles.cardBody}>{item.insight}</Text>
             </GlassCard>
           </FadeInView>
         ))}
 
-        <FadeInView delay={80 + reading.expression_insights.length * 60}>
+        <FadeInView delay={80 + reading.insights.length * 60}>
           <GlassCard style={styles.card}>
             <View style={styles.cardHeaderRow}>
               <Text style={styles.cardGlyph}>✦</Text>

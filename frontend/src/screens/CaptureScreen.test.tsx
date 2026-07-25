@@ -39,7 +39,7 @@ describe('CaptureScreen', () => {
     mockPlayCaptureChime.mockClear();
     mockPlayPromptChime.mockClear();
     mockPermissionState = { granted: true };
-    useAppStore.setState({ screen: 'capture', images: {} });
+    useAppStore.setState({ screen: 'capture', images: [], selectedModule: 'three-expression' });
   });
 
   it('prompts for camera access when permission is not granted', () => {
@@ -65,20 +65,50 @@ describe('CaptureScreen', () => {
 
     expect(screen.getByText('Calm')).toBeTruthy();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images.calm).toBe('mock-base64'));
+    await waitFor(() => expect(useAppStore.getState().images).toEqual(['mock-base64']));
 
     expect(screen.getByText('Bright')).toBeTruthy();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images.bright).toBe('mock-base64'));
+    await waitFor(() => expect(useAppStore.getState().images).toEqual(['mock-base64', 'mock-base64']));
 
     expect(screen.getByText('Deep')).toBeTruthy();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images.deep).toBe('mock-base64'));
+    await waitFor(() => expect(useAppStore.getState().images).toHaveLength(3));
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
     expect(mockTakePictureAsync).toHaveBeenCalledTimes(3);
     expect(mockPlayCaptureChime).toHaveBeenCalledTimes(3);
     // Prompt chime greets Bright and Deep, not the opening Calm step.
     expect(mockPlayPromptChime).toHaveBeenCalledTimes(2);
+  });
+
+  it('captures 2 photos for Relationship Harmony — 1 per person, front then back camera', async () => {
+    useAppStore.setState({ selectedModule: 'relationship-harmony' });
+    render(<CaptureScreen />);
+
+    expect(screen.getByText('Person One')).toBeTruthy();
+    expect(screen.getByTestId('camera-preview').props.facing).toBe('front');
+    fireEvent.press(screen.getByTestId('shutter-button'));
+    await waitFor(() => expect(useAppStore.getState().images).toEqual(['mock-base64']));
+
+    expect(screen.getByText('Person Two')).toBeTruthy();
+    expect(screen.getByTestId('camera-preview').props.facing).toBe('back');
+    fireEvent.press(screen.getByTestId('shutter-button'));
+
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
+    expect(useAppStore.getState().images).toHaveLength(2);
+    expect(mockTakePictureAsync).toHaveBeenCalledTimes(2);
+  });
+
+  it('captures a single photo for Career Match', async () => {
+    useAppStore.setState({ selectedModule: 'career-match' });
+    render(<CaptureScreen />);
+
+    expect(screen.getByText('Your Photo')).toBeTruthy();
+    fireEvent.press(screen.getByTestId('shutter-button'));
+
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
+    expect(useAppStore.getState().images).toEqual(['mock-base64']);
+    expect(mockTakePictureAsync).toHaveBeenCalledTimes(1);
   });
 });

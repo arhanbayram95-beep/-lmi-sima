@@ -11,9 +11,9 @@ jest.mock('react-native-view-shot', () => ({
 
 const READING = {
   headline: 'Effortlessly Magnetic',
-  expression_insights: [
-    { expression: 'calm' as const, insight: 'Grounded and steady.' },
-    { expression: 'bright' as const, insight: 'Genuinely warm smile.' },
+  insights: [
+    { label: 'Calm', insight: 'Grounded and steady.' },
+    { label: 'Bright', insight: 'Genuinely warm smile.' },
   ],
   narrative: 'You read as someone people trust instantly.',
 };
@@ -29,7 +29,7 @@ describe('RevealScreen', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders the headline, per-expression insights, and narrative', () => {
+  it('renders the headline, per-insight cards, and narrative', () => {
     render(<RevealScreen />);
     // Headline/narrative also appear in the off-screen ShareCard used for
     // react-native-view-shot capture, so there are legitimately two.

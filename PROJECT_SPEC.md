@@ -36,7 +36,7 @@ aesthetic that reads instantly as "fun astrology-adjacent app" to a US or EU use
 
 ---
 
-## 2. Core User Flow & The Triple Capture Mechanics
+## 2. Core User Flow & Capture Mechanics
 
 ### 2.1 Onboarding
 * Age gate (+18 self-attestation) inside a clean, on-brand welcome flow — think
@@ -45,7 +45,7 @@ aesthetic that reads instantly as "fun astrology-adjacent app" to a US or EU use
   plain-language privacy statement: *"Your photos are analyzed instantly and never
   stored. This is for entertainment only."*
 
-### 2.2 The Three-Expression Capture (Sequential Camera UI)
+### 2.2 Character Analysis: The Three-Expression Capture (Sequential Camera UI)
 Same underlying mechanic, restyled with lighter, universally legible copy:
 1. **Calm (Neutral):** Baseline capture under a soft glowing face-guide overlay.
 2. **Bright (Smiling):** Friendly chime prompt, e.g. "Show us your glow ✨"
@@ -54,17 +54,23 @@ Same underlying mechanic, restyled with lighter, universally legible copy:
 *Validation:* On-device face detection rejects non-face frames before any API call
 (privacy + cost control).
 
-### 2.3 Reading Modules (added 2026-07-24)
-The Analyze hub offers three reading modules, all sharing the identical
-Calm/Bright/Deep capture mechanic above — only the AI system prompt and
-resulting reading content differ per module (see §4 for how this is wired):
-* **3-Expression Face Reading** — the original general character/vibe reading.
-* **Relationship Harmony Analyzer** — reads the user's own connection/chemistry
-  style. Never a compatibility match against a specific partner — the app only
-  ever captures one person's photos, so nothing should imply an actual
-  two-person comparison.
-* **Career Match** ("What Job Suits You") — a fun career-archetype vibe read.
-  Never framed as a real psychometric or vocational assessment.
+### 2.3 Reading Modules (added 2026-07-24, photo counts revised 2026-07-25)
+The Analyze hub offers three reading modules, sharing the same capture
+mechanics above but with different photo counts and subjects per module —
+the AI system prompt and resulting reading content differ per module (see §4
+for how this is wired):
+* **Character Analysis** (originally "3-Expression Face Reading") — 3 photos
+  of the user (Calm, Bright, Deep). The original general character/vibe
+  reading.
+* **Relationship Harmony Analyzer** — **2 photos, one of the user and one of
+  another person** (product decision 2026-07-25 — originally spec'd as
+  reading only the user's own photos). Each photo is read independently;
+  never a compatibility score or a claim about the two people's actual
+  relationship. The second person's photo requires their permission — see
+  §6 and the Terms & Conditions' Acceptable Use clause.
+* **Career Match** ("What Job Suits You") — **1 photo** of the user. A fun
+  career-archetype vibe read, never framed as a real psychometric or
+  vocational assessment.
 
 ---
 
@@ -72,15 +78,16 @@ resulting reading content differ per module (see §4 for how this is wired):
 
 ```text
 [React Native App]
-   │  (1) Captures 3 images locally (Zustand cache, in-memory only)
+   │  (1) Captures 1-3 images locally, per module (Zustand cache, in-memory
+   │      only) — see §2.3 for which module captures how many, of whom
    │  (2) Plays audio & haptic confirmation cues
    V
 [Secure Backend Bridge]
    │  (3) Validates active entitlement via RevenueCat SDK
-   │  (4) Wraps images into a single payload with the system prompt
+   │  (4) Wraps images into a single payload with the module's system prompt
    V
-[Claude Sonnet 5 — Vision, Messages API]
-   │  (5) Returns structured JSON via tool-use schema (see §4)
+[Google Gemini — Vision, generateContent API (see §4)]
+   │  (5) Returns structured JSON via config.responseSchema
    V
 [React Native UI]
    │  (6) Purges images from memory immediately after response

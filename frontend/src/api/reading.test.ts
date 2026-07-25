@@ -1,4 +1,4 @@
-const PAYLOAD = { calm: 'base64-calm', bright: 'base64-bright', deep: 'base64-deep', module: 'three-expression' as const };
+const PAYLOAD = { photos: ['base64-calm', 'base64-bright', 'base64-deep'], module: 'three-expression' as const };
 
 describe('analyzeReading (real API mode)', () => {
   beforeEach(() => {
@@ -8,7 +8,7 @@ describe('analyzeReading (real API mode)', () => {
   });
 
   it('posts to the backend and returns the parsed reading on success', async () => {
-    const result = { headline: 'h', expression_insights: [], narrative: 'n' };
+    const result = { headline: 'h', insights: [], narrative: 'n' };
     (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => result });
 
     const { analyzeReading } = require('./reading');
@@ -48,7 +48,7 @@ describe('analyzeReading (pseudo-API mode)', () => {
     const result = await analyzeReading(PAYLOAD);
 
     expect(result.headline).toBeTruthy();
-    expect(result.expression_insights.length).toBeGreaterThan(0);
+    expect(result.insights.length).toBeGreaterThan(0);
     expect(global.fetch).not.toHaveBeenCalled();
   });
 

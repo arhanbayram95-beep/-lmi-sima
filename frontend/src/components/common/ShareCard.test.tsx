@@ -4,7 +4,7 @@ import ShareCard from './ShareCard';
 
 const READING = {
   headline: 'Effortlessly Magnetic',
-  expression_insights: [],
+  insights: [],
   narrative: 'You read as someone people trust instantly.',
 };
 

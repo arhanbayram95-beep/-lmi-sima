@@ -6,7 +6,8 @@ function textResponse(body: unknown) {
   return { text: JSON.stringify(body) };
 }
 
-const VALID_BODY = { calm: 'base64-calm', bright: 'base64-bright', deep: 'base64-deep' };
+const PHOTOS_3 = ['base64-calm', 'base64-bright', 'base64-deep'];
+const VALID_BODY = { photos: PHOTOS_3 };
 
 describe('POST /api/v1/reading/analyze', () => {
   let app: FastifyInstance;
@@ -23,9 +24,7 @@ describe('POST /api/v1/reading/analyze', () => {
   });
 
   it('returns 200 with the structured reading on success', async () => {
-    generateContent.mockResolvedValue(
-      textResponse({ headline: 'Effortlessly Magnetic', expression_insights: [], narrative: 'n' })
-    );
+    generateContent.mockResolvedValue(textResponse({ headline: 'Effortlessly Magnetic', insights: [], narrative: 'n' }));
 
     const response = await app.inject({ method: 'POST', url: '/api/v1/reading/analyze', payload: VALID_BODY });
 
@@ -33,14 +32,37 @@ describe('POST /api/v1/reading/analyze', () => {
     expect(response.json().headline).toBe('Effortlessly Magnetic');
   });
 
-  it('returns 400 when a required photo is missing', async () => {
+  it('returns 400 when photos is missing', async () => {
     const response = await app.inject({
       method: 'POST',
       url: '/api/v1/reading/analyze',
-      payload: { calm: VALID_BODY.calm, bright: VALID_BODY.bright },
+      payload: {},
     });
 
     expect(response.statusCode).toBe(400);
+    expect(generateContent).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when more than 3 photos are sent', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/reading/analyze',
+      payload: { photos: [...PHOTOS_3, 'one-too-many'] },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(generateContent).not.toHaveBeenCalled();
+  });
+
+  it('returns 502 when the photo count does not match the module', async () => {
+    // three-expression (the default module) needs exactly 3 photos.
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/reading/analyze',
+      payload: { photos: ['only-one'] },
+    });
+
+    expect(response.statusCode).toBe(502);
     expect(generateContent).not.toHaveBeenCalled();
   });
 
@@ -52,11 +74,11 @@ describe('POST /api/v1/reading/analyze', () => {
     expect(response.statusCode).toBe(502);
   });
 
-  it('rejects a single oversized field before calling the model', async () => {
+  it('rejects a single oversized photo before calling the model', async () => {
     const response = await app.inject({
       method: 'POST',
       url: '/api/v1/reading/analyze',
-      payload: { ...VALID_BODY, calm: 'a'.repeat(1_000_001) },
+      payload: { photos: ['a'.repeat(1_000_001), PHOTOS_3[1], PHOTOS_3[2]] },
     });
 
     expect(response.statusCode).toBe(400);
@@ -64,12 +86,13 @@ describe('POST /api/v1/reading/analyze', () => {
   });
 
   it('accepts a valid module and forwards it to the reading service', async () => {
-    generateContent.mockResolvedValue(textResponse({ headline: 'h', expression_insights: [], narrative: 'n' }));
+    generateContent.mockResolvedValue(textResponse({ headline: 'h', insights: [], narrative: 'n' }));
 
     const response = await app.inject({
       method: 'POST',
       url: '/api/v1/reading/analyze',
-      payload: { ...VALID_BODY, module: 'career-match' },
+      // career-match needs exactly 1 photo.
+      payload: { photos: ['solo-photo'], module: 'career-match' },
     });
 
     expect(response.statusCode).toBe(200);

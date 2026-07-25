@@ -142,9 +142,6 @@ support: no per-module prompt, no request parameter, nothing in
 PROJECT_SPEC.md. Product decision: build real per-module differentiation
 rather than just flip the flag, since the card copy already promises
 relationship/career-specific content a generic reading wouldn't deliver.
-Same 3-expression capture mechanic for every module (per PROJECT_SPEC.md
-§2.2's "same underlying mechanic" precedent) — only the AI system prompt
-and resulting reading content differ per module.
 - [x] **7.1 Backend: per-module system prompts + request routing**
   - `ReadingModuleId` type (`three-expression` | `relationship-harmony` |
     `career-match`) in `backend/src/services/readingSchema.ts`.
@@ -152,15 +149,11 @@ and resulting reading content differ per module.
     each module's prompt shares the same `SAFETY_RULES` block (entertainment-
     only, no clinical language, no negative traits, non-face/minor
     fallbacks) so a future edit can't silently apply to only one module.
-    Relationship Harmony is framed as the user's own connection style, never
-    a compatibility match against a specific other person (we only ever see
-    one person's photos). Career Match is framed as an entertainment vibe
-    read, never a real psychometric assessment.
   - `POST /api/v1/reading/analyze` accepts an optional `module` field
     (defaults to `three-expression` for backward compatibility) and forwards
     it to `generateReading`.
   - **Flagged for product owner review** (same as the original system
-    prompt draft): the two new prompts are first drafts, not legally
+    prompt draft): all three prompts are first drafts, not legally
     reviewed — read them before this ships to real users.
 - [x] **7.2 Frontend: module selection threaded through capture → reading**
   - `CaptureSlice.selectedModule` (Zustand) set by `AnalyzeScreen` when a
@@ -170,3 +163,33 @@ and resulting reading content differ per module.
     mode (`mockReading.ts`) returns a distinct canned reading per module so
     `EXPO_PUBLIC_USE_MOCK_API=true` testing can verify the content actually
     differs, not just that navigation works.
+- [x] **7.3 Per-module photo counts (2026-07-25)** — product decision
+  revising 7.1/7.2's original "same 3-expression mechanic for every module"
+  assumption: Character Analysis stays at 3 photos of the user, Relationship
+  Harmony now captures 2 (**one of the user, one of another person** — a
+  materially bigger scope than the module's original one-person design, see
+  PROJECT_SPEC.md §2.3), Career Match captures 1.
+  - Generalized the reading schema off the fixed Calm/Bright/Deep shape:
+    `expression_insights: [{expression, insight}]` → `insights: [{label,
+    insight}]` (both `backend/src/services/readingSchema.ts` and
+    `frontend/src/api/types.ts`), `AnalyzeReadingPayload.{calm,bright,deep}`
+    → `photos: string[]`. `MODULE_PHOTO_COUNTS` (mirrored on both sides)
+    enforces the right count per module; `generateReading` rejects a
+    mismatched count before ever calling Gemini.
+  - `CaptureSlice.images` is now a plain ordered array (was a
+    calm/bright/deep record) — `CaptureScreen`'s step sequence is now a
+    per-module `MODULE_STEPS` map; Relationship Harmony's second step uses
+    the back camera (photographing someone else) where every other step
+    uses the front camera (a selfie).
+  - Relationship Harmony's prompt rewritten for the real two-person
+    scenario: independent per-person insights, explicitly never a
+    compatibility score or a claim about the two people's actual
+    relationship (see PROJECT_SPEC.md §2.3 and the Biometric Data section
+    of `legalContent.ts`, both updated to match — a second real person's
+    photo being processed is a materially different privacy posture than
+    the module's original one-person design, flagged and confirmed with
+    the product owner before building rather than assumed).
+  - `RevealScreen`'s per-insight cards now render a generic label instead
+    of a Calm/Bright/Deep-keyed glyph lookup — works unchanged for any
+    module's insight shape. `ShareCard` was already headline/narrative-only
+    and needed no changes to work across all three modules.

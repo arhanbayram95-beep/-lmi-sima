@@ -3,6 +3,7 @@ import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { analyzeReading, ReadingApiError } from '../api/reading';
 import AppLogo from '../components/common/AppLogo';
 import PrimaryButton from '../components/common/PrimaryButton';
+import { MODULE_PHOTO_COUNTS } from '../api/types';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
@@ -22,18 +23,13 @@ export default function AnalyzingScreen() {
 
   const runAnalysis = useCallback(async () => {
     setError(null);
-    if (!images.calm || !images.bright || !images.deep) {
+    if (images.length !== MODULE_PHOTO_COUNTS[selectedModule]) {
       setError(t('analyzing.error.body'));
       return;
     }
 
     try {
-      const result = await analyzeReading({
-        calm: images.calm,
-        bright: images.bright,
-        deep: images.deep,
-        module: selectedModule,
-      });
+      const result = await analyzeReading({ photos: images, module: selectedModule });
       setReading(result);
       clearImages();
       goToScreen('reveal');

@@ -2,7 +2,7 @@ import { API_BASE_URL, USE_MOCK_API } from './config';
 import { analyzeReadingMock } from './mockReading';
 import { AnalyzeReadingPayload, ReadingResult } from './types';
 
-export type { ExpressionLabel, ExpressionInsight, ReadingResult, AnalyzeReadingPayload, ReadingModuleId } from './types';
+export type { ReadingInsight, ReadingResult, AnalyzeReadingPayload, ReadingModuleId } from './types';
 
 // 'NO_FACE_DETECTED' is a forward-compatible hook, not yet raised anywhere —
 // on-device face detection is deferred (see QA_FINDINGS.md QA-5 and

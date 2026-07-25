@@ -7,7 +7,7 @@ describe('useAppStore', () => {
       previousScreen: null,
       ageVerified: false,
       imageConsentGiven: false,
-      images: {},
+      images: [],
       isProActive: false,
     });
   });
@@ -42,18 +42,14 @@ describe('useAppStore', () => {
     expect(useAppStore.getState().imageConsentGiven).toBe(false);
   });
 
-  it('caches at most the three expression images and can clear them', () => {
-    useAppStore.getState().setImage('calm', 'base64-calm');
-    useAppStore.getState().setImage('bright', 'base64-bright');
-    useAppStore.getState().setImage('deep', 'base64-deep');
-    expect(useAppStore.getState().images).toEqual({
-      calm: 'base64-calm',
-      bright: 'base64-bright',
-      deep: 'base64-deep',
-    });
+  it('accumulates captured photos in order and can clear them', () => {
+    useAppStore.getState().addImage('base64-calm');
+    useAppStore.getState().addImage('base64-bright');
+    useAppStore.getState().addImage('base64-deep');
+    expect(useAppStore.getState().images).toEqual(['base64-calm', 'base64-bright', 'base64-deep']);
 
     useAppStore.getState().clearImages();
-    expect(useAppStore.getState().images).toEqual({});
+    expect(useAppStore.getState().images).toEqual([]);
   });
 
   it('tracks Pro entitlement status', () => {
@@ -81,7 +77,7 @@ describe('useAppStore', () => {
 
   it('holds the most recent reading result and can clear it', () => {
     expect(useAppStore.getState().reading).toBeNull();
-    const reading = { headline: 'h', expression_insights: [], narrative: 'n' };
+    const reading = { headline: 'h', insights: [], narrative: 'n' };
     useAppStore.getState().setReading(reading);
     expect(useAppStore.getState().reading).toEqual(reading);
     useAppStore.getState().setReading(null);

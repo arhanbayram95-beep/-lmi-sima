@@ -1,20 +1,41 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import PrimaryButton from '../components/common/PrimaryButton';
 import { useTranslation } from '../i18n/useTranslation';
 import { TranslationKey } from '../i18n/translations';
-import { ExpressionLabel } from '../state/slices/captureSlice';
+import { ReadingModuleId } from '../api/types';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 import { playCaptureChime, playPromptChime } from '../utils/sound';
 
-const STEPS: { expression: ExpressionLabel; titleKey: TranslationKey; promptKey: TranslationKey }[] = [
-  { expression: 'calm', titleKey: 'capture.step.calm.title', promptKey: 'capture.step.calm.prompt' },
-  { expression: 'bright', titleKey: 'capture.step.bright.title', promptKey: 'capture.step.bright.prompt' },
-  { expression: 'deep', titleKey: 'capture.step.deep.title', promptKey: 'capture.step.deep.prompt' },
-];
+interface CaptureStep {
+  key: string;
+  titleKey: TranslationKey;
+  promptKey: TranslationKey;
+  // Front camera for the user's own photo, back camera for photographing
+  // someone else — only Relationship Harmony's second photo uses 'back'.
+  facing: CameraType;
+}
+
+// One sequence per module, length matching MODULE_PHOTO_COUNTS
+// (api/types.ts) — Character Analysis captures 3 of the user, Relationship
+// Harmony 1 of the user then 1 of someone else, Career Match 1 of the user.
+const MODULE_STEPS: Record<ReadingModuleId, CaptureStep[]> = {
+  'three-expression': [
+    { key: 'calm', titleKey: 'capture.step.calm.title', promptKey: 'capture.step.calm.prompt', facing: 'front' },
+    { key: 'bright', titleKey: 'capture.step.bright.title', promptKey: 'capture.step.bright.prompt', facing: 'front' },
+    { key: 'deep', titleKey: 'capture.step.deep.title', promptKey: 'capture.step.deep.prompt', facing: 'front' },
+  ],
+  'relationship-harmony': [
+    { key: 'person1', titleKey: 'capture.step.person1.title', promptKey: 'capture.step.person1.prompt', facing: 'front' },
+    { key: 'person2', titleKey: 'capture.step.person2.title', promptKey: 'capture.step.person2.prompt', facing: 'back' },
+  ],
+  'career-match': [
+    { key: 'solo', titleKey: 'capture.step.solo.title', promptKey: 'capture.step.solo.prompt', facing: 'front' },
+  ],
+};
 
 export default function CaptureScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -24,10 +45,13 @@ export default function CaptureScreen() {
   const flash = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;
 
-  const setImage = useAppStore((s) => s.setImage);
+  const selectedModule = useAppStore((s) => s.selectedModule);
+  const addImage = useAppStore((s) => s.addImage);
   const goToScreen = useAppStore((s) => s.goToScreen);
   const goBack = useAppStore((s) => s.goBack);
   const t = useTranslation();
+
+  const steps = MODULE_STEPS[selectedModule];
 
   useEffect(() => {
     Animated.loop(
@@ -60,11 +84,11 @@ export default function CaptureScreen() {
     try {
       const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.6 });
       if (photo?.base64) {
-        setImage(STEPS[stepIndex].expression, photo.base64);
+        addImage(photo.base64);
       }
     } finally {
       setIsCapturing(false);
-      if (stepIndex < STEPS.length - 1) {
+      if (stepIndex < steps.length - 1) {
         setStepIndex(stepIndex + 1);
       } else {
         goToScreen('analyzing');
@@ -95,20 +119,20 @@ export default function CaptureScreen() {
     );
   }
 
-  const currentStep = STEPS[stepIndex];
+  const currentStep = steps[stepIndex];
   const currentTitle = t(currentStep.titleKey);
 
   return (
     <View style={styles.container} testID="capture-screen">
-      <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="front" />
+      <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing={currentStep.facing} />
 
       <Animated.View pointerEvents="none" style={[styles.flashOverlay, { opacity: flash }]} />
 
       <View style={styles.overlay}>
         <View style={styles.dots}>
-          {STEPS.map((step, index) => (
+          {steps.map((step, index) => (
             <View
-              key={step.expression}
+              key={step.key}
               style={[styles.dot, index === stepIndex && styles.dotActive, index < stepIndex && styles.dotDone]}
             />
           ))}
@@ -126,7 +150,7 @@ export default function CaptureScreen() {
             onPress={handleCapture}
             disabled={isCapturing}
             accessibilityRole="button"
-            accessibilityLabel={`Capture ${currentTitle} expression`}
+            accessibilityLabel={`Capture ${currentTitle} photo`}
             testID="shutter-button"
             style={styles.shutterOuter}
           >
