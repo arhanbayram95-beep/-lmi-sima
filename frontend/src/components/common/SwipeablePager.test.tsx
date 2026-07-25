@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import React, { useState } from 'react';
-import { ScrollView, Text } from 'react-native';
+import { Pressable, ScrollView, Text } from 'react-native';
 import SwipeablePager from './SwipeablePager';
 
 function ControlledPager({ children }: React.PropsWithChildren) {
@@ -9,6 +9,21 @@ function ControlledPager({ children }: React.PropsWithChildren) {
     <SwipeablePager index={index} onIndexChange={setIndex}>
       {children}
     </SwipeablePager>
+  );
+}
+
+function PagerWithNextButton({ children }: React.PropsWithChildren) {
+  const [index, setIndex] = useState(0);
+  return (
+    <>
+      <SwipeablePager index={index} onIndexChange={setIndex}>
+        {children}
+      </SwipeablePager>
+      <Text testID="current-index">{String(index)}</Text>
+      <Pressable testID="next" onPress={() => setIndex(index + 1)}>
+        <Text>Next</Text>
+      </Pressable>
+    </>
   );
 }
 
@@ -129,6 +144,58 @@ describe('SwipeablePager', () => {
 
     scrollToSpy.mockRestore();
     jest.useRealTimers();
+  });
+
+  it('does not report the pages its own animated scroll passes over', () => {
+    jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+
+    render(
+      <PagerWithNextButton>
+        <Text>Page One</Text>
+        <Text>Page Two</Text>
+      </PagerWithNextButton>
+    );
+
+    const pageWidth = 400;
+    fireEvent(screen.getByTestId('swipeable-pager'), 'layout', { nativeEvent: { layout: { width: pageWidth } } });
+    const scrollView = screen.UNSAFE_getByProps({ horizontal: true });
+
+    fireEvent.press(screen.getByTestId('next'));
+
+    // The early frames of the transition still round to page 0. Feeding them
+    // back to the parent snapped the index straight back and stalled the
+    // slide partway across — the reported Next-button bug.
+    fireEvent(scrollView, 'scroll', { nativeEvent: { contentOffset: { x: pageWidth * 0.1 } } });
+    fireEvent(scrollView, 'scroll', { nativeEvent: { contentOffset: { x: pageWidth * 0.4 } } });
+
+    expect(screen.getByTestId('current-index').props.children).toBe('1');
+
+    (ScrollView.prototype.scrollTo as jest.Mock).mockRestore();
+  });
+
+  it('tracks swipes again once its own animated scroll has landed', () => {
+    jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+
+    render(
+      <PagerWithNextButton>
+        <Text>Page One</Text>
+        <Text>Page Two</Text>
+      </PagerWithNextButton>
+    );
+
+    const pageWidth = 400;
+    fireEvent(screen.getByTestId('swipeable-pager'), 'layout', { nativeEvent: { layout: { width: pageWidth } } });
+    const scrollView = screen.UNSAFE_getByProps({ horizontal: true });
+
+    fireEvent.press(screen.getByTestId('next'));
+    fireEvent(scrollView, 'scroll', { nativeEvent: { contentOffset: { x: pageWidth } } });
+
+    // Swiping back to page 0 must still register.
+    fireEvent(scrollView, 'scroll', { nativeEvent: { contentOffset: { x: pageWidth * 0.4 } } });
+
+    expect(screen.getByTestId('current-index').props.children).toBe('0');
+
+    (ScrollView.prototype.scrollTo as jest.Mock).mockRestore();
   });
 
   it('never scrolls to a guessed width — waits for the real measured layout', () => {

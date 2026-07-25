@@ -9,9 +9,12 @@ describe('PaywallScreen', () => {
     useAppStore.setState({ screen: 'paywall', isProActive: false });
   });
 
-  it('always renders the entertainment disclaimer', () => {
+  // The entertainment disclaimer lives on the onboarding consent step and on
+  // every result surface (RevealScreen). The paywall is a pricing screen, not
+  // a reading, so it carries the subscription terms instead.
+  it('does not render the entertainment disclaimer', () => {
     render(<PaywallScreen />);
-    expect(screen.getByText(/entertainment purposes only/i)).toBeTruthy();
+    expect(screen.queryByText(/entertainment purposes only/i)).toBeNull();
   });
 
   it('offers a restore purchases path', () => {
