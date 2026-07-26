@@ -1,21 +1,18 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { Linking } from 'react-native';
 import React from 'react';
 import ReviewScreen from './ReviewScreen';
 import { useAppStore } from '../state/useAppStore';
-
-const mockIsAvailableAsync = jest.fn().mockResolvedValue(true);
-const mockRequestReview = jest.fn().mockResolvedValue(undefined);
-
-jest.mock('expo-store-review', () => ({
-  isAvailableAsync: () => mockIsAvailableAsync(),
-  requestReview: () => mockRequestReview(),
-}));
+import { getStoreListingUrl } from '../utils/storeLinks';
 
 describe('ReviewScreen', () => {
   beforeEach(() => {
     useAppStore.setState({ screen: 'review' });
-    mockIsAvailableAsync.mockClear();
-    mockRequestReview.mockClear();
+    jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('lets the user pick a star rating', () => {
@@ -24,21 +21,12 @@ describe('ReviewScreen', () => {
     expect(screen.getByLabelText('Rate 4 stars')).toBeTruthy();
   });
 
-  it('triggers the native store review prompt and returns to the Analyze hub by default', async () => {
+  it('opens the real App Store/Play Store listing and returns to the Analyze hub by default', async () => {
     render(<ReviewScreen />);
     fireEvent.press(screen.getByText('Rate on App Store'));
 
-    await waitFor(() => expect(mockRequestReview).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(Linking.openURL).toHaveBeenCalledWith(getStoreListingUrl()));
     await waitFor(() => expect(useAppStore.getState().screen).toBe('analyze'));
-  });
-
-  it('skips the native prompt when it is unavailable on this device', async () => {
-    mockIsAvailableAsync.mockResolvedValueOnce(false);
-    render(<ReviewScreen />);
-    fireEvent.press(screen.getByText('Rate on App Store'));
-
-    await waitFor(() => expect(useAppStore.getState().screen).toBe('analyze'));
-    expect(mockRequestReview).not.toHaveBeenCalled();
   });
 
   it('returns to Settings, not the Analyze hub, when Review was opened from Settings', async () => {

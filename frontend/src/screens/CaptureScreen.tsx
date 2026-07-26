@@ -233,9 +233,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   guideRing: {
-    width: 240,
-    height: 300,
-    borderRadius: 140,
+    width: 300,
+    height: 370,
+    borderRadius: 170,
     borderWidth: 2,
     borderColor: Theme.colors.accent.goldSecondary,
     shadowColor: Theme.colors.accent.goldSecondary,

@@ -2,3 +2,4 @@ node_modules/
 api_key.txt
 *.env
 .env
+files_for_claude/other/

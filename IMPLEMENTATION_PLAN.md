@@ -98,10 +98,18 @@ entertainment framing.
 ---
 
 ## Phase 5: Monetization & Final Deploy
-- [ ] **5.1 RevenueCat Hook Integration**
+- [ ] **5.1 RevenueCat Hook Integration — deferred (2026-07-26)**
   - Setup the paywall component inside the frontend app.
   - Lock deep-dive interpretations and reading history behind a weekly/monthly
     subscription — cancel flow must be equally frictionless as sign-up.
+  - Product decision: `react-native-purchases` is a native module, same
+    category as Phase 6's face detection — installing it drops plain Expo
+    Go support in favor of an EAS dev-client build. Deferred together with
+    6.1 rather than sprung on the project mid-prompt-tuning session.
+    Blocked on: `REVENUECAT_API_KEY` (missing from `.env`), a RevenueCat
+    account, and App Store Connect / Google Play Console developer
+    accounts with in-app products configured — RevenueCat sits on top of
+    those, it doesn't replace them. Revisit alongside 6.1.
 - [ ] **5.2 End-to-End Testing Matrix**
   - Run `backend/tests/unit` to verify JSON payload handling.
   - Run edge-case checks: non-face photo, apparent-minor photo (graceful,
@@ -114,12 +122,14 @@ entertainment framing.
 
 ---
 
-## Phase 6: Deferred — On-Device Face Detection
+## Phase 6: Deferred — On-Device Face Detection (+ RevenueCat, see 5.1)
 Pushed to the very end of the plan per product decision (2026-07-24): Expo
 dropped its built-in face-detector module, so real detection needs a native
 dependency (`react-native-vision-camera` + an ML Kit frame-processor plugin)
 and a move off plain Expo Go to an EAS dev-client build — a bigger
 architecture change than the rest of the plan, deliberately sequenced last.
+RevenueCat (5.1) hits the exact same Expo Go tradeoff, so it's grouped in
+here too (2026-07-26) — tackle both together when ready for a dev-client build.
 - [x] **6.0 Placeholder UI** — `NoFaceDetectedScreen` built and wired: a
   `ReadingApiError` thrown with `code: 'NO_FACE_DETECTED'` (frontend or
   backend, once real detection exists) routes `AnalyzingScreen` straight to

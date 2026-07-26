@@ -1,12 +1,12 @@
-import * as StoreReview from 'expo-store-review';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
+import { getStoreListingUrl } from '../utils/storeLinks';
 
 const STAR_COUNT = 5;
 const STAR_EMPTY_COLOR = 'rgba(228, 194, 125, 0.3)';
@@ -45,10 +45,7 @@ export default function ReviewScreen() {
   const t = useTranslation();
 
   const handleRateOnAppStore = async () => {
-    const available = await StoreReview.isAvailableAsync();
-    if (available) {
-      await StoreReview.requestReview();
-    }
+    await Linking.openURL(getStoreListingUrl());
     goBack();
   };
 
