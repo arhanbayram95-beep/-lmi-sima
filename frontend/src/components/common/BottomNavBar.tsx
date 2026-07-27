@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   navGlyphActive: {
-    color: Theme.colors.text.primary,
+    color: Theme.colors.accent.goldSecondary,
   },
   navLabel: {
     ...Theme.typography.labelSm,
@@ -86,6 +86,6 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
   },
   navLabelActive: {
-    color: Theme.colors.text.primary,
+    color: Theme.colors.accent.goldSecondary,
   },
 });

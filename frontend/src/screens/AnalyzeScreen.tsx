@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ImageSourcePropType, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import AppLogo from '../components/common/AppLogo';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
@@ -15,10 +15,22 @@ interface AnalysisModule {
   id: ReadingModuleId;
   titleKey: TranslationKey;
   descriptionKey: TranslationKey;
-  glyph: string;
+  icon: ImageSourcePropType;
   targetScreen: AppScreen;
   available: boolean;
 }
+
+// Nanobanana-generated module artwork (see hub_examples/ at the repo root
+// for the untouched source renders) — cropped square, background-keyed and
+// vignetted in frontend/assets/modules/ so they sit cleanly in the dark
+// icon slot with no light-background halo. Static requires, not a dynamic
+// map lookup, because Metro needs require() calls to be statically
+// analyzable.
+const MODULE_ICONS: Record<ReadingModuleId, ImageSourcePropType> = {
+  'three-expression': require('../../assets/modules/character-analysis.png'),
+  'relationship-harmony': require('../../assets/modules/relationship-harmony.png'),
+  'career-match': require('../../assets/modules/career-match.png'),
+};
 
 // Add future modules here — nothing else needs to change to surface them.
 // Each `id` must have a matching system prompt in
@@ -28,7 +40,7 @@ const MODULES: AnalysisModule[] = [
     id: 'three-expression',
     titleKey: 'analyze.module.threeExpression.title',
     descriptionKey: 'analyze.module.threeExpression.description',
-    glyph: '◐',
+    icon: MODULE_ICONS['three-expression'],
     targetScreen: 'capture',
     available: true,
   },
@@ -36,7 +48,7 @@ const MODULES: AnalysisModule[] = [
     id: 'relationship-harmony',
     titleKey: 'analyze.module.relationshipHarmony.title',
     descriptionKey: 'analyze.module.relationshipHarmony.description',
-    glyph: '♥',
+    icon: MODULE_ICONS['relationship-harmony'],
     targetScreen: 'capture',
     available: true,
   },
@@ -44,7 +56,7 @@ const MODULES: AnalysisModule[] = [
     id: 'career-match',
     titleKey: 'analyze.module.careerMatch.title',
     descriptionKey: 'analyze.module.careerMatch.description',
-    glyph: '◆',
+    icon: MODULE_ICONS['career-match'],
     targetScreen: 'capture',
     available: true,
   },
@@ -81,7 +93,7 @@ export default function AnalyzeScreen() {
               >
                 <GlassCard style={[styles.moduleCard, !module.available && styles.moduleCardDisabled]}>
                   <View style={styles.moduleIcon}>
-                    <Text style={styles.moduleGlyph}>{module.glyph}</Text>
+                    <Image source={module.icon} style={styles.moduleIconImage} resizeMode="cover" />
                   </View>
                   <View style={styles.moduleTextBlock}>
                     <View style={styles.moduleTitleRow}>
@@ -94,7 +106,11 @@ export default function AnalyzeScreen() {
                     </View>
                     <Text style={styles.moduleDescription}>{t(module.descriptionKey)}</Text>
                   </View>
-                  {module.available && <Text style={styles.moduleChevron}>›</Text>}
+                  {module.available && (
+                    <View style={styles.moduleChevronBadge}>
+                      <Text style={styles.moduleChevron}>›</Text>
+                    </View>
+                  )}
                 </GlassCard>
               </Pressable>
             </FadeInView>
@@ -144,23 +160,26 @@ const styles = StyleSheet.create({
     gap: Theme.spacing.md,
     paddingVertical: Theme.spacing.md,
     minHeight: 108,
+    // Gold glassmorphic border + a slightly richer fill than the base
+    // GlassCard default so these hub cards read with more contrast against
+    // the Dark Obsidian background, per DESIGN.md's glassmorphic system.
+    borderWidth: 1,
+    borderColor: 'rgba(235, 201, 131, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.07)',
   },
   moduleCardDisabled: {
     opacity: 0.55,
   },
-  // Sized to comfortably host a real thumbnail image later — swap the
-  // glyph Text for an Image here once module artwork is ready.
   moduleIcon: {
     width: 76,
     height: 76,
     borderRadius: Theme.radius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
+    overflow: 'hidden',
     backgroundColor: 'rgba(158, 41, 65, 0.25)',
   },
-  moduleGlyph: {
-    color: Theme.colors.accent.crimsonPrimary,
-    fontSize: 34,
+  moduleIconImage: {
+    width: '100%',
+    height: '100%',
   },
   moduleTextBlock: {
     flex: 1,
@@ -174,16 +193,25 @@ const styles = StyleSheet.create({
   moduleTitle: {
     ...Theme.typography.headlineMd,
     fontSize: 19,
-    color: Theme.colors.text.primary,
+    color: Theme.colors.accent.goldSecondary,
   },
   moduleDescription: {
     ...Theme.typography.bodyMd,
     fontSize: 14,
     color: Theme.colors.text.secondary,
   },
+  moduleChevronBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: Theme.radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(235, 201, 131, 0.15)',
+  },
   moduleChevron: {
-    color: Theme.colors.text.muted,
-    fontSize: 24,
+    color: Theme.colors.accent.goldSecondary,
+    fontSize: 20,
+    fontWeight: '700',
   },
   comingSoonBadge: {
     backgroundColor: 'rgba(235, 201, 131, 0.15)',
