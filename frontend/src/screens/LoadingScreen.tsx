@@ -57,7 +57,7 @@ export default function LoadingScreen() {
   return (
     <View style={styles.container} testID="loading-screen">
       <Animated.View style={{ transform: [{ scale: pulse }] }}>
-        <AppLogo size="lg" />
+        <AppLogo size="lg" showWordmark />
       </Animated.View>
       <Text style={styles.subtitle}>{t('loading.subtitle')}</Text>
 

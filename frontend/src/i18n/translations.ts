@@ -164,6 +164,10 @@ export const translations = {
     fr: "Autoriser l'accès à la caméra", ar: 'السماح بالوصول إلى الكاميرا', bn: 'ক্যামেরা অ্যাক্সেসের অনুমতি দিন', pt: 'Permitir acesso à câmara',
     ru: 'Разрешить доступ к камере', ur: 'کیمرے کی رسائی کی اجازت دیں',
   },
+  'capture.cancelButton': {
+    en: 'Cancel', zh: '取消', hi: 'रद्द करें', es: 'Cancelar', fr: 'Annuler', ar: 'إلغاء', bn: 'বাতিল করুন',
+    pt: 'Cancelar', ru: 'Отмена', ur: 'منسوخ کریں',
+  },
   'capture.step.calm.title': {
     en: 'Calm', zh: '平静', hi: 'शांत', es: 'Calma', fr: 'Calme', ar: 'هادئ', bn: 'শান্ত', pt: 'Calma', ru: 'Спокойствие', ur: 'پرسکون',
   },

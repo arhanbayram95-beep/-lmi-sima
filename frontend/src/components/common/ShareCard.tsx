@@ -15,7 +15,7 @@ const ShareCard = forwardRef<View, ShareCardProps>(({ reading }, ref) => {
   return (
     <View ref={ref} style={styles.card} collapsable={false}>
       <View style={styles.brand}>
-        <AppLogo />
+        <AppLogo showWordmark />
       </View>
 
       <View style={styles.body}>

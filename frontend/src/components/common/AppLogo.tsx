@@ -4,9 +4,16 @@ import { Theme } from '../../ui/theme';
 
 interface AppLogoProps {
   size?: 'sm' | 'lg';
+  // Icon-only by default — the full icon+wordmark lockup is reserved for
+  // the handful of once-per-session brand moments (first launch, the
+  // post-onboarding welcome, the externally-shared card) where it's
+  // explicitly opted into. Everywhere the user revisits constantly (the
+  // Analyze hub, onboarding, every single analysis run) showing the full
+  // wordmark every time read as repetitive.
+  showWordmark?: boolean;
 }
 
-export default function AppLogo({ size = 'sm' }: AppLogoProps) {
+export default function AppLogo({ size = 'sm', showWordmark = false }: AppLogoProps) {
   const isLarge = size === 'lg';
   return (
     <View style={styles.container}>
@@ -16,7 +23,7 @@ export default function AppLogo({ size = 'sm' }: AppLogoProps) {
           style={[styles.badge, isLarge && styles.badgeLg]}
         />
       </View>
-      <Text style={[styles.wordmark, isLarge && styles.wordmarkLg]}>Face Reader</Text>
+      {showWordmark && <Text style={[styles.wordmark, isLarge && styles.wordmarkLg]}>Face Reader</Text>}
     </View>
   );
 }

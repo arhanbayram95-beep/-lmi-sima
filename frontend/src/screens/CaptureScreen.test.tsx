@@ -60,6 +60,20 @@ describe('CaptureScreen', () => {
     expect(useAppStore.getState().screen).toBe('analyze');
   });
 
+  it('lets the user cancel mid-capture, discarding whatever was already taken', async () => {
+    useAppStore.getState().goToScreen('analyze');
+    useAppStore.getState().goToScreen('capture');
+
+    render(<CaptureScreen />);
+    fireEvent.press(screen.getByTestId('shutter-button'));
+    await waitFor(() => expect(useAppStore.getState().images).toEqual(['mock-base64']));
+
+    fireEvent.press(screen.getByTestId('capture-cancel-button'));
+
+    expect(useAppStore.getState().screen).toBe('analyze');
+    expect(useAppStore.getState().images).toEqual([]);
+  });
+
   it('captures all three expressions in order and stores them, then moves to analysis', async () => {
     render(<CaptureScreen />);
 

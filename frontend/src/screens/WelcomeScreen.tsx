@@ -28,7 +28,7 @@ export default function WelcomeScreen() {
     <View style={styles.container} testID="welcome-screen">
       <FadeInView style={styles.content}>
         <Animated.View style={{ transform: [{ scale: pulse }] }}>
-          <AppLogo size="lg" />
+          <AppLogo size="lg" showWordmark />
         </Animated.View>
         <Text style={styles.headline}>{t('welcome.headline')}</Text>
         <Text style={styles.subtitle}>{t('welcome.subtitle')}</Text>

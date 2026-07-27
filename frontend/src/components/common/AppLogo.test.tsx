@@ -3,8 +3,13 @@ import React from 'react';
 import AppLogo from './AppLogo';
 
 describe('AppLogo', () => {
-  it('renders the Face Reader wordmark', () => {
+  it('is icon-only by default', () => {
     render(<AppLogo />);
+    expect(screen.queryByText('Face Reader')).toBeNull();
+  });
+
+  it('shows the wordmark when explicitly opted into', () => {
+    render(<AppLogo showWordmark />);
     expect(screen.getByText('Face Reader')).toBeTruthy();
   });
 });

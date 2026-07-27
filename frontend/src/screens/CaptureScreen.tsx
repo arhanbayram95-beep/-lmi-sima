@@ -47,9 +47,19 @@ export default function CaptureScreen() {
 
   const selectedModule = useAppStore((s) => s.selectedModule);
   const addImage = useAppStore((s) => s.addImage);
+  const clearImages = useAppStore((s) => s.clearImages);
   const goToScreen = useAppStore((s) => s.goToScreen);
   const goBack = useAppStore((s) => s.goBack);
   const t = useTranslation();
+
+  // Discards whatever's been captured so far in this session (never
+  // partial-submitted — process-and-discard applies to an abandoned
+  // capture same as a completed one) and returns wherever the user came
+  // from, same as the permission-denied view's close button.
+  const handleCancel = () => {
+    clearImages();
+    goBack();
+  };
 
   const steps = MODULE_STEPS[selectedModule];
 
@@ -129,6 +139,16 @@ export default function CaptureScreen() {
       <Animated.View pointerEvents="none" style={[styles.flashOverlay, { opacity: flash }]} />
 
       <View style={styles.overlay}>
+        <Pressable
+          onPress={handleCancel}
+          accessibilityRole="button"
+          accessibilityLabel={t('capture.cancelButton')}
+          style={styles.closeButton}
+          testID="capture-cancel-button"
+        >
+          <Text style={styles.closeIcon}>✕</Text>
+        </Pressable>
+
         <View style={styles.dots}>
           {steps.map((step, index) => (
             <View

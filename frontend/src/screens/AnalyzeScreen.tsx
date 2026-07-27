@@ -21,11 +21,13 @@ interface AnalysisModule {
 }
 
 // Nanobanana-generated module artwork (see hub_examples/ at the repo root
-// for the untouched source renders) — cropped square, background-keyed and
-// vignetted in frontend/assets/modules/ so they sit cleanly in the dark
-// icon slot with no light-background halo. Static requires, not a dynamic
-// map lookup, because Metro needs require() calls to be statically
-// analyzable.
+// for the untouched source renders, and other_app.jpeg for the reference
+// look this was matched to) — background-keyed, then composited onto a
+// wide canvas with a right-side alpha fade baked in (frontend/assets/
+// modules/) so the art bleeds from the card's left edge and dissolves
+// straight into the card background, no boxed icon slot or visible edge.
+// Static requires, not a dynamic map lookup, because Metro needs
+// require() calls to be statically analyzable.
 const MODULE_ICONS: Record<ReadingModuleId, ImageSourcePropType> = {
   'three-expression': require('../../assets/modules/character-analysis.png'),
   'relationship-harmony': require('../../assets/modules/relationship-harmony.png'),
@@ -92,9 +94,7 @@ export default function AnalyzeScreen() {
                 testID={`analyze-module-${module.id}`}
               >
                 <GlassCard style={[styles.moduleCard, !module.available && styles.moduleCardDisabled]}>
-                  <View style={styles.moduleIcon}>
-                    <Image source={module.icon} style={styles.moduleIconImage} resizeMode="cover" />
-                  </View>
+                  <Image source={module.icon} style={styles.moduleArt} resizeMode="cover" />
                   <View style={styles.moduleTextBlock}>
                     <View style={styles.moduleTitleRow}>
                       <Text style={styles.moduleTitle}>{title}</Text>
@@ -157,9 +157,14 @@ const styles = StyleSheet.create({
   moduleCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Theme.spacing.md,
-    paddingVertical: Theme.spacing.md,
-    minHeight: 108,
+    minHeight: 124,
+    // overflow:hidden clips the bleeding art to the card's own rounded
+    // corners, same as the reference — padding is 0 here (not GlassCard's
+    // default) because the art needs to reach the card's left edge with
+    // nothing inset around it; moduleTextBlock/moduleChevronBadge carry
+    // their own padding instead.
+    padding: 0,
+    overflow: 'hidden',
     // Gold glassmorphic border + a slightly richer fill than the base
     // GlassCard default so these hub cards read with more contrast against
     // the Dark Obsidian background, per DESIGN.md's glassmorphic system.
@@ -170,20 +175,23 @@ const styles = StyleSheet.create({
   moduleCardDisabled: {
     opacity: 0.55,
   },
-  moduleIcon: {
-    width: 76,
-    height: 76,
-    borderRadius: Theme.radius.lg,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(158, 41, 65, 0.25)',
-  },
-  moduleIconImage: {
-    width: '100%',
-    height: '100%',
+  // Bleeds from the card's left edge and fades to transparent (baked into
+  // the asset itself, see frontend/assets/modules/) so it blends straight
+  // into the card background with no visible edge, rather than sitting in
+  // a separate boxed icon slot.
+  moduleArt: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 190,
   },
   moduleTextBlock: {
     flex: 1,
     gap: 4,
+    marginLeft: 150,
+    paddingVertical: Theme.spacing.md,
+    paddingRight: Theme.spacing.xs,
   },
   moduleTitleRow: {
     flexDirection: 'row',
@@ -207,6 +215,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(235, 201, 131, 0.15)',
+    marginRight: Theme.spacing.md,
   },
   moduleChevron: {
     color: Theme.colors.accent.goldSecondary,
