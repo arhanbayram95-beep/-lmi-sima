@@ -2,6 +2,7 @@ import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import React, { useState } from 'react';
 import { Alert, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import AppLogo from '../components/common/AppLogo';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
@@ -94,13 +95,16 @@ export default function SettingsScreen() {
   const currentLanguageName =
     SUPPORTED_LANGUAGES.find((language) => language.code === languageCode)?.englishName ?? 'English';
 
+  const appVersion = Constants.expoConfig?.version ?? '1.0.0';
+  const buildNumber = resolveBuildNumber();
+
   const handleContactUs = () => {
     const url = buildContactMailUrl({
       anonymousId,
       isProActive,
       languageCode,
-      appVersion: Constants.expoConfig?.version ?? '1.0.0',
-      buildNumber: resolveBuildNumber(),
+      appVersion,
+      buildNumber,
       platformLabel: resolvePlatformLabel(),
       osVersionLabel: resolveOsVersionLabel(),
       signOff: resolveSignOff(),
@@ -123,6 +127,13 @@ export default function SettingsScreen() {
     <View style={styles.container} testID="settings-screen">
       <View style={styles.header}>
         <Text style={styles.title}>{t('settings.title')}</Text>
+        <View style={styles.brandTag}>
+          <AppLogo />
+          <View>
+            <Text style={styles.brandName}>Face Reader</Text>
+            <Text style={styles.brandVersion}>{buildNumber ? `v${appVersion} (${buildNumber})` : `v${appVersion}`}</Text>
+          </View>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -183,6 +194,9 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.background.middle,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     paddingTop: Theme.spacing.xl,
     paddingHorizontal: Theme.spacing.gutter,
     paddingBottom: Theme.spacing.sm,
@@ -190,6 +204,23 @@ const styles = StyleSheet.create({
   title: {
     ...Theme.typography.headlineLg,
     color: Theme.colors.text.primary,
+  },
+  brandTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  brandName: {
+    ...Theme.typography.labelSm,
+    fontSize: 11,
+    color: Theme.colors.accent.goldSecondary,
+    textAlign: 'right',
+  },
+  brandVersion: {
+    ...Theme.typography.labelSm,
+    fontSize: 9,
+    color: Theme.colors.text.muted,
+    textAlign: 'right',
   },
   scrollContent: {
     paddingHorizontal: Theme.spacing.gutter,

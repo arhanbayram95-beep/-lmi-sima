@@ -42,12 +42,6 @@ export const translations = {
     ru: 'Только в развлекательных целях. Face Reader не предоставляет клинических, психологических или диагностических заключений. Фото обрабатываются только в памяти и никогда не сохраняются.',
     ur: 'صرف تفریحی مقاصد کے لیے۔ Face Reader کوئی طبی، نفسیاتی یا تشخیصی جائزہ فراہم نہیں کرتا۔ تصاویر صرف میموری میں پروسیس ہوتی ہیں اور کبھی محفوظ نہیں کی جاتیں۔',
   },
-  'loading.subtitle': {
-    en: 'Initializing Neural Matrix', zh: '正在初始化神经矩阵', hi: 'न्यूरल मैट्रिक्स आरंभ हो रहा है',
-    es: 'Inicializando matriz neuronal', fr: 'Initialisation de la matrice neuronale',
-    ar: 'جارٍ تهيئة المصفوفة العصبية', bn: 'নিউরাল ম্যাট্রিক্স চালু হচ্ছে', pt: 'A inicializar a matriz neural',
-    ru: 'Инициализация нейросети', ur: 'نیورل میٹرکس شروع ہو رہا ہے',
-  },
   'loading.status1': {
     en: 'CALIBRATING VISION ENGINE...', zh: '正在校准视觉引擎...', hi: 'विज़न इंजन कैलिब्रेट हो रहा है...',
     es: 'CALIBRANDO MOTOR DE VISIÓN...', fr: 'CALIBRAGE DU MOTEUR DE VISION...',

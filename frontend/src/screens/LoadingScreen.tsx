@@ -56,10 +56,10 @@ export default function LoadingScreen() {
 
   return (
     <View style={styles.container} testID="loading-screen">
-      <Animated.View style={{ transform: [{ scale: pulse }] }}>
-        <AppLogo size="lg" showWordmark />
+      <Animated.View style={[styles.brand, { transform: [{ scale: pulse }] }]}>
+        <AppLogo size="lg" />
+        <Text style={styles.brandName}>{'FACE\nREADER'}</Text>
       </Animated.View>
-      <Text style={styles.subtitle}>{t('loading.subtitle')}</Text>
 
       <View style={styles.progressWrap}>
         <Animated.View style={[styles.spinnerRing, { transform: [{ rotate: spinDeg }] }]} />
@@ -78,10 +78,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: Theme.spacing.containerPadding,
     gap: Theme.spacing.sm,
   },
-  subtitle: {
-    ...Theme.typography.labelSm,
-    color: Theme.colors.text.muted,
-    textTransform: 'uppercase',
+  brand: {
+    alignItems: 'center',
+    gap: Theme.spacing.sm,
+  },
+  brandName: {
+    ...Theme.typography.headlineLg,
+    fontSize: 26,
+    lineHeight: 30,
+    letterSpacing: 4,
+    color: Theme.colors.accent.goldSecondary,
+    textAlign: 'center',
   },
   progressWrap: {
     position: 'absolute',

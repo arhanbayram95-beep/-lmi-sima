@@ -47,8 +47,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: Theme.radius.md,
-    borderWidth: 1,
-    borderColor: Theme.colors.accent.goldSecondary,
   },
   badgeLg: {
     width: 128,
