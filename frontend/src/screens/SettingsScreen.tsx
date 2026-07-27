@@ -132,7 +132,9 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container} testID="settings-screen">
-      <Image source={require('../../assets/logo-emblem-transparent.png')} style={styles.watermark} resizeMode="contain" />
+      <View style={styles.watermarkWrap} pointerEvents="none">
+        <Image source={require('../../assets/logo-emblem-transparent.png')} style={styles.watermark} resizeMode="contain" />
+      </View>
 
       <View style={styles.header}>
         <Text style={styles.title}>{t('settings.title')}</Text>
@@ -209,14 +211,15 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.background.middle,
     overflow: 'hidden',
   },
+  watermarkWrap: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   watermark: {
-    position: 'absolute',
-    top: -40,
-    right: -60,
-    width: 340,
-    height: 340,
+    width: '90%',
+    aspectRatio: 1,
     opacity: 0.05,
-    pointerEvents: 'none',
   },
   header: {
     paddingTop: Theme.spacing.xl,
