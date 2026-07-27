@@ -56,29 +56,34 @@ export default function RevealScreen() {
         {reading.insights.map((item, index) => (
           <FadeInView key={`${item.label}-${index}`} delay={80 + index * 60}>
             <GlassCard style={styles.card}>
-              <View style={styles.cardHeaderRow}>
-                {images[index] && (
-                  <Image
-                    source={{ uri: `data:image/jpeg;base64,${images[index]}` }}
-                    style={styles.cardThumbnail}
-                    testID={`insight-photo-${index}`}
-                  />
-                )}
-                <Text style={styles.cardGlyph}>✦</Text>
-                <Text style={styles.cardHeading}>{item.label}</Text>
+              {images[index] && (
+                <Image
+                  source={{ uri: `data:image/jpeg;base64,${images[index]}` }}
+                  style={styles.cardPhoto}
+                  resizeMode="cover"
+                  testID={`insight-photo-${index}`}
+                />
+              )}
+              <View style={styles.cardContent}>
+                <View style={styles.cardHeaderRow}>
+                  <Text style={styles.cardGlyph}>✦</Text>
+                  <Text style={styles.cardHeading}>{item.label}</Text>
+                </View>
+                <Text style={styles.cardBody}>{item.insight}</Text>
               </View>
-              <Text style={styles.cardBody}>{item.insight}</Text>
             </GlassCard>
           </FadeInView>
         ))}
 
         <FadeInView delay={80 + reading.insights.length * 60}>
           <GlassCard style={styles.card}>
-            <View style={styles.cardHeaderRow}>
-              <Text style={styles.cardGlyph}>✦</Text>
-              <Text style={styles.cardHeading}>{t('reveal.narrativeHeading')}</Text>
+            <View style={styles.cardContent}>
+              <View style={styles.cardHeaderRow}>
+                <Text style={styles.cardGlyph}>✦</Text>
+                <Text style={styles.cardHeading}>{t('reveal.narrativeHeading')}</Text>
+              </View>
+              <Text style={styles.cardBody}>{reading.narrative}</Text>
             </View>
-            <Text style={styles.cardBody}>{reading.narrative}</Text>
           </GlassCard>
         </FadeInView>
       </ScrollView>
@@ -122,18 +127,22 @@ const styles = StyleSheet.create({
     marginBottom: Theme.spacing.xs,
   },
   card: {
+    padding: 0,
+    overflow: 'hidden',
+  },
+  cardPhoto: {
+    width: '100%',
+    aspectRatio: 1,
+    backgroundColor: Theme.colors.surface.glassBackground,
+  },
+  cardContent: {
+    padding: Theme.spacing.md,
     gap: Theme.spacing.xs,
   },
   cardHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-  },
-  cardThumbnail: {
-    width: 40,
-    height: 40,
-    borderRadius: Theme.radius.md,
-    backgroundColor: Theme.colors.surface.glassBackground,
   },
   cardGlyph: {
     fontSize: 22,

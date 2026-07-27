@@ -57,12 +57,9 @@ describe('PaywallScreen', () => {
     expect(useAppStore.getState().screen).toBe('welcome');
   });
 
-  it('still offers the free trial, but only as a secondary, de-emphasized link', () => {
+  it('does not offer a free trial option', () => {
     render(<PaywallScreen />);
-
-    fireEvent.press(screen.getByTestId('paywall-trial-link'));
-    expect(useAppStore.getState().isProActive).toBe(true);
-    expect(useAppStore.getState().screen).toBe('welcome');
+    expect(screen.queryByTestId('paywall-trial-link')).toBeNull();
   });
 
   it('opens the privacy policy modal from the footer link', () => {

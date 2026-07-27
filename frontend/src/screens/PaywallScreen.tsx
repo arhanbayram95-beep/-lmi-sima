@@ -56,10 +56,7 @@ export default function PaywallScreen() {
   const setProActive = useAppStore((s) => s.setProActive);
   const t = useTranslation();
 
-  // Subscribing and starting the trial land the user in the same place
-  // today (no real billing integration yet — see PROJECT_SPEC.md Phase
-  // 5.1). The trial is deliberately the smaller, secondary action so a
-  // full subscription is the path of least resistance.
+  // No real billing integration yet — see PROJECT_SPEC.md Phase 5.1.
   const enterApp = () => {
     setProActive(true);
     goToScreen('welcome');
@@ -156,10 +153,6 @@ export default function PaywallScreen() {
       <View style={styles.footer}>
         <PrimaryButton label={t('paywall.subscribeNow')} onPress={enterApp} />
         <Text style={styles.reassurance}>{t('paywall.reassurance')}</Text>
-
-        <Pressable onPress={enterApp} accessibilityRole="button" testID="paywall-trial-link">
-          <Text style={styles.trialLink}>{t('paywall.trialLink')}</Text>
-        </Pressable>
 
         <View style={styles.footerLinks}>
           <Pressable onPress={handleRestorePurchases} accessibilityRole="button" testID="paywall-restore-purchases">
@@ -353,13 +346,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Theme.colors.text.muted,
     textAlign: 'center',
-  },
-  trialLink: {
-    ...Theme.typography.labelSm,
-    fontSize: 11,
-    color: 'rgba(179, 176, 205, 0.55)',
-    textAlign: 'center',
-    textDecorationLine: 'underline',
   },
   footerLinks: {
     flexDirection: 'row',

@@ -365,17 +365,6 @@ export const translations = {
     ru: 'Получите неограниченный анализ по 3 выражениям и глубокие отчёты о личности.',
     ur: 'لامحدود 3-ایکسپریشن تجزیہ اور گہری شخصیت رپورٹس سے لطف اندوز ہوں۔',
   },
-  'paywall.trialBanner': {
-    en: '🎁 3-Day Free Trial — cancel anytime before it ends.', zh: '🎁 3天免费试用 — 结束前随时可取消。',
-    hi: '🎁 3-दिन का निःशुल्क ट्रायल — समाप्त होने से पहले कभी भी रद्द करें।',
-    es: '🎁 Prueba gratuita de 3 días — cancela cuando quieras antes de que termine.',
-    fr: "🎁 Essai gratuit de 3 jours — annulez à tout moment avant la fin.",
-    ar: '🎁 تجربة مجانية لمدة 3 أيام — يمكنك الإلغاء في أي وقت قبل انتهائها.',
-    bn: '🎁 ৩-দিনের বিনামূল্যে ট্রায়াল — শেষ হওয়ার আগে যেকোনো সময় বাতিল করুন।',
-    pt: '🎁 Teste gratuito de 3 dias — cancele a qualquer momento antes do fim.',
-    ru: '🎁 3-дневная бесплатная пробная версия — отмените в любой момент до её окончания.',
-    ur: '🎁 3 دن کا مفت ٹرائل — ختم ہونے سے پہلے کسی بھی وقت منسوخ کریں۔',
-  },
   'paywall.featuresHeading': {
     en: 'Everything you unlock', zh: '解锁全部权益', hi: 'आपको जो कुछ मिलेगा', es: 'Todo lo que desbloqueas',
     fr: 'Tout ce que vous débloquez', ar: 'كل ما ستحصل عليه', bn: 'আপনি যা যা আনলক করবেন', pt: 'Tudo o que desbloqueia',
@@ -421,12 +410,6 @@ export const translations = {
   'paywall.subscribeNow': {
     en: 'Subscribe Now', zh: '立即订阅', hi: 'अभी सब्सक्राइब करें', es: 'Suscribirse ahora', fr: "S'abonner maintenant",
     ar: 'اشترك الآن', bn: 'এখনই সাবস্ক্রাইব করুন', pt: 'Subscrever agora', ru: 'Оформить подписку', ur: 'ابھی سبسکرائب کریں',
-  },
-  'paywall.trialLink': {
-    en: 'Prefer to try free for 3 days first?', zh: '想先免费试用3天吗？', hi: 'पहले 3 दिन मुफ़्त आज़माना चाहेंगे?',
-    es: '¿Prefieres probarlo gratis 3 días antes?', fr: "Préférez-vous essayer gratuitement pendant 3 jours d'abord ?",
-    ar: 'هل تفضل تجربته مجانًا لمدة 3 أيام أولاً؟', bn: 'প্রথমে ৩ দিন বিনামূল্যে চেষ্টা করতে চান?', pt: 'Prefere experimentar gratuitamente por 3 dias primeiro?',
-    ru: 'Хотите сначала попробовать бесплатно 3 дня?', ur: 'کیا آپ پہلے 3 دن مفت آزمانا چاہیں گے؟',
   },
   'paywall.reassurance': {
     en: 'Cancel anytime · Secure payment', zh: '随时取消 · 安全支付', hi: 'कभी भी रद्द करें · सुरक्षित भुगतान',
