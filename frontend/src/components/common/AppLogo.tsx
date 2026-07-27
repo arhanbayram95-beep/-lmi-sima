@@ -37,15 +37,15 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
   },
   badge: {
-    width: 28,
-    height: 28,
+    width: 44,
+    height: 44,
     borderRadius: Theme.radius.md,
     borderWidth: 1,
     borderColor: Theme.colors.accent.goldSecondary,
   },
   badgeLg: {
-    width: 96,
-    height: 96,
+    width: 128,
+    height: 128,
     borderRadius: Theme.radius.lg,
   },
   wordmark: {

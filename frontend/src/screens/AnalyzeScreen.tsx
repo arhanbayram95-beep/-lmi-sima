@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import AppLogo from '../components/common/AppLogo';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
@@ -57,6 +58,7 @@ export default function AnalyzeScreen() {
   return (
     <View style={styles.container} testID="analyze-screen">
       <View style={styles.header}>
+        <AppLogo />
         <Text style={styles.title}>{t('analyze.title')}</Text>
         <Text style={styles.subtitle}>{t('analyze.subtitle')}</Text>
       </View>
@@ -120,7 +122,7 @@ const styles = StyleSheet.create({
     paddingTop: Theme.spacing.xl,
     paddingHorizontal: Theme.spacing.gutter,
     paddingBottom: Theme.spacing.sm,
-    gap: 4,
+    gap: Theme.spacing.xs,
   },
   title: {
     ...Theme.typography.headlineLg,
