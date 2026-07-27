@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { Theme } from '../../ui/theme';
 
 interface AppLogoProps {
@@ -11,9 +11,10 @@ export default function AppLogo({ size = 'sm' }: AppLogoProps) {
   return (
     <View style={styles.container}>
       <View style={[styles.glow, isLarge && styles.glowLg]}>
-        <View style={[styles.badge, isLarge && styles.badgeLg]}>
-          <Text style={[styles.sparkle, isLarge && styles.sparkleLg]}>✦</Text>
-        </View>
+        <Image
+          source={require('../../../assets/logo-badge.png')}
+          style={[styles.badge, isLarge && styles.badgeLg]}
+        />
       </View>
       <Text style={[styles.wordmark, isLarge && styles.wordmarkLg]}>Face Reader</Text>
     </View>
@@ -38,24 +39,14 @@ const styles = StyleSheet.create({
   badge: {
     width: 28,
     height: 28,
-    borderRadius: Theme.radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Theme.colors.surface.glassBackground,
+    borderRadius: Theme.radius.md,
     borderWidth: 1,
     borderColor: Theme.colors.accent.goldSecondary,
   },
   badgeLg: {
     width: 96,
     height: 96,
-    borderRadius: Theme.radius.full,
-  },
-  sparkle: {
-    color: Theme.colors.accent.goldSecondary,
-    fontSize: 14,
-  },
-  sparkleLg: {
-    fontSize: 40,
+    borderRadius: Theme.radius.lg,
   },
   wordmark: {
     ...Theme.typography.headlineMd,
