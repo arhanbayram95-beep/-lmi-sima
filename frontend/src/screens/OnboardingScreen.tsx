@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import AnimatedCheckbox from '../components/common/AnimatedCheckbox';
-import AppLogo from '../components/common/AppLogo';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
@@ -36,10 +35,6 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.container} testID="onboarding-screen">
-      <View style={styles.header}>
-        <AppLogo />
-      </View>
-
       <View style={styles.content}>
         <GlassCard style={styles.card}>
           <View style={styles.dots} accessibilityLabel="Onboarding progress">
@@ -97,10 +92,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Theme.colors.background.start,
-  },
-  header: {
-    paddingTop: Theme.spacing.xl,
-    paddingHorizontal: Theme.spacing.containerPadding,
   },
   content: {
     flex: 1,

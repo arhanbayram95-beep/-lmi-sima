@@ -105,4 +105,12 @@ describe('SettingsScreen', () => {
     expect(screen.getByText('Suscripción')).toBeTruthy();
     expect(screen.getByText('Idioma')).toBeTruthy();
   });
+
+  it('shows the app version and device info in the About section', () => {
+    render(<SettingsScreen />);
+
+    expect(screen.getByText('About')).toBeTruthy();
+    expect(screen.getByText('v1.0.0 (7)')).toBeTruthy();
+    expect(screen.getByText(/18\.0/)).toBeTruthy();
+  });
 });

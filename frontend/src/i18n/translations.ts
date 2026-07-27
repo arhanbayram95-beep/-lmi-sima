@@ -514,6 +514,18 @@ export const translations = {
     en: 'Contact Us', zh: '联系我们', hi: 'हमसे संपर्क करें', es: 'Contáctanos', fr: 'Nous contacter', ar: 'اتصل بنا',
     bn: 'যোগাযোগ করুন', pt: 'Contacte-nos', ru: 'Связаться с нами', ur: 'ہم سے رابطہ کریں',
   },
+  'settings.section.about': {
+    en: 'About', zh: '关于', hi: 'के बारे में', es: 'Acerca de', fr: 'À propos', ar: 'حول', bn: 'সম্পর্কে',
+    pt: 'Sobre', ru: 'О приложении', ur: 'کے بارے میں',
+  },
+  'settings.row.appVersion': {
+    en: 'App Version', zh: '应用版本', hi: 'ऐप संस्करण', es: 'Versión de la app', fr: "Version de l'application",
+    ar: 'إصدار التطبيق', bn: 'অ্যাপ সংস্করণ', pt: 'Versão da app', ru: 'Версия приложения', ur: 'ایپ ورژن',
+  },
+  'settings.row.device': {
+    en: 'Device', zh: '设备', hi: 'डिवाइस', es: 'Dispositivo', fr: 'Appareil', ar: 'الجهاز', bn: 'ডিভাইস',
+    pt: 'Dispositivo', ru: 'Устройство', ur: 'ڈیوائس',
+  },
   'analyzing.headline': {
     en: 'Reading Your Expressions', zh: '正在解读你的表情', hi: 'आपके एक्सप्रेशन पढ़े जा रहे हैं',
     es: 'Leyendo tus expresiones', fr: 'Lecture de vos expressions', ar: 'جارٍ قراءة تعابيرك',

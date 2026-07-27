@@ -1,8 +1,7 @@
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import React, { useState } from 'react';
-import { Alert, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
-import AppLogo from '../components/common/AppLogo';
+import { Alert, Image, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
@@ -28,11 +27,17 @@ interface SettingsRowConfig {
 
 function SettingsRow({ label, value, onPress, testID, isLast }: SettingsRowConfig & { isLast: boolean }) {
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" testID={testID} style={styles.row}>
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      accessibilityRole={onPress ? 'button' : 'text'}
+      testID={testID}
+      style={styles.row}
+    >
       <Text style={styles.rowLabel}>{label}</Text>
       <View style={styles.rowRight}>
         {value && <Text style={styles.rowValue}>{value}</Text>}
-        <Text style={styles.chevron}>›</Text>
+        {onPress && <Text style={styles.chevron}>›</Text>}
       </View>
       {!isLast && <View style={styles.divider} />}
     </Pressable>
@@ -123,17 +128,14 @@ export default function SettingsScreen() {
     Alert.alert(t('settings.row.restorePurchases'), t('restorePurchases.alertBody'));
   };
 
+  const deviceLabel = Device.osVersion ? `${resolvePlatformLabel()} · ${resolveOsVersionLabel()}` : resolvePlatformLabel();
+
   return (
     <View style={styles.container} testID="settings-screen">
+      <Image source={require('../../assets/logo-emblem-transparent.png')} style={styles.watermark} resizeMode="contain" />
+
       <View style={styles.header}>
         <Text style={styles.title}>{t('settings.title')}</Text>
-        <View style={styles.brandTag}>
-          <AppLogo />
-          <View>
-            <Text style={styles.brandName}>Face Reader</Text>
-            <Text style={styles.brandVersion}>{buildNumber ? `v${appVersion} (${buildNumber})` : `v${appVersion}`}</Text>
-          </View>
-        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -178,6 +180,19 @@ export default function SettingsScreen() {
             { label: t('settings.row.contactUs'), onPress: handleContactUs, testID: 'settings-contact-us' },
           ]}
         />
+
+        <SettingsSection
+          title={t('settings.section.about')}
+          delay={240}
+          rows={[
+            {
+              label: t('settings.row.appVersion'),
+              value: buildNumber ? `v${appVersion} (${buildNumber})` : `v${appVersion}`,
+              testID: 'settings-app-version',
+            },
+            { label: t('settings.row.device'), value: deviceLabel, testID: 'settings-device' },
+          ]}
+        />
       </ScrollView>
 
       <BottomNavBar active="settings" />
@@ -192,11 +207,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Theme.colors.background.middle,
+    overflow: 'hidden',
+  },
+  watermark: {
+    position: 'absolute',
+    top: -40,
+    right: -60,
+    width: 340,
+    height: 340,
+    opacity: 0.05,
+    pointerEvents: 'none',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     paddingTop: Theme.spacing.xl,
     paddingHorizontal: Theme.spacing.gutter,
     paddingBottom: Theme.spacing.sm,
@@ -204,23 +226,6 @@ const styles = StyleSheet.create({
   title: {
     ...Theme.typography.headlineLg,
     color: Theme.colors.text.primary,
-  },
-  brandTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  brandName: {
-    ...Theme.typography.labelSm,
-    fontSize: 11,
-    color: Theme.colors.accent.goldSecondary,
-    textAlign: 'right',
-  },
-  brandVersion: {
-    ...Theme.typography.labelSm,
-    fontSize: 9,
-    color: Theme.colors.text.muted,
-    textAlign: 'right',
   },
   scrollContent: {
     paddingHorizontal: Theme.spacing.gutter,
