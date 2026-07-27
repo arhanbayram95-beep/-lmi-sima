@@ -39,12 +39,13 @@ export const readingResponseSchema: Schema = {
   properties: {
     headline: {
       type: Type.STRING,
-      description: 'A short, punchy one-line headline for the reading (roughly 4-8 words).',
+      description:
+        'The single most brief, remarkable line in the whole reading (roughly 4-8 words) - a scroll-stopping hook the user reads first, not a summary of what follows. Save all specifics and elaboration for the insights and narrative below it.',
     },
     insights: {
       type: Type.ARRAY,
       description:
-        'One insight per photo provided, in the same order the photos were given. How many and how to label them depends on which reading this is — follow the system prompt.',
+        'One insight per photo provided, in the same order the photos were given. How many and how to label them depends on which reading this is — follow the system prompt. This is where the real detail and specificity lives, not the headline.',
       items: {
         type: Type.OBJECT,
         properties: {
@@ -52,14 +53,19 @@ export const readingResponseSchema: Schema = {
             type: Type.STRING,
             description: 'A short label for this insight — see the system prompt for what fits this reading.',
           },
-          insight: { type: Type.STRING, description: 'A short, warm observation for this insight.' },
+          insight: {
+            type: Type.STRING,
+            description:
+              'A specific, detailed observation for this one photo - concrete enough that it could not be copy-pasted onto a different photo. Go deeper than the headline, not just a rephrasing of it.',
+          },
         },
         required: ['label', 'insight'],
       },
     },
     narrative: {
       type: Type.STRING,
-      description: 'A short paragraph (2-4 sentences) tying the insights together into an overall read.',
+      description:
+        'The detailed payoff of the reading (3-5 sentences) - ties the insights together and goes further into specifics than the headline or any single insight does. This is where the user gets the substance, after the brief hook up top.',
     },
   },
   required: ['headline', 'insights', 'narrative'],

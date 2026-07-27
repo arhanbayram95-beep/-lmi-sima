@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Image, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import DisclaimerFooter from '../components/common/DisclaimerFooter';
 import FadeInView from '../components/common/FadeInView';
@@ -12,9 +12,17 @@ import { Theme } from '../ui/theme';
 
 export default function RevealScreen() {
   const reading = useAppStore((s) => s.reading);
+  const images = useAppStore((s) => s.images);
+  const clearImages = useAppStore((s) => s.clearImages);
   const goToScreen = useAppStore((s) => s.goToScreen);
   const t = useTranslation();
   const shareCardRef = useRef<View>(null);
+
+  // Photos stay in memory (never persisted, per PROJECT_SPEC.md §3) just
+  // long enough to render alongside their reading on this screen — purged
+  // the moment the user leaves it, however they leave, rather than
+  // immediately after the API response the way AnalyzingScreen used to.
+  useEffect(() => clearImages, [clearImages]);
 
   const handleShare = async () => {
     if (!shareCardRef.current) return;
@@ -49,6 +57,13 @@ export default function RevealScreen() {
           <FadeInView key={`${item.label}-${index}`} delay={80 + index * 60}>
             <GlassCard style={styles.card}>
               <View style={styles.cardHeaderRow}>
+                {images[index] && (
+                  <Image
+                    source={{ uri: `data:image/jpeg;base64,${images[index]}` }}
+                    style={styles.cardThumbnail}
+                    testID={`insight-photo-${index}`}
+                  />
+                )}
                 <Text style={styles.cardGlyph}>✦</Text>
                 <Text style={styles.cardHeading}>{item.label}</Text>
               </View>
@@ -113,6 +128,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  cardThumbnail: {
+    width: 40,
+    height: 40,
+    borderRadius: Theme.radius.md,
+    backgroundColor: Theme.colors.surface.glassBackground,
   },
   cardGlyph: {
     fontSize: 22,

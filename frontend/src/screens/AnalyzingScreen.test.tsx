@@ -38,7 +38,7 @@ describe('AnalyzingScreen', () => {
     });
   });
 
-  it('sends the captured photos and selected module, stores the reading, clears images, and moves to the reveal', async () => {
+  it('sends the captured photos and selected module, stores the reading, and moves to the reveal', async () => {
     mockAnalyzeReading.mockResolvedValue(READING);
     const { unmount } = render(<AnalyzingScreen />);
 
@@ -47,7 +47,9 @@ describe('AnalyzingScreen', () => {
     );
     await waitFor(() => expect(useAppStore.getState().screen).toBe('reveal'));
     expect(useAppStore.getState().reading).toEqual(READING);
-    expect(useAppStore.getState().images).toEqual([]);
+    // Images are left in place for RevealScreen to display - it purges
+    // them itself once the user leaves that screen.
+    expect(useAppStore.getState().images).toEqual(PHOTOS_3);
 
     unmount();
     await waitFor(() => expect(mockStop).toHaveBeenCalledTimes(1));
