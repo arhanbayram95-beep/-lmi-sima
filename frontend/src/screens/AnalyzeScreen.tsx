@@ -13,7 +13,6 @@ import { Theme } from '../ui/theme';
 interface AnalysisModule {
   id: ReadingModuleId;
   titleKey: TranslationKey;
-  descriptionKey: TranslationKey;
   card: ImageSourcePropType;
   targetScreen: AppScreen;
   available: boolean;
@@ -28,6 +27,12 @@ interface AnalysisModule {
 // Static requires, not a dynamic map lookup, because Metro needs
 // require() calls to be statically analyzable.
 const MODULE_CARD_ASPECT_RATIO = 385 / 172;
+
+// Tighter than Theme.spacing.gutter (16) — the hub reads better with the
+// cards bleeding closer to the screen edge instead of floating in a wide
+// margin. Drives both the card width calculation and the screen's
+// horizontal padding so the two stay in sync.
+const HORIZONTAL_MARGIN = 10;
 const MODULE_CARDS: Record<ReadingModuleId, ImageSourcePropType> = {
   'three-expression': require('../../assets/modules/character-analysis.png'),
   'relationship-harmony': require('../../assets/modules/relationship-harmony.png'),
@@ -41,7 +46,6 @@ const MODULES: AnalysisModule[] = [
   {
     id: 'three-expression',
     titleKey: 'analyze.module.threeExpression.title',
-    descriptionKey: 'analyze.module.threeExpression.description',
     card: MODULE_CARDS['three-expression'],
     targetScreen: 'capture',
     available: true,
@@ -49,7 +53,6 @@ const MODULES: AnalysisModule[] = [
   {
     id: 'relationship-harmony',
     titleKey: 'analyze.module.relationshipHarmony.title',
-    descriptionKey: 'analyze.module.relationshipHarmony.description',
     card: MODULE_CARDS['relationship-harmony'],
     targetScreen: 'capture',
     available: true,
@@ -57,7 +60,6 @@ const MODULES: AnalysisModule[] = [
   {
     id: 'career-match',
     titleKey: 'analyze.module.careerMatch.title',
-    descriptionKey: 'analyze.module.careerMatch.description',
     card: MODULE_CARDS['career-match'],
     targetScreen: 'capture',
     available: true,
@@ -76,7 +78,7 @@ export default function AnalyzeScreen() {
   // of the screen instead of filling it. An explicit pixel width sidesteps
   // that chain entirely.
   const { width: windowWidth } = useWindowDimensions();
-  const cardWidth = windowWidth - Theme.spacing.gutter * 2;
+  const cardWidth = windowWidth - HORIZONTAL_MARGIN * 2;
   const cardHeight = cardWidth / MODULE_CARD_ASPECT_RATIO;
 
   return (
@@ -136,9 +138,13 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.background.middle,
   },
   header: {
+    // paddingTop stays at spacing.xl — there's no SafeAreaView in this app,
+    // so this doubles as the status-bar/notch clearance on every screen,
+    // not just visual breathing room. Only the padding below it (and the
+    // horizontal margin, shared with the cards) gets tightened here.
     paddingTop: Theme.spacing.xl,
-    paddingHorizontal: Theme.spacing.gutter,
-    paddingBottom: Theme.spacing.sm,
+    paddingHorizontal: HORIZONTAL_MARGIN,
+    paddingBottom: Theme.spacing.xs,
     gap: Theme.spacing.xs,
   },
   title: {
@@ -151,9 +157,9 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
   },
   scrollContent: {
-    paddingHorizontal: Theme.spacing.gutter,
+    paddingHorizontal: HORIZONTAL_MARGIN,
     paddingBottom: 120,
-    gap: Theme.spacing.sm,
+    gap: Theme.spacing.xs,
   },
   // Full self-contained card artwork (background, title, description, and
   // CTA baked in at design time) — full width, edge-to-edge, like the
