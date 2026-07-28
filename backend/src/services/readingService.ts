@@ -11,7 +11,13 @@ import { READING_SYSTEM_PROMPTS } from './systemPrompt';
 
 export class ReadingServiceError extends Error {}
 
-const MODEL = 'gemini-2.5-flash';
+// 2026-07-28: gemini-2.5-flash returns a 404 ("no longer available to new
+// users") on newly-created API keys/projects — confirmed via a live
+// generateContent call, not a guess. gemini-flash-latest is Google's
+// auto-updating alias for the current recommended flash model, chosen over
+// pinning another specific version so this doesn't need another manual
+// swap next time a dated model gets deprecated. See PROJECT_SPEC.md §4.
+const MODEL = 'gemini-flash-latest';
 
 // Product ask (2026-07-28): open-ended picks (celebrity matches, spirit
 // animals, archetype tags) were clustering on the model's own "safe"

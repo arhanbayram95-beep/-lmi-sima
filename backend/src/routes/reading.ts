@@ -48,6 +48,12 @@ export function registerReadingRoutes(app: FastifyInstance, readingModelClient: 
         return reply.status(200).send(result);
       } catch (error) {
         if (error instanceof ReadingServiceError) {
+          // The 502 body only ever carries the sanitized message (see
+          // ReadingServiceError call sites in readingService.ts) — log the
+          // full error here, server-side only, so a Gemini-side failure or
+          // schema mismatch is diagnosable from the terminal instead of
+          // disappearing silently.
+          console.error('Reading generation failed:', error.message, error.cause ?? '');
           return reply.status(502).send({ error: error.message });
         }
         throw error;

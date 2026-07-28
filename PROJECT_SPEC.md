@@ -117,12 +117,21 @@ for how this is wired):
   still a pricing decision, not an architecture one — so keep the AI-calling
   code isolated in `backend/src/services/` (client + service + schema) so a
   future switch back stays a contained change, not a rewrite.
-* **Model:** `gemini-2.5-flash` via `@google/genai`'s `ai.models.generateContent`
+* **Model:** `gemini-flash-latest` via `@google/genai`'s `ai.models.generateContent`
   — supports multiple images in one user turn (ordered sequence), which is
   exactly the 3-expression use case. `gemini-2.0-flash` returned a `429`
-  (zero free-tier quota) on the current key; `gemini-2.5-flash` works on the
-  free tier as of this decision — re-check quota/pricing before assuming this
-  holds at production volume.
+  (zero free-tier quota) on the original key; `gemini-2.5-flash` worked on
+  that key's free tier as of the original 2026-07-24 decision, but as of
+  **2026-07-28**, on a newly-created key, it 404s with "no longer available
+  to new users" — confirmed via a live call, and `ai.models.list()` against
+  that same key still lists `gemini-2.5-flash` as existing, so this is an
+  account-eligibility restriction, not a global removal. Switched to
+  `gemini-flash-latest` (Google's auto-updating alias for the current
+  recommended flash model) instead of pinning another dated version, so a
+  future deprecation doesn't require another manual code change — re-check
+  quota/pricing/behavior-stability before assuming this holds at production
+  volume, an alias can change behavior out from under you on Google's
+  schedule, not just yours.
 * **Structured output:** Gemini has no Anthropic-style forced tool-use. Instead,
   set `config.responseMimeType: 'application/json'` and `config.responseSchema`
   (an OpenAPI-subset schema using the `Type` enum: `Type.OBJECT`, `Type.STRING`,
