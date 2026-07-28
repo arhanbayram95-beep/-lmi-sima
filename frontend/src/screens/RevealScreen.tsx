@@ -10,6 +10,7 @@ import {
   CelebrityMatchCard,
   ChecklistCard,
   MetadataBadgeRow,
+  PhotoStripCard,
   PillsCard,
   ReadingScoreCard,
 } from '../components/common/ReadingCards';
@@ -20,20 +21,19 @@ import { Theme } from '../ui/theme';
 
 type Translate = ReturnType<typeof useTranslation>;
 
-// One card stack per module, in the order the reading reads best: the hook
-// (badge tag), then the score, then the detail. Each module's shape is
-// guaranteed by its own response schema — see backend readingSchema.ts.
-function readingCards(reading: ReadingResult, t: Translate): React.ReactNode[] {
+// One card stack per module, in the order the reading reads best: the
+// captured photos, then the hook (badge tag), then progressively more
+// detail as it goes — score only survives for relationship_harmony now
+// (see systemPrompt.ts). Each module's shape is guaranteed by its own
+// response schema — see backend readingSchema.ts.
+function readingCards(reading: ReadingResult, images: string[], t: Translate): React.ReactNode[] {
+  const photos = <PhotoStripCard key="photos" images={images} testID="reveal-photos" />;
+
   switch (reading.module) {
     case 'character_analysis':
       return [
+        photos,
         <BadgeSummaryCard key="archetype" card={reading.archetype_card} testID="archetype-card" />,
-        <ReadingScoreCard
-          key="score"
-          card={reading.temperament_score_card}
-          overallLabel={t('reveal.overallLabel')}
-          testID="score-card"
-        />,
         <PillsCard
           key="traits"
           title={reading.traits_card.title}
@@ -55,6 +55,7 @@ function readingCards(reading: ReadingResult, t: Translate): React.ReactNode[] {
       ];
     case 'relationship_harmony':
       return [
+        photos,
         <BadgeSummaryCard key="vibe" card={reading.vibe_card} testID="archetype-card" />,
         <ReadingScoreCard
           key="score"
@@ -80,13 +81,8 @@ function readingCards(reading: ReadingResult, t: Translate): React.ReactNode[] {
       ];
     case 'career_path':
       return [
+        photos,
         <BadgeSummaryCard key="work" card={reading.work_archetype_card} testID="archetype-card" />,
-        <ReadingScoreCard
-          key="score"
-          card={reading.suitability_score_card}
-          overallLabel={t('reveal.overallLabel')}
-          testID="score-card"
-        />,
         <PillsCard
           key="domains"
           title={reading.domains_card.title}
@@ -105,14 +101,15 @@ function readingCards(reading: ReadingResult, t: Translate): React.ReactNode[] {
 
 export default function RevealScreen() {
   const reading = useAppStore((s) => s.reading);
+  const images = useAppStore((s) => s.images);
   const clearImages = useAppStore((s) => s.clearImages);
   const goToScreen = useAppStore((s) => s.goToScreen);
   const t = useTranslation();
   const shareCardRef = useRef<View>(null);
 
-  // The card stack no longer shows the captured photos, but they are still
-  // in memory when this screen mounts (never persisted, per PROJECT_SPEC.md
-  // §3) — purged the moment the user leaves, however they leave.
+  // The captured photos are still in memory when this screen mounts (never
+  // persisted, per PROJECT_SPEC.md §3) — shown at the top of the card stack
+  // below, then purged the moment the user leaves, however they leave.
   useEffect(() => clearImages, [clearImages]);
 
   const handleShare = async () => {
@@ -140,7 +137,7 @@ export default function RevealScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {readingCards(reading, t).map((card, index) => (
+        {readingCards(reading, images, t).map((card, index) => (
           <FadeInView key={index} delay={index * 70}>
             {card}
           </FadeInView>

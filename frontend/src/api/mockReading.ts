@@ -12,18 +12,7 @@ const MOCK_READING_RESULTS: Record<ReadingModuleId, ReadingResult> = {
     archetype_card: {
       title: 'Character Archetype',
       badge_tag: 'Analytical Visionary',
-      summary:
-        'Placeholder pseudo-API output for testing, not a real reading. You hold a steady baseline and let warmth surface deliberately rather than automatically.',
-    },
-    temperament_score_card: {
-      title: 'Temperament Score',
-      overall_score: 88,
-      breakdown_metrics: [
-        { label: 'Calmness', score: 91, icon: 'eye' },
-        { label: 'Expressiveness', score: 79, icon: 'sparkles' },
-        { label: 'Intensity', score: 85, icon: 'flame' },
-        { label: 'Focus', score: 93, icon: 'target' },
-      ],
+      summary: 'Placeholder pseudo-API output for testing, not a real reading.',
     },
     traits_card: {
       title: 'Facial Trait Analysis',
@@ -46,7 +35,7 @@ const MOCK_READING_RESULTS: Record<ReadingModuleId, ReadingResult> = {
     module: 'relationship_harmony',
     vibe_card: {
       title: 'Relational Archetype',
-      badge_tag: 'Deep & Selective Harmonizer',
+      badge_tag: 'Grounded & Playful Harmonizer',
       summary:
         'Placeholder pseudo-API output for testing, not a real reading. One brings steady reassurance, the other brings momentum — the two meet somewhere comfortable.',
     },
@@ -78,18 +67,7 @@ const MOCK_READING_RESULTS: Record<ReadingModuleId, ReadingResult> = {
     work_archetype_card: {
       title: 'Career Archetype',
       badge_tag: 'Strategic Innovator',
-      summary:
-        'Placeholder pseudo-API output for testing, not a real reading. Your natural composure suits rooms where the hard problem is on the table.',
-    },
-    suitability_score_card: {
-      title: 'Career Alignment Score',
-      overall_score: 86,
-      breakdown_metrics: [
-        { label: 'Strategy', score: 94, icon: 'compass' },
-        { label: 'Execution', score: 81, icon: 'briefcase' },
-        { label: 'Resilience', score: 88, icon: 'shield' },
-        { label: 'Innovation', score: 76, icon: 'lightbulb' },
-      ],
+      summary: 'Placeholder pseudo-API output for testing, not a real reading.',
     },
     domains_card: {
       title: 'Recommended Industries',

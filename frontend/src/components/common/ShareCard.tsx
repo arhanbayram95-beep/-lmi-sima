@@ -13,7 +13,9 @@ interface ShareCardProps {
 // layout flow, only measured and snapshotted.
 const ShareCard = forwardRef<View, ShareCardProps>(({ reading }, ref) => {
   // The badge tag and its summary are the shareable part of any module's
-  // reading — the score grid and pills don't survive a 9:16 crop.
+  // reading — the score grid and pills don't survive a 9:16 crop. Only
+  // relationship_harmony still has a score card; the other two modules
+  // dropped theirs, so it's optional here too.
   const badge = readingBadgeCard(reading);
   const score = readingScoreCard(reading);
 
@@ -25,7 +27,7 @@ const ShareCard = forwardRef<View, ShareCardProps>(({ reading }, ref) => {
 
       <View style={styles.body}>
         <Text style={styles.headline}>{badge.badge_tag}</Text>
-        <Text style={styles.score}>{score.overall_score}</Text>
+        {score && <Text style={styles.score}>{score.overall_score}</Text>}
         <Text style={styles.narrative}>{badge.summary}</Text>
       </View>
 

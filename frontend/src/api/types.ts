@@ -4,7 +4,7 @@
 // backend's response schema has to land here too.
 export type ReadingModuleId = 'three-expression' | 'relationship-harmony' | 'career-match';
 
-// Character Analysis: 3 (Calm/Bright/Stern, one person). Relationship
+// Character Analysis: 3 (Rest/Grin/Stern, one person). Relationship
 // Harmony: 2 (one photo per person). Career Match: 1 (a single photo).
 export const MODULE_PHOTO_COUNTS: Record<ReadingModuleId, number> = {
   'three-expression': 3,
@@ -62,7 +62,6 @@ export interface MetadataBadge {
 export interface CharacterAnalysisResult {
   module: 'character_analysis';
   archetype_card: BadgeCard;
-  temperament_score_card: ScoreCard;
   traits_card: {
     title: string;
     metadata_badges: MetadataBadge[];
@@ -94,7 +93,6 @@ export interface RelationshipHarmonyResult {
 export interface CareerPathResult {
   module: 'career_path';
   work_archetype_card: BadgeCard;
-  suitability_score_card: ScoreCard;
   domains_card: {
     title: string;
     top_industry_pills: string[];
@@ -120,15 +118,12 @@ export function readingBadgeCard(reading: ReadingResult): BadgeCard {
   }
 }
 
-export function readingScoreCard(reading: ReadingResult): ScoreCard {
-  switch (reading.module) {
-    case 'character_analysis':
-      return reading.temperament_score_card;
-    case 'relationship_harmony':
-      return reading.chemistry_score_card;
-    case 'career_path':
-      return reading.suitability_score_card;
-  }
+// Only relationship_harmony still carries a score card — character_analysis
+// and career_path dropped theirs so the reading opens on a short, punchy
+// badge instead of a number (see systemPrompt.ts's top-catchy/bottom-detail
+// structure).
+export function readingScoreCard(reading: ReadingResult): ScoreCard | undefined {
+  return reading.module === 'relationship_harmony' ? reading.chemistry_score_card : undefined;
 }
 
 export interface AnalyzeReadingPayload {

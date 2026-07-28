@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import { Share } from 'react-native';
 import React from 'react';
 import RevealScreen from './RevealScreen';
-import { CharacterAnalysisResult } from '../api/types';
+import { CharacterAnalysisResult, RelationshipHarmonyResult } from '../api/types';
 import { useAppStore } from '../state/useAppStore';
 
 const mockCaptureRef = jest.fn().mockResolvedValue('file://mock-share-card.png');
@@ -17,16 +17,6 @@ const READING: CharacterAnalysisResult = {
     badge_tag: 'Analytical Visionary',
     summary: 'You read as someone people trust instantly.',
   },
-  temperament_score_card: {
-    title: 'Temperament Score',
-    overall_score: 88,
-    breakdown_metrics: [
-      { label: 'Calmness', score: 91, icon: 'eye' },
-      { label: 'Expressiveness', score: 79, icon: 'sparkles' },
-      { label: 'Intensity', score: 85, icon: 'flame' },
-      { label: 'Focus', score: 93, icon: 'target' },
-    ],
-  },
   traits_card: {
     title: 'Facial Trait Analysis',
     metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],
@@ -39,6 +29,34 @@ const READING: CharacterAnalysisResult = {
     match_description: 'Same calm-under-pressure register.',
   },
 };
+const RELATIONSHIP_READING: RelationshipHarmonyResult = {
+  module: 'relationship_harmony',
+  vibe_card: {
+    title: 'Relational Archetype',
+    badge_tag: 'Grounded & Playful Harmonizer',
+    summary: 'Two styles that meet in the middle.',
+  },
+  chemistry_score_card: {
+    title: 'Chemistry & Synergy Score',
+    overall_score: 91,
+    breakdown_metrics: [
+      { label: 'Empathy', score: 88, icon: 'heart' },
+      { label: 'Communication', score: 84, icon: 'chat' },
+      { label: 'Attachment', score: 79, icon: 'shield' },
+      { label: 'Energy Match', score: 95, icon: 'zap' },
+    ],
+  },
+  dynamics_card: {
+    title: 'Relationship Dynamics',
+    best_chemistry_pills: ['Grounded Calmness'],
+    vibes_to_avoid_pills: ['Superficial Drama'],
+  },
+  guidance_card: {
+    title: 'Harmony Recommendations',
+    checklist_items: [{ headline: 'Direct Communication', description: 'Say it early and plainly.' }],
+  },
+};
+
 const PHOTOS = ['base64-calm', 'base64-bright'];
 
 describe('RevealScreen', () => {
@@ -52,21 +70,29 @@ describe('RevealScreen', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders the badge tag, score and detail cards for the module', () => {
+  it('renders the captured photos, badge tag, and detail cards for the module', () => {
     render(<RevealScreen />);
     // The badge tag and summary also appear in the off-screen ShareCard used
     // for react-native-view-shot capture, so there are legitimately two.
     expect(screen.getAllByText('Analytical Visionary').length).toBeGreaterThan(0);
-    expect(screen.getByTestId('score-card')).toBeTruthy();
+    expect(screen.getByTestId('reveal-photos')).toBeTruthy();
     expect(screen.getByTestId('traits-card')).toBeTruthy();
     expect(screen.getByTestId('celebrity-card')).toBeTruthy();
   });
 
-  it('renders the overall score and every sub-score in the grid', () => {
+  it('does not render a score card for character_analysis — only relationship_harmony kept one', () => {
     render(<RevealScreen />);
-    expect(screen.getByText('Calmness')).toBeTruthy();
-    expect(screen.getByText('91')).toBeTruthy();
-    expect(screen.getByText('Focus')).toBeTruthy();
+    expect(screen.queryByTestId('score-card')).toBeNull();
+  });
+
+  it('renders the overall score and every sub-score for relationship_harmony', () => {
+    useAppStore.setState({ reading: RELATIONSHIP_READING });
+    render(<RevealScreen />);
+    expect(screen.getByTestId('score-card')).toBeTruthy();
+    expect(screen.getByText('Empathy')).toBeTruthy();
+    // The overall score also appears in the off-screen ShareCard, so there
+    // are legitimately two — same reasoning as the badge tag check above.
+    expect(screen.getAllByText('91').length).toBeGreaterThan(0);
   });
 
   it('renders growth edges without alarming framing', () => {

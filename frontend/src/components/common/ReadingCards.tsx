@@ -1,13 +1,27 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { BadgeCard, ChecklistItem, MetadataBadge, MetricIcon, ScoreCard } from '../../api/types';
 import { Theme } from '../../ui/theme';
 import GlassCard from './GlassCard';
 
 // The presentational half of a reading. Every module's reveal is assembled
-// from these four cards (see RevealScreen) — they take already-fetched data
-// as props and never touch the store or the API, per CLAUDE.md's
-// components/ boundary.
+// from these cards (see RevealScreen) — they take already-fetched data as
+// props and never touch the store or the API, per CLAUDE.md's components/
+// boundary.
+
+// The photos that produced this reading — shown first, above the badge
+// card, since they're part of the "brief and catchy" opening beat. flex: 1
+// each so 1, 2, or 3 photos (per module, see MODULE_PHOTO_COUNTS) always
+// divide the row evenly.
+export function PhotoStripCard({ images, testID }: { images: string[]; testID?: string }) {
+  return (
+    <View style={styles.photoStrip} testID={testID}>
+      {images.map((photo, index) => (
+        <Image key={index} source={{ uri: `data:image/jpeg;base64,${photo}` }} style={styles.photoThumb} resizeMode="cover" />
+      ))}
+    </View>
+  );
+}
 
 // The backend constrains metric icons to exactly these names so a reading
 // can never ask for a glyph that isn't here.
@@ -159,6 +173,16 @@ export function CelebrityMatchCard({
 const DIAL_SIZE = 132;
 
 const styles = StyleSheet.create({
+  photoStrip: {
+    flexDirection: 'row',
+    gap: Theme.spacing.xs,
+  },
+  photoThumb: {
+    flex: 1,
+    aspectRatio: 3 / 4,
+    borderRadius: Theme.radius.lg,
+    backgroundColor: Theme.colors.surface.glassBackground,
+  },
   card: {
     gap: Theme.spacing.xs,
   },
