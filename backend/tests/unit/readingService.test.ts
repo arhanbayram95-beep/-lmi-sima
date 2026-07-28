@@ -27,6 +27,8 @@ const MODULE_RESPONSES: Record<ReadingModuleId, Record<string, unknown>> = {
   'three-expression': {
     module: 'character_analysis',
     archetype_card: { title: 'Character Archetype', badge_tag: 'Analytical Visionary', summary: 'One punchy sentence.' },
+    facial_structure_card: { title: 'Facial Structure', shape_tag: 'Oval', description: 'Structural description.' },
+    spirit_animal_card: { title: 'Spirit Animal Match', animal: 'Wolf', description: 'Symbolic description.' },
     traits_card: {
       title: 'Facial Trait Analysis',
       metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],

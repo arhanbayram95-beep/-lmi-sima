@@ -45,6 +45,14 @@ export const METRIC_ICONS = [
 
 export type MetricIcon = (typeof METRIC_ICONS)[number];
 
+// Character Analysis' Facial Structure card reads pure geometry (jawline,
+// cheekbones, forehead-to-chin ratio) into one of these categories — never
+// an attractiveness judgment, just a shape label, same spirit as the
+// existing eye/brow/jawline descriptors in traits_card.
+export const FACE_SHAPES = ['Oval', 'Round', 'Square', 'Heart', 'Diamond', 'Oblong', 'Triangle'] as const;
+
+export type FaceShape = (typeof FACE_SHAPES)[number];
+
 export interface ScoreMetric {
   label: string;
   score: number;
@@ -76,6 +84,16 @@ export interface MetadataBadge {
 export interface CharacterAnalysisResult {
   module: 'character_analysis';
   archetype_card: BadgeCard;
+  facial_structure_card: {
+    title: string;
+    shape_tag: FaceShape;
+    description: string;
+  };
+  spirit_animal_card: {
+    title: string;
+    animal: string;
+    description: string;
+  };
   traits_card: {
     title: string;
     metadata_badges: MetadataBadge[];
@@ -229,8 +247,41 @@ const characterAnalysisSchema: Schema = {
     archetype_card: badgeCard(
       'Character Archetype',
       'A short, striking archetype name of two to three words, e.g. "Analytical Visionary". Title case, no article in front.',
-      'One punchy sentence on the dominant character vibe read from facial geometry, gaze and expression range across the three photos — a hook, not an explanation. Specific enough that it could not be pasted onto a different person.'
+      'One punchy sentence on the dominant character vibe read from visible facial structure, gaze and expression range across the three photos — a hook, not an explanation. Specific enough that it could not be pasted onto a different person.'
     ),
+    facial_structure_card: {
+      type: Type.OBJECT,
+      properties: {
+        title: { type: Type.STRING, description: 'Always exactly "Facial Structure".', enum: ['Facial Structure'] },
+        shape_tag: {
+          type: Type.STRING,
+          enum: [...FACE_SHAPES],
+          description: 'One face shape category, read from jawline curve, cheekbone width, and forehead-to-chin proportion.',
+        },
+        description: {
+          type: Type.STRING,
+          description:
+            'Two to three sentences on the structural basis for this shape — jawline, cheekbones, forehead-to-chin ratio. Purely descriptive geometry, phrased neutrally and constructively; never a judgment of attractiveness, never mentioning race, ethnicity, health, or disability.',
+        },
+      },
+      required: ['title', 'shape_tag', 'description'],
+    },
+    spirit_animal_card: {
+      type: Type.OBJECT,
+      properties: {
+        title: { type: Type.STRING, description: 'Always exactly "Spirit Animal Match".', enum: ['Spirit Animal Match'] },
+        animal: {
+          type: Type.STRING,
+          description: 'One animal, one or two words, e.g. "Wolf" or "Snowy Owl". Title case.',
+        },
+        description: {
+          type: Type.STRING,
+          description:
+            'Two to three sentences connecting specific visible facial structure — jawline definition, eye shape and gaze quality, brow line — to this animal\'s symbolic energy. Descriptive and structural, never a judgment of attractiveness, never mentioning race, ethnicity, health, or disability.',
+        },
+      },
+      required: ['title', 'animal', 'description'],
+    },
     traits_card: {
       type: Type.OBJECT,
       properties: {
@@ -276,7 +327,14 @@ const characterAnalysisSchema: Schema = {
       required: ['title', 'match_name', 'match_description'],
     },
   },
-  required: ['module', 'archetype_card', 'traits_card', 'celebrity_match_card'],
+  required: [
+    'module',
+    'archetype_card',
+    'facial_structure_card',
+    'spirit_animal_card',
+    'traits_card',
+    'celebrity_match_card',
+  ],
 };
 
 const relationshipHarmonySchema: Schema = {
