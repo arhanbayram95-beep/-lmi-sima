@@ -1,4 +1,5 @@
 import { useAppStore } from './useAppStore';
+import { ReadingResult } from '../api/types';
 
 describe('useAppStore', () => {
   beforeEach(() => {
@@ -77,7 +78,17 @@ describe('useAppStore', () => {
 
   it('holds the most recent reading result and can clear it', () => {
     expect(useAppStore.getState().reading).toBeNull();
-    const reading = { headline: 'h', insights: [], narrative: 'n' };
+    const reading: ReadingResult = {
+      module: 'career_path',
+      work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 's' },
+      suitability_score_card: {
+        title: 'Career Alignment Score',
+        overall_score: 86,
+        breakdown_metrics: [{ label: 'Strategy', score: 94, icon: 'compass' }],
+      },
+      domains_card: { title: 'Recommended Industries', top_industry_pills: ['Engineering & R&D'] },
+      recommendations_card: { title: 'Ideal Role Matches', checklist_items: [] },
+    };
     useAppStore.getState().setReading(reading);
     expect(useAppStore.getState().reading).toEqual(reading);
     useAppStore.getState().setReading(null);

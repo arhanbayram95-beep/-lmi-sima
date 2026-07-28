@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { ReadingResult } from '../../api/types';
+import { readingBadgeCard, readingScoreCard, ReadingResult } from '../../api/types';
 import { Theme } from '../../ui/theme';
 import AppLogo from './AppLogo';
 
@@ -12,6 +12,11 @@ interface ShareCardProps {
 // RevealScreen). Rendered off-screen — never shown directly in the normal
 // layout flow, only measured and snapshotted.
 const ShareCard = forwardRef<View, ShareCardProps>(({ reading }, ref) => {
+  // The badge tag and its summary are the shareable part of any module's
+  // reading — the score grid and pills don't survive a 9:16 crop.
+  const badge = readingBadgeCard(reading);
+  const score = readingScoreCard(reading);
+
   return (
     <View ref={ref} style={styles.card} collapsable={false}>
       <View style={styles.brand}>
@@ -19,8 +24,9 @@ const ShareCard = forwardRef<View, ShareCardProps>(({ reading }, ref) => {
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.headline}>{reading.headline}</Text>
-        <Text style={styles.narrative}>{reading.narrative}</Text>
+        <Text style={styles.headline}>{badge.badge_tag}</Text>
+        <Text style={styles.score}>{score.overall_score}</Text>
+        <Text style={styles.narrative}>{badge.summary}</Text>
       </View>
 
       <Text style={styles.footer}>For entertainment purposes only · faceai.app</Text>
@@ -53,6 +59,12 @@ const styles = StyleSheet.create({
     ...Theme.typography.headlineLg,
     fontSize: 32,
     color: Theme.colors.accent.goldSecondary,
+    textAlign: 'center',
+  },
+  score: {
+    ...Theme.typography.headlineLg,
+    fontSize: 56,
+    color: Theme.colors.text.primary,
     textAlign: 'center',
   },
   narrative: {

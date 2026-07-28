@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import { Share } from 'react-native';
 import React from 'react';
 import RevealScreen from './RevealScreen';
+import { CharacterAnalysisResult } from '../api/types';
 import { useAppStore } from '../state/useAppStore';
 
 const mockCaptureRef = jest.fn().mockResolvedValue('file://mock-share-card.png');
@@ -9,13 +10,34 @@ jest.mock('react-native-view-shot', () => ({
   captureRef: (...args: unknown[]) => mockCaptureRef(...args),
 }));
 
-const READING = {
-  headline: 'Effortlessly Magnetic',
-  insights: [
-    { label: 'Calm', insight: 'Grounded and steady.' },
-    { label: 'Bright', insight: 'Genuinely warm smile.' },
-  ],
-  narrative: 'You read as someone people trust instantly.',
+const READING: CharacterAnalysisResult = {
+  module: 'character_analysis',
+  archetype_card: {
+    title: 'Character Archetype',
+    badge_tag: 'Analytical Visionary',
+    summary: 'You read as someone people trust instantly.',
+  },
+  temperament_score_card: {
+    title: 'Temperament Score',
+    overall_score: 88,
+    breakdown_metrics: [
+      { label: 'Calmness', score: 91, icon: 'eye' },
+      { label: 'Expressiveness', score: 79, icon: 'sparkles' },
+      { label: 'Intensity', score: 85, icon: 'flame' },
+      { label: 'Focus', score: 93, icon: 'target' },
+    ],
+  },
+  traits_card: {
+    title: 'Facial Trait Analysis',
+    metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],
+    strength_pills: ['Strategic Thinking'],
+    growth_pills: ['Pacing Energy'],
+  },
+  celebrity_match_card: {
+    title: 'Celebrity Archetype Match',
+    match_name: 'A Public Figure',
+    match_description: 'Same calm-under-pressure register.',
+  },
 };
 const PHOTOS = ['base64-calm', 'base64-bright'];
 
@@ -30,13 +52,27 @@ describe('RevealScreen', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders the headline, per-insight cards, and narrative', () => {
+  it('renders the badge tag, score and detail cards for the module', () => {
     render(<RevealScreen />);
-    // Headline/narrative also appear in the off-screen ShareCard used for
-    // react-native-view-shot capture, so there are legitimately two.
-    expect(screen.getAllByText('Effortlessly Magnetic').length).toBeGreaterThan(0);
-    expect(screen.getByText('Grounded and steady.')).toBeTruthy();
-    expect(screen.getAllByText('You read as someone people trust instantly.').length).toBeGreaterThan(0);
+    // The badge tag and summary also appear in the off-screen ShareCard used
+    // for react-native-view-shot capture, so there are legitimately two.
+    expect(screen.getAllByText('Analytical Visionary').length).toBeGreaterThan(0);
+    expect(screen.getByTestId('score-card')).toBeTruthy();
+    expect(screen.getByTestId('traits-card')).toBeTruthy();
+    expect(screen.getByTestId('celebrity-card')).toBeTruthy();
+  });
+
+  it('renders the overall score and every sub-score in the grid', () => {
+    render(<RevealScreen />);
+    expect(screen.getByText('Calmness')).toBeTruthy();
+    expect(screen.getByText('91')).toBeTruthy();
+    expect(screen.getByText('Focus')).toBeTruthy();
+  });
+
+  it('renders growth edges without alarming framing', () => {
+    render(<RevealScreen />);
+    expect(screen.getByText('Pacing Energy')).toBeTruthy();
+    expect(screen.getByText('Strategic Thinking')).toBeTruthy();
   });
 
   it('always renders the entertainment disclaimer', () => {
@@ -48,12 +84,6 @@ describe('RevealScreen', () => {
     render(<RevealScreen />);
     fireEvent.press(screen.getByText('Done'));
     expect(useAppStore.getState().screen).toBe('review');
-  });
-
-  it('shows the photo captured for each insight', () => {
-    render(<RevealScreen />);
-    expect(screen.getByTestId('insight-photo-0').props.source.uri).toBe('data:image/jpeg;base64,base64-calm');
-    expect(screen.getByTestId('insight-photo-1').props.source.uri).toBe('data:image/jpeg;base64,base64-bright');
   });
 
   it('purges the captured photos once the user leaves the reading behind', () => {

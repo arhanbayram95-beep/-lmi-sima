@@ -3,38 +3,111 @@ import { AnalyzeReadingPayload, ReadingModuleId, ReadingResult } from './types';
 // Canned responses for USE_MOCK_API — lets the whole capture -> analyzing ->
 // reveal flow be exercised end to end with no backend running and no AI
 // provider key configured, one per module so mock mode can actually verify
-// each module's content differs. Insight counts match MODULE_PHOTO_COUNTS
-// (3 for Character Analysis, 2 for Relationship Harmony, 2-3 for Career
-// Match) so mock mode exercises the same shape the real API produces.
+// each module's card stack differs. Shapes match the per-module response
+// schemas in backend/src/services/readingSchema.ts.
 // Remove alongside the config flag before public release.
 const MOCK_READING_RESULTS: Record<ReadingModuleId, ReadingResult> = {
   'three-expression': {
-    headline: 'Effortlessly Magnetic',
-    insights: [
-      { label: 'Calm', insight: 'Grounded and steady — people read you as someone reliable.' },
-      { label: 'Bright', insight: 'Your smile is genuinely warm, not performed.' },
-      { label: 'Deep', insight: 'A hint of quiet mystery keeps people curious.' },
-    ],
-    narrative:
-      'This is placeholder pseudo-API output for testing, not a real reading — you read as someone people trust instantly, with just enough intrigue to keep things interesting.',
+    module: 'character_analysis',
+    archetype_card: {
+      title: 'Character Archetype',
+      badge_tag: 'Analytical Visionary',
+      summary:
+        'Placeholder pseudo-API output for testing, not a real reading. You hold a steady baseline and let warmth surface deliberately rather than automatically.',
+    },
+    temperament_score_card: {
+      title: 'Temperament Score',
+      overall_score: 88,
+      breakdown_metrics: [
+        { label: 'Calmness', score: 91, icon: 'eye' },
+        { label: 'Expressiveness', score: 79, icon: 'sparkles' },
+        { label: 'Intensity', score: 85, icon: 'flame' },
+        { label: 'Focus', score: 93, icon: 'target' },
+      ],
+    },
+    traits_card: {
+      title: 'Facial Trait Analysis',
+      metadata_badges: [
+        { key: 'Eye Energy', value: 'Direct & Piercing' },
+        { key: 'Brow Line', value: 'Focused & Structured' },
+        { key: 'Jaw Energy', value: 'Determined & Grounded' },
+      ],
+      strength_pills: ['Strategic Thinking', 'Emotional Resilience', 'Charismatic Presence'],
+      growth_pills: ['Pacing Energy', 'Over-analyzing'],
+    },
+    celebrity_match_card: {
+      title: 'Celebrity Archetype Match',
+      match_name: 'A Well-Known Public Figure',
+      match_description:
+        'Placeholder text — shares the same calm-under-pressure register, holding a room without raising the volume.',
+    },
   },
   'relationship-harmony': {
-    headline: 'Two Distinct Vibes',
-    insights: [
-      { label: 'Person One', insight: 'Brings a reassuring, grounded energy to new connections.' },
-      { label: 'Person Two', insight: 'Warmth reads as genuine, not performative — people relax around them.' },
-    ],
-    narrative:
-      'This is placeholder pseudo-API output for testing, not a real reading — each connection style read independently, side by side.',
+    module: 'relationship_harmony',
+    vibe_card: {
+      title: 'Relational Archetype',
+      badge_tag: 'Deep & Selective Harmonizer',
+      summary:
+        'Placeholder pseudo-API output for testing, not a real reading. One brings steady reassurance, the other brings momentum — the two meet somewhere comfortable.',
+    },
+    chemistry_score_card: {
+      title: 'Chemistry & Synergy Score',
+      overall_score: 92,
+      breakdown_metrics: [
+        { label: 'Empathy', score: 89, icon: 'heart' },
+        { label: 'Communication', score: 94, icon: 'chat' },
+        { label: 'Attachment', score: 82, icon: 'shield' },
+        { label: 'Energy Match', score: 96, icon: 'zap' },
+      ],
+    },
+    dynamics_card: {
+      title: 'Relationship Dynamics',
+      best_chemistry_pills: ['Spontaneous Energy', 'Grounded Calmness', 'Intellectual Spark'],
+      vibes_to_avoid_pills: ['Superficial Drama', 'Inconsistent Plans'],
+    },
+    guidance_card: {
+      title: 'Harmony Recommendations',
+      checklist_items: [
+        { headline: 'Direct Communication', description: 'Say what you need early, in plain calm language, rather than hinting.' },
+        { headline: 'Space & Autonomy', description: 'Deep closeness works best here with real personal room built in around it.' },
+      ],
+    },
   },
   'career-match': {
-    headline: 'The Calm Strategist',
-    insights: [
-      { label: 'Work Style', insight: 'Thrives in steady, detail-oriented environments that reward focus.' },
-      { label: 'Ideal Environment', insight: 'Natural energy for people-facing, collaborative roles.' },
-    ],
-    narrative:
-      'This is placeholder pseudo-API output for testing, not a real reading — your natural energy suits roles that mix steady focus with real collaboration.',
+    module: 'career_path',
+    work_archetype_card: {
+      title: 'Career Archetype',
+      badge_tag: 'Strategic Innovator',
+      summary:
+        'Placeholder pseudo-API output for testing, not a real reading. Your natural composure suits rooms where the hard problem is on the table.',
+    },
+    suitability_score_card: {
+      title: 'Career Alignment Score',
+      overall_score: 86,
+      breakdown_metrics: [
+        { label: 'Strategy', score: 94, icon: 'compass' },
+        { label: 'Execution', score: 81, icon: 'briefcase' },
+        { label: 'Resilience', score: 88, icon: 'shield' },
+        { label: 'Innovation', score: 76, icon: 'lightbulb' },
+      ],
+    },
+    domains_card: {
+      title: 'Recommended Industries',
+      top_industry_pills: ['Engineering & R&D', 'Strategic Consulting', 'Creative Tech Leadership'],
+    },
+    recommendations_card: {
+      title: 'Ideal Role Matches',
+      checklist_items: [
+        {
+          headline: 'Systems Architect / Lead Engineer',
+          description: 'Leverages sustained focus and structured problem-solving when the pressure is on.',
+        },
+        {
+          headline: 'Product Strategist',
+          description: 'Pairs analytical range with the observational read that makes a room feel understood.',
+        },
+      ],
+    },
   },
 };
 

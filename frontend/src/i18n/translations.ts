@@ -622,6 +622,26 @@ export const translations = {
     ru: 'Предыдущие покупки для этого устройства не найдены.',
     ur: 'اس ڈیوائس کے لیے کوئی سابقہ خریداری نہیں ملی۔',
   },
+  'reveal.overallLabel': {
+    en: 'Overall', zh: '综合', hi: 'कुल', es: 'General', fr: 'Global',
+    ar: 'الإجمالي', bn: 'সামগ্রিক', pt: 'Geral', ru: 'Общий', ur: 'مجموعی',
+  },
+  'reveal.strengths': {
+    en: 'Strengths', zh: '优势', hi: 'ताकत', es: 'Fortalezas', fr: 'Forces',
+    ar: 'نقاط القوة', bn: 'শক্তি', pt: 'Pontos fortes', ru: 'Сильные стороны', ur: 'خوبیاں',
+  },
+  'reveal.growthEdges': {
+    en: 'Growth Edges', zh: '成长空间', hi: 'विकास के क्षेत्र', es: 'Áreas de crecimiento', fr: 'Axes de progression',
+    ar: 'مجالات النمو', bn: 'বৃদ্ধির ক্ষেত্র', pt: 'Áreas de crescimento', ru: 'Зоны роста', ur: 'ترقی کے پہلو',
+  },
+  'reveal.bestChemistry': {
+    en: 'Best Chemistry', zh: '最佳默契', hi: 'बेहतरीन तालमेल', es: 'Mejor química', fr: 'Meilleure alchimie',
+    ar: 'أفضل انسجام', bn: 'সেরা রসায়ন', pt: 'Melhor química', ru: 'Лучшая химия', ur: 'بہترین ہم آہنگی',
+  },
+  'reveal.vibesToAvoid': {
+    en: 'Vibes to Avoid', zh: '需要避开的氛围', hi: 'बचने योग्य बातें', es: 'Dinámicas a evitar', fr: 'Dynamiques à éviter',
+    ar: 'أنماط يُفضّل تجنّبها', bn: 'এড়িয়ে চলার বিষয়', pt: 'Dinâmicas a evitar', ru: 'Чего избегать', ur: 'جن سے بچنا ہے',
+  },
 } satisfies Record<string, Record<LanguageCode, string>>;
 
 export function translate(key: TranslationKey, languageCode: string, vars?: Record<string, string | number>): string {

@@ -4,10 +4,15 @@ import { Theme } from '../../ui/theme';
 
 interface GlassCardProps extends PropsWithChildren {
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 }
 
-export default function GlassCard({ children, style }: GlassCardProps) {
-  return <View style={[styles.card, style]}>{children}</View>;
+export default function GlassCard({ children, style, testID }: GlassCardProps) {
+  return (
+    <View style={[styles.card, style]} testID={testID}>
+      {children}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

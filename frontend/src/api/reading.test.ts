@@ -47,8 +47,8 @@ describe('analyzeReading (pseudo-API mode)', () => {
     const { analyzeReading } = require('./reading');
     const result = await analyzeReading(PAYLOAD);
 
-    expect(result.headline).toBeTruthy();
-    expect(result.insights.length).toBeGreaterThan(0);
+    expect(result.module).toBe('character_analysis');
+    expect(result.archetype_card.badge_tag).toBeTruthy();
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
@@ -59,7 +59,7 @@ describe('analyzeReading (pseudo-API mode)', () => {
     const relationship = await analyzeReading({ ...PAYLOAD, module: 'relationship-harmony' });
     const career = await analyzeReading({ ...PAYLOAD, module: 'career-match' });
 
-    const headlines = new Set([threeExpression.headline, relationship.headline, career.headline]);
-    expect(headlines.size).toBe(3);
+    const kinds = new Set([threeExpression.module, relationship.module, career.module]);
+    expect(kinds).toEqual(new Set(['character_analysis', 'relationship_harmony', 'career_path']));
   });
 });
