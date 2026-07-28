@@ -167,12 +167,19 @@ export default function RevealScreen() {
             {card}
           </FadeInView>
         ))}
+        <DisclaimerFooter />
       </ScrollView>
 
       <View style={styles.footer}>
-        <PrimaryButton label={t('reveal.shareButton')} variant="secondary" onPress={handleShare} testID="share-reading-button" />
-        <PrimaryButton label={t('reveal.doneButton')} onPress={() => goToScreen('review')} />
-        <DisclaimerFooter />
+        <PrimaryButton
+          label={t('reveal.shareButton')}
+          variant="secondary"
+          flow
+          icon="⤴"
+          onPress={handleShare}
+          testID="share-reading-button"
+        />
+        <PrimaryButton label={t('reveal.doneButton')} flow icon="✓" onPress={() => goToScreen('review')} />
       </View>
 
       <View style={styles.offscreen} pointerEvents="none">
@@ -205,9 +212,11 @@ const styles = StyleSheet.create({
     gap: Theme.spacing.sm,
   },
   footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: Theme.spacing.containerPadding,
     paddingBottom: Theme.spacing.sm,
-    gap: Theme.spacing.xs,
+    gap: Theme.spacing.sm,
   },
   offscreen: {
     position: 'absolute',

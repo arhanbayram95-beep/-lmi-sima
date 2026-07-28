@@ -17,6 +17,7 @@ export default function AnalyzingScreen() {
   const images = useAppStore((s) => s.images);
   const selectedModule = useAppStore((s) => s.selectedModule);
   const setReading = useAppStore((s) => s.setReading);
+  const logReading = useAppStore((s) => s.logReading);
   const goToScreen = useAppStore((s) => s.goToScreen);
   const t = useTranslation();
 
@@ -30,6 +31,7 @@ export default function AnalyzingScreen() {
     try {
       const result = await analyzeReading({ photos: images, module: selectedModule });
       setReading(result);
+      logReading(result);
       // Images stay in the store past this point — RevealScreen shows them
       // alongside the reading and purges them itself once the user leaves.
       goToScreen('reveal');
@@ -40,7 +42,7 @@ export default function AnalyzingScreen() {
       }
       setError(cause instanceof ReadingApiError ? cause.message : t('analyzing.error.body'));
     }
-  }, [images, selectedModule, setReading, goToScreen, t]);
+  }, [images, selectedModule, setReading, logReading, goToScreen, t]);
 
   useEffect(() => {
     runAnalysis();

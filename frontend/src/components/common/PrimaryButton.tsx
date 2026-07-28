@@ -6,6 +6,12 @@ interface PrimaryButtonProps {
   label: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary';
+  // Strips the filled/outlined pill down to just the label (+ optional
+  // icon) floating on the screen's own background — no card/block behind
+  // it. Used where a solid pill reads as too heavy a block (see
+  // RevealScreen's action row).
+  flow?: boolean;
+  icon?: string;
   disabled?: boolean;
   style?: ViewStyle;
   testID?: string;
@@ -15,6 +21,8 @@ export default function PrimaryButton({
   label,
   onPress,
   variant = 'primary',
+  flow = false,
+  icon,
   disabled = false,
   style,
   testID,
@@ -26,8 +34,19 @@ export default function PrimaryButton({
     Animated.spring(scale, { toValue, useNativeDriver: true, speed: 30, bounciness: 10 }).start();
   };
 
+  const buttonStyle = flow
+    ? [styles.flow, disabled && styles.disabled, style]
+    : [styles.button, isPrimary ? styles.primary : styles.secondary, disabled && styles.disabled, style];
+  const labelStyle = flow
+    ? isPrimary
+      ? styles.flowPrimaryLabel
+      : styles.flowSecondaryLabel
+    : isPrimary
+      ? styles.primaryLabel
+      : styles.secondaryLabel;
+
   return (
-    <Animated.View style={[styles.wrapper, { transform: [{ scale }] }]}>
+    <Animated.View style={[flow ? styles.flowWrapper : styles.wrapper, { transform: [{ scale }] }]}>
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ disabled }}
@@ -36,9 +55,10 @@ export default function PrimaryButton({
         onPressIn={() => animateTo(0.96)}
         onPressOut={() => animateTo(1)}
         testID={testID}
-        style={[styles.button, isPrimary ? styles.primary : styles.secondary, disabled && styles.disabled, style]}
+        style={buttonStyle}
       >
-        <Text style={isPrimary ? styles.primaryLabel : styles.secondaryLabel}>{label}</Text>
+        {icon && <Text style={labelStyle}>{icon} </Text>}
+        <Text style={labelStyle}>{label}</Text>
       </Pressable>
     </Animated.View>
   );
@@ -47,6 +67,15 @@ export default function PrimaryButton({
 const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
+  },
+  flowWrapper: {
+    flex: 1,
+  },
+  flow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
   },
   button: {
     width: '100%',
@@ -77,6 +106,20 @@ const styles = StyleSheet.create({
   },
   secondaryLabel: {
     ...Theme.typography.bodyMd,
+    color: Theme.colors.text.secondary,
+  },
+  flowPrimaryLabel: {
+    ...Theme.typography.headlineMd,
+    fontSize: 16,
+    color: Theme.colors.accent.goldSecondary,
+    textShadowColor: 'rgba(235, 201, 131, 0.45)',
+    textShadowRadius: 12,
+    textShadowOffset: { width: 0, height: 0 },
+  },
+  flowSecondaryLabel: {
+    ...Theme.typography.bodyMd,
+    fontSize: 15,
+    fontWeight: '600',
     color: Theme.colors.text.secondary,
   },
 });

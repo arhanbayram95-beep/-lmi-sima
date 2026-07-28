@@ -240,13 +240,25 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: Theme.colors.accent.crimsonPrimary,
     borderRadius: Theme.radius.full,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    shadowColor: Theme.colors.accent.crimsonPrimary,
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 0 },
   },
+  // The reading's punchline — the one line most likely to get screenshotted
+  // — so it runs bigger and bolder than a standard headline, with a soft
+  // glow rather than a flat fill to read as more alive than the rest of
+  // the card stack.
   badgeChipText: {
-    ...Theme.typography.headlineMd,
-    fontSize: 16,
+    ...Theme.typography.headlineLg,
+    fontSize: 22,
+    letterSpacing: -0.2,
     color: Theme.colors.text.primary,
+    textShadowColor: 'rgba(0, 0, 0, 0.35)',
+    textShadowRadius: 6,
+    textShadowOffset: { width: 0, height: 1 },
   },
   summary: {
     ...Theme.typography.bodyMd,
@@ -418,8 +430,12 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
   },
   matchName: {
-    ...Theme.typography.headlineMd,
-    fontSize: 22,
+    ...Theme.typography.headlineLg,
+    fontSize: 30,
+    letterSpacing: -0.4,
     color: Theme.colors.accent.goldSecondary,
+    textShadowColor: 'rgba(235, 201, 131, 0.4)',
+    textShadowRadius: 14,
+    textShadowOffset: { width: 0, height: 0 },
   },
 });

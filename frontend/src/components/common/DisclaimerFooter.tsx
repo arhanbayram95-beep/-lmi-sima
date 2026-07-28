@@ -16,13 +16,20 @@ export default function DisclaimerFooter() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: Theme.spacing.md,
-    paddingVertical: Theme.spacing.xs,
+    paddingHorizontal: Theme.spacing.lg,
+    paddingTop: Theme.spacing.sm,
+    paddingBottom: Theme.spacing.xs,
   },
+  // Deliberately quieter than labelSm — this reads at the very end of the
+  // card stack now (see RevealScreen), not pinned next to the action
+  // buttons, so it no longer needs to compete for attention. Still legible,
+  // per CLAUDE.md's "persistent, legible" requirement — just not loud.
   text: {
-    ...Theme.typography.labelSm,
+    fontSize: 9,
+    fontWeight: '500',
+    letterSpacing: 0.4,
     color: Theme.colors.text.muted,
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 13,
   },
 });

@@ -203,3 +203,30 @@ relationship/career-specific content a generic reading wouldn't deliver.
     of a Calm/Bright/Deep-keyed glyph lookup — works unchanged for any
     module's insight shape. `ShareCard` was already headline/narrative-only
     and needed no changes to work across all three modules.
+
+---
+
+## Phase 8: Reveal Screen Polish & Results History (2026-07-28)
+- [x] **8.1 Reveal screen action row restyle** — the Share/Done buttons no
+  longer sit on a filled pill; `PrimaryButton` gained a `flow` prop that
+  strips the background/border down to bold icon+label text so the footer
+  reads as floating controls, not a block. `DisclaimerFooter` moved out of
+  that footer into the end of the card `ScrollView` and shrank (fontSize 9)
+  per product direction — still always rendered (CLAUDE.md's disclaimer
+  requirement stands), just no longer competing with the buttons for
+  attention.
+- [x] **8.2 Reveal card punchlines enlarged** — `ReadingCards.tsx`'s
+  `badgeChipText` (headlineLg/22, glow) and `matchName` (headlineLg/30,
+  glow) now read as the loudest text in each card, per product direction
+  for "more dynamic, more visible" hooks.
+- [x] **8.3 Results tab: reading history log** — new `HistorySlice`
+  (`frontend/src/state/slices/historySlice.ts`) logs every completed
+  `ReadingResult` (text only, never the photos — same process-and-discard
+  boundary as before) the moment `AnalyzingScreen` gets a result back.
+  `ResultsScreen` now lists past reads (module, punchline, summary, date)
+  instead of always showing the empty state; tapping an entry reopens it in
+  `RevealScreen`. In-memory only — resets on app restart, since no
+  local-storage dependency is in `PROJECT_SPEC.md` yet and one wasn't added
+  here. Product decision (2026-07-28): the original 5.1 plan to gate
+  reading history behind Aura Pro no longer applies now that there's no
+  free tier — history is unconditional, not `isProActive`-gated.
