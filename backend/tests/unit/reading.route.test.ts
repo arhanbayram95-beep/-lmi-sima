@@ -13,12 +13,7 @@ const VALID_BODY = { photos: PHOTOS_3 };
 // see backend/src/services/readingSchema.ts.
 const CHARACTER_READING = {
   module: 'character_analysis',
-  archetype_card: { title: 'Character Archetype', badge_tag: 'Analytical Visionary', summary: 'Two sentences.' },
-  temperament_score_card: {
-    title: 'Temperament Score',
-    overall_score: 88,
-    breakdown_metrics: [{ label: 'Calmness', score: 85, icon: 'eye' }],
-  },
+  archetype_card: { title: 'Character Archetype', badge_tag: 'Analytical Visionary', summary: 'One punchy sentence.' },
   traits_card: {
     title: 'Facial Trait Analysis',
     metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],
@@ -30,12 +25,7 @@ const CHARACTER_READING = {
 
 const CAREER_READING = {
   module: 'career_path',
-  work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 'Two sentences.' },
-  suitability_score_card: {
-    title: 'Career Alignment Score',
-    overall_score: 86,
-    breakdown_metrics: [{ label: 'Strategy', score: 92, icon: 'compass' }],
-  },
+  work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 'One punchy sentence.' },
   domains_card: { title: 'Recommended Industries', top_industry_pills: ['Engineering & R&D'] },
   recommendations_card: {
     title: 'Ideal Role Matches',

@@ -26,8 +26,7 @@ const scoreCard = (title: string, labels: string[]) => ({
 const MODULE_RESPONSES: Record<ReadingModuleId, Record<string, unknown>> = {
   'three-expression': {
     module: 'character_analysis',
-    archetype_card: { title: 'Character Archetype', badge_tag: 'Analytical Visionary', summary: 'Two sentences.' },
-    temperament_score_card: scoreCard('Temperament Score', ['Calmness', 'Expressiveness', 'Intensity', 'Focus']),
+    archetype_card: { title: 'Character Archetype', badge_tag: 'Analytical Visionary', summary: 'One punchy sentence.' },
     traits_card: {
       title: 'Facial Trait Analysis',
       metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],
@@ -38,7 +37,7 @@ const MODULE_RESPONSES: Record<ReadingModuleId, Record<string, unknown>> = {
   },
   'relationship-harmony': {
     module: 'relationship_harmony',
-    vibe_card: { title: 'Relational Archetype', badge_tag: 'Deep & Selective Harmonizer', summary: 'Two sentences.' },
+    vibe_card: { title: 'Relational Archetype', badge_tag: 'Grounded & Playful Harmonizer', summary: 'One punchy sentence.' },
     chemistry_score_card: scoreCard('Chemistry & Synergy Score', ['Empathy', 'Communication', 'Attachment', 'Energy Match']),
     dynamics_card: {
       title: 'Relationship Dynamics',
@@ -52,8 +51,7 @@ const MODULE_RESPONSES: Record<ReadingModuleId, Record<string, unknown>> = {
   },
   'career-match': {
     module: 'career_path',
-    work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 'Two sentences.' },
-    suitability_score_card: scoreCard('Career Alignment Score', ['Strategy', 'Execution', 'Resilience', 'Innovation']),
+    work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 'One punchy sentence.' },
     domains_card: { title: 'Recommended Industries', top_industry_pills: ['Engineering & R&D'] },
     recommendations_card: {
       title: 'Ideal Role Matches',

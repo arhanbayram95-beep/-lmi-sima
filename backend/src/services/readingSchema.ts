@@ -8,7 +8,7 @@ export type ReadingModuleId = 'three-expression' | 'relationship-harmony' | 'car
 
 export const READING_MODULE_IDS: ReadingModuleId[] = ['three-expression', 'relationship-harmony', 'career-match'];
 
-// Character Analysis: 3 (Calm/Bright/Stern, one person). Relationship
+// Character Analysis: 3 (Rest/Grin/Stern, one person). Relationship
 // Harmony: 2 (one photo per person). Career Match: 1 (a single photo).
 export const MODULE_PHOTO_COUNTS: Record<ReadingModuleId, number> = {
   'three-expression': 3,
@@ -76,7 +76,6 @@ export interface MetadataBadge {
 export interface CharacterAnalysisResult {
   module: 'character_analysis';
   archetype_card: BadgeCard;
-  temperament_score_card: ScoreCard;
   traits_card: {
     title: string;
     metadata_badges: MetadataBadge[];
@@ -108,7 +107,6 @@ export interface RelationshipHarmonyResult {
 export interface CareerPathResult {
   module: 'career_path';
   work_archetype_card: BadgeCard;
-  suitability_score_card: ScoreCard;
   domains_card: {
     title: string;
     top_industry_pills: string[];
@@ -212,7 +210,8 @@ function checklistCard(title: string, description: string, headlineDescription: 
             headline: { type: Type.STRING, description: headlineDescription },
             description: {
               type: Type.STRING,
-              description: 'One or two sentences expanding on the headline. Concrete and actionable, never generic filler.',
+              description:
+                'Two to three sentences expanding on the headline — this is the richest, most concrete writing in the whole reading, so go into real detail rather than staying generic.',
             },
           },
           required: ['headline', 'description'],
@@ -230,12 +229,7 @@ const characterAnalysisSchema: Schema = {
     archetype_card: badgeCard(
       'Character Archetype',
       'A short, striking archetype name of two to three words, e.g. "Analytical Visionary". Title case, no article in front.',
-      'Two sentences on the dominant character vibe read from facial geometry, gaze and expression range across the three photos. Specific enough that it could not be pasted onto a different person.'
-    ),
-    temperament_score_card: scoreCard(
-      'Temperament Score',
-      'The headline temperament score. Read it from the expression range across all three photos.',
-      ['Calmness', 'Expressiveness', 'Intensity', 'Focus']
+      'One punchy sentence on the dominant character vibe read from facial geometry, gaze and expression range across the three photos — a hook, not an explanation. Specific enough that it could not be pasted onto a different person.'
     ),
     traits_card: {
       type: Type.OBJECT,
@@ -276,13 +270,13 @@ const characterAnalysisSchema: Schema = {
         match_description: {
           type: Type.STRING,
           description:
-            'One or two sentences on the shared expression energy and presence — how they carry a room, hold a gaze, shift between warmth and focus. Never a claim about physical resemblance or shared facial features.',
+            'Two to three sentences, vivid and specific — the richest writing in the reading. How they carry a room, hold a gaze, shift between warmth and focus. Never a claim about physical resemblance or shared facial features.',
         },
       },
       required: ['title', 'match_name', 'match_description'],
     },
   },
-  required: ['module', 'archetype_card', 'temperament_score_card', 'traits_card', 'celebrity_match_card'],
+  required: ['module', 'archetype_card', 'traits_card', 'celebrity_match_card'],
 };
 
 const relationshipHarmonySchema: Schema = {
@@ -291,8 +285,8 @@ const relationshipHarmonySchema: Schema = {
     module: moduleDiscriminator('relationship_harmony'),
     vibe_card: badgeCard(
       'Relational Archetype',
-      'A short, striking archetype name for how these two expression styles meet, two to three words, e.g. "Deep & Selective Harmonizer".',
-      'Two sentences on how the two expression styles play off each other — what each brings and where they meet.'
+      'A short, striking archetype name for how these two expression styles meet, two to three words, e.g. "Grounded & Playful Harmonizer".',
+      'One punchy sentence on how the two expression styles play off each other — a hook, not an explanation.'
     ),
     chemistry_score_card: scoreCard(
       'Chemistry & Synergy Score',
@@ -328,12 +322,7 @@ const careerPathSchema: Schema = {
     work_archetype_card: badgeCard(
       'Career Archetype',
       'A short, striking work archetype name of two to three words, e.g. "Strategic Innovator".',
-      'Two sentences on the working environments and roles that suit this natural composure and expression style.'
-    ),
-    suitability_score_card: scoreCard(
-      'Career Alignment Score',
-      'The headline alignment score for this work archetype. A vibe read, never an aptitude measurement.',
-      ['Strategy', 'Execution', 'Resilience', 'Innovation']
+      'One punchy sentence on the working environments and roles that suit this natural composure and expression style — a hook, not an explanation.'
     ),
     domains_card: {
       type: Type.OBJECT,
@@ -349,7 +338,7 @@ const careerPathSchema: Schema = {
       'A concrete role title, e.g. "Systems Architect / Lead Engineer".'
     ),
   },
-  required: ['module', 'work_archetype_card', 'suitability_score_card', 'domains_card', 'recommendations_card'],
+  required: ['module', 'work_archetype_card', 'domains_card', 'recommendations_card'],
 };
 
 export const READING_SCHEMAS: Record<ReadingModuleId, Schema> = {
