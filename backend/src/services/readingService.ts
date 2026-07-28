@@ -13,6 +13,13 @@ export class ReadingServiceError extends Error {}
 
 const MODEL = 'gemini-2.5-flash';
 
+// Product ask (2026-07-28): open-ended picks (celebrity matches, spirit
+// animals, archetype tags) were clustering on the model's own "safe"
+// defaults at the API's default temperature. Pushed up (valid range is
+// (0, 2] per the SDK) to genuinely widen the pool — paired with
+// VARIETY_GUIDANCE in systemPrompt.ts, which does the same job in words.
+const READING_TEMPERATURE = 1.3;
+
 // process-and-discard per PROJECT_SPEC.md §3: this function never persists
 // the incoming base64 strings anywhere (no disk, no db, no in-memory cache
 // outside its own call stack), and holds no reference to them after it
@@ -47,6 +54,7 @@ export async function generateReading(
         systemInstruction: READING_SYSTEM_PROMPTS[moduleId],
         responseMimeType: 'application/json',
         responseSchema: READING_SCHEMAS[moduleId],
+        temperature: READING_TEMPERATURE,
       },
     });
     responseText = response.text;

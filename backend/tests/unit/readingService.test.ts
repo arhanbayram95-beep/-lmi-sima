@@ -115,6 +115,15 @@ describe('generateReading', () => {
     expect(callArgs.config.responseSchema).toBeDefined();
   });
 
+  it('raises the temperature above the default to widen variety in open-ended picks', async () => {
+    const generateContent = clientFor('three-expression');
+
+    await generateReading(makeClient(generateContent), PHOTOS_3);
+
+    const [[callArgs]] = generateContent.mock.calls;
+    expect(callArgs.config.temperature).toBeGreaterThan(1);
+  });
+
   it.each(['three-expression', 'relationship-harmony', 'career-match'] as const)(
     "sends the %s module's own response schema",
     async (moduleId) => {

@@ -21,11 +21,20 @@ const SAFETY_RULES = `Rules, non-negotiable:
 Respond only with the structured result matching the provided response schema — never respond in plain, unstructured text.`;
 
 // Scores render as a dial and a sub-score grid. They are a presentation
-// device, not a measurement, so the band is deliberately positive: a user
-// who captured a photo in good faith should never be handed a number that
-// reads as a verdict against them. Variance within the band is what stops
-// every reading looking identical.
-const SCORING_GUIDANCE = `Scoring: every score is an integer from 0-100, but in practice stay in the 68-97 band — this is a fun read, not an exam, and a low number lands as a judgement rather than a bit of fun. Make the numbers genuinely vary: the four sub-scores should not cluster within two points of each other, and the overall score is your own read of the whole picture, not their average. Pick numbers that fit what you actually observed, so two different people never get the same grid.`;
+// device, not a measurement — but a band that never dips means every score
+// reads as automatic, which is its own kind of boring. Product ask
+// (2026-07-28): widen the range so a genuinely lower score can land
+// sometimes, without ever letting the accompanying copy turn negative or
+// alarming — that split (number can move, words stay warm) is what keeps
+// this inside CLAUDE.md's "never a trust-undermining claim" rule while
+// still feeling unpredictable.
+const SCORING_GUIDANCE = `Scoring: every score is an integer from 0-100 — use real range, not just the flattering end of it. Most readings land somewhere in a wide 55-97 band, but let genuine outliers happen: an occasional lower score, even into the 30s-40s, is what makes the high scores feel earned instead of automatic. A lower number is still delivered warmly in the copy — an unusual or quirky read is interesting, never a verdict against someone — but don't inflate the number itself just to soften it; the warmth belongs in the words, not in padding the score. Make the numbers genuinely vary: the four sub-scores should not cluster within two points of each other, and the overall score is your own read of the whole picture, not their average. Pick numbers that fit what you actually observed, so two different people never get the same grid.`;
+
+// Product ask (2026-07-28): open-ended picks (celebrity matches, spirit
+// animals, archetype tags) were clustering on the same handful of "safe"
+// answers. Nothing in the schema forces that — these fields are free text —
+// so the fix is pushing the model off its own defaults, not the schema.
+const VARIETY_GUIDANCE = `Variety: you have a huge range to draw from for any open-ended pick (a celebrity, a spirit animal, an archetype tag) — use it. Resist your own first instinct and the handful of names or tags that come to mind most easily; deliberately reach for less obvious, more specific choices so two different people almost never get the same answer. A generic pick that could describe anyone is a failure here, not a safe one. This applies to tone too: not every read needs to sound impressive or composed — a quirky, funny, or endearingly off-kilter register (a little chaotic, a bit dazed, unmistakably distracted) is just as valid as another confident visionary, and often more memorable. Stay constructive and warm either way, never mocking.`;
 
 // Shared across all three so a future tweak can't silently apply to only one
 // module. Product ask: read top to bottom as a build, not a flat list — the
@@ -48,6 +57,8 @@ You produce five cards, each one deeper than the last:
 - Celebrity Archetype Match — the richest card in the reading. One widely known public figure whose on-camera *expression energy* sits in the same register. This is a vibe comparison, never a lookalike claim: describe how they hold a gaze, carry a room, or shift between warmth and focus, in real specific detail. Never say the user resembles them, shares their features, or looks like them, and never reference bone structure, brow ridge, jaw shape or any other physical feature of the named person. If no genuine expression-energy match comes to mind, pick the closest register rather than inventing a resemblance.
 
 ${TONE_GUIDANCE}
+
+${VARIETY_GUIDANCE}
 
 ${STRUCTURE_GUIDANCE}
 
@@ -74,9 +85,11 @@ Critical constraints for this module:
 - The second person did not fill in this app or ask for a reading. Never produce a character verdict, criticism, or unflattering read of either individual. Everything you say about a person must be something they'd be happy to have read aloud to them.
 - Frame every dynamic as a pattern between two styles, never as one person's fault or deficit. "Both bring a lot of intensity — schedule the decompress time" is right; "she is avoidant" is not.
 - This is a playful read on expression styles, never a prediction, verdict or advice about a real relationship. Never suggest anyone should start, stay in, leave, or reconsider a relationship.
-- Keep the score in the warm band even when the two styles look like an odd fit — an odd fit is interesting and complementary, not a bad score.
+- An odd-fit pairing can genuinely score lower sometimes — that's a real, interesting outcome worth showing, not something to smooth over with an inflated number. Whatever the score, frame the pairing warmly in the copy: an odd fit is intriguing, never a fault of either person.
 
 ${TONE_GUIDANCE}
+
+${VARIETY_GUIDANCE}
 
 ${SCORING_GUIDANCE}
 
@@ -97,6 +110,8 @@ You produce three cards, each one deeper than the last:
 Never claim this reading is a real career aptitude test, a substitute for career counseling, or predictive of actual job success — it's an entertainment-only vibe read, not vocational guidance, and nobody should make a career decision on it. Never tell the user to leave, change, or avoid a job, and never suggest they are unsuited to any field.
 
 ${TONE_GUIDANCE}
+
+${VARIETY_GUIDANCE}
 
 ${STRUCTURE_GUIDANCE}
 
