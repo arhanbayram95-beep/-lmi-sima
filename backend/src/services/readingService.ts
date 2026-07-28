@@ -1,7 +1,7 @@
+import { Schema, Type } from '@google/genai';
 import { ReadingModelClient } from './geminiClient';
 import {
   MODULE_PHOTO_COUNTS,
-  MODULE_RESULT_KEYS,
   MODULE_RESULT_KIND,
   READING_SCHEMAS,
   ReadingModuleId,
@@ -68,23 +68,55 @@ export async function generateReading(
   return validateReadingResult(parsed, moduleId);
 }
 
-// Structural check only — that every card the module's renderer expects came
-// back as an object. The response schema already constrains the inside of
-// each card, and the frontend is the only consumer.
-function validateReadingResult(input: unknown, moduleId: ReadingModuleId): ReadingResult {
-  if (typeof input !== 'object' || input === null) {
-    throw new ReadingServiceError('Gemini response body was not an object.');
-  }
-
-  const body = input as Record<string, unknown>;
-
-  for (const key of MODULE_RESULT_KEYS[moduleId]) {
-    if (typeof body[key] !== 'object' || body[key] === null) {
-      throw new ReadingServiceError(`Gemini response body was missing the ${key} card.`);
+// Walks the module's own responseSchema (readingSchema.ts) recursively,
+// rather than a hand-maintained list of top-level keys — Gemini's
+// `responseSchema` is a strong constraint but not a guarantee, and the
+// frontend's card renderers (ReadingCards.tsx) call .map() on nested arrays
+// like `domains_card.top_industry_pills` with no defensive fallback, per
+// this project's "validate at the boundary, trust it past that point"
+// convention (CLAUDE.md). A response missing a nested array must fail here
+// as a clean 502, not reach RevealScreen as a render crash.
+function assertConformsToSchema(value: unknown, schema: Schema, path: string): void {
+  switch (schema.type) {
+    case Type.OBJECT: {
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        throw new ReadingServiceError(`Gemini response ${path} was not an object.`);
+      }
+      const body = value as Record<string, unknown>;
+      for (const key of schema.required ?? []) {
+        if (!(key in body)) {
+          throw new ReadingServiceError(`Gemini response ${path} was missing "${key}".`);
+        }
+        const propSchema = schema.properties?.[key];
+        if (propSchema) {
+          assertConformsToSchema(body[key], propSchema, `${path}.${key}`);
+        }
+      }
+      return;
     }
+    case Type.ARRAY: {
+      if (!Array.isArray(value)) {
+        throw new ReadingServiceError(`Gemini response ${path} was not an array.`);
+      }
+      if (schema.items) {
+        value.forEach((item, index) => assertConformsToSchema(item, schema.items as Schema, `${path}[${index}]`));
+      }
+      return;
+    }
+    default:
+      // STRING/INTEGER/etc. leaves: the schema already constrains their
+      // shape and enum values at generation time — only presence is worth
+      // re-checking here.
+      if (value === undefined || value === null) {
+        throw new ReadingServiceError(`Gemini response ${path} was missing.`);
+      }
   }
+}
+
+function validateReadingResult(input: unknown, moduleId: ReadingModuleId): ReadingResult {
+  assertConformsToSchema(input, READING_SCHEMAS[moduleId], 'body');
 
   // Stamped here rather than trusted from the model: the module that was
   // asked for is the authoritative answer to which shape came back.
-  return { ...body, module: MODULE_RESULT_KIND[moduleId] } as ReadingResult;
+  return { ...(input as Record<string, unknown>), module: MODULE_RESULT_KIND[moduleId] } as ReadingResult;
 }

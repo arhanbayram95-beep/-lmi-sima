@@ -357,11 +357,3 @@ export const READING_SCHEMAS: Record<ReadingModuleId, Schema> = {
   'relationship-harmony': relationshipHarmonySchema,
   'career-match': careerPathSchema,
 };
-
-// The top-level card keys each module's payload must carry. Used to validate
-// the model's response at the service boundary.
-export const MODULE_RESULT_KEYS: Record<ReadingModuleId, string[]> = {
-  'three-expression': ['archetype_card', 'temperament_score_card', 'traits_card', 'celebrity_match_card'],
-  'relationship-harmony': ['vibe_card', 'chemistry_score_card', 'dynamics_card', 'guidance_card'],
-  'career-match': ['work_archetype_card', 'suitability_score_card', 'domains_card', 'recommendations_card'],
-};

@@ -152,6 +152,34 @@ describe('generateReading', () => {
     await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
   });
 
+  // Regression: a live Gemini response once came back with domains_card
+  // present but missing top_industry_pills, which the old top-level-only
+  // check let through — ReadingCards.tsx's `.map()` over the missing array
+  // then crashed RevealScreen for the career-match module in production.
+  it('throws when a card is present but missing one of its own required nested fields', async () => {
+    const malformed = {
+      ...MODULE_RESPONSES['career-match'],
+      domains_card: { title: 'Recommended Industries' },
+    };
+    const generateContent = jest.fn().mockResolvedValue(textResponse(malformed));
+
+    await expect(
+      generateReading(makeClient(generateContent), PHOTOS_1, 'career-match')
+    ).rejects.toBeInstanceOf(ReadingServiceError);
+  });
+
+  it('throws when a required array field comes back as the wrong type', async () => {
+    const malformed = {
+      ...MODULE_RESPONSES['career-match'],
+      recommendations_card: { title: 'Ideal Role Matches', checklist_items: 'not an array' },
+    };
+    const generateContent = jest.fn().mockResolvedValue(textResponse(malformed));
+
+    await expect(
+      generateReading(makeClient(generateContent), PHOTOS_1, 'career-match')
+    ).rejects.toBeInstanceOf(ReadingServiceError);
+  });
+
   it('defaults to the three-expression system prompt when no module is given', async () => {
     const generateContent = clientFor('three-expression');
 
