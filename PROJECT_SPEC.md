@@ -64,10 +64,23 @@ for how this is wired):
   reading.
 * **Relationship Harmony Analyzer** — **2 photos, one of the user and one of
   another person** (product decision 2026-07-25 — originally spec'd as
-  reading only the user's own photos). Each photo is read independently;
-  never a compatibility score or a claim about the two people's actual
-  relationship. The second person's photo requires their permission — see
-  §6 and the Terms & Conditions' Acceptable Use clause.
+  reading only the user's own photos). **Reversed 2026-07-28:** the two
+  photos are now read *together* and scored as a pair (Chemistry & Synergy
+  Score), replacing the 2026-07-25 rule that each photo be read
+  independently with never a compatibility score. Product owner's explicit
+  call, made after the biometric-comparison exposure was raised. The second
+  person's photo requires their permission — see §6 and the Terms &
+  Conditions' Acceptable Use clause.
+  * **Open item:** the Privacy Policy's Biometric Data section
+    (`frontend/src/content/legalContent.ts`) still states the second photo
+    "is never matched, scored, or compared against the other photo," and
+    leans on that to argue these photos fall outside BIPA / GDPR Art. 9.
+    Shipping pair scoring makes that sentence false and weakens the
+    argument. Needs legal sign-off and a rewrite before release.
+  * Guardrails carried in the prompt instead: no verdict or advice about a
+    real relationship, no character judgement of either person (the second
+    person never asked for a reading), no guessing names/genders/ages or
+    what the two people are to each other, and scores stay in the warm band.
 * **Career Match** ("What Job Suits You") — **1 photo** of the user. A fun
   career-archetype vibe read, never framed as a real psychometric or
   vocational assessment.
@@ -130,6 +143,18 @@ for how this is wired):
   entertainment-only/no-clinical-language/non-face/minor-fallback rules can't
   drift out of sync across modules. `generateReading` selects the prompt from
   the request's optional `module` field (defaults to `three-expression`).
+* **Per-module response schemas (added 2026-07-28):** each module now returns
+  its own card stack rather than the original shared
+  `{ headline, insights[], narrative }` shape —
+  `READING_SCHEMAS[moduleId]` in `backend/src/services/readingSchema.ts` is
+  passed as `config.responseSchema`, and the payload carries a `module`
+  discriminator (`character_analysis` / `relationship_harmony` /
+  `career_path`) that the frontend switches on to pick a renderer. Every
+  card stack is: a badge-tag card, a 0-100 overall score with exactly four
+  named sub-scores, then pill arrays and/or a recommendation checklist.
+  Metric `icon` values are enum-constrained to the set the app can actually
+  render. Scores are a presentation device, not a measurement — the
+  "stay in the 68-97 band, never punitive" rule lives in the prompts.
 
 ---
 
