@@ -14,18 +14,22 @@ interface AnalysisModule {
   id: ReadingModuleId;
   titleKey: TranslationKey;
   descriptionKey: TranslationKey;
-  icon: ImageSourcePropType;
+  card: ImageSourcePropType;
   targetScreen: AppScreen;
   available: boolean;
 }
 
-// Module artwork (frontend/assets/modules/) — cropped tight to the
-// recognizable subject and feathered to transparent on all sides so it
-// sits directly on the card's glass background with no hard edge or boxed
-// icon slot, while staying small enough to read clearly at a glance.
+// Full module cards (frontend/assets/modules/) — self-contained artwork with
+// background, title, description, and CTA already composed at design time,
+// at a fixed 385x172 aspect ratio (the PNGs are @2x exports at 770x344, but
+// layout sizing here is style-driven, not intrinsic-size-driven, so source
+// pixel density never affects the rendered size — only sharpness). Full
+// width, edge-to-edge, matching how the original icon+text hub cards filled
+// the page.
 // Static requires, not a dynamic map lookup, because Metro needs
 // require() calls to be statically analyzable.
-const MODULE_ICONS: Record<ReadingModuleId, ImageSourcePropType> = {
+const MODULE_CARD_ASPECT_RATIO = 385 / 172;
+const MODULE_CARDS: Record<ReadingModuleId, ImageSourcePropType> = {
   'three-expression': require('../../assets/modules/character-analysis.png'),
   'relationship-harmony': require('../../assets/modules/relationship-harmony.png'),
   'career-match': require('../../assets/modules/career-match.png'),
@@ -39,7 +43,7 @@ const MODULES: AnalysisModule[] = [
     id: 'three-expression',
     titleKey: 'analyze.module.threeExpression.title',
     descriptionKey: 'analyze.module.threeExpression.description',
-    icon: MODULE_ICONS['three-expression'],
+    card: MODULE_CARDS['three-expression'],
     targetScreen: 'capture',
     available: true,
   },
@@ -47,7 +51,7 @@ const MODULES: AnalysisModule[] = [
     id: 'relationship-harmony',
     titleKey: 'analyze.module.relationshipHarmony.title',
     descriptionKey: 'analyze.module.relationshipHarmony.description',
-    icon: MODULE_ICONS['relationship-harmony'],
+    card: MODULE_CARDS['relationship-harmony'],
     targetScreen: 'capture',
     available: true,
   },
@@ -55,7 +59,7 @@ const MODULES: AnalysisModule[] = [
     id: 'career-match',
     titleKey: 'analyze.module.careerMatch.title',
     descriptionKey: 'analyze.module.careerMatch.description',
-    icon: MODULE_ICONS['career-match'],
+    card: MODULE_CARDS['career-match'],
     targetScreen: 'capture',
     available: true,
   },
@@ -88,26 +92,14 @@ export default function AnalyzeScreen() {
                 accessibilityLabel={title}
                 accessibilityState={{ disabled: !module.available }}
                 testID={`analyze-module-${module.id}`}
+                style={!module.available && styles.moduleCardDisabled}
               >
-                <GlassCard style={[styles.moduleCard, !module.available && styles.moduleCardDisabled]}>
-                  <Image source={module.icon} style={styles.moduleArt} resizeMode="contain" />
-                  <View style={styles.moduleTextBlock}>
-                    <View style={styles.moduleTitleRow}>
-                      <Text style={styles.moduleTitle}>{title}</Text>
-                      {!module.available && (
-                        <View style={styles.comingSoonBadge}>
-                          <Text style={styles.comingSoonBadgeText}>{t('analyze.comingSoonBadge')}</Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text style={styles.moduleDescription}>{t(module.descriptionKey)}</Text>
+                <Image source={module.card} style={styles.moduleCard} resizeMode="contain" />
+                {!module.available && (
+                  <View style={styles.comingSoonBadge}>
+                    <Text style={styles.comingSoonBadgeText}>{t('analyze.comingSoonBadge')}</Text>
                   </View>
-                  {module.available && (
-                    <View style={styles.moduleChevronBadge}>
-                      <Text style={styles.moduleChevron}>›</Text>
-                    </View>
-                  )}
-                </GlassCard>
+                )}
               </Pressable>
             </FadeInView>
           );
@@ -150,63 +142,20 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
     gap: Theme.spacing.sm,
   },
+  // Full self-contained card artwork (background, title, description, and
+  // CTA baked in at design time) — full width, edge-to-edge, like the
+  // original dynamic hub cards.
   moduleCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Theme.spacing.sm,
-    // Gold glassmorphic border + a slightly richer fill than the base
-    // GlassCard default so these hub cards read with more contrast against
-    // the Dark Obsidian background, per DESIGN.md's glassmorphic system.
-    borderWidth: 1,
-    borderColor: 'rgba(235, 201, 131, 0.2)',
-    backgroundColor: 'rgba(255, 255, 255, 0.07)',
+    width: '100%',
+    aspectRatio: MODULE_CARD_ASPECT_RATIO,
   },
   moduleCardDisabled: {
     opacity: 0.55,
   },
-  // Feathered to transparent on all sides in the asset itself (see
-  // frontend/assets/modules/) so it sits on the card's glass background
-  // with no hard edge, at a size small enough to actually read at a
-  // glance instead of bleeding edge-to-edge.
-  moduleArt: {
-    width: 88,
-    height: 88,
-    marginRight: Theme.spacing.sm,
-  },
-  moduleTextBlock: {
-    flex: 1,
-    gap: 4,
-  },
-  moduleTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  moduleTitle: {
-    ...Theme.typography.headlineMd,
-    fontSize: 19,
-    color: Theme.colors.accent.goldSecondary,
-  },
-  moduleDescription: {
-    ...Theme.typography.bodyMd,
-    fontSize: 14,
-    color: Theme.colors.text.secondary,
-  },
-  moduleChevronBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: Theme.radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(235, 201, 131, 0.15)',
-    marginLeft: Theme.spacing.xs,
-  },
-  moduleChevron: {
-    color: Theme.colors.accent.goldSecondary,
-    fontSize: 20,
-    fontWeight: '700',
-  },
   comingSoonBadge: {
+    position: 'absolute',
+    top: Theme.spacing.sm,
+    right: Theme.spacing.sm,
     backgroundColor: 'rgba(235, 201, 131, 0.15)',
     borderRadius: 4,
     paddingHorizontal: 6,

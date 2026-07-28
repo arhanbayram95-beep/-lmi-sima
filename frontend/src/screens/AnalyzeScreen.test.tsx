@@ -22,7 +22,7 @@ describe('AnalyzeScreen', () => {
 
   it('lets the user pick the relationship harmony module', () => {
     render(<AnalyzeScreen />);
-    expect(screen.getByText('Relationship Harmony Analyzer')).toBeTruthy();
+    expect(screen.getByLabelText('Relationship Harmony Analyzer')).toBeTruthy();
 
     fireEvent.press(screen.getByTestId('analyze-module-relationship-harmony'));
 
@@ -32,7 +32,7 @@ describe('AnalyzeScreen', () => {
 
   it('lets the user pick the career match module', () => {
     render(<AnalyzeScreen />);
-    expect(screen.getByText('What Job Suits You')).toBeTruthy();
+    expect(screen.getByLabelText('What Job Suits You')).toBeTruthy();
 
     fireEvent.press(screen.getByTestId('analyze-module-career-match'));
 
