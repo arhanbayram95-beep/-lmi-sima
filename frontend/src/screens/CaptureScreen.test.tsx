@@ -85,14 +85,14 @@ describe('CaptureScreen', () => {
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images).toEqual(['mock-base64', 'mock-base64']));
 
-    expect(screen.getByText('Deep')).toBeTruthy();
+    expect(screen.getByText('Stern')).toBeTruthy();
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images).toHaveLength(3));
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
     expect(mockTakePictureAsync).toHaveBeenCalledTimes(3);
     expect(mockPlayCaptureChime).toHaveBeenCalledTimes(3);
-    // Prompt chime greets Bright and Deep, not the opening Calm step.
+    // Prompt chime greets Bright and Stern, not the opening Calm step.
     expect(mockPlayPromptChime).toHaveBeenCalledTimes(2);
   });
 

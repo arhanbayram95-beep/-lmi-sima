@@ -179,14 +179,14 @@ export const translations = {
     fr: 'Montrez-nous votre éclat ✨', ar: 'أرِنا إشراقتك ✨', bn: 'আমাদের আপনার ঔজ্জ্বল্য দেখান ✨', pt: 'Mostre-nos o seu brilho ✨',
     ru: 'Покажите нам своё сияние ✨', ur: 'ہمیں اپنی چمک دکھائیں ✨',
   },
-  'capture.step.deep.title': {
-    en: 'Deep', zh: '深邃', hi: 'गहन', es: 'Profunda', fr: 'Profond', ar: 'عميق', bn: 'গভীর', pt: 'Profunda', ru: 'Глубина', ur: 'گہرا',
+  'capture.step.stern.title': {
+    en: 'Stern', zh: '严肃', hi: 'सख्त', es: 'Seria', fr: 'Sévère', ar: 'جاد', bn: 'কঠোর', pt: 'Séria', ru: 'Строгость', ur: 'سخت',
   },
-  'capture.step.deep.prompt': {
-    en: 'Now give us your mysterious side 🌙', zh: '现在展现你神秘的一面 🌙', hi: 'अब हमें अपना रहस्यमयी पक्ष दिखाएं 🌙',
-    es: 'Ahora muéstranos tu lado misterioso 🌙', fr: 'Montrez-nous maintenant votre côté mystérieux 🌙',
-    ar: 'الآن أرِنا جانبك الغامض 🌙', bn: 'এবার আমাদের আপনার রহস্যময় দিকটি দেখান 🌙', pt: 'Agora mostre-nos o seu lado misterioso 🌙',
-    ru: 'Теперь покажите нам свою загадочную сторону 🌙', ur: 'اب ہمیں اپنا پراسرار پہلو دکھائیں 🌙',
+  'capture.step.stern.prompt': {
+    en: 'Now give us your best frown 😤', zh: '现在皱起眉头，给我们看看你严肃的一面 😤', hi: 'अब हमें अपनी सबसे तीखी भौंहें दिखाएं 😤',
+    es: 'Ahora muéstranos tu mejor ceño fruncido 😤', fr: 'Montrez-nous maintenant votre plus beau froncement de sourcils 😤',
+    ar: 'الآن أرِنا أفضل تكشيرة عابسة لديك 😤', bn: 'এবার আমাদের আপনার সেরা কুঁচকানো ভ্রু দেখান 😤', pt: 'Agora mostre-nos a sua melhor cara de bravo 😤',
+    ru: 'Теперь покажите нам свой лучший хмурый взгляд 😤', ur: 'اب ہمیں اپنی سب سے سخت تیوری دکھائیں 😤',
   },
   'capture.step.person1.title': {
     en: 'Person One', zh: '第一位', hi: 'पहला व्यक्ति', es: 'Persona Uno', fr: 'Personne Un', ar: 'الشخص الأول',
@@ -232,16 +232,16 @@ export const translations = {
     ru: 'Анализ характера', ur: 'کریکٹر تجزیہ',
   },
   'analyze.module.threeExpression.description': {
-    en: 'Capture Calm, Bright, and Deep expressions for your AI character reading.',
-    zh: '捕捉平静、明亮和深邃三种表情，获取你的 AI 性格解读。',
-    hi: 'अपनी AI कैरेक्टर रीडिंग के लिए शांत, उज्ज्वल और गहन एक्सप्रेशन कैप्चर करें।',
-    es: 'Captura las expresiones Calma, Brillante y Profunda para tu lectura de carácter con IA.',
-    fr: 'Capturez les expressions Calme, Lumineux et Profond pour votre lecture de caractère par IA.',
-    ar: 'التقط تعابير الهادئ والمشرق والعميق لقراءة شخصيتك بالذكاء الاصطناعي.',
-    bn: 'আপনার AI ক্যারেক্টার রিডিংয়ের জন্য শান্ত, উজ্জ্বল ও গভীর অভিব্যক্তি ধারণ করুন।',
-    pt: 'Capture as expressões Calma, Radiante e Profunda para a sua leitura de caráter com IA.',
-    ru: 'Запечатлейте выражения «Спокойствие», «Сияние» и «Глубина» для ИИ-анализа характера.',
-    ur: 'اپنی AI کریکٹر ریڈنگ کے لیے پرسکون، روشن اور گہرے تاثرات کیپچر کریں۔',
+    en: 'Capture Calm, Bright, and Stern expressions for your AI character reading.',
+    zh: '捕捉平静、明亮和严肃三种表情，获取你的 AI 性格解读。',
+    hi: 'अपनी AI कैरेक्टर रीडिंग के लिए शांत, उज्ज्वल और सख्त एक्सप्रेशन कैप्चर करें।',
+    es: 'Captura las expresiones Calma, Brillante y Seria para tu lectura de carácter con IA.',
+    fr: 'Capturez les expressions Calme, Lumineux et Sévère pour votre lecture de caractère par IA.',
+    ar: 'التقط تعابير الهادئ والمشرق والجاد لقراءة شخصيتك بالذكاء الاصطناعي.',
+    bn: 'আপনার AI ক্যারেক্টার রিডিংয়ের জন্য শান্ত, উজ্জ্বল ও কঠোর অভিব্যক্তি ধারণ করুন।',
+    pt: 'Capture as expressões Calma, Radiante e Séria para a sua leitura de caráter com IA.',
+    ru: 'Запечатлейте выражения «Спокойствие», «Сияние» и «Строгость» для ИИ-анализа характера.',
+    ur: 'اپنی AI کریکٹر ریڈنگ کے لیے پرسکون، روشن اور سخت تاثرات کیپچر کریں۔',
   },
   'analyze.module.relationshipHarmony.title': {
     en: 'Relationship Harmony Analyzer', zh: '关系和谐度分析', hi: 'रिलेशनशिप हार्मनी एनालाइज़र',

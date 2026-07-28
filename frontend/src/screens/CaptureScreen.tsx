@@ -26,7 +26,7 @@ const MODULE_STEPS: Record<ReadingModuleId, CaptureStep[]> = {
   'three-expression': [
     { key: 'calm', titleKey: 'capture.step.calm.title', promptKey: 'capture.step.calm.prompt', facing: 'front' },
     { key: 'bright', titleKey: 'capture.step.bright.title', promptKey: 'capture.step.bright.prompt', facing: 'front' },
-    { key: 'deep', titleKey: 'capture.step.deep.title', promptKey: 'capture.step.deep.prompt', facing: 'front' },
+    { key: 'stern', titleKey: 'capture.step.stern.title', promptKey: 'capture.step.stern.prompt', facing: 'front' },
   ],
   'relationship-harmony': [
     { key: 'person1', titleKey: 'capture.step.person1.title', promptKey: 'capture.step.person1.prompt', facing: 'front' },

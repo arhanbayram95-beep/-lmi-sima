@@ -8,7 +8,7 @@ export type ReadingModuleId = 'three-expression' | 'relationship-harmony' | 'car
 
 export const READING_MODULE_IDS: ReadingModuleId[] = ['three-expression', 'relationship-harmony', 'career-match'];
 
-// Character Analysis: 3 (Calm/Bright/Deep, one person). Relationship
+// Character Analysis: 3 (Calm/Bright/Stern, one person). Relationship
 // Harmony: 2 (one photo per person). Career Match: 1 (a single photo).
 export const MODULE_PHOTO_COUNTS: Record<ReadingModuleId, number> = {
   'three-expression': 3,

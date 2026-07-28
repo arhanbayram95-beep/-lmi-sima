@@ -3,7 +3,7 @@ import { ReadingModuleId } from '../../api/types';
 
 // In-memory only, per PROJECT_SPEC.md §3 process-and-discard architecture —
 // never persisted, and must be cleared once the backend response returns.
-// A plain ordered array rather than a fixed calm/bright/deep record because
+// A plain ordered array rather than a fixed calm/bright/stern record because
 // the photo count and meaning of each slot now vary per module (see
 // MODULE_PHOTO_COUNTS in api/types.ts) — Character Analysis captures 3,
 // Relationship Harmony 2, Career Match 1.
