@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, ImageSourcePropType, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ImageSourcePropType, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
@@ -21,11 +21,10 @@ interface AnalysisModule {
 
 // Full module cards (frontend/assets/modules/) — self-contained artwork with
 // background, title, description, and CTA already composed at design time,
-// at a fixed 385x172 aspect ratio (the PNGs are @2x exports at 770x344, but
-// layout sizing here is style-driven, not intrinsic-size-driven, so source
-// pixel density never affects the rendered size — only sharpness). Full
-// width, edge-to-edge, matching how the original icon+text hub cards filled
-// the page.
+// at a fixed 385x172 aspect ratio (the PNGs are @2x exports at 770x344 —
+// source pixel density only affects sharpness; the rendered size is always
+// pinned to an explicit width/height computed from the screen, see
+// cardWidth/cardHeight in AnalyzeScreen below).
 // Static requires, not a dynamic map lookup, because Metro needs
 // require() calls to be statically analyzable.
 const MODULE_CARD_ASPECT_RATIO = 385 / 172;
@@ -70,6 +69,16 @@ export default function AnalyzeScreen() {
   const setSelectedModule = useAppStore((s) => s.setSelectedModule);
   const t = useTranslation();
 
+  // Computed in JS rather than a `width: '100%'` style: percentage width
+  // does not reliably resolve down through the ScrollView -> Animated.View
+  // (FadeInView) -> Pressable -> Image chain here, and was rendering each
+  // card at close to its native pixel size, overflowing off the right edge
+  // of the screen instead of filling it. An explicit pixel width sidesteps
+  // that chain entirely.
+  const { width: windowWidth } = useWindowDimensions();
+  const cardWidth = windowWidth - Theme.spacing.gutter * 2;
+  const cardHeight = cardWidth / MODULE_CARD_ASPECT_RATIO;
+
   return (
     <View style={styles.container} testID="analyze-screen">
       <View style={styles.header}>
@@ -94,7 +103,11 @@ export default function AnalyzeScreen() {
                 testID={`analyze-module-${module.id}`}
                 style={!module.available && styles.moduleCardDisabled}
               >
-                <Image source={module.card} style={styles.moduleCard} resizeMode="contain" />
+                <Image
+                  source={module.card}
+                  style={[styles.moduleCard, { width: cardWidth, height: cardHeight }]}
+                  resizeMode="contain"
+                />
                 {!module.available && (
                   <View style={styles.comingSoonBadge}>
                     <Text style={styles.comingSoonBadgeText}>{t('analyze.comingSoonBadge')}</Text>
@@ -144,10 +157,10 @@ const styles = StyleSheet.create({
   },
   // Full self-contained card artwork (background, title, description, and
   // CTA baked in at design time) — full width, edge-to-edge, like the
-  // original dynamic hub cards.
+  // original dynamic hub cards. width/height are computed in JS (see
+  // cardWidth/cardHeight above) and merged in at render time.
   moduleCard: {
-    width: '100%',
-    aspectRatio: MODULE_CARD_ASPECT_RATIO,
+    alignSelf: 'center',
   },
   moduleCardDisabled: {
     opacity: 0.55,
