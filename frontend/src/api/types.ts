@@ -59,9 +59,23 @@ export interface MetadataBadge {
   value: string;
 }
 
+// Read from jawline/cheekbone/forehead-chin geometry — never an
+// attractiveness judgment, just a shape label.
+export type FaceShape = 'Oval' | 'Round' | 'Square' | 'Heart' | 'Diamond' | 'Oblong' | 'Triangle';
+
 export interface CharacterAnalysisResult {
   module: 'character_analysis';
   archetype_card: BadgeCard;
+  facial_structure_card: {
+    title: string;
+    shape_tag: FaceShape;
+    description: string;
+  };
+  spirit_animal_card: {
+    title: string;
+    animal: string;
+    description: string;
+  };
   traits_card: {
     title: string;
     metadata_badges: MetadataBadge[];

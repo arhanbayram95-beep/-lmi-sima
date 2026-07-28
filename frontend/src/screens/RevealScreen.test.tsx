@@ -17,6 +17,16 @@ const READING: CharacterAnalysisResult = {
     badge_tag: 'Analytical Visionary',
     summary: 'You read as someone people trust instantly.',
   },
+  facial_structure_card: {
+    title: 'Facial Structure',
+    shape_tag: 'Oval',
+    description: 'Balanced proportions with a defined jawline.',
+  },
+  spirit_animal_card: {
+    title: 'Spirit Animal Match',
+    animal: 'Wolf',
+    description: 'A steady gaze and defined jawline read as sharp awareness.',
+  },
   traits_card: {
     title: 'Facial Trait Analysis',
     metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],
@@ -78,6 +88,14 @@ describe('RevealScreen', () => {
     expect(screen.getByTestId('reveal-photos')).toBeTruthy();
     expect(screen.getByTestId('traits-card')).toBeTruthy();
     expect(screen.getByTestId('celebrity-card')).toBeTruthy();
+  });
+
+  it('renders the facial structure and spirit animal cards, grounded in physical features', () => {
+    render(<RevealScreen />);
+    expect(screen.getByTestId('facial-structure-card')).toBeTruthy();
+    expect(screen.getByText('Oval')).toBeTruthy();
+    expect(screen.getByTestId('spirit-animal-card')).toBeTruthy();
+    expect(screen.getByText('Wolf')).toBeTruthy();
   });
 
   it('does not render a score card for character_analysis — only relationship_harmony kept one', () => {

@@ -39,10 +39,24 @@ const METRIC_GLYPHS: Record<MetricIcon, string> = {
   lightbulb: '💡',
 };
 
-export function BadgeSummaryCard({ card, testID }: { card: BadgeCard; testID?: string }) {
+// Every card leads with a bold icon + title, rather than a small uppercase
+// label — the fun, energetic header style the reveal screen is going for
+// (see files_for_claude/design_examples), while keeping the app's own
+// dark/crimson/gold palette rather than borrowing the reference's light
+// theme.
+function CardHeader({ icon, title }: { icon?: string; title: string }) {
+  return (
+    <View style={styles.cardHeader}>
+      {icon && <Text style={styles.cardHeaderIcon}>{icon}</Text>}
+      <Text style={styles.cardTitle}>{title}</Text>
+    </View>
+  );
+}
+
+export function BadgeSummaryCard({ card, icon, testID }: { card: BadgeCard; icon?: string; testID?: string }) {
   return (
     <GlassCard style={styles.card} testID={testID}>
-      <Text style={styles.cardTitle}>{card.title}</Text>
+      <CardHeader icon={icon} title={card.title} />
       <View style={styles.badgeChip}>
         <Text style={styles.badgeChipText}>{card.badge_tag}</Text>
       </View>
@@ -54,15 +68,17 @@ export function BadgeSummaryCard({ card, testID }: { card: BadgeCard; testID?: s
 export function ReadingScoreCard({
   card,
   overallLabel,
+  icon,
   testID,
 }: {
   card: ScoreCard;
   overallLabel: string;
+  icon?: string;
   testID?: string;
 }) {
   return (
     <GlassCard style={styles.card} testID={testID}>
-      <Text style={styles.cardTitle}>{card.title}</Text>
+      <CardHeader icon={icon} title={card.title} />
 
       <View style={styles.dial} testID="score-dial">
         <Text style={styles.dialScore}>{card.overall_score}</Text>
@@ -97,10 +113,16 @@ export interface PillGroup {
   tone?: 'positive' | 'caution';
 }
 
-export function PillsCard({ title, groups, children, testID }: React.PropsWithChildren<{ title: string; groups: PillGroup[]; testID?: string }>) {
+export function PillsCard({
+  title,
+  icon,
+  groups,
+  children,
+  testID,
+}: React.PropsWithChildren<{ title: string; icon?: string; groups: PillGroup[]; testID?: string }>) {
   return (
     <GlassCard style={styles.card} testID={testID}>
-      <Text style={styles.cardTitle}>{title}</Text>
+      <CardHeader icon={icon} title={title} />
       {children}
       {groups.map((group, index) => (
         <View key={group.label ?? index} style={styles.pillGroup}>
@@ -131,10 +153,20 @@ export function MetadataBadgeRow({ badges }: { badges: MetadataBadge[] }) {
   );
 }
 
-export function ChecklistCard({ title, items, testID }: { title: string; items: ChecklistItem[]; testID?: string }) {
+export function ChecklistCard({
+  title,
+  icon,
+  items,
+  testID,
+}: {
+  title: string;
+  icon?: string;
+  items: ChecklistItem[];
+  testID?: string;
+}) {
   return (
     <GlassCard style={styles.card} testID={testID}>
-      <Text style={styles.cardTitle}>{title}</Text>
+      <CardHeader icon={icon} title={title} />
       {items.map((item) => (
         <View key={item.headline} style={styles.checkItem}>
           <View style={styles.checkMark}>
@@ -150,20 +182,25 @@ export function ChecklistCard({ title, items, testID }: { title: string; items: 
   );
 }
 
-export function CelebrityMatchCard({
+// Generic "one bold word/name + description" card — used for both the
+// Celebrity Archetype Match and the Spirit Animal Match, since they're
+// structurally identical (title, a single striking answer, a description).
+export function HighlightCard({
   title,
+  icon,
   name,
   description,
   testID,
 }: {
   title: string;
+  icon?: string;
   name: string;
   description: string;
   testID?: string;
 }) {
   return (
     <GlassCard style={styles.card} testID={testID}>
-      <Text style={styles.cardTitle}>{title}</Text>
+      <CardHeader icon={icon} title={title} />
       <Text style={styles.matchName}>{name}</Text>
       <Text style={styles.summary}>{description}</Text>
     </GlassCard>
@@ -186,11 +223,18 @@ const styles = StyleSheet.create({
   card: {
     gap: Theme.spacing.xs,
   },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  cardHeaderIcon: {
+    fontSize: 22,
+  },
   cardTitle: {
-    ...Theme.typography.labelSm,
+    ...Theme.typography.headlineMd,
+    fontSize: 18,
     color: Theme.colors.accent.goldSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
   },
   badgeChip: {
     alignSelf: 'flex-start',

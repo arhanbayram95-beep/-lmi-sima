@@ -14,6 +14,16 @@ const MOCK_READING_RESULTS: Record<ReadingModuleId, ReadingResult> = {
       badge_tag: 'Analytical Visionary',
       summary: 'Placeholder pseudo-API output for testing, not a real reading.',
     },
+    facial_structure_card: {
+      title: 'Facial Structure',
+      shape_tag: 'Oval',
+      description: 'Placeholder text — balanced proportions with a defined jawline and a forehead slightly wider than the chin.',
+    },
+    spirit_animal_card: {
+      title: 'Spirit Animal Match',
+      animal: 'Wolf',
+      description: 'Placeholder text — a steady, direct gaze and a defined jawline read as sharp awareness and quiet independence.',
+    },
     traits_card: {
       title: 'Facial Trait Analysis',
       metadata_badges: [

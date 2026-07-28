@@ -7,8 +7,8 @@ import PrimaryButton from '../components/common/PrimaryButton';
 import ShareCard from '../components/common/ShareCard';
 import {
   BadgeSummaryCard,
-  CelebrityMatchCard,
   ChecklistCard,
+  HighlightCard,
   MetadataBadgeRow,
   PhotoStripCard,
   PillsCard,
@@ -33,10 +33,29 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
     case 'character_analysis':
       return [
         photos,
-        <BadgeSummaryCard key="archetype" card={reading.archetype_card} testID="archetype-card" />,
+        <BadgeSummaryCard key="archetype" card={reading.archetype_card} icon="🎭" testID="archetype-card" />,
+        <BadgeSummaryCard
+          key="facial-structure"
+          card={{
+            title: reading.facial_structure_card.title,
+            badge_tag: reading.facial_structure_card.shape_tag,
+            summary: reading.facial_structure_card.description,
+          }}
+          icon="📐"
+          testID="facial-structure-card"
+        />,
+        <HighlightCard
+          key="spirit-animal"
+          title={reading.spirit_animal_card.title}
+          icon="🐾"
+          name={reading.spirit_animal_card.animal}
+          description={reading.spirit_animal_card.description}
+          testID="spirit-animal-card"
+        />,
         <PillsCard
           key="traits"
           title={reading.traits_card.title}
+          icon="✨"
           testID="traits-card"
           groups={[
             { label: t('reveal.strengths'), pills: reading.traits_card.strength_pills },
@@ -45,9 +64,10 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
         >
           <MetadataBadgeRow badges={reading.traits_card.metadata_badges} />
         </PillsCard>,
-        <CelebrityMatchCard
+        <HighlightCard
           key="celebrity"
           title={reading.celebrity_match_card.title}
+          icon="⭐"
           name={reading.celebrity_match_card.match_name}
           description={reading.celebrity_match_card.match_description}
           testID="celebrity-card"
@@ -56,16 +76,18 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
     case 'relationship_harmony':
       return [
         photos,
-        <BadgeSummaryCard key="vibe" card={reading.vibe_card} testID="archetype-card" />,
+        <BadgeSummaryCard key="vibe" card={reading.vibe_card} icon="💞" testID="archetype-card" />,
         <ReadingScoreCard
           key="score"
           card={reading.chemistry_score_card}
           overallLabel={t('reveal.overallLabel')}
+          icon="🔥"
           testID="score-card"
         />,
         <PillsCard
           key="dynamics"
           title={reading.dynamics_card.title}
+          icon="🌊"
           testID="dynamics-card"
           groups={[
             { label: t('reveal.bestChemistry'), pills: reading.dynamics_card.best_chemistry_pills },
@@ -75,6 +97,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
         <ChecklistCard
           key="guidance"
           title={reading.guidance_card.title}
+          icon="✅"
           items={reading.guidance_card.checklist_items}
           testID="checklist-card"
         />,
@@ -82,16 +105,18 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
     case 'career_path':
       return [
         photos,
-        <BadgeSummaryCard key="work" card={reading.work_archetype_card} testID="archetype-card" />,
+        <BadgeSummaryCard key="work" card={reading.work_archetype_card} icon="💼" testID="archetype-card" />,
         <PillsCard
           key="domains"
           title={reading.domains_card.title}
+          icon="🧭"
           testID="domains-card"
           groups={[{ pills: reading.domains_card.top_industry_pills }]}
         />,
         <ChecklistCard
           key="roles"
           title={reading.recommendations_card.title}
+          icon="✅"
           items={reading.recommendations_card.checklist_items}
           testID="checklist-card"
         />,
