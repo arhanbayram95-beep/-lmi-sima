@@ -28,11 +28,10 @@ interface AnalysisModule {
 // require() calls to be statically analyzable.
 const MODULE_CARD_ASPECT_RATIO = 385 / 172;
 
-// Tighter than Theme.spacing.gutter (16) — the hub reads better with the
-// cards bleeding closer to the screen edge instead of floating in a wide
-// margin. Drives both the card width calculation and the screen's
-// horizontal padding so the two stay in sync.
-const HORIZONTAL_MARGIN = 10;
+// Near-zero — the cards should read as almost edge-to-edge, with barely a
+// sliver of margin left. Drives both the card width calculation and the
+// screen's horizontal padding so the two stay in sync.
+const HORIZONTAL_MARGIN = 4;
 const MODULE_CARDS: Record<ReadingModuleId, ImageSourcePropType> = {
   'three-expression': require('../../assets/modules/character-analysis.png'),
   'relationship-harmony': require('../../assets/modules/relationship-harmony.png'),
@@ -159,7 +158,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: HORIZONTAL_MARGIN,
     paddingBottom: 120,
-    gap: Theme.spacing.xs,
+    gap: 4,
   },
   // Full self-contained card artwork (background, title, description, and
   // CTA baked in at design time) — full width, edge-to-edge, like the
