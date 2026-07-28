@@ -480,11 +480,11 @@ export const translations = {
     bn: 'আপনার এক্সপ্রেশন পড়া হচ্ছে', pt: 'A ler as suas expressões', ru: 'Анализ ваших выражений', ur: 'آپ کے تاثرات پڑھے جا رہے ہیں',
   },
   'analyzing.subtitle': {
-    en: 'Our AI is generating your character reading...', zh: '我们的 AI 正在生成你的性格解读……',
-    hi: 'हमारा AI आपकी कैरेक्टर रीडिंग तैयार कर रहा है...', es: 'Nuestra IA está generando tu lectura de carácter...',
-    fr: 'Notre IA génère votre lecture de caractère...', ar: 'يقوم الذكاء الاصطناعي بإنشاء قراءة شخصيتك...',
-    bn: 'আমাদের AI আপনার ক্যারেক্টার রিডিং তৈরি করছে...', pt: 'A nossa IA está a gerar a sua leitura de caráter...',
-    ru: 'Наш ИИ создаёт анализ вашего характера...', ur: 'ہمارا AI آپ کی کریکٹر ریڈنگ تیار کر رہا ہے...',
+    en: 'Our AI is generating your reading...', zh: '我们的 AI 正在生成你的解读……',
+    hi: 'हमारा AI आपकी रीडिंग तैयार कर रहा है...', es: 'Nuestra IA está generando tu lectura...',
+    fr: 'Notre IA génère votre lecture...', ar: 'يقوم الذكاء الاصطناعي بإنشاء قراءتك...',
+    bn: 'আমাদের AI আপনার রিডিং তৈরি করছে...', pt: 'A nossa IA está a gerar a sua leitura...',
+    ru: 'Наш ИИ создаёт ваш анализ...', ur: 'ہمارا AI آپ کی ریڈنگ تیار کر رہا ہے...',
   },
   'analyzing.error.title': {
     en: 'Something Went Wrong', zh: '出错了', hi: 'कुछ गलत हो गया', es: 'Algo salió mal', fr: "Une erreur s'est produite",
@@ -547,6 +547,26 @@ export const translations = {
   'reveal.shareButton': {
     en: 'Share Reading', zh: '分享解读', hi: 'रीडिंग शेयर करें', es: 'Compartir lectura', fr: 'Partager la lecture',
     ar: 'مشاركة القراءة', bn: 'রিডিং শেয়ার করুন', pt: 'Partilhar leitura', ru: 'Поделиться анализом', ur: 'ریڈنگ شیئر کریں',
+  },
+  'reveal.shareVariantClassic': {
+    en: 'Classic', zh: '经典', hi: 'क्लासिक', es: 'Clásico', fr: 'Classique', ar: 'كلاسيكي',
+    bn: 'ক্লাসিক', pt: 'Clássico', ru: 'Классика', ur: 'کلاسک',
+  },
+  'reveal.shareVariantHighlight': {
+    en: 'Fun Fact', zh: '趣味亮点', hi: 'मज़ेदार तथ्य', es: 'Dato Curioso', fr: 'Anecdote Fun', ar: 'حقيقة ممتعة',
+    bn: 'মজার তথ্য', pt: 'Facto Divertido', ru: 'Забавный Факт', ur: 'دلچسپ حقیقت',
+  },
+  'reveal.shareTextButton': {
+    en: 'Share as Text', zh: '以文字分享', hi: 'टेक्स्ट के रूप में शेयर करें', es: 'Compartir como Texto',
+    fr: 'Partager en Texte', ar: 'مشاركة كنص', bn: 'টেক্সট হিসেবে শেয়ার করুন', pt: 'Partilhar como Texto',
+    ru: 'Поделиться Текстом', ur: 'متن کے طور پر شیئر کریں',
+  },
+  'reveal.shareTextFooter': {
+    en: 'Get your own reading with Face Reader.', zh: '用 Face Reader 获取你自己的解读。',
+    hi: 'Face Reader के साथ अपनी खुद की रीडिंग पाएं।', es: 'Obtén tu propia lectura con Face Reader.',
+    fr: 'Obtenez votre propre lecture avec Face Reader.', ar: 'احصل على قراءتك الخاصة مع Face Reader.',
+    bn: 'Face Reader দিয়ে নিজের রিডিং পান।', pt: 'Obtenha a sua própria leitura com o Face Reader.',
+    ru: 'Получите свой собственный анализ с Face Reader.', ur: 'Face Reader کے ساتھ اپنی ریڈنگ حاصل کریں۔',
   },
   'welcome.headline': {
     en: "You're All Set", zh: '一切准备就绪', hi: 'आप तैयार हैं', es: 'Todo listo', fr: 'Vous êtes prêt',

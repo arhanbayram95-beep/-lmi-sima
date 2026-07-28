@@ -140,6 +140,25 @@ export function readingScoreCard(reading: ReadingResult): ScoreCard | undefined 
   return reading.module === 'relationship_harmony' ? reading.chemistry_score_card : undefined;
 }
 
+export interface ReadingHighlight {
+  label: string;
+  value: string;
+}
+
+// The single most fun, most shareable fact in a reading, one per module —
+// used by the "Fun Fact" share card variant (ShareCard.tsx) to lead with
+// something punchier than the badge tag alone.
+export function readingHighlight(reading: ReadingResult): ReadingHighlight {
+  switch (reading.module) {
+    case 'character_analysis':
+      return { label: 'Spirit Animal', value: reading.spirit_animal_card.animal };
+    case 'relationship_harmony':
+      return { label: 'Best Chemistry', value: reading.dynamics_card.best_chemistry_pills[0] };
+    case 'career_path':
+      return { label: 'Top Industry', value: reading.domains_card.top_industry_pills[0] };
+  }
+}
+
 export interface AnalyzeReadingPayload {
   photos: string[];
   module: ReadingModuleId;
