@@ -24,8 +24,8 @@ interface CaptureStep {
 // Harmony 1 of the user then 1 of someone else, Career Match 1 of the user.
 const MODULE_STEPS: Record<ReadingModuleId, CaptureStep[]> = {
   'three-expression': [
-    { key: 'calm', titleKey: 'capture.step.calm.title', promptKey: 'capture.step.calm.prompt', facing: 'front' },
-    { key: 'bright', titleKey: 'capture.step.bright.title', promptKey: 'capture.step.bright.prompt', facing: 'front' },
+    { key: 'rest', titleKey: 'capture.step.rest.title', promptKey: 'capture.step.rest.prompt', facing: 'front' },
+    { key: 'grin', titleKey: 'capture.step.grin.title', promptKey: 'capture.step.grin.prompt', facing: 'front' },
     { key: 'stern', titleKey: 'capture.step.stern.title', promptKey: 'capture.step.stern.prompt', facing: 'front' },
   ],
   'relationship-harmony': [

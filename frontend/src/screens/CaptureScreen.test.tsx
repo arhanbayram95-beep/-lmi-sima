@@ -77,11 +77,11 @@ describe('CaptureScreen', () => {
   it('captures all three expressions in order and stores them, then moves to analysis', async () => {
     render(<CaptureScreen />);
 
-    expect(screen.getByText('Calm')).toBeTruthy();
+    expect(screen.getByText('Rest')).toBeTruthy();
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images).toEqual(['mock-base64']));
 
-    expect(screen.getByText('Bright')).toBeTruthy();
+    expect(screen.getByText('Grin')).toBeTruthy();
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images).toEqual(['mock-base64', 'mock-base64']));
 
@@ -92,7 +92,7 @@ describe('CaptureScreen', () => {
     await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
     expect(mockTakePictureAsync).toHaveBeenCalledTimes(3);
     expect(mockPlayCaptureChime).toHaveBeenCalledTimes(3);
-    // Prompt chime greets Bright and Stern, not the opening Calm step.
+    // Prompt chime greets Grin and Stern, not the opening Rest step.
     expect(mockPlayPromptChime).toHaveBeenCalledTimes(2);
   });
 

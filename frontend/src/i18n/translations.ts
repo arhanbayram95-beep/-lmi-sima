@@ -162,22 +162,23 @@ export const translations = {
     en: 'Cancel', zh: '取消', hi: 'रद्द करें', es: 'Cancelar', fr: 'Annuler', ar: 'إلغاء', bn: 'বাতিল করুন',
     pt: 'Cancelar', ru: 'Отмена', ur: 'منسوخ کریں',
   },
-  'capture.step.calm.title': {
-    en: 'Calm', zh: '平静', hi: 'शांत', es: 'Calma', fr: 'Calme', ar: 'هادئ', bn: 'শান্ত', pt: 'Calma', ru: 'Спокойствие', ur: 'پرسکون',
+  'capture.step.rest.title': {
+    en: 'Rest', zh: '休息', hi: 'आराम', es: 'Descanso', fr: 'Repos', ar: 'راحة', bn: 'বিশ্রাম', pt: 'Descanso', ru: 'Покой', ur: 'آرام',
   },
-  'capture.step.calm.prompt': {
-    en: 'Hold a relaxed, neutral expression.', zh: '保持放松、中性的表情。', hi: 'एक शांत, न्यूट्रल एक्सप्रेशन बनाए रखें।',
-    es: 'Mantén una expresión relajada y neutra.', fr: 'Gardez une expression détendue et neutre.',
-    ar: 'حافظ على تعبير مسترخٍ ومحايد.', bn: 'একটি শিথিল, নিরপেক্ষ অভিব্যক্তি ধরে রাখুন।', pt: 'Mantenha uma expressão relaxada e neutra.',
-    ru: 'Сохраняйте расслабленное, нейтральное выражение лица.', ur: 'ایک پرسکون، غیر جانبدار تاثر برقرار رکھیں۔',
+  'capture.step.rest.prompt': {
+    en: 'Let your face completely relax 😌', zh: '让你的脸完全放松 😌', hi: 'अपने चेहरे को पूरी तरह से आराम दें 😌',
+    es: 'Deja que tu cara se relaje por completo 😌', fr: 'Laissez votre visage se détendre complètement 😌',
+    ar: 'دع وجهك يسترخي تمامًا 😌', bn: 'আপনার মুখ সম্পূর্ণ শিথিল হতে দিন 😌', pt: 'Deixe o seu rosto relaxar completamente 😌',
+    ru: 'Позвольте своему лицу полностью расслабиться 😌', ur: 'اپنے چہرے کو مکمل طور پر پرسکون ہونے دیں 😌',
   },
-  'capture.step.bright.title': {
-    en: 'Bright', zh: '明亮', hi: 'उज्ज्वल', es: 'Brillante', fr: 'Lumineux', ar: 'مشرق', bn: 'উজ্জ্বল', pt: 'Radiante', ru: 'Сияние', ur: 'روشن',
+  'capture.step.grin.title': {
+    en: 'Grin', zh: '笑容', hi: 'मुस्कान', es: 'Sonrisa', fr: 'Sourire', ar: 'ابتسامة', bn: 'হাসি', pt: 'Sorriso', ru: 'Улыбка', ur: 'مسکراہٹ',
   },
-  'capture.step.bright.prompt': {
-    en: 'Show us your glow ✨', zh: '展现你的光彩 ✨', hi: 'हमें अपनी चमक दिखाएं ✨', es: 'Muéstranos tu brillo ✨',
-    fr: 'Montrez-nous votre éclat ✨', ar: 'أرِنا إشراقتك ✨', bn: 'আমাদের আপনার ঔজ্জ্বল্য দেখান ✨', pt: 'Mostre-nos o seu brilho ✨',
-    ru: 'Покажите нам своё сияние ✨', ur: 'ہمیں اپنی چمک دکھائیں ✨',
+  'capture.step.grin.prompt': {
+    en: 'Now flash us your biggest grin 😄', zh: '现在给我们露出你最灿烂的笑容 😄', hi: 'अब हमें अपनी सबसे बड़ी मुस्कान दिखाएं 😄',
+    es: 'Ahora muéstranos tu sonrisa más grande 😄', fr: 'Montrez-nous maintenant votre plus grand sourire 😄',
+    ar: 'الآن أرِنا أوسع ابتسامة لديك 😄', bn: 'এবার আমাদের আপনার সবচেয়ে বড় হাসি দেখান 😄', pt: 'Agora mostre-nos o seu maior sorriso 😄',
+    ru: 'Теперь покажите нам свою самую широкую улыбку 😄', ur: 'اب ہمیں اپنی سب سے بڑی مسکراہٹ دکھائیں 😄',
   },
   'capture.step.stern.title': {
     en: 'Stern', zh: '严肃', hi: 'सख्त', es: 'Seria', fr: 'Sévère', ar: 'جاد', bn: 'কঠোর', pt: 'Séria', ru: 'Строгость', ur: 'سخت',
@@ -231,53 +232,17 @@ export const translations = {
     fr: 'Analyse de Caractère', ar: 'تحليل الشخصية', bn: 'ক্যারেক্টার অ্যানালাইসিস', pt: 'Análise de Caráter',
     ru: 'Анализ характера', ur: 'کریکٹر تجزیہ',
   },
-  'analyze.module.threeExpression.description': {
-    en: 'Capture Calm, Bright, and Stern expressions for your AI character reading.',
-    zh: '捕捉平静、明亮和严肃三种表情，获取你的 AI 性格解读。',
-    hi: 'अपनी AI कैरेक्टर रीडिंग के लिए शांत, उज्ज्वल और सख्त एक्सप्रेशन कैप्चर करें।',
-    es: 'Captura las expresiones Calma, Brillante y Seria para tu lectura de carácter con IA.',
-    fr: 'Capturez les expressions Calme, Lumineux et Sévère pour votre lecture de caractère par IA.',
-    ar: 'التقط تعابير الهادئ والمشرق والجاد لقراءة شخصيتك بالذكاء الاصطناعي.',
-    bn: 'আপনার AI ক্যারেক্টার রিডিংয়ের জন্য শান্ত, উজ্জ্বল ও কঠোর অভিব্যক্তি ধারণ করুন।',
-    pt: 'Capture as expressões Calma, Radiante e Séria para a sua leitura de caráter com IA.',
-    ru: 'Запечатлейте выражения «Спокойствие», «Сияние» и «Строгость» для ИИ-анализа характера.',
-    ur: 'اپنی AI کریکٹر ریڈنگ کے لیے پرسکون، روشن اور سخت تاثرات کیپچر کریں۔',
-  },
   'analyze.module.relationshipHarmony.title': {
     en: 'Relationship Harmony Analyzer', zh: '关系和谐度分析', hi: 'रिलेशनशिप हार्मनी एनालाइज़र',
     es: 'Analizador de armonía en pareja', fr: 'Analyseur d’harmonie relationnelle',
     ar: 'محلل انسجام العلاقة', bn: 'রিলেশনশিপ হারমনি অ্যানালাইজার', pt: 'Analisador de harmonia no relacionamento',
     ru: 'Анализатор гармонии в отношениях', ur: 'ریلیشن شپ ہارمنی تجزیہ کار',
   },
-  'analyze.module.relationshipHarmony.description': {
-    en: 'See how your expressions reflect connection, chemistry, and compatibility.',
-    zh: '了解你的表情如何反映情感联结、化学反应与契合度。',
-    hi: 'देखें आपके एक्सप्रेशन किस तरह जुड़ाव, केमिस्ट्री और अनुकूलता दर्शाते हैं।',
-    es: 'Descubre cómo tus expresiones reflejan conexión, química y compatibilidad.',
-    fr: 'Découvrez comment vos expressions reflètent la connexion, la alchimie et la compatibilité.',
-    ar: 'اكتشف كيف تعكس تعابيرك التواصل والانسجام والتوافق.',
-    bn: 'দেখুন আপনার অভিব্যক্তি কীভাবে সংযোগ, রসায়ন ও সামঞ্জস্য প্রতিফলিত করে।',
-    pt: 'Veja como as suas expressões refletem ligação, química e compatibilidade.',
-    ru: 'Узнайте, как ваши выражения лица отражают связь, химию и совместимость.',
-    ur: 'دیکھیں آپ کے تاثرات کس طرح تعلق، کیمسٹری اور مطابقت کی عکاسی کرتے ہیں۔',
-  },
   'analyze.module.careerMatch.title': {
     en: 'What Job Suits You', zh: '最适合你的职业', hi: 'आपके लिए कौन सी नौकरी उपयुक्त है',
     es: 'Qué trabajo te conviene', fr: 'Quel métier vous convient',
     ar: 'ما الوظيفة التي تناسبك', bn: 'আপনার জন্য কোন চাকরি উপযুক্ত', pt: 'Que trabalho combina consigo',
     ru: 'Какая работа вам подходит', ur: 'آپ کے لیے کون سی نوکری موزوں ہے',
-  },
-  'analyze.module.careerMatch.description': {
-    en: 'Discover career paths that match your natural expression style.',
-    zh: '发现与你天然表情风格相匹配的职业方向。',
-    hi: 'अपनी स्वाभाविक एक्सप्रेशन शैली से मेल खाते करियर विकल्प खोजें।',
-    es: 'Descubre carreras que encajan con tu estilo natural de expresión.',
-    fr: 'Découvrez des carrières qui correspondent à votre style d’expression naturel.',
-    ar: 'اكتشف المسارات المهنية التي تناسب أسلوب تعابيرك الطبيعي.',
-    bn: 'আপনার স্বাভাবিক এক্সপ্রেশন স্টাইলের সাথে মানানসই ক্যারিয়ার পথ আবিষ্কার করুন।',
-    pt: 'Descubra percursos profissionais que combinam com o seu estilo natural de expressão.',
-    ru: 'Узнайте карьерные пути, которые соответствуют вашему естественному стилю выражения.',
-    ur: 'اپنے فطری ایکسپریشن انداز سے میل کھاتے کیریئر کے راستے دریافت کریں۔',
   },
   'analyze.comingSoonBadge': {
     en: 'COMING SOON', zh: '即将推出', hi: 'जल्द आ रहा है', es: 'PRÓXIMAMENTE', fr: 'BIENTÔT DISPONIBLE',
@@ -571,10 +536,6 @@ export const translations = {
     en: 'Back to Analyze', zh: '返回分析', hi: 'विश्लेषण पर वापस जाएं', es: 'Volver a Analizar',
     fr: "Retour à Analyser", ar: 'العودة إلى التحليل', bn: 'বিশ্লেষণে ফিরে যান', pt: 'Voltar a Analisar',
     ru: 'Назад к анализу', ur: 'تجزیہ پر واپس جائیں',
-  },
-  'reveal.narrativeHeading': {
-    en: 'The Full Picture', zh: '整体画像', hi: 'पूरी तस्वीर', es: 'La imagen completa', fr: "Le tableau d'ensemble",
-    ar: 'الصورة الكاملة', bn: 'সম্পূর্ণ চিত্র', pt: 'A imagem completa', ru: 'Полная картина', ur: 'مکمل تصویر',
   },
   'reveal.title': {
     en: 'Your Reading', zh: '你的解读', hi: 'आपकी रीडिंग', es: 'Tu lectura', fr: 'Votre lecture', ar: 'قراءتك',

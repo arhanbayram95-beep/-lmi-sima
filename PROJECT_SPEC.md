@@ -47,8 +47,8 @@ aesthetic that reads instantly as "fun astrology-adjacent app" to a US or EU use
 
 ### 2.2 Character Analysis: The Three-Expression Capture (Sequential Camera UI)
 Same underlying mechanic, restyled with lighter, universally legible copy:
-1. **Calm (Neutral):** Baseline capture under a soft glowing face-guide overlay.
-2. **Bright (Smiling):** Friendly chime prompt, e.g. "Show us your glow ✨"
+1. **Rest (Neutral):** Baseline capture under a soft glowing face-guide overlay, e.g. "Let your face completely relax 😌"
+2. **Grin (Smiling):** Friendly chime prompt, e.g. "Now flash us your biggest grin 😄"
 3. **Stern (Frowning):** e.g. "Now give us your best frown 😤"
 
 *Validation:* On-device face detection rejects non-face frames before any API call
@@ -60,7 +60,7 @@ mechanics above but with different photo counts and subjects per module —
 the AI system prompt and resulting reading content differ per module (see §4
 for how this is wired):
 * **Character Analysis** (originally "3-Expression Face Reading") — 3 photos
-  of the user (Calm, Bright, Stern). The original general character/vibe
+  of the user (Rest, Grin, Stern). The original general character/vibe
   reading.
 * **Relationship Harmony Analyzer** — **2 photos, one of the user and one of
   another person** (product decision 2026-07-25 — originally spec'd as
