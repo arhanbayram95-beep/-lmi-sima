@@ -9,6 +9,40 @@ function textResponse(body: unknown) {
 const PHOTOS_3 = ['base64-calm', 'base64-bright', 'base64-deep'];
 const VALID_BODY = { photos: PHOTOS_3 };
 
+// Mirrors the character_analysis card stack the response schema forces —
+// see backend/src/services/readingSchema.ts.
+const CHARACTER_READING = {
+  module: 'character_analysis',
+  archetype_card: { title: 'Character Archetype', badge_tag: 'Analytical Visionary', summary: 'Two sentences.' },
+  temperament_score_card: {
+    title: 'Temperament Score',
+    overall_score: 88,
+    breakdown_metrics: [{ label: 'Calmness', score: 85, icon: 'eye' }],
+  },
+  traits_card: {
+    title: 'Facial Trait Analysis',
+    metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],
+    strength_pills: ['Strategic Thinking'],
+    growth_pills: ['Pacing Energy'],
+  },
+  celebrity_match_card: { title: 'Celebrity Archetype Match', match_name: 'A Public Figure', match_description: 'Same register.' },
+};
+
+const CAREER_READING = {
+  module: 'career_path',
+  work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 'Two sentences.' },
+  suitability_score_card: {
+    title: 'Career Alignment Score',
+    overall_score: 86,
+    breakdown_metrics: [{ label: 'Strategy', score: 92, icon: 'compass' }],
+  },
+  domains_card: { title: 'Recommended Industries', top_industry_pills: ['Engineering & R&D'] },
+  recommendations_card: {
+    title: 'Ideal Role Matches',
+    checklist_items: [{ headline: 'Systems Architect', description: 'Structured problem-solving.' }],
+  },
+};
+
 describe('POST /api/v1/reading/analyze', () => {
   let app: FastifyInstance;
   let generateContent: jest.Mock;
@@ -24,12 +58,12 @@ describe('POST /api/v1/reading/analyze', () => {
   });
 
   it('returns 200 with the structured reading on success', async () => {
-    generateContent.mockResolvedValue(textResponse({ headline: 'Effortlessly Magnetic', insights: [], narrative: 'n' }));
+    generateContent.mockResolvedValue(textResponse(CHARACTER_READING));
 
     const response = await app.inject({ method: 'POST', url: '/api/v1/reading/analyze', payload: VALID_BODY });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json().headline).toBe('Effortlessly Magnetic');
+    expect(response.json().archetype_card.badge_tag).toBe('Analytical Visionary');
   });
 
   it('returns 400 when photos is missing', async () => {
@@ -86,7 +120,7 @@ describe('POST /api/v1/reading/analyze', () => {
   });
 
   it('accepts a valid module and forwards it to the reading service', async () => {
-    generateContent.mockResolvedValue(textResponse({ headline: 'h', insights: [], narrative: 'n' }));
+    generateContent.mockResolvedValue(textResponse(CAREER_READING));
 
     const response = await app.inject({
       method: 'POST',
@@ -101,7 +135,7 @@ describe('POST /api/v1/reading/analyze', () => {
   });
 
   it('accepts a realistic multi-photo payload larger than the default 1 MiB body limit', async () => {
-    generateContent.mockResolvedValue(textResponse({ headline: 'h', insights: [], narrative: 'n' }));
+    generateContent.mockResolvedValue(textResponse(CHARACTER_READING));
 
     // ~3MB per photo is in the realistic range for a real, uncapped-
     // resolution phone photo at quality 0.6 (see CaptureScreen.tsx) -

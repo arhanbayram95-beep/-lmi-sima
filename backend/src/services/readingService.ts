@@ -1,5 +1,12 @@
 import { ReadingModelClient } from './geminiClient';
-import { MODULE_PHOTO_COUNTS, ReadingInsight, ReadingModuleId, ReadingResult, readingResponseSchema } from './readingSchema';
+import {
+  MODULE_PHOTO_COUNTS,
+  MODULE_RESULT_KEYS,
+  MODULE_RESULT_KIND,
+  READING_SCHEMAS,
+  ReadingModuleId,
+  ReadingResult,
+} from './readingSchema';
 import { READING_SYSTEM_PROMPTS } from './systemPrompt';
 
 export class ReadingServiceError extends Error {}
@@ -39,7 +46,7 @@ export async function generateReading(
       config: {
         systemInstruction: READING_SYSTEM_PROMPTS[moduleId],
         responseMimeType: 'application/json',
-        responseSchema: readingResponseSchema,
+        responseSchema: READING_SCHEMAS[moduleId],
       },
     });
     responseText = response.text;
@@ -58,23 +65,26 @@ export async function generateReading(
     throw new ReadingServiceError('Gemini response was not valid JSON.', { cause });
   }
 
-  return validateReadingResult(parsed);
+  return validateReadingResult(parsed, moduleId);
 }
 
-function validateReadingResult(input: unknown): ReadingResult {
+// Structural check only — that every card the module's renderer expects came
+// back as an object. The response schema already constrains the inside of
+// each card, and the frontend is the only consumer.
+function validateReadingResult(input: unknown, moduleId: ReadingModuleId): ReadingResult {
   if (typeof input !== 'object' || input === null) {
     throw new ReadingServiceError('Gemini response body was not an object.');
   }
 
-  const { headline, insights, narrative } = input as Record<string, unknown>;
+  const body = input as Record<string, unknown>;
 
-  if (typeof headline !== 'string' || typeof narrative !== 'string' || !Array.isArray(insights)) {
-    throw new ReadingServiceError('Gemini response body did not match the expected schema.');
+  for (const key of MODULE_RESULT_KEYS[moduleId]) {
+    if (typeof body[key] !== 'object' || body[key] === null) {
+      throw new ReadingServiceError(`Gemini response body was missing the ${key} card.`);
+    }
   }
 
-  return {
-    headline,
-    narrative,
-    insights: insights as ReadingInsight[],
-  };
+  // Stamped here rather than trusted from the model: the module that was
+  // asked for is the authoritative answer to which shape came back.
+  return { ...body, module: MODULE_RESULT_KIND[moduleId] } as ReadingResult;
 }

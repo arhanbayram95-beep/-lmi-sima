@@ -1,6 +1,6 @@
 import { ReadingModelClient } from '../../src/services/geminiClient';
 import { generateReading, ReadingServiceError } from '../../src/services/readingService';
-import { ReadingModuleId } from '../../src/services/readingSchema';
+import { READING_SCHEMAS, ReadingModuleId } from '../../src/services/readingSchema';
 import { READING_SYSTEM_PROMPTS } from '../../src/services/systemPrompt';
 
 const PHOTOS_3 = ['base64-calm', 'base64-bright', 'base64-deep'];
@@ -15,6 +15,53 @@ const MODULE_PHOTOS: Record<ReadingModuleId, string[]> = {
   'career-match': PHOTOS_1,
 };
 
+const scoreCard = (title: string, labels: string[]) => ({
+  title,
+  overall_score: 88,
+  breakdown_metrics: labels.map((label, i) => ({ label, score: 80 + i * 3, icon: 'eye' })),
+});
+
+// Fixtures mirror the shape each module's responseSchema forces — see
+// readingSchema.ts. Never the real API in tests, per CLAUDE.md.
+const MODULE_RESPONSES: Record<ReadingModuleId, Record<string, unknown>> = {
+  'three-expression': {
+    module: 'character_analysis',
+    archetype_card: { title: 'Character Archetype', badge_tag: 'Analytical Visionary', summary: 'Two sentences.' },
+    temperament_score_card: scoreCard('Temperament Score', ['Calmness', 'Expressiveness', 'Intensity', 'Focus']),
+    traits_card: {
+      title: 'Facial Trait Analysis',
+      metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],
+      strength_pills: ['Strategic Thinking'],
+      growth_pills: ['Pacing Energy'],
+    },
+    celebrity_match_card: { title: 'Celebrity Archetype Match', match_name: 'A Public Figure', match_description: 'Same register.' },
+  },
+  'relationship-harmony': {
+    module: 'relationship_harmony',
+    vibe_card: { title: 'Relational Archetype', badge_tag: 'Deep & Selective Harmonizer', summary: 'Two sentences.' },
+    chemistry_score_card: scoreCard('Chemistry & Synergy Score', ['Empathy', 'Communication', 'Attachment', 'Energy Match']),
+    dynamics_card: {
+      title: 'Relationship Dynamics',
+      best_chemistry_pills: ['Grounded Calmness'],
+      vibes_to_avoid_pills: ['Superficial Drama'],
+    },
+    guidance_card: {
+      title: 'Harmony Recommendations',
+      checklist_items: [{ headline: 'Direct Communication', description: 'Say it early and plainly.' }],
+    },
+  },
+  'career-match': {
+    module: 'career_path',
+    work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 'Two sentences.' },
+    suitability_score_card: scoreCard('Career Alignment Score', ['Strategy', 'Execution', 'Resilience', 'Innovation']),
+    domains_card: { title: 'Recommended Industries', top_industry_pills: ['Engineering & R&D'] },
+    recommendations_card: {
+      title: 'Ideal Role Matches',
+      checklist_items: [{ headline: 'Systems Architect', description: 'Structured problem-solving under pressure.' }],
+    },
+  },
+};
+
 function makeClient(generateContent: ReadingModelClient['models']['generateContent']): ReadingModelClient {
   return { models: { generateContent } };
 }
@@ -23,29 +70,32 @@ function textResponse(body: unknown) {
   return { text: JSON.stringify(body) };
 }
 
+function clientFor(moduleId: ReadingModuleId) {
+  return jest.fn().mockResolvedValue(textResponse(MODULE_RESPONSES[moduleId]));
+}
+
 describe('generateReading', () => {
-  it('returns the structured reading parsed from the JSON response text', async () => {
-    const generateContent = jest.fn().mockResolvedValue(
-      textResponse({
-        headline: 'Effortlessly Magnetic',
-        insights: [
-          { label: 'Calm', insight: 'Grounded and steady.' },
-          { label: 'Bright', insight: 'Genuinely warm smile.' },
-          { label: 'Deep', insight: 'A hint of quiet mystery.' },
-        ],
-        narrative: 'You read as someone people trust instantly.',
-      })
-    );
+  it('returns the structured card stack parsed from the JSON response text', async () => {
+    const generateContent = clientFor('three-expression');
 
     const result = await generateReading(makeClient(generateContent), PHOTOS_3);
 
-    expect(result.headline).toBe('Effortlessly Magnetic');
-    expect(result.insights).toHaveLength(3);
+    expect(result).toMatchObject({ archetype_card: { badge_tag: 'Analytical Visionary' } });
     expect(generateContent).toHaveBeenCalledTimes(1);
   });
 
+  it('stamps the module discriminator from the requested module, not the model output', async () => {
+    const generateContent = jest.fn().mockResolvedValue(
+      textResponse({ ...MODULE_RESPONSES['career-match'], module: 'something_else' })
+    );
+
+    const result = await generateReading(makeClient(generateContent), PHOTOS_1, 'career-match');
+
+    expect(result.module).toBe('career_path');
+  });
+
   it('sends the images before the text content, per PROJECT_SPEC.md §4', async () => {
-    const generateContent = jest.fn().mockResolvedValue(textResponse({ headline: 'h', insights: [], narrative: 'n' }));
+    const generateContent = clientFor('three-expression');
 
     await generateReading(makeClient(generateContent), PHOTOS_3);
 
@@ -56,7 +106,7 @@ describe('generateReading', () => {
   });
 
   it('forces JSON structured output via responseSchema', async () => {
-    const generateContent = jest.fn().mockResolvedValue(textResponse({ headline: 'h', insights: [], narrative: 'n' }));
+    const generateContent = clientFor('three-expression');
 
     await generateReading(makeClient(generateContent), PHOTOS_3);
 
@@ -64,6 +114,18 @@ describe('generateReading', () => {
     expect(callArgs.config.responseMimeType).toBe('application/json');
     expect(callArgs.config.responseSchema).toBeDefined();
   });
+
+  it.each(['three-expression', 'relationship-harmony', 'career-match'] as const)(
+    "sends the %s module's own response schema",
+    async (moduleId) => {
+      const generateContent = clientFor(moduleId);
+
+      await generateReading(makeClient(generateContent), MODULE_PHOTOS[moduleId], moduleId);
+
+      const [[callArgs]] = generateContent.mock.calls;
+      expect(callArgs.config.responseSchema).toBe(READING_SCHEMAS[moduleId]);
+    }
+  );
 
   it('wraps a network failure as a ReadingServiceError', async () => {
     const generateContent = jest.fn().mockRejectedValue(new Error('ECONNRESET'));
@@ -83,14 +145,15 @@ describe('generateReading', () => {
     await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
   });
 
-  it('throws when the parsed body does not match the expected schema', async () => {
-    const generateContent = jest.fn().mockResolvedValue(textResponse({ headline: 'h' }));
+  it('throws when a card the module renders is missing from the response', async () => {
+    const { celebrity_match_card, ...withoutCelebrity } = MODULE_RESPONSES['three-expression'];
+    const generateContent = jest.fn().mockResolvedValue(textResponse(withoutCelebrity));
 
     await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
   });
 
   it('defaults to the three-expression system prompt when no module is given', async () => {
-    const generateContent = jest.fn().mockResolvedValue(textResponse({ headline: 'h', insights: [], narrative: 'n' }));
+    const generateContent = clientFor('three-expression');
 
     await generateReading(makeClient(generateContent), PHOTOS_3);
 
@@ -101,7 +164,7 @@ describe('generateReading', () => {
   it.each(['three-expression', 'relationship-harmony', 'career-match'] as const)(
     "uses the %s module's own system prompt",
     async (moduleId) => {
-      const generateContent = jest.fn().mockResolvedValue(textResponse({ headline: 'h', insights: [], narrative: 'n' }));
+      const generateContent = clientFor(moduleId);
 
       await generateReading(makeClient(generateContent), MODULE_PHOTOS[moduleId], moduleId);
 
@@ -113,7 +176,7 @@ describe('generateReading', () => {
   it.each(['three-expression', 'relationship-harmony', 'career-match'] as const)(
     'accepts the correct photo count for %s',
     async (moduleId) => {
-      const generateContent = jest.fn().mockResolvedValue(textResponse({ headline: 'h', insights: [], narrative: 'n' }));
+      const generateContent = clientFor(moduleId);
 
       await expect(generateReading(makeClient(generateContent), MODULE_PHOTOS[moduleId], moduleId)).resolves.toBeDefined();
       expect(generateContent).toHaveBeenCalledTimes(1);
