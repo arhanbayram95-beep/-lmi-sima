@@ -548,26 +548,6 @@ export const translations = {
     en: 'Share Reading', zh: '分享解读', hi: 'रीडिंग शेयर करें', es: 'Compartir lectura', fr: 'Partager la lecture',
     ar: 'مشاركة القراءة', bn: 'রিডিং শেয়ার করুন', pt: 'Partilhar leitura', ru: 'Поделиться анализом', ur: 'ریڈنگ شیئر کریں',
   },
-  'reveal.shareVariantClassic': {
-    en: 'Classic', zh: '经典', hi: 'क्लासिक', es: 'Clásico', fr: 'Classique', ar: 'كلاسيكي',
-    bn: 'ক্লাসিক', pt: 'Clássico', ru: 'Классика', ur: 'کلاسک',
-  },
-  'reveal.shareVariantHighlight': {
-    en: 'Fun Fact', zh: '趣味亮点', hi: 'मज़ेदार तथ्य', es: 'Dato Curioso', fr: 'Anecdote Fun', ar: 'حقيقة ممتعة',
-    bn: 'মজার তথ্য', pt: 'Facto Divertido', ru: 'Забавный Факт', ur: 'دلچسپ حقیقت',
-  },
-  'reveal.shareTextButton': {
-    en: 'Share as Text', zh: '以文字分享', hi: 'टेक्स्ट के रूप में शेयर करें', es: 'Compartir como Texto',
-    fr: 'Partager en Texte', ar: 'مشاركة كنص', bn: 'টেক্সট হিসেবে শেয়ার করুন', pt: 'Partilhar como Texto',
-    ru: 'Поделиться Текстом', ur: 'متن کے طور پر شیئر کریں',
-  },
-  'reveal.shareTextFooter': {
-    en: 'Get your own reading with Face Reader.', zh: '用 Face Reader 获取你自己的解读。',
-    hi: 'Face Reader के साथ अपनी खुद की रीडिंग पाएं।', es: 'Obtén tu propia lectura con Face Reader.',
-    fr: 'Obtenez votre propre lecture avec Face Reader.', ar: 'احصل على قراءتك الخاصة مع Face Reader.',
-    bn: 'Face Reader দিয়ে নিজের রিডিং পান।', pt: 'Obtenha a sua própria leitura com o Face Reader.',
-    ru: 'Получите свой собственный анализ с Face Reader.', ur: 'Face Reader کے ساتھ اپنی ریڈنگ حاصل کریں۔',
-  },
   'welcome.headline': {
     en: "You're All Set", zh: '一切准备就绪', hi: 'आप तैयार हैं', es: 'Todo listo', fr: 'Vous êtes prêt',
     ar: 'أنت جاهز الآن', bn: 'আপনি প্রস্তুত', pt: 'Está tudo pronto', ru: 'Всё готово', ur: 'آپ تیار ہیں',

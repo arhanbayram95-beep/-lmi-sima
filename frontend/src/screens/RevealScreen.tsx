@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import DisclaimerFooter from '../components/common/DisclaimerFooter';
 import FadeInView from '../components/common/FadeInView';
 import PrimaryButton from '../components/common/PrimaryButton';
-import ShareCard, { ShareCardVariant } from '../components/common/ShareCard';
+import ShareCard from '../components/common/ShareCard';
 import {
   BadgeSummaryCard,
   ChecklistCard,
@@ -14,7 +14,7 @@ import {
   PillsCard,
   ReadingScoreCard,
 } from '../components/common/ReadingCards';
-import { readingBadgeCard, readingHighlight, ReadingResult } from '../api/types';
+import { ReadingResult } from '../api/types';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
@@ -131,33 +131,17 @@ export default function RevealScreen() {
   const goToScreen = useAppStore((s) => s.goToScreen);
   const t = useTranslation();
   const shareCardRef = useRef<View>(null);
-  const [shareVariant, setShareVariant] = useState<ShareCardVariant>('classic');
 
   // The captured photos are still in memory when this screen mounts (never
   // persisted, per PROJECT_SPEC.md §3) — shown at the top of the card stack
   // below, then purged the moment the user leaves, however they leave.
   useEffect(() => clearImages, [clearImages]);
 
-  const handleShareImage = async () => {
+  const handleShare = async () => {
     if (!shareCardRef.current) return;
     try {
       const uri = await captureRef(shareCardRef, { format: 'png', quality: 0.9 });
       await Share.share({ url: uri });
-    } catch {
-      // Sharing is a nice-to-have — never block the reveal flow on failure.
-    }
-  };
-
-  // A second, image-free share path — no view-shot capture involved, just
-  // the same badge tag + fun highlight as plain text, for contexts where an
-  // image attachment doesn't fit (a text message, a note, etc.).
-  const handleShareText = async () => {
-    if (!reading) return;
-    const badge = readingBadgeCard(reading);
-    const highlight = readingHighlight(reading);
-    const message = `${badge.badge_tag} — ${badge.summary}\n${highlight.label}: ${highlight.value}\n\n${t('reveal.shareTextFooter')}`;
-    try {
-      await Share.share({ message });
     } catch {
       // Sharing is a nice-to-have — never block the reveal flow on failure.
     }
@@ -186,37 +170,13 @@ export default function RevealScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <View style={styles.shareVariantRow}>
-          <Pressable
-            onPress={() => setShareVariant('classic')}
-            style={[styles.shareVariantChip, shareVariant === 'classic' && styles.shareVariantChipActive]}
-            testID="share-variant-classic"
-          >
-            <Text style={[styles.shareVariantText, shareVariant === 'classic' && styles.shareVariantTextActive]}>
-              {t('reveal.shareVariantClassic')}
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setShareVariant('highlight')}
-            style={[styles.shareVariantChip, shareVariant === 'highlight' && styles.shareVariantChipActive]}
-            testID="share-variant-highlight"
-          >
-            <Text style={[styles.shareVariantText, shareVariant === 'highlight' && styles.shareVariantTextActive]}>
-              {t('reveal.shareVariantHighlight')}
-            </Text>
-          </Pressable>
-        </View>
-
-        <PrimaryButton label={t('reveal.shareButton')} variant="secondary" onPress={handleShareImage} testID="share-reading-button" />
-        <Pressable onPress={handleShareText} testID="share-text-button">
-          <Text style={styles.shareTextLink}>{t('reveal.shareTextButton')}</Text>
-        </Pressable>
+        <PrimaryButton label={t('reveal.shareButton')} variant="secondary" onPress={handleShare} testID="share-reading-button" />
         <PrimaryButton label={t('reveal.doneButton')} onPress={() => goToScreen('review')} />
         <DisclaimerFooter />
       </View>
 
       <View style={styles.offscreen} pointerEvents="none">
-        <ShareCard ref={shareCardRef} reading={reading} variant={shareVariant} />
+        <ShareCard ref={shareCardRef} reading={reading} />
       </View>
     </View>
   );
@@ -236,8 +196,11 @@ const styles = StyleSheet.create({
     ...Theme.typography.headlineLg,
     color: Theme.colors.accent.goldSecondary,
   },
+  // Tighter than Theme.spacing.containerPadding (20) — the reveal cards
+  // read bigger and closer to the design_examples reference with less
+  // margin eating into their width.
   scrollContent: {
-    paddingHorizontal: Theme.spacing.containerPadding,
+    paddingHorizontal: 8,
     paddingBottom: Theme.spacing.md,
     gap: Theme.spacing.sm,
   },
@@ -245,40 +208,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Theme.spacing.containerPadding,
     paddingBottom: Theme.spacing.sm,
     gap: Theme.spacing.xs,
-  },
-  shareVariantRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: Theme.spacing.xs,
-    marginBottom: 4,
-  },
-  shareVariantChip: {
-    borderRadius: Theme.radius.full,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(235, 201, 131, 0.3)',
-    backgroundColor: 'transparent',
-  },
-  shareVariantChipActive: {
-    backgroundColor: Theme.colors.accent.goldSecondary,
-    borderColor: Theme.colors.accent.goldSecondary,
-  },
-  shareVariantText: {
-    ...Theme.typography.labelSm,
-    fontSize: 13,
-    color: Theme.colors.accent.goldSecondary,
-  },
-  shareVariantTextActive: {
-    color: Theme.colors.background.start,
-  },
-  shareTextLink: {
-    ...Theme.typography.labelSm,
-    fontSize: 13,
-    color: Theme.colors.text.secondary,
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-    paddingVertical: 4,
   },
   offscreen: {
     position: 'absolute',

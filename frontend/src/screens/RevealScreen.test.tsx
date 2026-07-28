@@ -147,24 +147,4 @@ describe('RevealScreen', () => {
       expect(Share.share).toHaveBeenCalledWith({ url: 'file://mock-share-card.png' })
     );
   });
-
-  it('switches the off-screen share card to the Fun Fact highlight when that chip is selected', () => {
-    render(<RevealScreen />);
-    expect(screen.queryByText('SPIRIT ANIMAL')).toBeNull();
-
-    fireEvent.press(screen.getByTestId('share-variant-highlight'));
-
-    expect(screen.getByText('SPIRIT ANIMAL')).toBeTruthy();
-  });
-
-  it('shares a text-only summary via the Share as Text action', async () => {
-    render(<RevealScreen />);
-    fireEvent.press(screen.getByTestId('share-text-button'));
-
-    await waitFor(() => expect(Share.share).toHaveBeenCalledTimes(1));
-    const [[arg]] = (Share.share as jest.Mock).mock.calls;
-    expect(arg.message).toContain('Analytical Visionary');
-    expect(arg.message).toContain('Wolf');
-    expect(arg.url).toBeUndefined();
-  });
 });

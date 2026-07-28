@@ -49,12 +49,4 @@ describe('ShareCard', () => {
     render(<ShareCard reading={RELATIONSHIP_READING} />);
     expect(screen.getByText('86')).toBeTruthy();
   });
-
-  it('leads with the module highlight instead of the badge tag in the highlight variant', () => {
-    render(<ShareCard reading={CAREER_READING} variant="highlight" />);
-    expect(screen.getByText('Engineering & R&D')).toBeTruthy();
-    expect(screen.getByText('TOP INDUSTRY')).toBeTruthy();
-    // The badge tag still appears, just as the secondary line, not the headline.
-    expect(screen.getByText('Strategic Innovator')).toBeTruthy();
-  });
 });
