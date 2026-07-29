@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Face Reader - AI Physiognomy Tool",
-    "slug": "frontend",
+    "slug": "arhan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,7 +23,11 @@
         "backgroundColor": "#1A050B"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -35,6 +39,18 @@
           "cameraPermission": "Face Reader uses your camera to capture your photos for your reading. Photos are processed in memory and never stored."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2970ea0e-9543-40f9-bdab-711f9e120980"
+      }
+    },
+    "owner": "arhanbayrams-team",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2970ea0e-9543-40f9-bdab-711f9e120980"
+    }
   }
 }
