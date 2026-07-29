@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Pressable, ScrollView, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { PurchasesPackage } from 'react-native-purchases';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
@@ -9,6 +10,15 @@ import { useTranslation } from '../i18n/useTranslation';
 import { TranslationKey } from '../i18n/translations';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
+import {
+  ensurePurchasesConfigured,
+  getSubscriptionPackages,
+  hasActiveEntitlement,
+  isPurchasesConfigured,
+  PurchaseCancelledError,
+  purchasePackage,
+  restorePurchases,
+} from '../utils/purchases';
 
 type PlanId = 'weekly' | 'annual';
 
@@ -50,23 +60,81 @@ export default function PaywallScreen() {
   const [selectedPlan, setSelectedPlan] = useState<PlanId>('weekly');
   const [privacyVisible, setPrivacyVisible] = useState(false);
   const [termsVisible, setTermsVisible] = useState(false);
+  const [weeklyPackage, setWeeklyPackage] = useState<PurchasesPackage | null>(null);
+  const [annualPackage, setAnnualPackage] = useState<PurchasesPackage | null>(null);
+  const [purchasing, setPurchasing] = useState(false);
   const goToScreen = useAppStore((s) => s.goToScreen);
   const goBack = useAppStore((s) => s.goBack);
   const isProActive = useAppStore((s) => s.isProActive);
   const setProActive = useAppStore((s) => s.setProActive);
   const t = useTranslation();
 
-  // No real billing integration yet — see PROJECT_SPEC.md Phase 5.1.
-  const enterApp = () => {
-    setProActive(true);
-    goToScreen('welcome');
+  // No RevenueCat account exists yet (see PROJECT_SPEC.md Phase 5.1) — every
+  // environment today has isPurchasesConfigured === false, so this fetch
+  // never actually runs. Once a real project/API key exists, this replaces
+  // the static $4.99/$39.99 copy below with real store pricing.
+  useEffect(() => {
+    if (!isPurchasesConfigured) return;
+    ensurePurchasesConfigured();
+    getSubscriptionPackages()
+      .then(({ weekly, annual }) => {
+        setWeeklyPackage(weekly);
+        setAnnualPackage(annual);
+      })
+      .catch(() => {
+        // Offerings fetch failed — keep the static fallback prices below
+        // rather than blocking the paywall from rendering at all.
+      });
+  }, []);
+
+  // Falls back to the pre-RevenueCat local-only stub when no RevenueCat
+  // project is configured (every environment today) — see
+  // PROJECT_SPEC.md Phase 5.1.
+  const handleSubscribe = async () => {
+    if (!isPurchasesConfigured) {
+      setProActive(true);
+      goToScreen('welcome');
+      return;
+    }
+
+    const pkg = selectedPlan === 'weekly' ? weeklyPackage : annualPackage;
+    if (!pkg || purchasing) return;
+
+    setPurchasing(true);
+    try {
+      const customerInfo = await purchasePackage(pkg);
+      if (hasActiveEntitlement(customerInfo)) {
+        setProActive(true);
+        goToScreen('welcome');
+      }
+    } catch (error) {
+      if (!(error instanceof PurchaseCancelledError)) {
+        Alert.alert(t('paywall.purchaseError.title'), t('paywall.purchaseError.body'));
+      }
+    } finally {
+      setPurchasing(false);
+    }
   };
 
-  // No RevenueCat integration yet (Phase 5.1) — this can't look up real
-  // purchase history, so it honestly reports finding nothing rather than
-  // silently doing nothing when tapped.
-  const handleRestorePurchases = () => {
-    Alert.alert(t('paywall.restorePurchases'), t('restorePurchases.alertBody'));
+  const handleRestorePurchases = async () => {
+    if (!isPurchasesConfigured) {
+      // Can't look up real purchase history without RevenueCat configured
+      // — honestly reports finding nothing rather than silently no-op'ing.
+      Alert.alert(t('paywall.restorePurchases'), t('restorePurchases.alertBody'));
+      return;
+    }
+
+    try {
+      const customerInfo = await restorePurchases();
+      if (hasActiveEntitlement(customerInfo)) {
+        setProActive(true);
+        Alert.alert(t('paywall.restorePurchases'), t('paywall.restoreSuccess.body'));
+      } else {
+        Alert.alert(t('paywall.restorePurchases'), t('restorePurchases.alertBody'));
+      }
+    } catch {
+      Alert.alert(t('paywall.purchaseError.title'), t('paywall.purchaseError.body'));
+    }
   };
 
   return (
@@ -124,7 +192,7 @@ export default function PaywallScreen() {
                 <Text style={styles.planDescription}>{t('paywall.weeklyDescription')}</Text>
               </View>
               <View style={styles.planPriceBlock}>
-                <Text style={styles.planPrice}>$4.99</Text>
+                <Text style={styles.planPrice}>{weeklyPackage?.product.priceString ?? '$4.99'}</Text>
                 <Text style={styles.planCadence}>{t('paywall.weeklyCadence')}</Text>
               </View>
             </View>
@@ -142,7 +210,7 @@ export default function PaywallScreen() {
                 <Text style={styles.planDescription}>{t('paywall.annualDescription')}</Text>
               </View>
               <View style={styles.planPriceBlock}>
-                <Text style={styles.planPrice}>$39.99</Text>
+                <Text style={styles.planPrice}>{annualPackage?.product.priceString ?? '$39.99'}</Text>
                 <Text style={styles.planCadence}>{t('paywall.annualCadence')}</Text>
               </View>
             </View>
@@ -151,7 +219,11 @@ export default function PaywallScreen() {
       </View>
 
       <View style={styles.footer}>
-        <PrimaryButton label={t('paywall.subscribeNow')} onPress={enterApp} />
+        <PrimaryButton
+          label={t('paywall.subscribeNow')}
+          onPress={handleSubscribe}
+          disabled={purchasing || (isPurchasesConfigured && !(selectedPlan === 'weekly' ? weeklyPackage : annualPackage))}
+        />
         <Text style={styles.reassurance}>{t('paywall.reassurance')}</Text>
 
         <View style={styles.footerLinks}>

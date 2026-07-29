@@ -415,6 +415,23 @@ export const translations = {
     en: 'Privacy Policy', zh: '隐私政策', hi: 'गोपनीयता नीति', es: 'Política de privacidad', fr: 'Politique de confidentialité',
     ar: 'سياسة الخصوصية', bn: 'গোপনীয়তা নীতি', pt: 'Política de privacidade', ru: 'Политика конфиденциальности', ur: 'پرائیویسی پالیسی',
   },
+  'paywall.purchaseError.title': {
+    en: 'Purchase Failed', zh: '购买失败', hi: 'खरीदारी विफल', es: 'Compra fallida', fr: "Échec de l'achat",
+    ar: 'فشل الشراء', bn: 'ক্রয় ব্যর্থ হয়েছে', pt: 'Compra falhou', ru: 'Покупка не удалась', ur: 'خریداری ناکام',
+  },
+  'paywall.purchaseError.body': {
+    en: 'Something went wrong with your purchase. Please try again.', zh: '购买时出现问题，请重试。',
+    hi: 'आपकी खरीदारी में कुछ गड़बड़ हुई। कृपया पुनः प्रयास करें।', es: 'Algo salió mal con tu compra. Inténtalo de nuevo.',
+    fr: 'Un problème est survenu avec votre achat. Veuillez réessayer.', ar: 'حدث خطأ أثناء الشراء. يرجى المحاولة مرة أخرى.',
+    bn: 'আপনার ক্রয়ে কিছু ভুল হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', pt: 'Algo correu mal com a sua compra. Por favor, tente novamente.',
+    ru: 'Что-то пошло не так с вашей покупкой. Пожалуйста, попробуйте снова.', ur: 'آپ کی خریداری میں کچھ گڑبڑ ہوئی۔ براہ کرم دوبارہ کوشش کریں۔',
+  },
+  'paywall.restoreSuccess.body': {
+    en: 'Your subscription has been restored.', zh: '您的订阅已恢复。', hi: 'आपकी सदस्यता पुनर्स्थापित कर दी गई है।',
+    es: 'Tu suscripción ha sido restaurada.', fr: 'Votre abonnement a été restauré.', ar: 'تمت استعادة اشتراكك.',
+    bn: 'আপনার সাবস্ক্রিপশন পুনরুদ্ধার করা হয়েছে।', pt: 'A sua subscrição foi restaurada.', ru: 'Ваша подписка восстановлена.',
+    ur: 'آپ کی سبسکرپشن بحال کر دی گئی ہے۔',
+  },
   'settings.title': {
     en: 'Settings', zh: '设置', hi: 'सेटिंग्स', es: 'Ajustes', fr: 'Paramètres', ar: 'الإعدادات', bn: 'সেটিংস',
     pt: 'Definições', ru: 'Настройки', ur: 'ترتیبات',
