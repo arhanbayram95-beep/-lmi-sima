@@ -1,5 +1,7 @@
 import Fastify, { FastifyError, FastifyInstance } from 'fastify';
 import { ReadingModelClient } from './services/geminiClient';
+import { registerRateLimit } from './middleware/rateLimit';
+import { registerLegalRoutes } from './routes/legal';
 import { registerReadingRoutes } from './routes/reading';
 
 // Fastify's own default bodyLimit is 1 MiB for the whole request — far
@@ -10,9 +12,13 @@ import { registerReadingRoutes } from './routes/reading';
 // plus JSON overhead, with headroom.
 const BODY_LIMIT_BYTES = 25 * 1024 * 1024;
 
-export function buildApp(readingModelClient: ReadingModelClient): FastifyInstance {
+export async function buildApp(readingModelClient: ReadingModelClient): Promise<FastifyInstance> {
   const app = Fastify({ logger: false, bodyLimit: BODY_LIMIT_BYTES });
+  // Must complete before any route is registered — see the comment on
+  // registerRateLimit for why an unawaited call silently no-ops.
+  await registerRateLimit(app);
   registerReadingRoutes(app, readingModelClient);
+  registerLegalRoutes(app);
 
   // Defense-in-depth: every expected failure path already responds with a
   // sanitized message (ReadingServiceError handling in routes/reading.ts;
@@ -24,6 +30,14 @@ export function buildApp(readingModelClient: ReadingModelClient): FastifyInstanc
   app.setErrorHandler((error: FastifyError, _request, reply) => {
     if (error.validation) {
       reply.status(error.statusCode ?? 400).send({ error: error.message });
+      return;
+    }
+    // @fastify/rate-limit throws its errorResponseBuilder's return value on
+    // exceeding the limit (see middleware/rateLimit.ts) -- an expected,
+    // already-sanitized control-flow response, not the "something broke"
+    // case the branch below is for.
+    if (error.statusCode === 429) {
+      reply.status(429).send({ error: error.message });
       return;
     }
     console.error('Unhandled error in Face Reader backend:', error);

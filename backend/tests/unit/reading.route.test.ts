@@ -39,10 +39,10 @@ describe('POST /api/v1/reading/analyze', () => {
   let app: FastifyInstance;
   let generateContent: jest.Mock;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     generateContent = jest.fn();
     const readingModelClient: ReadingModelClient = { models: { generateContent } };
-    app = buildApp(readingModelClient);
+    app = await buildApp(readingModelClient);
   });
 
   afterEach(async () => {
