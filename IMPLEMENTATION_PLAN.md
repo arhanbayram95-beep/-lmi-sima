@@ -178,6 +178,25 @@ here too (2026-07-26) — tackle both together when ready for a dev-client build
     `PROJECT_SPEC.md` §2.2 (privacy + cost control) — route straight to
     `NoFaceDetectedScreen` rather than letting a bad frame reach the backend.
   - Requires an EAS dev-client build (no longer testable in plain Expo Go).
+  - **Dependency groundwork done (2026-07-29):** `react-native-vision-camera`
+    v5 needs a worklets runtime requiring React Native 0.83–0.86, which
+    forced an Expo SDK 54→57 upgrade first (see `PROJECT_SPEC.md` §3 for the
+    full cascade — RN 0.86, `expo-av`→`expo-audio`, app.json schema fixes,
+    TS 6.0's breaking `types` default, `StyleSheet.absoluteFillObject`
+    removal). `react-native-vision-camera@5.2.0`,
+    `react-native-nitro-modules`, `react-native-nitro-image`,
+    `react-native-worklets`, `react-native-vision-camera-worklets`, and
+    `react-native-vision-camera-face-detector` (the ML Kit frame-processor
+    plugin) are all installed and verified (`tsc`/Jest/`expo-doctor`/`expo
+    export` all clean). No `app.json` plugin or `babel.config.js` needed —
+    see PROJECT_SPEC.md §3 for why. `CaptureScreen` is untouched, still on
+    `expo-camera`, zero frame-processor logic wired — this row stays
+    unchecked. What's actually left: the `CaptureScreen` rewrite itself, and
+    an EAS dev-client build to test it on a real device (user has their own
+    EAS account now, set up 2026-07-29). `react-native-nitro-image` is
+    flagged by `expo-doctor` as untested on React Native's New Architecture
+    (mandatory as of SDK 57) — worth re-checking before wiring the actual
+    detection logic, not just installing it.
 
 ---
 

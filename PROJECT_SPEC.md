@@ -128,6 +128,44 @@ both places. Exempt from rate limiting (`config: { rateLimit: false }`) since
 they're static compliance pages, not the paid AI endpoint. The frontend's
 `LEGAL_URLS` (`frontend/src/api/config.ts`) points at these routes off the
 same `API_BASE_URL` as the API itself, and each in-app legal modal now has an
+"Open in browser" (external-link icon) link to the hosted version.
+
+**Expo SDK 54 → 57 upgrade, `expo-av` → `expo-audio` (2026-07-29):** driven by
+`react-native-vision-camera` v5 (IMPLEMENTATION_PLAN.md 6.1's groundwork) —
+v5's worklets runtime (`react-native-worklets`, by Software Mansion) requires
+React Native 0.83–0.86; the project was on Expo SDK 54 / RN 0.81.5. SDK 57
+pins RN 0.86 and React 19.2.3. Cascading changes this forced, in case any of
+these surprise a future reader:
+  - `expo-av` is deprecated with no SDK-57-compatible release, so
+    `frontend/src/utils/sound.ts` (capture/prompt chimes, ambient shimmer
+    loop) moved to `expo-audio`'s imperative `createAudioPlayer` API. Public
+    function signatures unchanged (still `Promise`-returning), so no caller
+    changes needed beyond the module internals.
+  - `app.json`'s top-level `newArchEnabled`, `splash`, and
+    `android.edgeToEdgeEnabled` are no longer valid SDK 57 config fields (New
+    Architecture and edge-to-edge are now unconditional defaults; splash
+    screen config moved to the `expo-splash-screen` config plugin).
+  - TypeScript 6.0 (pulled in transitively) changed its default `types` from
+    "every `@types/*` package" to `[]` — `frontend/tsconfig.json` now sets
+    `"types": ["jest", "node"]` explicitly, or every test file loses
+    `describe`/`it`/`expect`.
+  - React Native 0.86 removed `StyleSheet.absoluteFillObject` (kept only
+    `absoluteFill`, same plain-object shape) — two spread-usages in
+    `CaptureScreen.tsx`/`SettingsScreen.tsx` updated.
+  - Vision-camera groundwork itself (added, not yet wired):
+    `react-native-vision-camera@5.2.0`, `react-native-nitro-modules`,
+    `react-native-nitro-image`, `react-native-worklets`,
+    `react-native-vision-camera-worklets`,
+    `react-native-vision-camera-face-detector` — dependencies only. None of
+    these ship an Expo config plugin (camera permission is already covered
+    by the existing `expo-camera` plugin entry's `NSCameraUsageDescription`/
+    `android.permission.CAMERA`), and no `babel.config.js` was added since
+    `babel-preset-expo` auto-detects and wires `react-native-worklets/plugin`
+    when the package is present. `CaptureScreen` is still on `expo-camera`
+    with zero frame-processor/face-detection logic — see
+    IMPLEMENTATION_PLAN.md 6.1. `react-native-nitro-image` is flagged by
+    `expo-doctor` as untested on New Architecture (mandatory in SDK 57);
+    worth re-checking before actually wiring 6.1's detection logic.
 "Open in browser ↗" link to the hosted version.
 
 ---
