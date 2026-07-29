@@ -117,6 +117,22 @@ entertainment framing.
     account, and App Store Connect / Google Play Console developer
     accounts with in-app products configured — RevenueCat sits on top of
     those, it doesn't replace them. Revisit alongside 6.1.
+  - **Dependency/integration groundwork done (2026-07-30):**
+    `react-native-purchases@10.5.0` installed and wired end to end —
+    `frontend/src/utils/purchases.ts` wraps `configure`/`getOfferings`/
+    `purchasePackage`/`restorePurchases`; `PaywallScreen.tsx` calls the real
+    SDK whenever `EXPO_PUBLIC_REVENUECAT_API_KEY` is set, falling back to
+    the original local-only stub otherwise (every environment today, since
+    no RevenueCat account exists — confirmed with the product owner before
+    building past the stub). See `PROJECT_SPEC.md` §6 for the full
+    rationale, the `aura_pro_access` entitlement identifier that must match
+    the RevenueCat dashboard once it exists, and the `REVENUECAT_API_KEY` →
+    `EXPO_PUBLIC_REVENUECAT_API_KEY` naming clarification against
+    `CLAUDE.md`'s locked env var list. `jest.config.js` extended for
+    `@revenuecat/*` sub-packages; `tsc`/full Jest suite (137 tests)/
+    `expo-doctor`/`expo export` all verified green. This row stays
+    unchecked — the account/key/dashboard-config blockers above are
+    unchanged, this is purely code that's ready for them.
 - [x] **5.2 End-to-End Testing Matrix (audited 2026-07-29)**
   - `backend/tests/unit` covers JSON payload handling thoroughly — malformed/
     missing/wrong-type fields at every schema nesting level, network failure,

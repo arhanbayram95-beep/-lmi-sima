@@ -268,3 +268,33 @@ tradeoff — noting it here for the record, not as an open question.
   translation" for a lighter tone.
 * Recommend a short legal review of paywall copy and disclaimers per target
   market before launch — this is a one-time cost worth paying early.
+
+**RevenueCat groundwork (added 2026-07-30):** no RevenueCat account exists
+yet (confirmed with the product owner), so this is dependency/integration
+code only, not a live billing path. `react-native-purchases@10.5.0` is
+installed; `frontend/src/utils/purchases.ts` wraps `configure`,
+`getOfferings`, `purchasePackage`, and `restorePurchases`, deriving
+`isProActive` from `CustomerInfo.entitlements.active['aura_pro_access']` —
+that identifier must exactly match whatever entitlement gets created in the
+RevenueCat dashboard once a real project exists; nothing on the app side
+needs to change besides the string if it's named differently there.
+`PaywallScreen.tsx` calls the real SDK only when
+`EXPO_PUBLIC_REVENUECAT_API_KEY` is set; every environment today has it
+unset, so the screen still falls back to its original local-only stub
+(`setProActive(true)` on tap, no real purchase). `jest.config.js`'s
+`transformIgnorePatterns` was extended for `@revenuecat/*` sub-packages
+that ship untranspiled syntax.
+  - **Naming clarification, not a divergence:** CLAUDE.md's locked env var
+    list names it `REVENUECAT_API_KEY`; the actual variable is
+    `EXPO_PUBLIC_REVENUECAT_API_KEY` — Expo only bundles client-side env
+    vars carrying that prefix (same pattern already used for
+    `EXPO_PUBLIC_API_BASE_URL`), so an unprefixed name would silently never
+    reach the app.
+  - **Still blocked on:** a real RevenueCat account/project (with the
+    `aura_pro_access` entitlement and weekly/annual offering packages
+    configured), and App Store Connect / Play Console developer accounts
+    with real in-app products — RevenueCat sits on top of those, it doesn't
+    replace them. The backend's `requireActiveEntitlement` stays a
+    permissive stub — server-side entitlement verification needs a
+    RevenueCat *secret* key and webhook setup, a separate, security-
+    sensitive piece of work out of scope for this groundwork pass.
