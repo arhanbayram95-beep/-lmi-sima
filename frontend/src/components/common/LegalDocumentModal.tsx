@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LegalSection } from '../../content/legalContent';
 import { useTranslation } from '../../i18n/useTranslation';
 import { Theme } from '../../ui/theme';
@@ -11,6 +11,7 @@ interface LegalDocumentModalProps {
   title: string;
   lastUpdated: string;
   sections: LegalSection[];
+  url: string;
   testID: string;
 }
 
@@ -20,6 +21,7 @@ export default function LegalDocumentModal({
   title,
   lastUpdated,
   sections,
+  url,
   testID,
 }: LegalDocumentModalProps) {
   const t = useTranslation();
@@ -29,6 +31,9 @@ export default function LegalDocumentModal({
         <View style={styles.sheet} testID={testID}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.lastUpdated}>Last updated: {lastUpdated}</Text>
+          <Pressable onPress={() => Linking.openURL(url)} testID={`${testID}-open-external`}>
+            <Text style={styles.externalLink}>Open in browser ↗</Text>
+          </Pressable>
           <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
             {sections.map((section) => (
               <View key={section.heading} style={styles.section}>
@@ -76,6 +81,12 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.muted,
     textAlign: 'center',
     marginBottom: Theme.spacing.xs,
+  },
+  externalLink: {
+    ...Theme.typography.labelSm,
+    color: Theme.colors.accent.goldSecondary,
+    textAlign: 'center',
+    marginBottom: Theme.spacing.sm,
   },
   body: {
     marginBottom: Theme.spacing.xs,

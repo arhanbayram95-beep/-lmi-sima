@@ -1,4 +1,5 @@
 import React from 'react';
+import { LEGAL_URLS } from '../../api/config';
 import { LEGAL_LAST_UPDATED, TERMS_SECTIONS } from '../../content/legalContent';
 import LegalDocumentModal from './LegalDocumentModal';
 
@@ -15,6 +16,7 @@ export default function TermsModal({ visible, onClose }: TermsModalProps) {
       title="Terms & Conditions"
       lastUpdated={LEGAL_LAST_UPDATED}
       sections={TERMS_SECTIONS}
+      url={LEGAL_URLS.terms}
       testID="terms-modal"
     />
   );

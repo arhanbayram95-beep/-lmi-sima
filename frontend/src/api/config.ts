@@ -3,6 +3,16 @@
 // machine's LAN IP — set EXPO_PUBLIC_API_BASE_URL in that case.
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
+// Real, publicly-reachable pages (backend/src/routes/legal.ts) — App Store
+// Connect and Play Console both require a URL for the privacy policy in
+// store listing metadata, not just in-app modal text. Same host as the API
+// itself, so this resolves correctly in dev and once actually deployed
+// without a second env var to keep in sync.
+export const LEGAL_URLS = {
+  privacy: `${API_BASE_URL}/legal/privacy`,
+  terms: `${API_BASE_URL}/legal/terms`,
+} as const;
+
 // Pseudo-API mode for testing the full capture -> analyzing -> reveal flow
 // without a running backend or AI provider key configured — set
 // EXPO_PUBLIC_USE_MOCK_API=true in the environment (e.g. `eas build` env,

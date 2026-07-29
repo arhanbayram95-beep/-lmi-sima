@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { Linking } from 'react-native';
 import React from 'react';
+import { LEGAL_URLS } from '../../api/config';
 import PrivacyPolicyModal from './PrivacyPolicyModal';
 
 describe('PrivacyPolicyModal', () => {
@@ -13,5 +15,13 @@ describe('PrivacyPolicyModal', () => {
     render(<PrivacyPolicyModal visible onClose={onClose} />);
     fireEvent.press(screen.getByText('Close'));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the hosted policy externally, for the App Store/Play Console URL requirement', () => {
+    const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+    render(<PrivacyPolicyModal visible onClose={jest.fn()} />);
+
+    fireEvent.press(screen.getByTestId('privacy-policy-modal-open-external'));
+    expect(openURL).toHaveBeenCalledWith(LEGAL_URLS.privacy);
   });
 });
