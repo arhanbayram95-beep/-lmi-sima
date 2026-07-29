@@ -1,5 +1,6 @@
 import Fastify, { FastifyError, FastifyInstance } from 'fastify';
 import { ReadingModelClient } from './services/geminiClient';
+import { registerCors } from './middleware/cors';
 import { registerRateLimit } from './middleware/rateLimit';
 import { registerLegalRoutes } from './routes/legal';
 import { registerReadingRoutes } from './routes/reading';
@@ -16,6 +17,7 @@ export async function buildApp(readingModelClient: ReadingModelClient): Promise<
   const app = Fastify({ logger: false, bodyLimit: BODY_LIMIT_BYTES });
   // Must complete before any route is registered — see the comment on
   // registerRateLimit for why an unawaited call silently no-ops.
+  await registerCors(app);
   await registerRateLimit(app);
   registerReadingRoutes(app, readingModelClient);
   registerLegalRoutes(app);

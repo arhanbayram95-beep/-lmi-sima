@@ -116,6 +116,15 @@ New dependency: `@fastify/rate-limit` (`^11.1.0`), registered globally in
 per 10 minutes, keyed by IP (the only signal available pre-RevenueCat).
 Revisit the key/limit once real accounts or device IDs exist.
 
+**CORS (added 2026-07-30):** discovered live while sharing a dev build over
+an ngrok tunnel — the backend had no CORS handling at all, so a cross-origin
+preflight `OPTIONS /api/v1/reading/analyze` 404'd (Fastify's default for an
+unregistered route/method), which surfaced in the app as "Could not reach
+the Face Reader server." New dependency: `@fastify/cors`, registered in
+`backend/src/app.ts` via `backend/src/middleware/cors.ts`, reflecting any
+origin (`origin: true`) — safe here since nothing in this API is
+cookie/session-authenticated, there's no cross-site credential to leak.
+
 **Hosted legal pages (added 2026-07-29):** `GET /legal/privacy` and
 `GET /legal/terms` (`backend/src/routes/legal.ts`) serve the same Privacy
 Policy / Terms & Conditions content as the in-app modals, as real public HTML
