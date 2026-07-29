@@ -13,9 +13,11 @@
       "backgroundColor": "#1A050B"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "app.faceai.facereader"
     },
     "android": {
+      "package": "app.faceai.facereader",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1A050B"
