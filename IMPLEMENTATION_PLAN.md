@@ -8,9 +8,16 @@ entertainment framing.
 ---
 
 ## Phase 1: Local Environment & Audio-Visual Asset Prep
-- [ ] **1.1 Expo Initialization Verification**
+- [x] **1.1 Expo Initialization Verification (audited 2026-07-29)**
   - Ensure the `/frontend` directory contains a compile-ready TypeScript blank template.
   - Test run via `npm run android` or `npm run ios`.
+  - No Android/iOS device or emulator is available in this environment, so
+    `npm run android`/`ios` can't launch interactively here — verified the
+    same underlying guarantee (the template actually compiles and bundles)
+    via `npx expo export --platform android` and `--platform ios`: both
+    produced a clean Metro bundle (665/667 modules, zero errors). Also ran
+    `npx expo-doctor`: 18/18 checks passed. `tsc --noEmit` and the full Jest
+    suite (29 suites, 125 tests) are already green as of the same pass.
 - [x] **1.2 Asset Gathering (Cosmic Mystic)**
   - Source or generate 3 audio effect files (`.mp3`/`.wav`, `expo-av` compatible):
     - `capture_chime.mp3` (light camera-shutter click layered with a soft cosmic twinkle).
