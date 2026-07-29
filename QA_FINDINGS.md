@@ -262,6 +262,50 @@ the close handler is wired correctly.
 
 ---
 
+## Rate Limiting — 2026-07-29
+
+Scope: closing out the Security Review's "No rate limiting on
+`/api/v1/reading/analyze`" flag (above) ahead of a public launch with no
+RevenueCat gate to slow abuse down.
+
+- [x] **RATE-1: `@fastify/rate-limit` added, 20 req/10min per IP** — see
+  `backend/src/middleware/rateLimit.ts`, registered in `app.ts`, documented
+  in `PROJECT_SPEC.md` §3.
+
+- [x] **RATE-2 (found while building RATE-1): unawaited plugin registration
+  silently never rate-limited anything.** `@fastify/rate-limit` attaches
+  itself to routes via an `onRoute` hook set up inside its own async plugin
+  body. Calling `app.register(rateLimit, opts)` without awaiting it, then
+  immediately calling `registerReadingRoutes(app, ...)` (which synchronously
+  adds the route), ran the route registration before the plugin's `onRoute`
+  hook existed to see it — the route was added to the router with zero
+  rate-limit hook attached, no error, no warning, `x-ratelimit-*` headers
+  simply never appeared and no request was ever blocked, at any volume.
+  Caught by writing a real test that fired 21 requests and asserting a 429
+  (RATE-1's test would have shipped a no-op rate limiter silently if that
+  test had used a mock instead of `buildApp` + real `.inject()` calls).
+  Reproduced in isolation with a minimal Fastify app to confirm the
+  mechanism, not just patched and hoped: awaiting `app.register(...)` before
+  registering routes fixed it in isolation, then in the real app. Fix:
+  `buildApp` is now `async` and awaits `registerRateLimit(app)` before
+  `registerReadingRoutes` — `server.ts` and both test files updated to
+  `await buildApp(...)` accordingly.
+
+- [x] **RATE-3 (found in the same pass): a custom `errorResponseBuilder`
+  returning a plain object instead of a real `Error` fell through
+  `setErrorHandler`'s generic branch.** The plugin `throw`s whatever
+  `errorResponseBuilder` returns on exceeding the limit; a plain
+  `{ error: string }` object has no `.validation` or recognizable
+  `.statusCode`, so it landed in the backend's catch-all "unexpected error"
+  branch (SEC-4) and came back as a sanitized-but-wrong 500 instead of a
+  429. Fixed by having `errorResponseBuilder` return a real `Error` with
+  `.statusCode = 429` set, and adding an explicit `error.statusCode === 429`
+  branch in `app.ts`'s `setErrorHandler` alongside the existing
+  `error.validation` one — SEC-4's defensive catch-all still only fires for
+  genuinely unexpected errors, not this now-expected control-flow path.
+
+---
+
 ## Per-Module Photo Counts — 2026-07-25
 
 Scope: product decision to give each reading module its own photo count

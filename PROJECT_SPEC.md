@@ -107,6 +107,29 @@ for how this is wired):
    │  (7) Renders the Reading Screen + shareable story-format card
 ```
 
+**Rate limiting (added 2026-07-29):** `requireActiveEntitlement` is still a
+permissive stub pending RevenueCat (see IMPLEMENTATION_PLAN.md 5.1) — with no
+paywall gate and no per-device identifier sent by the client, an unthrottled
+`/api/v1/reading/analyze` is an open door to unlimited paid Gemini calls.
+New dependency: `@fastify/rate-limit` (`^11.1.0`), registered globally in
+`backend/src/app.ts` via `backend/src/middleware/rateLimit.ts` — 20 requests
+per 10 minutes, keyed by IP (the only signal available pre-RevenueCat).
+Revisit the key/limit once real accounts or device IDs exist.
+
+**Hosted legal pages (added 2026-07-29):** `GET /legal/privacy` and
+`GET /legal/terms` (`backend/src/routes/legal.ts`) serve the same Privacy
+Policy / Terms & Conditions content as the in-app modals, as real public HTML
+— App Store Connect and Play Console both require a public URL for the
+privacy policy in store listing metadata, not just in-app text. No shared
+package between frontend/backend, so this is a deliberate second copy of
+`frontend/src/content/legalContent.ts`'s section data (same tradeoff already
+made for `readingSchema.ts`/`api/types.ts`) — a copy change has to land in
+both places. Exempt from rate limiting (`config: { rateLimit: false }`) since
+they're static compliance pages, not the paid AI endpoint. The frontend's
+`LEGAL_URLS` (`frontend/src/api/config.ts`) points at these routes off the
+same `API_BASE_URL` as the API itself, and each in-app legal modal now has an
+"Open in browser ↗" link to the hosted version.
+
 ---
 
 ## 4. AI Integration Notes (current: Google Gemini)

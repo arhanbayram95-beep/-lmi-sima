@@ -110,15 +110,45 @@ entertainment framing.
     account, and App Store Connect / Google Play Console developer
     accounts with in-app products configured — RevenueCat sits on top of
     those, it doesn't replace them. Revisit alongside 6.1.
-- [ ] **5.2 End-to-End Testing Matrix**
-  - Run `backend/tests/unit` to verify JSON payload handling.
-  - Run edge-case checks: non-face photo, apparent-minor photo (graceful,
-    non-clinical fallback message without crashing), poor lighting/no-face-detected.
-- [ ] **5.3 Deployment Preparation**
-  - Finalize the `Dockerfile` for backend server compilation.
-  - Package frontend configuration for Apple TestFlight and Google Play internal testing.
-  - Legal review pass on paywall copy + disclaimers per target market (US, key EU
-    markets) before public launch.
+- [x] **5.2 End-to-End Testing Matrix (audited 2026-07-29)**
+  - `backend/tests/unit` covers JSON payload handling thoroughly — malformed/
+    missing/wrong-type fields at every schema nesting level, network failure,
+    non-JSON response.
+  - Edge-case audit against CLAUDE.md's required list: non-face-detected
+    photo (`AnalyzingScreen.test.tsx`), network failure mid-analysis (3
+    layers: `api/reading.test.ts`, `AnalyzingScreen.test.tsx`, backend
+    `reading.route.test.ts`), age-gate rejection (`OnboardingScreen.test.tsx`)
+    — all already covered, nothing to add. Expired/missing entitlement has
+    nothing to test yet — `requireActiveEntitlement` is still a permissive
+    stub pending 5.1, no real logic branch exists. Apparent-minor/poor-lighting
+    fallbacks are AI-content behavior, not code branches — manually verified
+    live against the real API in `QA_FINDINGS.md`'s MOD-2 pass; the
+    schema-conformance tests above are what's actually automatable for this.
+- [x] **5.3 Deployment Preparation (partial, 2026-07-29)**
+  - `Dockerfile` was already complete (multi-stage, non-root user, prod-only
+    deps) — verified `npm run build` produces exactly what it expects.
+  - `frontend/eas.json` added (development/preview/production build
+    profiles) and `app.json` gained `ios.bundleIdentifier` /
+    `android.package` (`app.faceai.facereader` — a **placeholder** derived
+    from the `faceai.app` domain already referenced in `ShareCard.tsx`'s
+    footer; confirm/replace with the real reverse-DNS identifier before an
+    actual store submission, it's effectively permanent once published).
+  - Still blocked on the user: an EAS/Expo account (`eas login` +
+    `eas build:configure` to generate a real `extra.eas.projectId`), Apple
+    Developer Program + App Store Connect membership, Google Play Console
+    developer account. None of these can be created by an agent.
+  - Legal review pass: see new root-level `LEGAL_REVIEW_PACKET.md` — compiles
+    all three system prompts, the full Privacy Policy/Terms text, and every
+    in-app consent/disclaimer string in one place for actual review, with
+    known open items (placeholder Governing Law, paid-tier AI key
+    requirement) called out. The review itself still needs a human (ideally
+    counsel), not something this pass could complete.
+  - Also done in this pass, not originally scoped here: Privacy
+    Policy/Terms are now hosted as real public pages
+    (`backend/src/routes/legal.ts`, `/legal/privacy` + `/legal/terms`) —
+    required for the App Store Connect / Play Console privacy policy URL
+    field, which plain in-app modal text can't satisfy. See `PROJECT_SPEC.md`
+    §3.
 
 ---
 
