@@ -1,77 +1,79 @@
-const mockCreateAsync = jest.fn();
+const mockCreateAudioPlayer = jest.fn();
 
-jest.mock('expo-av', () => ({
-  Audio: {
-    Sound: { createAsync: (...args: unknown[]) => mockCreateAsync(...args) },
-  },
+jest.mock('expo-audio', () => ({
+  createAudioPlayer: (...args: unknown[]) => mockCreateAudioPlayer(...args),
 }));
 
 import { playCaptureChime, playPromptChime, startAmbientShimmerLoop } from './sound';
 
+function fakePlayer() {
+  return {
+    play: jest.fn(),
+    pause: jest.fn(),
+    remove: jest.fn(),
+    addListener: jest.fn(),
+    loop: false,
+    volume: 1,
+  };
+}
+
 describe('sound utilities', () => {
   beforeEach(() => {
-    mockCreateAsync.mockReset();
+    mockCreateAudioPlayer.mockReset();
   });
 
   it('plays and auto-unloads a one-shot capture chime', async () => {
-    const setOnPlaybackStatusUpdate = jest.fn();
-    const playAsync = jest.fn().mockResolvedValue(undefined);
-    const unloadAsync = jest.fn().mockResolvedValue(undefined);
-    mockCreateAsync.mockResolvedValue({ sound: { setOnPlaybackStatusUpdate, playAsync, unloadAsync } });
+    const player = fakePlayer();
+    mockCreateAudioPlayer.mockReturnValue(player);
 
     await playCaptureChime();
 
-    expect(playAsync).toHaveBeenCalledTimes(1);
-    const [onStatus] = setOnPlaybackStatusUpdate.mock.calls[0];
+    expect(player.play).toHaveBeenCalledTimes(1);
+    const [event, onStatus] = player.addListener.mock.calls[0];
+    expect(event).toBe('playbackStatusUpdate');
     onStatus({ isLoaded: true, didJustFinish: true });
-    expect(unloadAsync).toHaveBeenCalledTimes(1);
+    expect(player.remove).toHaveBeenCalledTimes(1);
   });
 
   it('stops the previous one-shot chime before starting the next, to avoid overlap', async () => {
-    const first = {
-      setOnPlaybackStatusUpdate: jest.fn(),
-      playAsync: jest.fn().mockResolvedValue(undefined),
-      stopAsync: jest.fn().mockResolvedValue(undefined),
-      unloadAsync: jest.fn().mockResolvedValue(undefined),
-    };
-    const second = {
-      setOnPlaybackStatusUpdate: jest.fn(),
-      playAsync: jest.fn().mockResolvedValue(undefined),
-      stopAsync: jest.fn().mockResolvedValue(undefined),
-      unloadAsync: jest.fn().mockResolvedValue(undefined),
-    };
-    mockCreateAsync.mockResolvedValueOnce({ sound: first }).mockResolvedValueOnce({ sound: second });
+    const first = fakePlayer();
+    const second = fakePlayer();
+    mockCreateAudioPlayer.mockReturnValueOnce(first).mockReturnValueOnce(second);
 
     await playCaptureChime();
     await playPromptChime();
 
-    expect(first.stopAsync).toHaveBeenCalledTimes(1);
-    expect(first.unloadAsync).toHaveBeenCalledTimes(1);
-    expect(second.playAsync).toHaveBeenCalledTimes(1);
+    expect(first.pause).toHaveBeenCalledTimes(1);
+    expect(first.remove).toHaveBeenCalledTimes(1);
+    expect(second.play).toHaveBeenCalledTimes(1);
   });
 
   it('does not throw when playback fails to load', async () => {
-    mockCreateAsync.mockRejectedValue(new Error('no audio device'));
+    mockCreateAudioPlayer.mockImplementation(() => {
+      throw new Error('no audio device');
+    });
     await expect(playPromptChime()).resolves.toBeUndefined();
   });
 
   it('starts a looping ambient shimmer and stops it on request', async () => {
-    const playAsync = jest.fn().mockResolvedValue(undefined);
-    const stopAsync = jest.fn().mockResolvedValue(undefined);
-    const unloadAsync = jest.fn().mockResolvedValue(undefined);
-    mockCreateAsync.mockResolvedValue({ sound: { playAsync, stopAsync, unloadAsync } });
+    const player = fakePlayer();
+    mockCreateAudioPlayer.mockReturnValue(player);
 
     const handle = await startAmbientShimmerLoop();
-    expect(mockCreateAsync).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ isLooping: true }));
-    expect(playAsync).toHaveBeenCalledTimes(1);
+    expect(mockCreateAudioPlayer).toHaveBeenCalledWith(expect.anything());
+    expect(player.loop).toBe(true);
+    expect(player.volume).toBe(0.5);
+    expect(player.play).toHaveBeenCalledTimes(1);
 
     await handle.stop();
-    expect(stopAsync).toHaveBeenCalledTimes(1);
-    expect(unloadAsync).toHaveBeenCalledTimes(1);
+    expect(player.pause).toHaveBeenCalledTimes(1);
+    expect(player.remove).toHaveBeenCalledTimes(1);
   });
 
   it('returns a no-op handle when the ambient loop fails to start', async () => {
-    mockCreateAsync.mockRejectedValue(new Error('no audio device'));
+    mockCreateAudioPlayer.mockImplementation(() => {
+      throw new Error('no audio device');
+    });
     const handle = await startAmbientShimmerLoop();
     await expect(handle.stop()).resolves.toBeUndefined();
   });

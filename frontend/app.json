@@ -6,12 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#1A050B"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.faceai.facereader"
@@ -22,7 +16,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1A050B"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.CAMERA",
@@ -38,7 +31,17 @@
         {
           "cameraPermission": "Face Reader uses your camera to capture your photos for your reading. Photos are processed in memory and never stored."
         }
-      ]
+      ],
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#1A050B"
+        }
+      ],
+      "expo-asset"
     ],
     "extra": {
       "eas": {

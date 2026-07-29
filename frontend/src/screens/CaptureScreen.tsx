@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   flashOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: '#FFFFFF',
   },
   overlay: {

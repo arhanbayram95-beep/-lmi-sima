@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+import { AudioPlayer, createAudioPlayer } from 'expo-audio';
 
 // Synthesized placeholder chimes (see frontend/assets/audio) — generated
 // procedurally, not professionally produced. Swap the files for real sound
@@ -11,28 +11,28 @@ const AMBIENT_SHIMMER = require('../../assets/audio/ambient_shimmer.wav');
 // followed by the next step's prompt) — without this, the previous chime is
 // still ringing out when the next one starts, and the two overlap into a
 // mesh of sound. Only one one-shot chime plays at a time.
-let activeOneShot: Audio.Sound | null = null;
+let activeOneShot: AudioPlayer | null = null;
 
 async function playOneShot(source: number): Promise<void> {
   try {
     if (activeOneShot) {
       const previous = activeOneShot;
       activeOneShot = null;
-      await previous.stopAsync().catch(() => {});
-      await previous.unloadAsync().catch(() => {});
+      previous.pause();
+      previous.remove();
     }
 
-    const { sound } = await Audio.Sound.createAsync(source);
-    activeOneShot = sound;
-    sound.setOnPlaybackStatusUpdate((status) => {
+    const player = createAudioPlayer(source);
+    activeOneShot = player;
+    player.addListener('playbackStatusUpdate', (status) => {
       if (status.isLoaded && status.didJustFinish) {
-        sound.unloadAsync();
-        if (activeOneShot === sound) {
+        player.remove();
+        if (activeOneShot === player) {
           activeOneShot = null;
         }
       }
     });
-    await sound.playAsync();
+    player.play();
   } catch {
     // Audio is a nice-to-have — never block the capture/prompt flow on
     // playback failure (e.g. silent mode, missing asset in a bare test env).
@@ -53,15 +53,17 @@ export interface AmbientLoopHandle {
 
 export async function startAmbientShimmerLoop(): Promise<AmbientLoopHandle> {
   try {
-    const { sound } = await Audio.Sound.createAsync(AMBIENT_SHIMMER, { isLooping: true, volume: 0.5 });
-    await sound.playAsync();
+    const player = createAudioPlayer(AMBIENT_SHIMMER);
+    player.loop = true;
+    player.volume = 0.5;
+    player.play();
     return {
       stop: async () => {
         try {
-          await sound.stopAsync();
-          await sound.unloadAsync();
+          player.pause();
+          player.remove();
         } catch {
-          // already unloaded/stopped — fine.
+          // already released — fine.
         }
       },
     };
