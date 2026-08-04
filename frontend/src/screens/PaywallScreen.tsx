@@ -1,15 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Pressable, ScrollView, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { Alert, Animated, Linking, Pressable, ScrollView, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { PurchasesPackage } from 'react-native-purchases';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
-import PrivacyPolicyModal from '../components/common/PrivacyPolicyModal';
-import TermsModal from '../components/common/TermsModal';
 import { useTranslation } from '../i18n/useTranslation';
 import { TranslationKey } from '../i18n/translations';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '../utils/legalLinks';
 import {
   ensurePurchasesConfigured,
   getSubscriptionPackages,
@@ -20,7 +19,7 @@ import {
   restorePurchases,
 } from '../utils/purchases';
 
-type PlanId = 'weekly' | 'annual';
+type PlanId = 'weekly' | 'monthly';
 
 const FEATURE_KEYS: TranslationKey[] = ['paywall.feature1', 'paywall.feature2', 'paywall.feature3'];
 
@@ -58,10 +57,12 @@ function PlanCard({
 
 export default function PaywallScreen() {
   const [selectedPlan, setSelectedPlan] = useState<PlanId>('weekly');
-  const [privacyVisible, setPrivacyVisible] = useState(false);
-  const [termsVisible, setTermsVisible] = useState(false);
   const [weeklyPackage, setWeeklyPackage] = useState<PurchasesPackage | null>(null);
-  const [annualPackage, setAnnualPackage] = useState<PurchasesPackage | null>(null);
+  const [monthlyPackage, setMonthlyPackage] = useState<PurchasesPackage | null>(null);
+  // True only while we're actively waiting on real store prices — avoids
+  // rendering the static $4.99/$9.99 guess and then visibly flipping it to
+  // the real price a moment later once the fetch resolves.
+  const [pricesLoading, setPricesLoading] = useState(isPurchasesConfigured);
   const [purchasing, setPurchasing] = useState(false);
   const goToScreen = useAppStore((s) => s.goToScreen);
   const goBack = useAppStore((s) => s.goBack);
@@ -69,22 +70,23 @@ export default function PaywallScreen() {
   const setProActive = useAppStore((s) => s.setProActive);
   const t = useTranslation();
 
-  // No RevenueCat account exists yet (see PROJECT_SPEC.md Phase 5.1) — every
-  // environment today has isPurchasesConfigured === false, so this fetch
-  // never actually runs. Once a real project/API key exists, this replaces
-  // the static $4.99/$39.99 copy below with real store pricing.
+  // isPurchasesConfigured is true wherever EXPO_PUBLIC_REVENUECAT_API_KEY is
+  // set (see PROJECT_SPEC.md Phase 5.1) — real store products aren't
+  // configured yet, so getSubscriptionPackages() may still resolve nulls
+  // and fall back to the static $4.99/$9.99 copy below.
   useEffect(() => {
     if (!isPurchasesConfigured) return;
     ensurePurchasesConfigured();
     getSubscriptionPackages()
-      .then(({ weekly, annual }) => {
+      .then(({ weekly, monthly }) => {
         setWeeklyPackage(weekly);
-        setAnnualPackage(annual);
+        setMonthlyPackage(monthly);
       })
       .catch(() => {
         // Offerings fetch failed — keep the static fallback prices below
         // rather than blocking the paywall from rendering at all.
-      });
+      })
+      .finally(() => setPricesLoading(false));
   }, []);
 
   // Falls back to the pre-RevenueCat local-only stub when no RevenueCat
@@ -97,7 +99,7 @@ export default function PaywallScreen() {
       return;
     }
 
-    const pkg = selectedPlan === 'weekly' ? weeklyPackage : annualPackage;
+    const pkg = selectedPlan === 'weekly' ? weeklyPackage : monthlyPackage;
     if (!pkg || purchasing) return;
 
     setPurchasing(true);
@@ -106,6 +108,12 @@ export default function PaywallScreen() {
       if (hasActiveEntitlement(customerInfo)) {
         setProActive(true);
         goToScreen('welcome');
+      } else {
+        // Purchase completed but the entitlement isn't active — e.g. the
+        // store product isn't attached to aura_pro_access in the RevenueCat
+        // dashboard yet. Surface it rather than leaving the screen stuck
+        // with no feedback.
+        Alert.alert(t('paywall.purchaseError.title'), t('paywall.purchaseError.body'));
       }
     } catch (error) {
       if (!(error instanceof PurchaseCancelledError)) {
@@ -192,26 +200,30 @@ export default function PaywallScreen() {
                 <Text style={styles.planDescription}>{t('paywall.weeklyDescription')}</Text>
               </View>
               <View style={styles.planPriceBlock}>
-                <Text style={styles.planPrice}>{weeklyPackage?.product.priceString ?? '$4.99'}</Text>
+                <Text style={styles.planPrice}>
+                  {pricesLoading ? '···' : (weeklyPackage?.product.priceString ?? '$4.99')}
+                </Text>
                 <Text style={styles.planCadence}>{t('paywall.weeklyCadence')}</Text>
               </View>
             </View>
           </PlanCard>
 
-          <PlanCard selected={selectedPlan === 'annual'} onPress={() => setSelectedPlan('annual')} testID="plan-annual">
+          <PlanCard selected={selectedPlan === 'monthly'} onPress={() => setSelectedPlan('monthly')} testID="plan-monthly">
             <View style={styles.planRow}>
               <View>
                 <View style={styles.planNameRow}>
-                  <Text style={styles.planName}>{t('paywall.annualName')}</Text>
+                  <Text style={styles.planName}>{t('paywall.monthlyName')}</Text>
                   <View style={styles.saveBadge}>
                     <Text style={styles.saveBadgeText}>{t('paywall.saveBadge')}</Text>
                   </View>
                 </View>
-                <Text style={styles.planDescription}>{t('paywall.annualDescription')}</Text>
+                <Text style={styles.planDescription}>{t('paywall.monthlyDescription')}</Text>
               </View>
               <View style={styles.planPriceBlock}>
-                <Text style={styles.planPrice}>{annualPackage?.product.priceString ?? '$39.99'}</Text>
-                <Text style={styles.planCadence}>{t('paywall.annualCadence')}</Text>
+                <Text style={styles.planPrice}>
+                  {pricesLoading ? '···' : (monthlyPackage?.product.priceString ?? '$9.99')}
+                </Text>
+                <Text style={styles.planCadence}>{t('paywall.monthlyCadence')}</Text>
               </View>
             </View>
           </PlanCard>
@@ -222,7 +234,7 @@ export default function PaywallScreen() {
         <PrimaryButton
           label={t('paywall.subscribeNow')}
           onPress={handleSubscribe}
-          disabled={purchasing || (isPurchasesConfigured && !(selectedPlan === 'weekly' ? weeklyPackage : annualPackage))}
+          disabled={purchasing || (isPurchasesConfigured && !(selectedPlan === 'weekly' ? weeklyPackage : monthlyPackage))}
         />
         <Text style={styles.reassurance}>{t('paywall.reassurance')}</Text>
 
@@ -231,19 +243,16 @@ export default function PaywallScreen() {
             <Text style={styles.footerLink}>{t('paywall.restorePurchases')}</Text>
           </Pressable>
           <Text style={styles.footerLinkDivider}>•</Text>
-          <Pressable onPress={() => setTermsVisible(true)} accessibilityRole="link" testID="paywall-terms-of-service">
+          <Pressable onPress={() => Linking.openURL(TERMS_URL)} accessibilityRole="link" testID="paywall-terms-of-service">
             <Text style={styles.footerLink}>{t('paywall.termsOfService')}</Text>
           </Pressable>
           <Text style={styles.footerLinkDivider}>•</Text>
-          <Pressable onPress={() => setPrivacyVisible(true)} accessibilityRole="link">
+          <Pressable onPress={() => Linking.openURL(PRIVACY_POLICY_URL)} accessibilityRole="link">
             <Text style={styles.footerLink}>{t('paywall.privacyPolicy')}</Text>
           </Pressable>
         </View>
       </View>
       </ScrollView>
-
-      <PrivacyPolicyModal visible={privacyVisible} onClose={() => setPrivacyVisible(false)} />
-      <TermsModal visible={termsVisible} onClose={() => setTermsVisible(false)} />
     </View>
   );
 }
@@ -338,7 +347,7 @@ const styles = StyleSheet.create({
   },
   // In normal flow the badge pushed the plan row below the card's vertical
   // centre, so the weekly card's name and price sat visibly lower than the
-  // annual card's. It now floats in reserved top padding of matching height,
+  // monthly card's. It now floats in reserved top padding of matching height,
   // leaving the row centred in both cards.
   planWithBadge: {
     paddingVertical: Theme.spacing.lg,

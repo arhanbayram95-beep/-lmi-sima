@@ -161,20 +161,48 @@ these surprise a future reader:
   - React Native 0.86 removed `StyleSheet.absoluteFillObject` (kept only
     `absoluteFill`, same plain-object shape) — two spread-usages in
     `CaptureScreen.tsx`/`SettingsScreen.tsx` updated.
-  - Vision-camera groundwork itself (added, not yet wired):
+  - Vision-camera groundwork itself (added 2026-07-29, wired 2026-07-30):
     `react-native-vision-camera@5.2.0`, `react-native-nitro-modules`,
     `react-native-nitro-image`, `react-native-worklets`,
     `react-native-vision-camera-worklets`,
-    `react-native-vision-camera-face-detector` — dependencies only. None of
-    these ship an Expo config plugin (camera permission is already covered
-    by the existing `expo-camera` plugin entry's `NSCameraUsageDescription`/
-    `android.permission.CAMERA`), and no `babel.config.js` was added since
-    `babel-preset-expo` auto-detects and wires `react-native-worklets/plugin`
-    when the package is present. `CaptureScreen` is still on `expo-camera`
-    with zero frame-processor/face-detection logic — see
-    IMPLEMENTATION_PLAN.md 6.1. `react-native-nitro-image` is flagged by
-    `expo-doctor` as untested on New Architecture (mandatory in SDK 57);
-    worth re-checking before actually wiring 6.1's detection logic.
+    `react-native-vision-camera-face-detector` — no `babel.config.js` needed
+    since `babel-preset-expo` auto-detects and wires
+    `react-native-worklets/plugin` when the package is present.
+    `react-native-nitro-image` is flagged by `expo-doctor` as untested on New
+    Architecture (mandatory in SDK 57); nothing surfaced in testing so far,
+    but worth watching on a real device.
+  - **CaptureScreen rewrite (2026-07-30, IMPLEMENTATION_PLAN.md 6.1):**
+    `expo-camera` removed entirely (its Expo config plugin entry in
+    `app.json` too — replaced with a manual `ios.infoPlist.NSCameraUsageDescription`,
+    since none of the vision-camera packages ship a config plugin;
+    `android.permission.CAMERA` was already a static `app.json` entry, not
+    plugin-generated, so it needed no change). `CaptureScreen` now renders
+    `react-native-vision-camera-face-detector`'s `<Camera>` (front/back via
+    its `device`/`cameraFacing` props, same as the old `facing` prop) with a
+    `usePhotoOutput({ containerFormat: 'jpeg', quality: 0.6 })` merged into
+    `outputs`. `onFacesDetected` tracks whether a face is currently in frame;
+    the shutter button checks that flag *before* calling
+    `photoOutput.capturePhoto()` — no face means an immediate
+    `goToScreen('noFaceDetected')` (clearing any already-captured photos in
+    the sequence, same discard treatment as cancelling), never reaching
+    `capturePhoto` or the backend, per §2.2. Capture goes through
+    `photo.getFileDataAsync()` (in-memory `ArrayBuffer`) → `base64-js`'
+    `fromByteArray()`, deliberately avoiding `capturePhotoToFile`/
+    `saveToTemporaryFileAsync` — those write to disk, which the Privacy
+    Architecture (process-and-discard, images in memory only) rules out.
+    `photo.dispose()` runs immediately after encoding. Added `base64-js` as
+    an explicit dependency (was only ever transitive via `react-native`
+    itself) since application code now imports it directly.
+  - **Pre-existing lockfile drift fixed in passing (2026-07-30):** the SDK
+    57 upgrade had left `package.json` pinning `react-native@0.86.2` exactly
+    while `package-lock.json`/`node_modules` were still on `0.86.0` — any
+    fresh `npm install` failed with an ERESOLVE peer conflict regardless of
+    this task. Separately, `devDependencies.react-test-renderer` floated on
+    `^19.1.0`, which resolves to `19.2.8` and demands `react@^19.2.8` —
+    conflicting with the exact `react@19.2.3` pin (`react-test-renderer` must
+    always match `react`'s exact version). Pinned `react-test-renderer` to
+    `19.2.3` and did a full clean reinstall; both `tsc --noEmit` and the Jest
+    suite are green against the reconciled tree.
 "Open in browser ↗" link to the hosted version.
 
 ---
@@ -291,7 +319,7 @@ that ship untranspiled syntax.
     `EXPO_PUBLIC_API_BASE_URL`), so an unprefixed name would silently never
     reach the app.
   - **Still blocked on:** a real RevenueCat account/project (with the
-    `aura_pro_access` entitlement and weekly/annual offering packages
+    `aura_pro_access` entitlement and weekly/monthly offering packages
     configured), and App Store Connect / Play Console developer accounts
     with real in-app products — RevenueCat sits on top of those, it doesn't
     replace them. The backend's `requireActiveEntitlement` stays a

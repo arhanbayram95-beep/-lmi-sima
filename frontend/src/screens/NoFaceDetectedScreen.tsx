@@ -15,7 +15,6 @@ export default function NoFaceDetectedScreen() {
 
   return (
     <View style={styles.container} testID="no-face-detected-screen">
-      <Text style={styles.glyph}>🙈</Text>
       <Text style={styles.headline}>{t('noFaceDetected.headline')}</Text>
       <Text style={styles.body}>{t('noFaceDetected.body')}</Text>
 
@@ -43,10 +42,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Theme.spacing.containerPadding,
     gap: Theme.spacing.sm,
-  },
-  glyph: {
-    fontSize: 56,
-    marginBottom: Theme.spacing.sm,
   },
   headline: {
     ...Theme.typography.headlineLg,

@@ -1,8 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import PaywallScreen from './PaywallScreen';
 import { useAppStore } from '../state/useAppStore';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '../utils/legalLinks';
 
 describe('PaywallScreen', () => {
   beforeEach(() => {
@@ -32,10 +33,12 @@ describe('PaywallScreen', () => {
     (Alert.alert as jest.Mock).mockRestore();
   });
 
-  it('opens the terms modal from the footer link', () => {
+  it('opens the terms URL from the footer link', () => {
+    jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined as never);
     render(<PaywallScreen />);
     fireEvent.press(screen.getByTestId('paywall-terms-of-service'));
-    expect(screen.getByTestId('terms-modal')).toBeTruthy();
+    expect(Linking.openURL).toHaveBeenCalledWith(TERMS_URL);
+    (Linking.openURL as jest.Mock).mockRestore();
   });
 
   it('is not skippable on first launch — no close button until entitlement is active', () => {
@@ -62,10 +65,12 @@ describe('PaywallScreen', () => {
     expect(screen.queryByTestId('paywall-trial-link')).toBeNull();
   });
 
-  it('opens the privacy policy modal from the footer link', () => {
+  it('opens the privacy policy URL from the footer link', () => {
+    jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined as never);
     render(<PaywallScreen />);
     fireEvent.press(screen.getByText('Privacy Policy'));
-    expect(screen.getByTestId('privacy-policy-modal')).toBeTruthy();
+    expect(Linking.openURL).toHaveBeenCalledWith(PRIVACY_POLICY_URL);
+    (Linking.openURL as jest.Mock).mockRestore();
   });
 
   it('closes back to Settings, not Main Menu, when reopened from Settings with an active entitlement', () => {

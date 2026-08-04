@@ -133,6 +133,15 @@ entertainment framing.
     `expo-doctor`/`expo export` all verified green. This row stays
     unchecked — the account/key/dashboard-config blockers above are
     unchanged, this is purely code that's ready for them.
+  - **Live-tested end to end against a real RevenueCat project (2026-08-04):**
+    a real RevenueCat account/project now exists (Test Store, not yet a real
+    App Store Connect / Play Console product) — packages switched from
+    weekly/annual to weekly/monthly per product decision (`purchases.ts`,
+    `PaywallScreen.tsx`, translations, both copies of the Terms text).
+    Verified on-device via the RevenueCat Test Store purchase dialog: a real
+    `purchasePackage()` call, entitlement check, and paywall dismissal all
+    worked. Row stays unchecked — still blocked on real store products, per
+    the blockers above.
 - [x] **5.2 End-to-End Testing Matrix (audited 2026-07-29)**
   - `backend/tests/unit` covers JSON payload handling thoroughly — malformed/
     missing/wrong-type fields at every schema nesting level, network failure,
@@ -187,7 +196,7 @@ here too (2026-07-26) — tackle both together when ready for a dev-client build
   `ReadingApiError` thrown with `code: 'NO_FACE_DETECTED'` (frontend or
   backend, once real detection exists) routes `AnalyzingScreen` straight to
   it instead of the generic error state. Nothing throws that code yet.
-- [ ] **6.1 On-device face bounding verification**
+- [x] **6.1 On-device face bounding verification**
   - Add `react-native-vision-camera` + a face-detector frame-processor
     plugin; switch `CaptureScreen` off `expo-camera`.
   - Reject non-face frames locally before `capture_chime` fires, per
@@ -199,20 +208,65 @@ here too (2026-07-26) — tackle both together when ready for a dev-client build
     forced an Expo SDK 54→57 upgrade first (see `PROJECT_SPEC.md` §3 for the
     full cascade — RN 0.86, `expo-av`→`expo-audio`, app.json schema fixes,
     TS 6.0's breaking `types` default, `StyleSheet.absoluteFillObject`
-    removal). `react-native-vision-camera@5.2.0`,
-    `react-native-nitro-modules`, `react-native-nitro-image`,
-    `react-native-worklets`, `react-native-vision-camera-worklets`, and
-    `react-native-vision-camera-face-detector` (the ML Kit frame-processor
-    plugin) are all installed and verified (`tsc`/Jest/`expo-doctor`/`expo
-    export` all clean). No `app.json` plugin or `babel.config.js` needed —
-    see PROJECT_SPEC.md §3 for why. `CaptureScreen` is untouched, still on
-    `expo-camera`, zero frame-processor logic wired — this row stays
-    unchecked. What's actually left: the `CaptureScreen` rewrite itself, and
-    an EAS dev-client build to test it on a real device (user has their own
-    EAS account now, set up 2026-07-29). `react-native-nitro-image` is
-    flagged by `expo-doctor` as untested on React Native's New Architecture
-    (mandatory as of SDK 57) — worth re-checking before wiring the actual
-    detection logic, not just installing it.
+    removal).
+  - **`CaptureScreen` rewrite done (2026-07-30):** off `expo-camera` entirely
+    (package removed, its `app.json` plugin entry replaced with a manual
+    `ios.infoPlist.NSCameraUsageDescription` — see `PROJECT_SPEC.md` §3),
+    onto `react-native-vision-camera-face-detector`'s `<Camera>` +
+    `usePhotoOutput`. Shutter press checks live `onFacesDetected` state
+    first — no face routes straight to `NoFaceDetectedScreen` (discarding
+    any already-captured photos in the sequence) without ever calling
+    `capturePhoto` or reaching the backend, per §2.2. Capture stays fully
+    in-memory (`getFileDataAsync()` → `base64-js`, never
+    `capturePhotoToFile`/a temp file) per the Privacy Architecture.
+    `tsc --noEmit` and the full Jest suite (139 tests) are green.
+    In fixing this, also found and fixed pre-existing lockfile drift from
+    the SDK 57 upgrade blocking any `npm install` (`react-native`/
+    `react-test-renderer` version mismatch — see `PROJECT_SPEC.md` §3) and a
+    missing `expo-dev-client` dependency (required by `eas.json`'s
+    `development` build profile).
+  - **On-device verification done (2026-08-04):** built and installed a real
+    EAS development client on a physical Android device (Galaxy A06,
+    Android 14) and drove the full flow end to end via `adb` (screenshots +
+    logcat at every step, including live-typed shutter taps) — onboarding,
+    paywall test purchase, all 3 Character Analysis captures, and a real
+    backend-generated reading all completed successfully. `NoFaceDetectedScreen`
+    routing confirmed working (an empty/faceless frame routes there without
+    ever calling `capturePhoto` or reaching the backend, per §2.2).
+    - Found and fixed a real bug surfaced only by physical hardware, not
+      Jest mocks: `CaptureScreen`'s `handleCapture` used a catch-less
+      `try/finally`, so a failed `capturePhoto()` still silently advanced
+      the step (or navigated to Analyzing) as if it had succeeded —
+      producing a misleadingly-worded "check your connection" failure
+      several steps later with images silently missing. Fixed to only
+      advance on genuine success.
+    - Found (via on-device logcat) that `react-native-vision-camera-face-detector`
+      reconfigures its native camera session — an unbind/rebind cycle —
+      automatically the instant `capturePhoto()` is called, and that
+      reconfigure's own teardown step aborts the very request that
+      triggered it (`ImageCaptureException: Camera is closed`, ~100ms,
+      independent of `performanceMode`) on this device. The reconfigure
+      finishes shortly after the failure, so `handleCapture` now retries
+      once after a 400ms wait (an immediate retry was confirmed on-device
+      to hit an even earlier failure, "Not bound to a valid Camera",
+      because the rebind hadn't finished) — verified on-device this
+      resolves cleanly. A capture that still fails after the retry now
+      shows a real `Alert` (`capture.error.title`/`.body`) instead of
+      silently resetting with no feedback.
+    - Also suppressed (`LogBox.ignoreLogs` in `App.tsx`) the same
+      "Camera is closed" exception when it's thrown from the library's own
+      internal reconfigure coroutine rather than from the awaited
+      `capturePhoto()` call — that promise isn't one this app ever holds a
+      reference to, so it can't be caught locally, and it fires after the
+      photo is already safely retrieved. Confirmed benign, just noisy.
+    - Found and fixed a real, unrelated networking bug this pass also
+      exposed: Android blocks an app's own cleartext (plain HTTP) traffic
+      by default on modern `targetSdkVersion`, even though tools like `adb`/
+      `nc` bypass that per-app policy entirely and falsely suggested the
+      network path was fine. Added `android.usesCleartextTraffic: true` to
+      `app.json` — **must come back out (or be scoped to dev builds only)
+      before a real production submission**, once the backend has a real
+      HTTPS domain.
 
 ---
 

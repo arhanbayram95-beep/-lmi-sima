@@ -1,7 +1,9 @@
-import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
+import { fromByteArray } from 'base64-js';
 import * as Haptics from 'expo-haptics';
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCameraPermission, usePhotoOutput, type CameraPosition } from 'react-native-vision-camera';
+import { Camera, type Face } from 'react-native-vision-camera-face-detector';
 import PrimaryButton from '../components/common/PrimaryButton';
 import { useTranslation } from '../i18n/useTranslation';
 import { TranslationKey } from '../i18n/translations';
@@ -10,13 +12,39 @@ import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 import { playCaptureChime, playPromptChime } from '../utils/sound';
 
+const CAPTURE_TIMEOUT_MS = 6000;
+
+// capturePhoto()/getFileDataAsync() can hang indefinitely — neither
+// resolving nor rejecting — when the native camera session's internal
+// reconfigure races the request (the same instability behind the
+// "ImageCaptureException: Camera is closed" teardown noise, just
+// manifesting as a stall instead of a throw). Without this, a hang leaves
+// isCapturing stuck true forever, silently soft-locking the shutter with no
+// error and nothing to catch — confirmed on-device via adb: three
+// consecutive shutter taps produced zero logcat activity after a stall.
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`Capture timed out after ${ms}ms`)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
+
 interface CaptureStep {
   key: string;
   titleKey: TranslationKey;
   promptKey: TranslationKey;
   // Front camera for the user's own photo, back camera for photographing
   // someone else — only Relationship Harmony's second photo uses 'back'.
-  facing: CameraType;
+  facing: CameraPosition;
 }
 
 // One sequence per module, length matching MODULE_PHOTO_COUNTS
@@ -38,10 +66,20 @@ const MODULE_STEPS: Record<ReadingModuleId, CaptureStep[]> = {
 };
 
 export default function CaptureScreen() {
-  const [permission, requestPermission] = useCameraPermissions();
+  const { hasPermission, requestPermission } = useCameraPermission();
   const [stepIndex, setStepIndex] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
-  const cameraRef = useRef<CameraView>(null);
+  const [hasFace, setHasFace] = useState(false);
+  // usePhotoOutput/outputs must stay reference-stable across renders — a
+  // fresh options object or array literal here reconfigures (unbinds and
+  // rebinds) the native camera session on every re-render, including the
+  // one right after a capture. That races with the native pipeline still
+  // tearing down the just-completed capture and throws
+  // "ImageCaptureException: Camera is closed" as an unhandled rejection.
+  const photoOutput = usePhotoOutput(
+    useMemo(() => ({ containerFormat: 'jpeg' as const, quality: 0.6 }), [])
+  );
+  const cameraOutputs = useMemo(() => [photoOutput], [photoOutput]);
   const flash = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;
 
@@ -80,8 +118,24 @@ export default function CaptureScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepIndex]);
 
+  // On-device face detection rejects non-face frames before any API call
+  // (PROJECT_SPEC.md §2.2, privacy + cost control) — a missing face routes
+  // straight to NoFaceDetectedScreen instead of capturing, same
+  // process-and-discard treatment as an abandoned capture (handleCancel
+  // above), rather than letting a bad frame reach the backend.
+  const handleFacesDetected = useCallback((faces: Face[]) => {
+    setHasFace(faces.length > 0);
+  }, []);
+
   const handleCapture = async () => {
-    if (isCapturing || !cameraRef.current) return;
+    if (isCapturing) return;
+
+    if (!hasFace) {
+      clearImages();
+      goToScreen('noFaceDetected');
+      return;
+    }
+
     setIsCapturing(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     playCaptureChime();
@@ -91,26 +145,67 @@ export default function CaptureScreen() {
       Animated.timing(flash, { toValue: 0, duration: 200, useNativeDriver: true }),
     ]).start();
 
-    try {
-      const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.6 });
-      if (photo?.base64) {
-        addImage(photo.base64);
+    // No catch-less finally here on purpose: a failed capturePhoto()/
+    // getFileDataAsync() (the same underlying native camera instability as
+    // the "Camera is closed" teardown race) must NOT advance the step or
+    // navigate to analyzing — a try/finally alone would do that regardless
+    // of success, silently under-counting images and only surfacing as a
+    // confusing "check your connection" failure once analyzing sees fewer
+    // photos than the module needs. On failure, stay on the current step so
+    // the shutter can just be pressed again.
+    //
+    // The very first capturePhoto() per screen mount reliably races a
+    // one-time native session reconfigure (confirmed via on-device logcat:
+    // the library rebinds use-cases the instant a real capture is
+    // requested, and that reconfigure's own unbind step aborts the request
+    // that triggered it — "ImageCaptureException: Camera is closed",
+    // ~100ms, independent of performanceMode). By the time it fails, that
+    // reconfigure has already completed, so an immediate retry hits an
+    // already-stabilized session — confirmed on-device this succeeds where
+    // a single attempt doesn't. Retrying automatically here, rather than
+    // making the user tap the shutter again, since the first failure is a
+    // known one-time cost, not a signal anything is actually wrong.
+    const MAX_CAPTURE_ATTEMPTS = 2;
+    let succeeded = false;
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= MAX_CAPTURE_ATTEMPTS && !succeeded; attempt++) {
+      try {
+        const photo = await withTimeout(photoOutput.capturePhoto({}, {}), CAPTURE_TIMEOUT_MS);
+        const data = await withTimeout(photo.getFileDataAsync(), CAPTURE_TIMEOUT_MS);
+        addImage(fromByteArray(new Uint8Array(data)));
+        photo.dispose();
+        succeeded = true;
+      } catch (error) {
+        lastError = error;
+        console.error(`Photo capture failed (attempt ${attempt}/${MAX_CAPTURE_ATTEMPTS}):`, error);
+        if (attempt < MAX_CAPTURE_ATTEMPTS) {
+          // The reconfigure the failed attempt triggered is still rebinding
+          // at this point (confirmed on-device: retrying immediately hits a
+          // *different*, earlier-stage error — "Not bound to a valid
+          // Camera" — because the use case isn't reattached yet). The full
+          // unbind-to-onCameraControlReady cycle measured ~100-150ms on
+          // this device; wait past that before retrying.
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        }
       }
-    } finally {
+    }
+
+    if (!succeeded) {
+      console.error('Photo capture failed after retry:', lastError);
       setIsCapturing(false);
-      if (stepIndex < steps.length - 1) {
-        setStepIndex(stepIndex + 1);
-      } else {
-        goToScreen('analyzing');
-      }
+      Alert.alert(t('capture.error.title'), t('capture.error.body'));
+      return;
+    }
+
+    setIsCapturing(false);
+    if (stepIndex < steps.length - 1) {
+      setStepIndex(stepIndex + 1);
+    } else {
+      goToScreen('analyzing');
     }
   };
 
-  if (!permission) {
-    return <View style={styles.container} testID="capture-screen" />;
-  }
-
-  if (!permission.granted) {
+  if (!hasPermission) {
     return (
       <View style={[styles.container, styles.permissionContainer]} testID="capture-screen">
         <Pressable
@@ -134,7 +229,15 @@ export default function CaptureScreen() {
 
   return (
     <View style={styles.container} testID="capture-screen">
-      <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing={currentStep.facing} />
+      <Camera
+        style={StyleSheet.absoluteFill}
+        isActive
+        device={currentStep.facing}
+        cameraFacing={currentStep.facing}
+        outputs={cameraOutputs}
+        onFacesDetected={handleFacesDetected}
+        onError={(error) => console.error('Camera error:', error)}
+      />
 
       <Animated.View pointerEvents="none" style={[styles.flashOverlay, { opacity: flash }]} />
 

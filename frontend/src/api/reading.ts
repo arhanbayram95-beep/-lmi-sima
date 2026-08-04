@@ -43,7 +43,10 @@ export async function analyzeReading(payload: AnalyzeReadingPayload): Promise<Re
       body: JSON.stringify(payload),
     });
   } catch (cause) {
-    throw new ReadingApiError('Could not reach the Face Reader server. Check your connection and try again.');
+    const detail = cause instanceof Error ? cause.message : String(cause);
+    throw new ReadingApiError(
+      `Could not reach the Face Reader server. Check your connection and try again. (${detail})`
+    );
   }
 
   if (!response.ok) {

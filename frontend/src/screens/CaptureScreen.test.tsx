@@ -1,21 +1,38 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import { useAppStore } from '../state/useAppStore';
 import CaptureScreen from './CaptureScreen';
 
-const mockTakePictureAsync = jest.fn().mockResolvedValue({ base64: 'mock-base64', uri: 'file://mock.jpg' });
+// Bytes chosen arbitrarily; base64-js encodes them deterministically to 'AQID'.
+const mockFileData = new Uint8Array([1, 2, 3]).buffer;
+const mockDispose = jest.fn();
+const mockCapturePhoto = jest.fn().mockResolvedValue({
+  getFileDataAsync: jest.fn().mockResolvedValue(mockFileData),
+  dispose: mockDispose,
+});
 const mockRequestPermission = jest.fn();
-let mockPermissionState: { granted: boolean } | null = { granted: true };
+let mockHasPermission = true;
 
-jest.mock('expo-camera', () => {
-  const { forwardRef, useImperativeHandle } = require('react');
+jest.mock('react-native-vision-camera', () => ({
+  useCameraPermission: () => ({
+    hasPermission: mockHasPermission,
+    requestPermission: mockRequestPermission,
+  }),
+  usePhotoOutput: () => ({ capturePhoto: mockCapturePhoto }),
+}));
+
+// Captures the live `onFacesDetected` callback so tests can simulate the
+// on-device detector firing, deterministically, right before a shutter
+// press — rather than relying on render/effect timing.
+let latestOnFacesDetected: ((faces: unknown[]) => void) | undefined;
+
+jest.mock('react-native-vision-camera-face-detector', () => {
   const { View } = require('react-native');
   return {
-    CameraView: forwardRef((props: any, ref: any) => {
-      useImperativeHandle(ref, () => ({ takePictureAsync: mockTakePictureAsync }));
+    Camera: (props: any) => {
+      latestOnFacesDetected = props.onFacesDetected;
       return <View testID="camera-preview" {...props} />;
-    }),
-    useCameraPermissions: () => [mockPermissionState, mockRequestPermission],
+    },
   };
 });
 
@@ -32,25 +49,39 @@ jest.mock('../utils/sound', () => ({
   playPromptChime: () => mockPlayPromptChime(),
 }));
 
+function detectFace() {
+  act(() => {
+    latestOnFacesDetected?.([{}]);
+  });
+}
+
+function detectNoFace() {
+  act(() => {
+    latestOnFacesDetected?.([]);
+  });
+}
+
 describe('CaptureScreen', () => {
   beforeEach(() => {
-    mockTakePictureAsync.mockClear();
+    mockCapturePhoto.mockClear();
+    mockDispose.mockClear();
     mockRequestPermission.mockClear();
     mockPlayCaptureChime.mockClear();
     mockPlayPromptChime.mockClear();
-    mockPermissionState = { granted: true };
+    mockHasPermission = true;
+    latestOnFacesDetected = undefined;
     useAppStore.setState({ screen: 'capture', images: [], selectedModule: 'three-expression' });
   });
 
   it('prompts for camera access when permission is not granted', () => {
-    mockPermissionState = { granted: false };
+    mockHasPermission = false;
     render(<CaptureScreen />);
     fireEvent.press(screen.getByText('Allow Camera Access'));
     expect(mockRequestPermission).toHaveBeenCalledTimes(1);
   });
 
   it('offers a way out when camera permission is denied, instead of a dead end', () => {
-    mockPermissionState = { granted: false };
+    mockHasPermission = false;
     useAppStore.getState().goToScreen('analyze');
     useAppStore.getState().goToScreen('capture');
 
@@ -65,8 +96,9 @@ describe('CaptureScreen', () => {
     useAppStore.getState().goToScreen('capture');
 
     render(<CaptureScreen />);
+    detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images).toEqual(['mock-base64']));
+    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
 
     fireEvent.press(screen.getByTestId('capture-cancel-button'));
 
@@ -78,19 +110,23 @@ describe('CaptureScreen', () => {
     render(<CaptureScreen />);
 
     expect(screen.getByText('Rest')).toBeTruthy();
+    detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images).toEqual(['mock-base64']));
+    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
 
     expect(screen.getByText('Grin')).toBeTruthy();
+    detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images).toEqual(['mock-base64', 'mock-base64']));
+    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID', 'AQID']));
 
     expect(screen.getByText('Stern')).toBeTruthy();
+    detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images).toHaveLength(3));
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
-    expect(mockTakePictureAsync).toHaveBeenCalledTimes(3);
+    expect(mockCapturePhoto).toHaveBeenCalledTimes(3);
+    expect(mockDispose).toHaveBeenCalledTimes(3);
     expect(mockPlayCaptureChime).toHaveBeenCalledTimes(3);
     // Prompt chime greets Grin and Stern, not the opening Rest step.
     expect(mockPlayPromptChime).toHaveBeenCalledTimes(2);
@@ -101,28 +137,57 @@ describe('CaptureScreen', () => {
     render(<CaptureScreen />);
 
     expect(screen.getByText('Person One')).toBeTruthy();
-    expect(screen.getByTestId('camera-preview').props.facing).toBe('front');
+    expect(screen.getByTestId('camera-preview').props.device).toBe('front');
+    detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images).toEqual(['mock-base64']));
+    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
 
     expect(screen.getByText('Person Two')).toBeTruthy();
-    expect(screen.getByTestId('camera-preview').props.facing).toBe('back');
+    expect(screen.getByTestId('camera-preview').props.device).toBe('back');
+    detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
     expect(useAppStore.getState().images).toHaveLength(2);
-    expect(mockTakePictureAsync).toHaveBeenCalledTimes(2);
+    expect(mockCapturePhoto).toHaveBeenCalledTimes(2);
   });
 
   it('captures a single photo for Career Match', async () => {
     useAppStore.setState({ selectedModule: 'career-match' });
     render(<CaptureScreen />);
 
+    detectFace();
     expect(screen.getByText('Your Photo')).toBeTruthy();
     fireEvent.press(screen.getByTestId('shutter-button'));
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
-    expect(useAppStore.getState().images).toEqual(['mock-base64']);
-    expect(mockTakePictureAsync).toHaveBeenCalledTimes(1);
+    expect(useAppStore.getState().images).toEqual(['AQID']);
+    expect(mockCapturePhoto).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes to the no-face-detected screen instead of capturing when no face is in frame', async () => {
+    render(<CaptureScreen />);
+
+    detectNoFace();
+    fireEvent.press(screen.getByTestId('shutter-button'));
+
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('noFaceDetected'));
+    expect(mockCapturePhoto).not.toHaveBeenCalled();
+    expect(mockPlayCaptureChime).not.toHaveBeenCalled();
+    expect(useAppStore.getState().images).toEqual([]);
+  });
+
+  it('discards already-captured photos in the sequence if a later step has no face', async () => {
+    render(<CaptureScreen />);
+
+    detectFace();
+    fireEvent.press(screen.getByTestId('shutter-button'));
+    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
+
+    detectNoFace();
+    fireEvent.press(screen.getByTestId('shutter-button'));
+
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('noFaceDetected'));
+    expect(useAppStore.getState().images).toEqual([]);
   });
 });

@@ -71,15 +71,15 @@ describe('purchases utility', () => {
     });
   });
 
-  it('reads weekly and annual packages off the current offering', async () => {
+  it('reads weekly and monthly packages off the current offering', async () => {
     const weekly = { identifier: 'weekly-pkg' };
-    const annual = { identifier: 'annual-pkg' };
-    mockGetOfferings.mockResolvedValue({ current: { weekly, annual } });
+    const monthly = { identifier: 'monthly-pkg' };
+    mockGetOfferings.mockResolvedValue({ current: { weekly, monthly } });
 
     const { getSubscriptionPackages } = require('./purchases');
     const result = await getSubscriptionPackages();
 
-    expect(result).toEqual({ weekly, annual });
+    expect(result).toEqual({ weekly, monthly });
   });
 
   it('returns null packages when there is no current offering', async () => {
@@ -88,7 +88,7 @@ describe('purchases utility', () => {
     const { getSubscriptionPackages } = require('./purchases');
     const result = await getSubscriptionPackages();
 
-    expect(result).toEqual({ weekly: null, annual: null });
+    expect(result).toEqual({ weekly: null, monthly: null });
   });
 
   it('hasActiveEntitlement is true when the aura_pro_access entitlement is active', () => {

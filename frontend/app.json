@@ -8,7 +8,10 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.faceai.facereader"
+      "bundleIdentifier": "app.faceai.facereader",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Face Reader uses your camera to capture your photos for your reading. Photos are processed in memory and never stored."
+      }
     },
     "android": {
       "package": "app.faceai.facereader",
@@ -17,6 +20,7 @@
         "backgroundColor": "#1A050B"
       },
       "predictiveBackGestureEnabled": false,
+      "usesCleartextTraffic": true,
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
@@ -26,12 +30,6 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Face Reader uses your camera to capture your photos for your reading. Photos are processed in memory and never stored."
-        }
-      ],
       "expo-status-bar",
       [
         "expo-splash-screen",

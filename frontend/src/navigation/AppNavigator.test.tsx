@@ -9,6 +9,20 @@ jest.mock('../utils/sound', () => ({
   startAmbientShimmerLoop: jest.fn().mockResolvedValue({ stop: jest.fn().mockResolvedValue(undefined) }),
 }));
 
+// AppNavigator statically imports every screen including CaptureScreen, which
+// pulls in react-native-vision-camera's native turbo module at import time —
+// this file never actually renders the capture screen, so a minimal mock is
+// enough to stop that native init from crashing Jest.
+jest.mock('react-native-vision-camera', () => ({
+  useCameraPermission: () => ({ hasPermission: true, requestPermission: jest.fn() }),
+  usePhotoOutput: () => ({ capturePhoto: jest.fn() }),
+}));
+
+jest.mock('react-native-vision-camera-face-detector', () => {
+  const { View } = require('react-native');
+  return { Camera: (props: any) => <View testID="camera-preview" {...props} /> };
+});
+
 describe('AppNavigator', () => {
   it('renders the settings screen when routed there', () => {
     useAppStore.setState({ screen: 'settings' });

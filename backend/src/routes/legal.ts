@@ -100,7 +100,7 @@ const TERMS_SECTIONS: LegalSection[] = [
   {
     heading: 'Subscriptions & Free Trial',
     body:
-      'Full access to Face Reader is offered through auto-renewing weekly or annual subscriptions, managed through your App Store or Google Play account via RevenueCat. Where offered, a free trial converts automatically into a paid subscription at the end of the trial period unless cancelled beforehand. You can view, manage, or cancel your subscription at any time from your device\'s account settings — cancellation is designed to be as simple as signing up.',
+      'Full access to Face Reader is offered through auto-renewing weekly or monthly subscriptions, managed through your App Store or Google Play account via RevenueCat. Where offered, a free trial converts automatically into a paid subscription at the end of the trial period unless cancelled beforehand. You can view, manage, or cancel your subscription at any time from your device\'s account settings — cancellation is designed to be as simple as signing up.',
   },
   {
     heading: 'Acceptable Use',

@@ -11,19 +11,28 @@ interface AppLogoProps {
   // Analyze hub, onboarding, every single analysis run) showing the full
   // wordmark every time read as repetitive.
   showWordmark?: boolean;
+  // 'row' (default) sits the wordmark beside the icon, matching the
+  // share-card lockup. 'stacked' sits it below the icon on two lines, for
+  // the loading screen's centered splash moment.
+  layout?: 'row' | 'stacked';
 }
 
-export default function AppLogo({ size = 'sm', showWordmark = false }: AppLogoProps) {
+export default function AppLogo({ size = 'sm', showWordmark = false, layout = 'row' }: AppLogoProps) {
   const isLarge = size === 'lg';
+  const isStacked = layout === 'stacked';
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isStacked && styles.containerStacked]}>
       <View style={[styles.glow, isLarge && styles.glowLg]}>
         <Image
           source={require('../../../assets/logo-badge.png')}
           style={[styles.badge, isLarge && styles.badgeLg]}
         />
       </View>
-      {showWordmark && <Text style={[styles.wordmark, isLarge && styles.wordmarkLg]}>Face Reader</Text>}
+      {showWordmark && (
+        <Text style={[styles.wordmark, isLarge && styles.wordmarkLg, isStacked && styles.wordmarkStacked]}>
+          {isStacked ? 'Face\nReader' : 'Face Reader'}
+        </Text>
+      )}
     </View>
   );
 }
@@ -33,6 +42,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  containerStacked: {
+    flexDirection: 'column',
+    gap: 12,
   },
   glow: {
     shadowColor: Theme.colors.accent.goldSecondary,
@@ -64,5 +77,9 @@ const styles = StyleSheet.create({
     ...Theme.typography.headlineLg,
     fontSize: 26,
     letterSpacing: 4,
+  },
+  wordmarkStacked: {
+    textAlign: 'center',
+    lineHeight: 30,
   },
 });

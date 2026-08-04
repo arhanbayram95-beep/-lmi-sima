@@ -1,11 +1,12 @@
 import Purchases, { CustomerInfo, PurchasesPackage, PURCHASES_ERROR_CODE } from 'react-native-purchases';
 
-// No RevenueCat account/project exists yet (see PROJECT_SPEC.md Phase 5.1) —
-// EXPO_PUBLIC_REVENUECAT_API_KEY is unset in every environment today. Every
-// export below assumes Purchases.configure() has already run; callers MUST
-// check isPurchasesConfigured first and fall back to the existing local-only
-// stub (PaywallScreen's pre-RevenueCat behavior) when it's false, rather
-// than this module pretending to succeed with fake data.
+// EXPO_PUBLIC_REVENUECAT_API_KEY is set to a RevenueCat Test Store public
+// key as of 2026-08-03 (see PROJECT_SPEC.md Phase 5.1) — real App Store/Play
+// Console products still aren't configured, so this exercises the RevenueCat
+// SDK/entitlement plumbing against RevenueCat's sandbox store, not a real
+// purchase. Every export below assumes Purchases.configure() has already
+// run; callers MUST check isPurchasesConfigured first and fall back to the
+// local-only stub (PaywallScreen's pre-RevenueCat behavior) when it's false.
 const API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY;
 
 export const isPurchasesConfigured = Boolean(API_KEY);
@@ -32,14 +33,14 @@ export function hasActiveEntitlement(customerInfo: CustomerInfo): boolean {
 
 export interface SubscriptionPackages {
   weekly: PurchasesPackage | null;
-  annual: PurchasesPackage | null;
+  monthly: PurchasesPackage | null;
 }
 
 export async function getSubscriptionPackages(): Promise<SubscriptionPackages> {
   const offerings = await Purchases.getOfferings();
   return {
     weekly: offerings.current?.weekly ?? null,
-    annual: offerings.current?.annual ?? null,
+    monthly: offerings.current?.monthly ?? null,
   };
 }
 
