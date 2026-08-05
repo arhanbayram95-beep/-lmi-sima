@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 import DisclaimerFooter from '../components/common/DisclaimerFooter';
 import FadeInView from '../components/common/FadeInView';
 import PrimaryButton from '../components/common/PrimaryButton';
 import ShareCard from '../components/common/ShareCard';
+import ShareOptionsModal from '../components/common/ShareOptionsModal';
 import {
   BadgeSummaryCard,
   ChecklistCard,
@@ -14,7 +16,7 @@ import {
   PillsCard,
   ReadingScoreCard,
 } from '../components/common/ReadingCards';
-import { ReadingResult } from '../api/types';
+import { ReadingResult, readingShareableSections } from '../api/types';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
@@ -131,13 +133,27 @@ export default function RevealScreen() {
   const goToScreen = useAppStore((s) => s.goToScreen);
   const t = useTranslation();
   const shareCardRef = useRef<View>(null);
+  const insets = useSafeAreaInsets();
+  const [shareOptionsVisible, setShareOptionsVisible] = useState(false);
+  const [includePhotoInCard, setIncludePhotoInCard] = useState(false);
+  const [selectedSectionIds, setSelectedSectionIds] = useState<Set<string>>(new Set());
 
   // The captured photos are still in memory when this screen mounts (never
   // persisted, per PROJECT_SPEC.md §3) — shown at the top of the card stack
   // below, then purged the moment the user leaves, however they leave.
   useEffect(() => clearImages, [clearImages]);
 
-  const handleShare = async () => {
+  // Every section starts selected — the builder is an opt-out picker, not
+  // an opt-in one, so a user who never opens it still gets the full card.
+  useEffect(() => {
+    if (reading) setSelectedSectionIds(new Set(readingShareableSections(reading).map((section) => section.id)));
+  }, [reading]);
+
+  // The off-screen ShareCard below already re-renders with the current
+  // includePhotoInCard/images state, so capturing it here always reflects
+  // whatever the user picked in ShareOptionsModal — no extra plumbing
+  // needed between the toggle and the capture.
+  const handleShareImage = async () => {
     if (!shareCardRef.current) return;
     try {
       const uri = await captureRef(shareCardRef, { format: 'png', quality: 0.9 });
@@ -170,21 +186,38 @@ export default function RevealScreen() {
         <DisclaimerFooter />
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Theme.spacing.sm + insets.bottom }]}>
         <PrimaryButton
           label={t('reveal.shareButton')}
           variant="secondary"
           flow
           icon="⤴"
-          onPress={handleShare}
+          onPress={() => setShareOptionsVisible(true)}
           testID="share-reading-button"
         />
         <PrimaryButton label={t('reveal.doneButton')} flow icon="✓" onPress={() => goToScreen('review')} />
       </View>
 
       <View style={styles.offscreen} pointerEvents="none">
-        <ShareCard ref={shareCardRef} reading={reading} />
+        <ShareCard
+          ref={shareCardRef}
+          sections={readingShareableSections(reading).filter((section) => selectedSectionIds.has(section.id))}
+          photo={includePhotoInCard ? images[0] : undefined}
+        />
       </View>
+
+      <ShareOptionsModal
+        visible={shareOptionsVisible}
+        onClose={() => setShareOptionsVisible(false)}
+        reading={reading}
+        sections={readingShareableSections(reading)}
+        hasPhoto={images.length > 0}
+        includePhoto={includePhotoInCard}
+        onIncludePhotoChange={setIncludePhotoInCard}
+        selectedSectionIds={selectedSectionIds}
+        onSelectedSectionIdsChange={setSelectedSectionIds}
+        onShareImage={handleShareImage}
+      />
     </View>
   );
 }

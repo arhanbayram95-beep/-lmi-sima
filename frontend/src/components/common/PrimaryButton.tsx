@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 18,
   },
   button: {
     width: '100%',
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   },
   flowPrimaryLabel: {
     ...Theme.typography.headlineMd,
-    fontSize: 16,
+    fontSize: 19,
     color: Theme.colors.accent.goldSecondary,
     textShadowColor: 'rgba(235, 201, 131, 0.45)',
     textShadowRadius: 12,
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   },
   flowSecondaryLabel: {
     ...Theme.typography.bodyMd,
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '600',
     color: Theme.colors.text.secondary,
   },

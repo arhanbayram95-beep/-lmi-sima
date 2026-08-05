@@ -140,6 +140,92 @@ export function readingScoreCard(reading: ReadingResult): ScoreCard | undefined 
   return reading.module === 'relationship_harmony' ? reading.chemistry_score_card : undefined;
 }
 
+export interface ShareableSection {
+  id: string;
+  title: string;
+  body: string;
+}
+
+// Every card a module's reading carries, flattened into a picklist for the
+// share card builder (see ShareOptionsModal) — the user chooses which of
+// these actually go on their card, rather than the card being a fixed,
+// non-negotiable layout. Card titles come straight off the reading itself
+// (already English-only from the AI response, same as everywhere else this
+// app displays them — see RevealScreen), not re-translated here.
+export function readingShareableSections(reading: ReadingResult): ShareableSection[] {
+  switch (reading.module) {
+    case 'character_analysis':
+      return [
+        {
+          id: 'archetype',
+          title: reading.archetype_card.title,
+          body: `${reading.archetype_card.badge_tag} — ${reading.archetype_card.summary}`,
+        },
+        {
+          id: 'facial-structure',
+          title: reading.facial_structure_card.title,
+          body: `${reading.facial_structure_card.shape_tag} face shape — ${reading.facial_structure_card.description}`,
+        },
+        {
+          id: 'spirit-animal',
+          title: reading.spirit_animal_card.title,
+          body: `${reading.spirit_animal_card.animal} — ${reading.spirit_animal_card.description}`,
+        },
+        {
+          id: 'traits',
+          title: reading.traits_card.title,
+          body: `Strengths: ${reading.traits_card.strength_pills.join(', ')}`,
+        },
+        {
+          id: 'celebrity',
+          title: reading.celebrity_match_card.title,
+          body: `${reading.celebrity_match_card.match_name} — ${reading.celebrity_match_card.match_description}`,
+        },
+      ];
+    case 'relationship_harmony':
+      return [
+        {
+          id: 'vibe',
+          title: reading.vibe_card.title,
+          body: `${reading.vibe_card.badge_tag} — ${reading.vibe_card.summary}`,
+        },
+        {
+          id: 'chemistry',
+          title: reading.chemistry_score_card.title,
+          body: `Overall score: ${reading.chemistry_score_card.overall_score}`,
+        },
+        {
+          id: 'dynamics',
+          title: reading.dynamics_card.title,
+          body: `Best chemistry: ${reading.dynamics_card.best_chemistry_pills.join(', ')}`,
+        },
+        {
+          id: 'guidance',
+          title: reading.guidance_card.title,
+          body: reading.guidance_card.checklist_items.map((item) => item.headline).join(', '),
+        },
+      ];
+    case 'career_path':
+      return [
+        {
+          id: 'work',
+          title: reading.work_archetype_card.title,
+          body: `${reading.work_archetype_card.badge_tag} — ${reading.work_archetype_card.summary}`,
+        },
+        {
+          id: 'domains',
+          title: reading.domains_card.title,
+          body: reading.domains_card.top_industry_pills.join(', '),
+        },
+        {
+          id: 'recommendations',
+          title: reading.recommendations_card.title,
+          body: reading.recommendations_card.checklist_items.map((item) => item.headline).join(', '),
+        },
+      ];
+  }
+}
+
 export interface AnalyzeReadingPayload {
   photos: string[];
   module: ReadingModuleId;

@@ -205,6 +205,31 @@ these surprise a future reader:
     suite are green against the reconciled tree.
 "Open in browser ↗" link to the hosted version.
 
+**New dependency (2026-08-04):** `expo-clipboard`, added for RevealScreen's
+"Copy Text" share option (see IMPLEMENTATION_PLAN.md 8.6) — a first-party
+Expo SDK module, same category as `expo-haptics`/`expo-crypto` already in
+use, no config plugin or `app.json` changes needed.
+
+**New dependency (2026-08-05):** `react-native-safe-area-context`
+(`~5.7.0`, installed via `npx expo install`), Expo's standard package for
+system-bar insets. Added after on-device testing (Galaxy A06, Android 14)
+found RevealScreen's Share/Done buttons partly unreachable — Android's
+edge-to-edge rendering (default since RN 0.76 / this app's current RN
+0.86.2) draws app content behind the 3-button navigation bar unless a
+screen explicitly insets around it, and this app had no safe-area handling
+at all (`AnalyzeScreen.tsx`'s header comment even calls this out for the
+top inset). `App.tsx` now wraps the tree in `SafeAreaProvider`;
+`useSafeAreaInsets().bottom` is added to the bottom padding of every
+fixed-to-the-bottom primary action: `BottomNavBar`, RevealScreen's
+Share/Done footer, OnboardingScreen's Next/Get Started footer, and
+PaywallScreen's Subscribe footer. Jest needs the package's own mock
+reimplemented by hand in `frontend/test/mocks/react-native-safe-area-context.js`
+(mapped in `jest.config.js`) — the upstream `jest/mock.tsx` internally calls
+`jest.requireActual('react-native-safe-area-context')` to reach the real
+context objects, which resolves back through the same `moduleNameMapper`
+entry instead of the real package, so it was simpler to mock the whole
+package with a fixed zero-inset object than fight that self-reference.
+
 ---
 
 ## 4. AI Integration Notes (current: Google Gemini)

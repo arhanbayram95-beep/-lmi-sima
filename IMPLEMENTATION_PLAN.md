@@ -356,3 +356,63 @@ relationship/career-specific content a generic reading wouldn't deliver.
   here. Product decision (2026-07-28): the original 5.1 plan to gate
   reading history behind Aura Pro no longer applies now that there's no
   free tier — history is unconditional, not `isProActive`-gated.
+- [x] **8.4 Multi-photo reveal: swipeable slider, enlarged** (2026-08-04) —
+  `PhotoStripCard` (`ReadingCards.tsx`) now pages through Character
+  Analysis/Relationship Harmony's multiple photos one at a time at full
+  card width via `SwipeablePager` (the same component onboarding uses) with
+  progress dots, instead of squeezing them into small side-by-side
+  thumbnails. Career Match's single photo is unchanged (still fills the row
+  directly — no pager needed for one photo).
+- [x] **8.5 Reveal footer buttons enlarged** — `PrimaryButton`'s `flow`
+  variant (used only by RevealScreen's Share Reading/Done buttons)
+  increased from 14/16px to 18/19px padding and label size.
+- [x] **8.6 Multiple share options + optional photo-in-card** — Share
+  Reading now opens `ShareOptionsModal` instead of sharing immediately:
+  Story Card (the existing `react-native-view-shot` image capture, now
+  with an opt-in "Include my photo" toggle that embeds the first captured
+  photo into `ShareCard`), Quick Message (native share sheet with a text
+  summary), and Copy Text (`expo-clipboard`, new dependency — see
+  PROJECT_SPEC.md). No image is ever included unless the user explicitly
+  opts in, consistent with the process-and-discard privacy posture
+  elsewhere.
+- [x] **8.7 Transparent app icon** — `AppLogo` (used by `LoadingScreen`,
+  `AnalyzingScreen`, `WelcomeScreen`, and `ShareCard`) switched from
+  `logo-badge.png` to a new transparent-background mark supplied by the
+  product owner (`assets/logo-badge-transparent.png`), `resizeMode:
+  'contain'` since the source has generous padding around the emblem;
+  dropped the now-pointless `borderRadius` on the badge frame.
+- [x] **8.8 Share card builder v2** (2026-08-05) — Redefined per product
+  feedback: sharing isn't a fixed text/image choice anymore, it's a
+  per-module card the user builds themselves. `readingShareableSections()`
+  (`api/types.ts`) flattens each module's cards into a titled-section
+  picklist; `ShareOptionsModal` gained a `builder` mode with a
+  photo-include toggle and a checkbox per section (`AnimatedCheckbox`,
+  all-selected by default); `ShareCard` now renders whatever sections it's
+  handed instead of a fixed headline/score layout, height driven by content
+  instead of a fixed 9:16 crop.
+- [x] **8.9 External legal links + logo size fix** (2026-08-05) — Terms and
+  Privacy now open the product owner's Google Sites pages
+  (`utils/legalLinks.ts`) from every surface (Onboarding consent step,
+  Settings, Paywall footer) instead of an in-app modal; deleted the
+  now-orphaned `PrivacyPolicyModal`/`TermsModal`/`LegalDocumentModal`
+  components and trimmed `content/legalContent.ts` down to the one export
+  still used in-app (`LEGAL_CONTACT_EMAIL`) — the full legal text stays
+  live in `backend/src/routes/legal.ts` for the store-listing URL
+  requirement, just no longer duplicated into the frontend bundle. Also
+  re-cropped `assets/logo-badge-transparent.png` (source PNG's real emblem
+  only filled ~23% of its canvas width) and bumped `AppLogo`'s badge sizes
+  (60/168, was 44/128) — the product owner flagged the icon as "way too
+  small" across loading screens.
+- [x] **8.10 Fix unreachable bottom buttons on edge-to-edge Android**
+  (2026-08-05) — On-device testing (Galaxy A06, Android 14, 3-button nav)
+  found RevealScreen's Share Reading/Done buttons didn't respond to taps
+  near the bottom of the screen; traced via `adb shell dumpsys window` to
+  Android's edge-to-edge rendering drawing the system navigation bar
+  (bottom 90px) on top of app content, with this app having no safe-area
+  handling at all. Added `react-native-safe-area-context` (see
+  PROJECT_SPEC.md), wrapped `App.tsx` in `SafeAreaProvider`, and added
+  `useSafeAreaInsets().bottom` to every screen with a fixed bottom action:
+  `BottomNavBar`, RevealScreen's Share/Done footer, OnboardingScreen's
+  Next/Get Started footer, PaywallScreen's Subscribe footer. Verified live
+  on-device (uiautomator dump confirmed the button bounds, then confirmed
+  the fixed build's builder flow reaches the native share sheet).

@@ -3,6 +3,7 @@ import { Alert, Linking, Share } from 'react-native';
 import React from 'react';
 import SettingsScreen from './SettingsScreen';
 import { useAppStore } from '../state/useAppStore';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '../utils/legalLinks';
 
 jest.mock('expo-constants', () => ({
   expoConfig: { version: '1.0.0', ios: { buildNumber: '7' }, android: { versionCode: 7 } },
@@ -16,7 +17,11 @@ jest.mock('expo-device', () => ({
 describe('SettingsScreen', () => {
   beforeEach(() => {
     useAppStore.setState({ screen: 'settings', languageCode: 'en', isProActive: false });
-    jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    // Linking.openURL is already a persistent mock from the RN test preset —
+    // restoreAllMocks() below unwraps back to it without clearing its call
+    // history, so re-spying alone lets counts leak across tests in this
+    // file. mockClear() first keeps each test's assertions accurate.
+    jest.spyOn(Linking, 'openURL').mockClear().mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -52,16 +57,16 @@ describe('SettingsScreen', () => {
     expect(useAppStore.getState().screen).toBe('review');
   });
 
-  it('opens the privacy policy modal from the Legal section', () => {
+  it('opens the external privacy policy page from the Legal section', () => {
     render(<SettingsScreen />);
     fireEvent.press(screen.getByTestId('settings-privacy-policy'));
-    expect(screen.getByTestId('privacy-policy-modal')).toBeTruthy();
+    expect(Linking.openURL).toHaveBeenCalledWith(PRIVACY_POLICY_URL);
   });
 
-  it('opens the terms modal from the Legal section', () => {
+  it('opens the external terms page from the Legal section', () => {
     render(<SettingsScreen />);
     fireEvent.press(screen.getByTestId('settings-terms'));
-    expect(screen.getByTestId('terms-modal')).toBeTruthy();
+    expect(Linking.openURL).toHaveBeenCalledWith(TERMS_URL);
   });
 
   it('opens the language picker and updates the selected language', () => {

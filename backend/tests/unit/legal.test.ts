@@ -20,7 +20,7 @@ describe('legal document routes', () => {
     expect(response.statusCode).toBe(200);
     expect(response.headers['content-type']).toMatch(/text\/html/);
     expect(response.body).toContain('Privacy Policy');
-    expect(response.body).toContain('Biometric Data');
+    expect(response.body).toContain('Face Data (User Photos)');
   });
 
   it('serves the terms & conditions as HTML', async () => {

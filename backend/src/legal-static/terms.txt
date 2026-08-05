@@ -1,8 +1,8 @@
 Terms & Conditions
-Last updated: July 24, 2026
+Last updated: August 4, 2026
 
 Acceptance of Terms
-By downloading, accessing, or using Face Reader, you agree to these Terms & Conditions and our Privacy Policy. If you do not agree, please do not use the app.
+These Terms & Conditions apply to the Face Reader – AI Physiognomy Tool app ("Application"), offered on an "AS IS" basis. By downloading, accessing, or using Face Reader, you agree to these Terms and our Privacy Policy. If you do not agree, please do not use the app.
 
 Entertainment Purpose Only
 Face Reader generates playful, AI-assisted "vibe" readings from your photos for entertainment purposes only. It is not a clinical, psychological, medical, or diagnostic tool, and nothing in the app should be relied upon as professional advice of any kind.
@@ -41,6 +41,4 @@ Governing Law
 The governing law and venue for disputes will be specified here once finalized with legal counsel for the entity operating Face Reader.
 
 Contact Us
-Questions about these terms can be sent to fevzi.bayram@boun.edu.tr.
-
-This document is a working draft pending final legal review per target market and may be updated before public launch.
+If you have any questions about these Terms, please contact us at fevzi.bayram@boun.edu.tr.

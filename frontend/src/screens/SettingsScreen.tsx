@@ -6,13 +6,12 @@ import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import LanguagePickerModal from '../components/common/LanguagePickerModal';
-import PrivacyPolicyModal from '../components/common/PrivacyPolicyModal';
-import TermsModal from '../components/common/TermsModal';
 import { useTranslation } from '../i18n/useTranslation';
 import { SUPPORTED_LANGUAGES } from '../state/slices/localeSlice';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 import { buildContactMailUrl } from '../utils/contactMail';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '../utils/legalLinks';
 
 // No published store URL yet — add it here once Face Reader is live on the
 // App Store / Play Store so the share message includes a real link.
@@ -88,8 +87,6 @@ function resolveBuildNumber(): string | null {
 }
 
 export default function SettingsScreen() {
-  const [privacyVisible, setPrivacyVisible] = useState(false);
-  const [termsVisible, setTermsVisible] = useState(false);
   const [languageVisible, setLanguageVisible] = useState(false);
   const goToScreen = useAppStore((s) => s.goToScreen);
   const anonymousId = useAppStore((s) => s.anonymousId);
@@ -177,8 +174,8 @@ export default function SettingsScreen() {
           title={t('settings.section.legal')}
           delay={160}
           rows={[
-            { label: t('settings.row.privacyPolicy'), onPress: () => setPrivacyVisible(true), testID: 'settings-privacy-policy' },
-            { label: t('settings.row.termsConditions'), onPress: () => setTermsVisible(true), testID: 'settings-terms' },
+            { label: t('settings.row.privacyPolicy'), onPress: () => Linking.openURL(PRIVACY_POLICY_URL), testID: 'settings-privacy-policy' },
+            { label: t('settings.row.termsConditions'), onPress: () => Linking.openURL(TERMS_URL), testID: 'settings-terms' },
             { label: t('settings.row.contactUs'), onPress: handleContactUs, testID: 'settings-contact-us' },
           ]}
         />
@@ -198,8 +195,6 @@ export default function SettingsScreen() {
       </ScrollView>
 
       <BottomNavBar active="settings" />
-      <PrivacyPolicyModal visible={privacyVisible} onClose={() => setPrivacyVisible(false)} />
-      <TermsModal visible={termsVisible} onClose={() => setTermsVisible(false)} />
       <LanguagePickerModal visible={languageVisible} onClose={() => setLanguageVisible(false)} />
     </View>
   );

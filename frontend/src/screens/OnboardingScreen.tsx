@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AnimatedCheckbox from '../components/common/AnimatedCheckbox';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
 import PrimaryButton from '../components/common/PrimaryButton';
-import PrivacyPolicyModal from '../components/common/PrivacyPolicyModal';
 import SwipeablePager from '../components/common/SwipeablePager';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
+import { PRIVACY_POLICY_URL } from '../utils/legalLinks';
 
 const STEP_COUNT = 2;
 
 export default function OnboardingScreen() {
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
-  const [privacyVisible, setPrivacyVisible] = useState(false);
   const ageVerified = useAppStore((s) => s.ageVerified);
   const imageConsentGiven = useAppStore((s) => s.imageConsentGiven);
   const setAgeVerified = useAppStore((s) => s.setAgeVerified);
@@ -67,7 +68,7 @@ export default function OnboardingScreen() {
                 testID="consent-checkbox"
               />
 
-              <Pressable onPress={() => setPrivacyVisible(true)} accessibilityRole="link">
+              <Pressable onPress={() => Linking.openURL(PRIVACY_POLICY_URL)} accessibilityRole="link">
                 <Text style={styles.privacyLink}>{t('onboarding.privacyLink')}</Text>
               </Pressable>
             </FadeInView>
@@ -75,15 +76,13 @@ export default function OnboardingScreen() {
         </GlassCard>
       </View>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Theme.spacing.lg + insets.bottom }]}>
         <PrimaryButton
           label={step < STEP_COUNT - 1 ? t('onboarding.next') : t('onboarding.getStarted')}
           onPress={handlePrimaryPress}
           disabled={!canContinue}
         />
       </View>
-
-      <PrivacyPolicyModal visible={privacyVisible} onClose={() => setPrivacyVisible(false)} />
     </View>
   );
 }

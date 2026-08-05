@@ -24,8 +24,9 @@ export default function AppLogo({ size = 'sm', showWordmark = false, layout = 'r
     <View style={[styles.container, isStacked && styles.containerStacked]}>
       <View style={[styles.glow, isLarge && styles.glowLg]}>
         <Image
-          source={require('../../../assets/logo-badge.png')}
+          source={require('../../../assets/logo-badge-transparent.png')}
           style={[styles.badge, isLarge && styles.badgeLg]}
+          resizeMode="contain"
         />
       </View>
       {showWordmark && (
@@ -57,14 +58,12 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
   },
   badge: {
-    width: 44,
-    height: 44,
-    borderRadius: Theme.radius.md,
+    width: 60,
+    height: 60,
   },
   badgeLg: {
-    width: 128,
-    height: 128,
-    borderRadius: Theme.radius.lg,
+    width: 168,
+    height: 168,
   },
   wordmark: {
     ...Theme.typography.headlineMd,

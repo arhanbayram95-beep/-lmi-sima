@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useAppStore } from '../../state/useAppStore';
 import { Theme } from '../../ui/theme';
@@ -19,6 +20,11 @@ interface BottomNavBarProps {
 export default function BottomNavBar({ active }: BottomNavBarProps) {
   const goToScreen = useAppStore((s) => s.goToScreen);
   const t = useTranslation();
+  // Android's edge-to-edge rendering (default since RN 0.76) draws this
+  // pill behind the system navigation bar unless it's pushed clear of it —
+  // confirmed on-device (3-button nav swallowed taps on the bottom ~2/3 of
+  // this bar before this fix).
+  const insets = useSafeAreaInsets();
 
   const handlePress = (key: NavKey) => {
     if (key === 'analyze') goToScreen('analyze');
@@ -27,7 +33,7 @@ export default function BottomNavBar({ active }: BottomNavBarProps) {
   };
 
   return (
-    <View style={styles.bottomNav}>
+    <View style={[styles.bottomNav, { bottom: insets.bottom + 16 }]}>
       {NAV_ITEMS.map((item) => {
         const isActive = item.key === active;
         const label = t(item.labelKey);
@@ -52,7 +58,6 @@ export default function BottomNavBar({ active }: BottomNavBarProps) {
 const styles = StyleSheet.create({
   bottomNav: {
     position: 'absolute',
-    bottom: 32,
     alignSelf: 'center',
     flexDirection: 'row',
     gap: Theme.spacing.xs,

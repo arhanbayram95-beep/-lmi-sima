@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { BadgeCard, ChecklistItem, MetadataBadge, MetricIcon, ScoreCard } from '../../api/types';
 import { Theme } from '../../ui/theme';
 import GlassCard from './GlassCard';
+import SwipeablePager from './SwipeablePager';
 
 // The presentational half of a reading. Every module's reveal is assembled
 // from these cards (see RevealScreen) — they take already-fetched data as
@@ -10,15 +11,41 @@ import GlassCard from './GlassCard';
 // boundary.
 
 // The photos that produced this reading — shown first, above the badge
-// card, since they're part of the "brief and catchy" opening beat. flex: 1
-// each so 1, 2, or 3 photos (per module, see MODULE_PHOTO_COUNTS) always
-// divide the row evenly.
+// card, since they're part of the "brief and catchy" opening beat. A single
+// photo (Career Match) fills the row at full size. Multiple photos
+// (Character Analysis, Relationship Harmony) page through one at a time at
+// that same large size instead of squeezing side by side — swipeable, with
+// progress dots, same pattern as the onboarding carousel.
 export function PhotoStripCard({ images, testID }: { images: string[]; testID?: string }) {
+  const [index, setIndex] = useState(0);
+
+  if (images.length <= 1) {
+    return (
+      <View style={styles.photoStrip} testID={testID}>
+        {images.map((photo, i) => (
+          <Image key={i} source={{ uri: `data:image/jpeg;base64,${photo}` }} style={styles.photoThumb} resizeMode="cover" />
+        ))}
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.photoStrip} testID={testID}>
-      {images.map((photo, index) => (
-        <Image key={index} source={{ uri: `data:image/jpeg;base64,${photo}` }} style={styles.photoThumb} resizeMode="cover" />
-      ))}
+    <View testID={testID}>
+      <SwipeablePager index={index} onIndexChange={setIndex}>
+        {images.map((photo, i) => (
+          <Image
+            key={i}
+            source={{ uri: `data:image/jpeg;base64,${photo}` }}
+            style={styles.photoLarge}
+            resizeMode="cover"
+          />
+        ))}
+      </SwipeablePager>
+      <View style={styles.photoDots} accessibilityLabel="Photo progress">
+        {images.map((_, i) => (
+          <View key={i} style={[styles.photoDot, i === index && styles.photoDotActive]} />
+        ))}
+      </View>
     </View>
   );
 }
@@ -219,6 +246,29 @@ const styles = StyleSheet.create({
     aspectRatio: 3 / 4,
     borderRadius: Theme.radius.lg,
     backgroundColor: Theme.colors.surface.glassBackground,
+  },
+  photoLarge: {
+    width: '100%',
+    aspectRatio: 3 / 4,
+    borderRadius: Theme.radius.lg,
+    backgroundColor: Theme.colors.surface.glassBackground,
+  },
+  photoDots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: Theme.spacing.xs,
+  },
+  photoDot: {
+    width: 6,
+    height: 6,
+    borderRadius: Theme.radius.full,
+    backgroundColor: 'rgba(255, 223, 158, 0.3)',
+  },
+  photoDotActive: {
+    width: 8,
+    height: 8,
+    backgroundColor: Theme.colors.accent.goldSecondary,
   },
   card: {
     gap: Theme.spacing.xs,
