@@ -92,4 +92,30 @@ describe('AnalyzingScreen', () => {
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('noFaceDetected'));
   });
+
+  // Process-and-discard (PROJECT_SPEC.md §3): only the success path hands
+  // the photos on to RevealScreen, which purges them on unmount. Every path
+  // that abandons the reading has to purge them here instead, or they sit in
+  // the store indefinitely — and the next capture session appends onto them,
+  // overshooting MODULE_PHOTO_COUNTS and failing with a misleading error.
+  it('discards the captured photos when a failed reading is abandoned', async () => {
+    mockAnalyzeReading.mockRejectedValue(new ReadingApiError('Could not reach the Face Reader server.'));
+    render(<AnalyzingScreen />);
+
+    await waitFor(() => expect(screen.getByTestId('analyzing-retry-button')).toBeTruthy());
+    expect(useAppStore.getState().images).toEqual(PHOTOS_3);
+
+    fireEvent.press(screen.getByText('Back to Analyze'));
+
+    expect(useAppStore.getState().screen).toBe('analyze');
+    expect(useAppStore.getState().images).toEqual([]);
+  });
+
+  it('discards the captured photos when routing to the no-face-detected screen', async () => {
+    mockAnalyzeReading.mockRejectedValue(new ReadingApiError('No face found in one of the photos.', 'NO_FACE_DETECTED'));
+    render(<AnalyzingScreen />);
+
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('noFaceDetected'));
+    expect(useAppStore.getState().images).toEqual([]);
+  });
 });

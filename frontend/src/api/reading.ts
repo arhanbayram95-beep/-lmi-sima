@@ -11,11 +11,12 @@ export type {
   RelationshipHarmonyResult,
 } from './types';
 
-// 'NO_FACE_DETECTED' is a forward-compatible hook, not yet raised anywhere —
-// on-device face detection is deferred (see QA_FINDINGS.md QA-5 and
-// IMPLEMENTATION_PLAN.md 2.3). Once real detection lands, either the client
-// or the backend can throw this code and AnalyzingScreen will already route
-// to NoFaceDetectedScreen for it.
+// 'NO_FACE_DETECTED' is a forward-compatible hook that nothing raises yet.
+// On-device detection shipped in IMPLEMENTATION_PLAN.md 6.1, but it rejects
+// a faceless frame at the shutter in CaptureScreen — before any API call —
+// so it never travels as an error code. This stays wired for the case where
+// the backend starts reporting it: AnalyzingScreen already routes it to
+// NoFaceDetectedScreen.
 export type ReadingApiErrorCode = 'NO_FACE_DETECTED';
 
 export class ReadingApiError extends Error {
