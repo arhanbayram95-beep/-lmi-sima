@@ -31,6 +31,22 @@ export function hasActiveEntitlement(customerInfo: CustomerInfo): boolean {
   return Boolean(customerInfo.entitlements.active[ENTITLEMENT_ID]);
 }
 
+// Lets api/reading.ts tell the backend which RevenueCat subscriber is
+// asking (see entitlement.ts's monitor-mode check) without api/ reaching
+// into react-native-purchases directly. Guarded on the module-private
+// `configured` flag rather than isPurchasesConfigured (only "was a key
+// present," not "did configure() actually run") — calling into the SDK
+// before configure() has run throws. Returns undefined, never throws, so a
+// missing/failed lookup never blocks getting a reading.
+export async function getCurrentAppUserId(): Promise<string | undefined> {
+  if (!configured) return undefined;
+  try {
+    return await Purchases.getAppUserID();
+  } catch {
+    return undefined;
+  }
+}
+
 export interface SubscriptionPackages {
   weekly: PurchasesPackage | null;
   monthly: PurchasesPackage | null;

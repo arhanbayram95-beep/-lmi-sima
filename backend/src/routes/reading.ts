@@ -1,7 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { ReadingModelClient } from '../services/geminiClient';
+import { RevenueCatClient } from '../services/revenueCatClient';
 import { generateReading, ReadingServiceError } from '../services/readingService';
-import { requireActiveEntitlement } from '../middleware/entitlement';
+import { createEntitlementCheck } from '../middleware/entitlement';
 import { READING_MODULE_IDS, ReadingModuleId } from '../services/readingSchema';
 
 // maxLength guards against a single grossly-oversized photo (e.g. abuse
@@ -38,10 +39,14 @@ interface AnalyzeRequestBody {
   module?: ReadingModuleId;
 }
 
-export function registerReadingRoutes(app: FastifyInstance, readingModelClient: ReadingModelClient): void {
+export function registerReadingRoutes(
+  app: FastifyInstance,
+  readingModelClient: ReadingModelClient,
+  revenueCatClient?: RevenueCatClient
+): void {
   app.post<{ Body: AnalyzeRequestBody }>(
     '/api/v1/reading/analyze',
-    { preHandler: requireActiveEntitlement, schema: { body: analyzeBodySchema } },
+    { preHandler: createEntitlementCheck(revenueCatClient), schema: { body: analyzeBodySchema } },
     async (request, reply) => {
       try {
         const result = await generateReading(readingModelClient, request.body.photos, request.body.module);
