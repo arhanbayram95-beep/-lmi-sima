@@ -1,51 +1,25 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { BadgeCard, ChecklistItem, MetadataBadge, MetricIcon, ScoreCard } from '../../api/types';
 import { Theme } from '../../ui/theme';
 import GlassCard from './GlassCard';
-import SwipeablePager from './SwipeablePager';
 
 // The presentational half of a reading. Every module's reveal is assembled
 // from these cards (see RevealScreen) — they take already-fetched data as
 // props and never touch the store or the API, per CLAUDE.md's components/
 // boundary.
 
-// The photos that produced this reading — shown first, above the badge
-// card, since they're part of the "brief and catchy" opening beat. A single
-// photo (Career Match) fills the row at full size. Multiple photos
-// (Character Analysis, Relationship Harmony) page through one at a time at
-// that same large size instead of squeezing side by side — swipeable, with
-// progress dots, same pattern as the onboarding carousel.
-export function PhotoStripCard({ images, testID }: { images: string[]; testID?: string }) {
-  const [index, setIndex] = useState(0);
-
-  if (images.length <= 1) {
-    return (
-      <View style={styles.photoStrip} testID={testID}>
-        {images.map((photo, i) => (
-          <Image key={i} source={{ uri: `data:image/jpeg;base64,${photo}` }} style={styles.photoThumb} resizeMode="cover" />
-        ))}
-      </View>
-    );
-  }
-
+// One captured photo, shown large — part of the "brief and catchy" opening
+// beat of the reveal. RevealScreen gives each photo its own top-level page
+// in the reveal pager rather than nesting a second swiper in here: nesting
+// two horizontal SwipeablePagers (this card's own carousel inside the
+// reveal's card-by-card pager) risks the exact gesture-ownership fights
+// SwipeablePager's own comments describe fixing for a single level of
+// paging.
+export function PhotoPageCard({ photo, testID }: { photo: string; testID?: string }) {
   return (
-    <View testID={testID}>
-      <SwipeablePager index={index} onIndexChange={setIndex}>
-        {images.map((photo, i) => (
-          <Image
-            key={i}
-            source={{ uri: `data:image/jpeg;base64,${photo}` }}
-            style={styles.photoLarge}
-            resizeMode="cover"
-          />
-        ))}
-      </SwipeablePager>
-      <View style={styles.photoDots} accessibilityLabel="Photo progress">
-        {images.map((_, i) => (
-          <View key={i} style={[styles.photoDot, i === index && styles.photoDotActive]} />
-        ))}
-      </View>
+    <View style={styles.photoPage} testID={testID}>
+      <Image source={{ uri: `data:image/jpeg;base64,${photo}` }} style={styles.photoLarge} resizeMode="cover" />
     </View>
   );
 }
@@ -237,38 +211,14 @@ export function HighlightCard({
 const DIAL_SIZE = 132;
 
 const styles = StyleSheet.create({
-  photoStrip: {
-    flexDirection: 'row',
-    gap: Theme.spacing.xs,
-  },
-  photoThumb: {
-    flex: 1,
-    aspectRatio: 3 / 4,
-    borderRadius: Theme.radius.lg,
-    backgroundColor: Theme.colors.surface.glassBackground,
+  photoPage: {
+    justifyContent: 'center',
   },
   photoLarge: {
     width: '100%',
     aspectRatio: 3 / 4,
     borderRadius: Theme.radius.lg,
     backgroundColor: Theme.colors.surface.glassBackground,
-  },
-  photoDots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 6,
-    marginTop: Theme.spacing.xs,
-  },
-  photoDot: {
-    width: 6,
-    height: 6,
-    borderRadius: Theme.radius.full,
-    backgroundColor: 'rgba(255, 223, 158, 0.3)',
-  },
-  photoDotActive: {
-    width: 8,
-    height: 8,
-    backgroundColor: Theme.colors.accent.goldSecondary,
   },
   card: {
     gap: Theme.spacing.xs,

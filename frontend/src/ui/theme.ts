@@ -54,3 +54,40 @@ export const Theme = {
 } as const;
 
 export type ThemeColors = typeof Theme.colors;
+
+// Share-card color options (see ShareOptionsModal's builder). Every value
+// here is one already defined in Theme.colors above — no new hex values,
+// per the "colors are locked" rule at the top of this file — just
+// recombined so the card background/accent pairing can differ from the
+// app chrome's own crimson-on-obsidian default while staying inside the
+// locked palette.
+export const SHARE_CARD_PALETTES = [
+  {
+    id: 'crimson',
+    background: Theme.colors.background.start,
+    accent: Theme.colors.accent.goldSecondary,
+  },
+  {
+    id: 'burgundy',
+    background: Theme.colors.background.middle,
+    accent: Theme.colors.accent.goldSecondary,
+  },
+  {
+    id: 'midnight',
+    background: Theme.colors.background.end,
+    accent: Theme.colors.accent.iridescentShimmer,
+  },
+  {
+    id: 'iridescent',
+    background: Theme.colors.background.start,
+    accent: Theme.colors.accent.iridescentShimmer,
+  },
+] as const;
+
+export type SharePaletteId = (typeof SHARE_CARD_PALETTES)[number]['id'];
+
+export const DEFAULT_SHARE_PALETTE_ID: SharePaletteId = 'crimson';
+
+export function shareCardPalette(id: SharePaletteId) {
+  return SHARE_CARD_PALETTES.find((palette) => palette.id === id) ?? SHARE_CARD_PALETTES[0];
+}
