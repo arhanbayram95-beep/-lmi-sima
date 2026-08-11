@@ -148,11 +148,6 @@ const TERMS_SECTIONS: LegalSection[] = [
       'We may update Face Reader or these terms from time to time. Continued use of the app after changes take effect constitutes acceptance of the updated terms.',
   },
   {
-    heading: 'Governing Law',
-    body:
-      'The governing law and venue for disputes will be specified here once finalized with legal counsel for the entity operating Face Reader.',
-  },
-  {
     heading: 'Contact Us',
     body: `If you have any questions about these Terms, please contact us at ${LEGAL_CONTACT_EMAIL}.`,
   },

@@ -10,9 +10,11 @@ linked below; if something here needs to change, change it there.
 
 **Known open items going in** (already flagged elsewhere, listed here so a
 reviewer doesn't have to go hunting):
-- Terms & Conditions' "Governing Law" section is a literal placeholder —
-  `frontend/src/content/legalContent.ts`, "will be specified here once
-  finalized with legal counsel."
+- Terms & Conditions no longer has a "Governing Law" section — product
+  decision (2026-08-11): no legal counsel engaged yet, so rather than ship a
+  placeholder naming a jurisdiction nobody's confirmed, the section was
+  dropped entirely (`backend/src/routes/legal.ts`, `TERMS_SECTIONS`). Add it
+  back once a real entity/jurisdiction is settled.
 - The Privacy Policy's "no training on your data" claim is only true on a
   **paid** AI provider API tier — confirm the production key is
   billing-enabled before this ships (`QA_FINDINGS.md`, Security Review).
@@ -124,25 +126,28 @@ Console privacy policy URL field.
 - Confirm "we do not sell your personal data to anyone" and the CCPA
   "share" disclaimer hold up given the AI provider relationship (photos
   leave the company's servers to a third party, even if not "sold").
-- `LEGAL_CONTACT_EMAIL` (`frontend/src/content/legalContent.ts:24`) is a
+- `LEGAL_CONTACT_EMAIL` (`frontend/src/content/legalContent.ts`, also
+  duplicated in `backend/src/routes/legal.ts`) is a
   personal `@boun.edu.tr` address — confirm this is the intended contact of
   record for a public-facing privacy policy, or swap it for a company
   address before launch.
 
-## 3. Terms & Conditions (frontend/src/content/legalContent.ts, `TERMS_SECTIONS`)
+## 3. Terms & Conditions (backend/src/routes/legal.ts, `TERMS_SECTIONS`)
 
-Full current text — 14 sections: Acceptance of Terms, Entertainment Purpose
+Full current text — 13 sections: Acceptance of Terms, Entertainment Purpose
 Only, Eligibility, Description of Service, Subscriptions & Free Trial,
 Acceptable Use, Intellectual Property, Third-Party Services, Disclaimer of
 Warranties, Limitation of Liability, Termination, Changes to the App or
-These Terms, Governing Law, Contact Us. Rendered in-app via `TermsModal.tsx`
-and hosted at `{API_BASE_URL}/legal/terms`.
+These Terms, Contact Us. Hosted at `{API_BASE_URL}/legal/terms` (no
+in-app `TermsModal` anymore — legal links open this page externally, see
+`frontend/src/utils/legalLinks.ts`).
 
-**Review focus:** "Governing Law" is an explicit placeholder — this needs a
-real jurisdiction from counsel before launch, not a review comment. Also
-confirm "Disclaimer of Warranties" / "Limitation of Liability" language is
-enforceable in every target market (US + key EU markets), since EU consumer
-law treats liability waivers more restrictively than the US.
+**Review focus:** no "Governing Law" section exists (product decision,
+2026-08-11 — see the open item at the top of this doc); add one once a
+jurisdiction is settled. Also confirm "Disclaimer of Warranties" /
+"Limitation of Liability" language is enforceable in every target market
+(US + key EU markets), since EU consumer law treats liability waivers more
+restrictively than the US.
 
 ---
 

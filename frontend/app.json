@@ -10,7 +10,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "app.faceai.facereader",
       "infoPlist": {
-        "NSCameraUsageDescription": "Face Reader uses your camera to capture your photos for your reading. Photos are processed in memory and never stored."
+        "NSCameraUsageDescription": "Face Reader uses your camera to capture your photos for your reading. Photos are processed in memory and never stored.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -22,8 +23,7 @@
       "predictiveBackGestureEnabled": false,
       "usesCleartextTraffic": true,
       "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.CAMERA"
       ]
     },
     "web": {
