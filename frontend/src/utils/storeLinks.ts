@@ -1,11 +1,10 @@
 import { Platform } from 'react-native';
 
-// TODO: replace once Face Reader has a real App Store Connect / Google Play
-// Console listing (see app.json, which has no ios.bundleIdentifier or
-// android.package yet either) - these placeholders keep "Rate on App Store"
-// wired to real navigation logic now, without pretending a listing exists.
+// TODO: replace IOS_APP_STORE_ID once the App Store Connect app record
+// exists and has a real numeric Apple ID - keeps "Rate on App Store" wired
+// to real navigation logic now, without pretending a listing exists.
 const IOS_APP_STORE_ID = 'REPLACE_WITH_REAL_APP_STORE_ID';
-const ANDROID_PACKAGE_NAME = 'REPLACE_WITH_REAL_PACKAGE_NAME';
+const ANDROID_PACKAGE_NAME = 'com.arhanbayram.facereader';
 
 export function getStoreListingUrl(): string {
   if (Platform.OS === 'ios') {

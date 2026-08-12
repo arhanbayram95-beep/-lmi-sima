@@ -88,7 +88,7 @@ module scoring a non-consenting third party. Confirm: (a) the "critical
 constraints" block (never guess relationship/identity, never criticize
 either individual, frame everything as pattern-not-fault) is sufficient
 consent-adjacent protection for that second person; (b) whether the
-Acceptable Use clause in Terms (`frontend/src/content/legalContent.ts`,
+Acceptable Use clause in Terms (`backend/src/routes/legal.ts`,
 "only with photos of yourself, or of others who have given you permission")
 is legally sufficient to place that consent burden on the submitting user
 rather than the app, in every target jurisdiction.
@@ -105,15 +105,20 @@ celebrity-match or relationship read.
 
 ---
 
-## 2. Privacy Policy (frontend/src/content/legalContent.ts, `PRIVACY_POLICY_SECTIONS`)
+## 2. Privacy Policy (backend/src/routes/legal.ts, `PRIVACY_POLICY_SECTIONS`)
 
 Full current text — 12 sections: Overview, Information We Collect, Biometric
 Data, How Your Photos Are Used, Third-Party Services, Data Retention, Your
 Rights, Children's Privacy, Security, International Data Transfers, Changes
-to This Policy, Contact Us. Rendered in-app via `PrivacyPolicyModal.tsx` and
-now also hosted as a real page at `{API_BASE_URL}/legal/privacy`
-(`backend/src/routes/legal.ts`) — required for the App Store Connect / Play
-Console privacy policy URL field.
+to This Policy, Contact Us. **Updated 2026-08-05:** the in-app
+`PrivacyPolicyModal.tsx` was deleted — every in-app surface (Onboarding
+consent step, Settings, Paywall footer) now links out via
+`frontend/src/utils/legalLinks.ts` to the product owner's externally-hosted
+Google Sites page instead. The text below is the backend-rendered copy at
+`{API_BASE_URL}/legal/privacy` (`backend/src/routes/legal.ts`), which
+remains the source of truth for the App Store Connect / Play Console privacy
+policy URL field — confirm it's actually kept in sync with the Google Sites
+page content reviewers see in-app.
 
 **Review focus:**
 - The "Biometric Data" section makes an explicit legal argument (not BIPA
@@ -124,19 +129,24 @@ Console privacy policy URL field.
 - Confirm "we do not sell your personal data to anyone" and the CCPA
   "share" disclaimer hold up given the AI provider relationship (photos
   leave the company's servers to a third party, even if not "sold").
-- `LEGAL_CONTACT_EMAIL` (`frontend/src/content/legalContent.ts:24`) is a
-  personal `@boun.edu.tr` address — confirm this is the intended contact of
-  record for a public-facing privacy policy, or swap it for a company
-  address before launch.
+- `LEGAL_CONTACT_EMAIL` (`frontend/src/content/legalContent.ts:8` — this is
+  now the only export left in that file, the rest trimmed 2026-08-05 once
+  the in-app modals reading from it were deleted) is a personal
+  `@boun.edu.tr` address — confirm this is the intended contact of record
+  for a public-facing privacy policy, or swap it for a company address
+  before launch.
 
-## 3. Terms & Conditions (frontend/src/content/legalContent.ts, `TERMS_SECTIONS`)
+## 3. Terms & Conditions (backend/src/routes/legal.ts, `TERMS_SECTIONS`)
 
 Full current text — 14 sections: Acceptance of Terms, Entertainment Purpose
 Only, Eligibility, Description of Service, Subscriptions & Free Trial,
 Acceptable Use, Intellectual Property, Third-Party Services, Disclaimer of
 Warranties, Limitation of Liability, Termination, Changes to the App or
-These Terms, Governing Law, Contact Us. Rendered in-app via `TermsModal.tsx`
-and hosted at `{API_BASE_URL}/legal/terms`.
+These Terms, Governing Law, Contact Us. **Updated 2026-08-05:** same change
+as the Privacy Policy above — the in-app `TermsModal.tsx` was deleted, every
+in-app surface now links to the externally-hosted Google Sites page via
+`frontend/src/utils/legalLinks.ts`. The text below is the backend-rendered
+copy at `{API_BASE_URL}/legal/terms` (`backend/src/routes/legal.ts`).
 
 **Review focus:** "Governing Law" is an explicit placeholder — this needs a
 real jurisdiction from counsel before launch, not a review comment. Also
@@ -172,8 +182,10 @@ consent language is where translation errors carry the most legal risk.
 
 ## 5. What This Packet Does Not Cover
 
-- RevenueCat/subscription terms enforcement — out of scope, RevenueCat
-  integration itself is still deferred (`IMPLEMENTATION_PLAN.md` 5.1).
+- RevenueCat/subscription terms enforcement — out of scope. The SDK
+  integration itself is code-complete and live-tested against a real
+  RevenueCat Test Store project, but still blocked on real App Store
+  Connect / Google Play Console products (`IMPLEMENTATION_PLAN.md` 5.1).
 - App Store / Play Store's own review guideline compliance (contract terms,
   not law) — separate from this legal-content review.
 - Any jurisdiction-specific consent flow beyond the single global +18 gate

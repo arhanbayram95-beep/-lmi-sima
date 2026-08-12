@@ -15,6 +15,12 @@ jest.mock('expo-clipboard', () => ({
   setStringAsync: (...args: unknown[]) => mockSetStringAsync(...args),
 }));
 
+const mockShareAsync = jest.fn().mockResolvedValue(undefined);
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn().mockResolvedValue(true),
+  shareAsync: (...args: unknown[]) => mockShareAsync(...args),
+}));
+
 const READING: CharacterAnalysisResult = {
   module: 'character_analysis',
   archetype_card: {
@@ -79,6 +85,7 @@ describe('RevealScreen', () => {
     useAppStore.setState({ screen: 'reveal', reading: READING, images: PHOTOS });
     mockCaptureRef.mockClear();
     mockSetStringAsync.mockClear();
+    mockShareAsync.mockClear();
     jest.spyOn(Share, 'share').mockResolvedValue({ action: Share.sharedAction });
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   });
@@ -174,7 +181,10 @@ describe('RevealScreen', () => {
 
     await waitFor(() => expect(mockCaptureRef).toHaveBeenCalledTimes(1));
     await waitFor(() =>
-      expect(Share.share).toHaveBeenCalledWith({ url: 'file://mock-share-card.png' })
+      expect(mockShareAsync).toHaveBeenCalledWith('file://mock-share-card.png', {
+        mimeType: 'image/png',
+        dialogTitle: 'Story Card',
+      })
     );
   });
 

@@ -45,7 +45,7 @@ const ShareCard = forwardRef<View, ShareCardProps>(({ sections, photo }, ref) =>
         ))}
       </View>
 
-      <Text style={styles.footer}>For entertainment purposes only · faceai.app</Text>
+      <Text style={styles.footer}>For entertainment purposes only</Text>
     </View>
   );
 });
