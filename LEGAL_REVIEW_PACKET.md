@@ -10,9 +10,11 @@ linked below; if something here needs to change, change it there.
 
 **Known open items going in** (already flagged elsewhere, listed here so a
 reviewer doesn't have to go hunting):
-- Terms & Conditions' "Governing Law" section is a literal placeholder —
-  `frontend/src/content/legalContent.ts`, "will be specified here once
-  finalized with legal counsel."
+- Terms & Conditions no longer has a "Governing Law" section — product
+  decision (2026-08-11): no legal counsel engaged yet, so rather than ship a
+  placeholder naming a jurisdiction nobody's confirmed, the section was
+  dropped entirely (`backend/src/routes/legal.ts`, `TERMS_SECTIONS`). Add it
+  back once a real entity/jurisdiction is settled.
 - The Privacy Policy's "no training on your data" claim is only true on a
   **paid** AI provider API tier — confirm the production key is
   billing-enabled before this ships (`QA_FINDINGS.md`, Security Review).
@@ -131,28 +133,30 @@ page content reviewers see in-app.
   leave the company's servers to a third party, even if not "sold").
 - `LEGAL_CONTACT_EMAIL` (`frontend/src/content/legalContent.ts:8` — this is
   now the only export left in that file, the rest trimmed 2026-08-05 once
-  the in-app modals reading from it were deleted) is a personal
-  `@boun.edu.tr` address — confirm this is the intended contact of record
-  for a public-facing privacy policy, or swap it for a company address
-  before launch.
+  the in-app modals reading from it were deleted; also duplicated as its own
+  constant in `backend/src/routes/legal.ts`) is a personal `@boun.edu.tr`
+  address — confirm this is the intended contact of record for a
+  public-facing privacy policy, or swap it for a company address before
+  launch.
 
 ## 3. Terms & Conditions (backend/src/routes/legal.ts, `TERMS_SECTIONS`)
 
-Full current text — 14 sections: Acceptance of Terms, Entertainment Purpose
+Full current text — 13 sections: Acceptance of Terms, Entertainment Purpose
 Only, Eligibility, Description of Service, Subscriptions & Free Trial,
 Acceptable Use, Intellectual Property, Third-Party Services, Disclaimer of
 Warranties, Limitation of Liability, Termination, Changes to the App or
-These Terms, Governing Law, Contact Us. **Updated 2026-08-05:** same change
-as the Privacy Policy above — the in-app `TermsModal.tsx` was deleted, every
-in-app surface now links to the externally-hosted Google Sites page via
+These Terms, Contact Us. **Updated 2026-08-05:** same change as the Privacy
+Policy above — the in-app `TermsModal.tsx` was deleted, every in-app surface
+now links to the externally-hosted Google Sites page via
 `frontend/src/utils/legalLinks.ts`. The text below is the backend-rendered
 copy at `{API_BASE_URL}/legal/terms` (`backend/src/routes/legal.ts`).
 
-**Review focus:** "Governing Law" is an explicit placeholder — this needs a
-real jurisdiction from counsel before launch, not a review comment. Also
-confirm "Disclaimer of Warranties" / "Limitation of Liability" language is
-enforceable in every target market (US + key EU markets), since EU consumer
-law treats liability waivers more restrictively than the US.
+**Review focus:** no "Governing Law" section exists (product decision,
+2026-08-11 — see the open item at the top of this doc); add one once a
+jurisdiction is settled. Also confirm "Disclaimer of Warranties" /
+"Limitation of Liability" language is enforceable in every target market
+(US + key EU markets), since EU consumer law treats liability waivers more
+restrictively than the US.
 
 ---
 
@@ -169,7 +173,7 @@ policy document.
 | Pre-capture notice: "Your photos are analyzed instantly and never stored. This is for entertainment only." | Onboarding step 2 | `frontend/src/i18n/translations.ts` (`onboarding.step1.body`) |
 | Camera permission rationale: "Face Reader needs your camera to capture your photos for your reading. Photos are processed in memory and never stored." | Capture permission prompt | `frontend/src/i18n/translations.ts` (`capture.permission.body`) |
 | Persistent disclaimer footer: "For entertainment purposes only. Face Reader does not provide clinical, psychological, or diagnostic assessments. Photos are processed in memory and never stored." | Every result screen (non-negotiable per `CLAUDE.md`) | `frontend/src/i18n/translations.ts` (`disclaimer.text`), rendered by `DisclaimerFooter.tsx` |
-| Share-card footer: "For entertainment purposes only · faceai.app" | Exported/shared image | `frontend/src/components/common/ShareCard.tsx:34` |
+| Share-card footer: "For entertainment purposes only" | Exported/shared image | `frontend/src/components/common/ShareCard.tsx:53` |
 
 **Review focus:** all of the above are English-only (translated to 10
 languages via machine-assisted translation, not professional legal

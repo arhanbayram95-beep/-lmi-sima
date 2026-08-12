@@ -2,6 +2,7 @@ const mockConfigure = jest.fn();
 const mockGetOfferings = jest.fn();
 const mockPurchasePackage = jest.fn();
 const mockRestorePurchases = jest.fn();
+const mockGetAppUserID = jest.fn();
 
 jest.mock('react-native-purchases', () => ({
   __esModule: true,
@@ -10,6 +11,7 @@ jest.mock('react-native-purchases', () => ({
     getOfferings: (...args: unknown[]) => mockGetOfferings(...args),
     purchasePackage: (...args: unknown[]) => mockPurchasePackage(...args),
     restorePurchases: (...args: unknown[]) => mockRestorePurchases(...args),
+    getAppUserID: (...args: unknown[]) => mockGetAppUserID(...args),
   },
   PURCHASES_ERROR_CODE: { PURCHASE_CANCELLED_ERROR: 'PURCHASE_CANCELLED_ERROR' },
 }));
@@ -131,5 +133,39 @@ describe('purchases utility', () => {
 
     const { restorePurchases } = require('./purchases');
     await expect(restorePurchases()).resolves.toBe(customerInfo);
+  });
+
+  it('getCurrentAppUserId returns undefined without touching the SDK when never configured', async () => {
+    await jest.isolateModulesAsync(async () => {
+      delete process.env.EXPO_PUBLIC_REVENUECAT_API_KEY;
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const purchases = require('./purchases');
+      await expect(purchases.getCurrentAppUserId()).resolves.toBeUndefined();
+      expect(mockGetAppUserID).not.toHaveBeenCalled();
+    });
+  });
+
+  it('getCurrentAppUserId returns the SDK id once configure() has actually run', async () => {
+    await jest.isolateModulesAsync(async () => {
+      process.env.EXPO_PUBLIC_REVENUECAT_API_KEY = 'test-key';
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const purchases = require('./purchases');
+      purchases.ensurePurchasesConfigured();
+      mockGetAppUserID.mockResolvedValue('rc-user-123');
+
+      await expect(purchases.getCurrentAppUserId()).resolves.toBe('rc-user-123');
+    });
+  });
+
+  it('getCurrentAppUserId returns undefined instead of throwing when the SDK call fails', async () => {
+    await jest.isolateModulesAsync(async () => {
+      process.env.EXPO_PUBLIC_REVENUECAT_API_KEY = 'test-key';
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const purchases = require('./purchases');
+      purchases.ensurePurchasesConfigured();
+      mockGetAppUserID.mockRejectedValue(new Error('bridge not ready'));
+
+      await expect(purchases.getCurrentAppUserId()).resolves.toBeUndefined();
+    });
   });
 });

@@ -5,10 +5,11 @@ import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
 
-// Placeholder destination for the not-yet-implemented on-device face-check
-// (IMPLEMENTATION_PLAN.md 2.3, tracked as QA-5 in QA_FINDINGS.md). Nothing
-// routes here yet — AnalyzingScreen is wired to land on it the moment real
-// detection starts throwing ReadingApiError('NO_FACE_DETECTED').
+// Destination for the on-device face-check (IMPLEMENTATION_PLAN.md 6.1).
+// Two routes land here, both having already discarded the captured photos:
+// CaptureScreen, when the shutter is pressed with no face in frame (the
+// live path), and AnalyzingScreen, if a ReadingApiError('NO_FACE_DETECTED')
+// ever comes back from the API (wired, but nothing raises that code yet).
 export default function NoFaceDetectedScreen() {
   const goToScreen = useAppStore((s) => s.goToScreen);
   const t = useTranslation();

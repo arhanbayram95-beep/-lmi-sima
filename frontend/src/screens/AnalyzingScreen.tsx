@@ -19,7 +19,23 @@ export default function AnalyzingScreen() {
   const setReading = useAppStore((s) => s.setReading);
   const logReading = useAppStore((s) => s.logReading);
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const clearImages = useAppStore((s) => s.clearImages);
   const t = useTranslation();
+
+  // Only the success path below hands the photos on to RevealScreen (which
+  // purges them itself on unmount). Every path that leaves this screen
+  // without a reading has to purge them here instead — otherwise they sit in
+  // the store for the rest of the session (against process-and-discard,
+  // PROJECT_SPEC.md §3) and the next capture session's addImage() calls
+  // append onto them, overshooting MODULE_PHOTO_COUNTS and failing the
+  // count check above with a misleading "couldn't complete your reading."
+  const abandonReading = useCallback(
+    (destination: 'analyze' | 'noFaceDetected') => {
+      clearImages();
+      goToScreen(destination);
+    },
+    [clearImages, goToScreen]
+  );
 
   const runAnalysis = useCallback(async () => {
     setError(null);
@@ -37,12 +53,12 @@ export default function AnalyzingScreen() {
       goToScreen('reveal');
     } catch (cause) {
       if (cause instanceof ReadingApiError && cause.code === 'NO_FACE_DETECTED') {
-        goToScreen('noFaceDetected');
+        abandonReading('noFaceDetected');
         return;
       }
       setError(cause instanceof ReadingApiError ? cause.message : t('analyzing.error.body'));
     }
-  }, [images, selectedModule, setReading, logReading, goToScreen, t]);
+  }, [images, selectedModule, setReading, logReading, goToScreen, abandonReading, t]);
 
   useEffect(() => {
     runAnalysis();
@@ -92,7 +108,7 @@ export default function AnalyzingScreen() {
         <PrimaryButton
           label={t('analyzing.error.backHome')}
           variant="secondary"
-          onPress={() => goToScreen('analyze')}
+          onPress={() => abandonReading('analyze')}
         />
       </View>
     );

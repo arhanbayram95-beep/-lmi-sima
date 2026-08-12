@@ -552,6 +552,18 @@ export const translations = {
     en: 'Share Reading', zh: '分享解读', hi: 'रीडिंग शेयर करें', es: 'Compartir lectura', fr: 'Partager la lecture',
     ar: 'مشاركة القراءة', bn: 'রিডিং শেয়ার করুন', pt: 'Partilhar leitura', ru: 'Поделиться анализом', ur: 'ریڈنگ شیئر کریں',
   },
+  'reveal.previousCard': {
+    en: 'Previous card', zh: '上一张', hi: 'पिछला कार्ड', es: 'Tarjeta anterior', fr: 'Carte précédente',
+    ar: 'البطاقة السابقة', bn: 'আগের কার্ড', pt: 'Cartão anterior', ru: 'Предыдущая карточка', ur: 'پچھلا کارڈ',
+  },
+  'reveal.nextCard': {
+    en: 'Next card', zh: '下一张', hi: 'अगला कार्ड', es: 'Tarjeta siguiente', fr: 'Carte suivante',
+    ar: 'البطاقة التالية', bn: 'পরবর্তী কার্ড', pt: 'Cartão seguinte', ru: 'Следующая карточка', ur: 'اگلا کارڈ',
+  },
+  'reveal.cardProgress': {
+    en: 'Card progress', zh: '卡片进度', hi: 'कार्ड प्रगति', es: 'Progreso de las tarjetas', fr: 'Progression des cartes',
+    ar: 'تقدم البطاقات', bn: 'কার্ড অগ্রগতি', pt: 'Progresso dos cartões', ru: 'Прогресс карточек', ur: 'کارڈ کی پیش رفت',
+  },
   'share.modalTitle': {
     en: 'Share Your Reading', zh: '分享你的解读', hi: 'अपनी रीडिंग शेयर करें', es: 'Comparte tu lectura',
     fr: 'Partagez votre lecture', ar: 'شارك قراءتك', bn: 'আপনার রিডিং শেয়ার করুন', pt: 'Partilhe a sua leitura',
@@ -613,6 +625,10 @@ export const translations = {
     es: 'Elige qué aparece en tu tarjeta', fr: 'Choisissez ce qui apparaît sur votre carte',
     ar: 'اختر ما يظهر على بطاقتك', bn: 'আপনার কার্ডে কী দেখাবে তা বেছে নিন', pt: 'Escolha o que aparece no seu cartão',
     ru: 'Выберите, что показать на карточке', ur: 'منتخب کریں کہ آپ کے کارڈ پر کیا دکھایا جائے',
+  },
+  'share.builder.colorLabel': {
+    en: 'Card color', zh: '卡片颜色', hi: 'कार्ड का रंग', es: 'Color de la tarjeta', fr: 'Couleur de la carte',
+    ar: 'لون البطاقة', bn: 'কার্ডের রঙ', pt: 'Cor do cartão', ru: 'Цвет карточки', ur: 'کارڈ کا رنگ',
   },
   'share.builder.createButton': {
     en: 'Create & Share', zh: '创建并分享', hi: 'बनाएं और शेयर करें', es: 'Crear y compartir', fr: 'Créer et partager',

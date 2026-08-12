@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { ShareableSection } from '../../api/types';
-import { Theme } from '../../ui/theme';
+import { DEFAULT_SHARE_PALETTE_ID, shareCardPalette, SharePaletteId, Theme } from '../../ui/theme';
 import AppLogo from './AppLogo';
 
 interface ShareCardProps {
@@ -14,6 +14,9 @@ interface ShareCardProps {
   // on the card, this is purely a user preference for a more personal
   // share.
   photo?: string;
+  // Which of the locked SHARE_CARD_PALETTES (see theme.ts) the user picked
+  // in the builder. Defaults to the app's own crimson-on-obsidian look.
+  paletteId?: SharePaletteId;
 }
 
 // Vertical, story-ready card captured via react-native-view-shot (see
@@ -21,9 +24,11 @@ interface ShareCardProps {
 // layout flow, only measured and snapshotted. Height is intentionally not
 // fixed to a 9:16 crop like the old single-headline version — the number of
 // sections is entirely up to the user, so the card grows to fit them.
-const ShareCard = forwardRef<View, ShareCardProps>(({ sections, photo }, ref) => {
+const ShareCard = forwardRef<View, ShareCardProps>(({ sections, photo, paletteId = DEFAULT_SHARE_PALETTE_ID }, ref) => {
+  const palette = shareCardPalette(paletteId);
+
   return (
-    <View ref={ref} style={styles.card} collapsable={false}>
+    <View ref={ref} testID="share-card" style={[styles.card, { backgroundColor: palette.background }]} collapsable={false}>
       <View style={styles.brand}>
         <AppLogo showWordmark />
       </View>
@@ -39,7 +44,7 @@ const ShareCard = forwardRef<View, ShareCardProps>(({ sections, photo }, ref) =>
         )}
         {sections.map((section) => (
           <View key={section.id} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <Text style={[styles.sectionTitle, { color: palette.accent }]}>{section.title}</Text>
             <Text style={styles.sectionBody}>{section.body}</Text>
           </View>
         ))}

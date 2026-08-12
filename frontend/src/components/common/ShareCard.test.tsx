@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react-native';
 import React from 'react';
 import ShareCard from './ShareCard';
 import { ShareableSection } from '../../api/types';
+import { shareCardPalette } from '../../ui/theme';
 
 const SECTIONS: ShareableSection[] = [
   { id: 'work', title: 'Career Archetype', body: 'Strategic Innovator — You read as someone people trust instantly.' },
@@ -35,5 +36,17 @@ describe('ShareCard', () => {
   it('includes the photo when explicitly opted into', () => {
     render(<ShareCard sections={SECTIONS} photo="ZmFrZS1iYXNlNjQ=" />);
     expect(screen.getByTestId('share-card-photo')).toBeTruthy();
+  });
+
+  it('defaults to the crimson palette when none is given', () => {
+    render(<ShareCard sections={SECTIONS} />);
+    const flatStyle = Object.assign({}, ...([] as object[]).concat(screen.getByTestId('share-card').props.style));
+    expect(flatStyle.backgroundColor).toBe(shareCardPalette('crimson').background);
+  });
+
+  it('applies the requested palette background', () => {
+    render(<ShareCard sections={SECTIONS} paletteId="midnight" />);
+    const flatStyle = Object.assign({}, ...([] as object[]).concat(screen.getByTestId('share-card').props.style));
+    expect(flatStyle.backgroundColor).toBe(shareCardPalette('midnight').background);
   });
 });

@@ -13,7 +13,7 @@ A React Native mobile app that gives users playful, AI-generated character and e
 * **Multimodal AI Vision** — Google Gemini (`gemini-flash-latest`, Google's auto-updating flash alias) generates the structured reading. Anthropic Claude remains a candidate under pricing evaluation (see `PROJECT_SPEC.md` §4); the AI-calling code is isolated in `backend/src/services/` so switching providers again stays a contained change.
 * **Real on-device face detection** — `react-native-vision-camera` + `react-native-vision-camera-face-detector` (ML Kit) reject non-face frames locally, before `capturePhoto` or any network call, per `PROJECT_SPEC.md` §2.2. Verified end-to-end on a physical Android device (2026-08-04). This replaced `expo-camera`, which is why the app now needs an EAS dev-client build instead of plain Expo Go — see "Running on a physical device" below.
 * **Privacy-first (process-and-discard)** — captured photos live in memory only, on both the client and the server, and are purged immediately after the API response returns. No image ever touches disk or a database.
-* **Story-ready share cards** — a builder UI (`ShareOptionsModal`) lets the user pick which reading sections to include, with an opt-in toggle to embed their captured photo, then renders a `react-native-view-shot` card sized to the content. Plain-text "Quick Message" and "Copy Text" options are also available, and image sharing goes through `expo-sharing` (needed for a real cross-platform file attachment — React Native's built-in `Share.share({ url })` is iOS-only).
+* **Story-ready share cards** — a builder UI (`ShareOptionsModal`) lets the user pick which reading sections to include and a color palette for the card, with an opt-in toggle to embed their captured photo, then renders a `react-native-view-shot` card sized to the content. Plain-text "Quick Message" and "Copy Text" options are also available, and image sharing goes through `expo-sharing` (needed for a real cross-platform file attachment — React Native's built-in `Share.share({ url })` is iOS-only).
 * **10-language UI** — en/zh/hi/es/fr/ar/bn/pt/ru/ur, via a lightweight custom i18n dictionary (`frontend/src/i18n/`). Legal documents (Privacy Policy/Terms) are hosted externally (see below) and stay English-only pending professional translation.
 * **Monetization (RevenueCat)** — SDK fully wired and live-tested end-to-end against a real RevenueCat project (Test Store purchase dialog, weekly/monthly packages, entitlement check). Not yet live for real users — blocked on real App Store Connect / Google Play Console in-app products, which RevenueCat sits on top of rather than replaces. See `IMPLEMENTATION_PLAN.md` 5.1.
 
@@ -21,7 +21,7 @@ A React Native mobile app that gives users playful, AI-generated character and e
 
 ## Tech Stack
 
-* **Frontend:** React Native + TypeScript, Expo SDK 57 (blank TS template). State via `Zustand`. Camera via `react-native-vision-camera` + `react-native-vision-camera-face-detector`. Purchases via `react-native-purchases` (RevenueCat). Audio via `expo-av`. Share cards via `react-native-view-shot` + `expo-sharing`.
+* **Frontend:** React Native + TypeScript, Expo SDK 57 / React Native 0.86 (blank TS template). State via `Zustand`. Camera + face detection via `react-native-vision-camera` + `react-native-vision-camera-face-detector`. Audio via `expo-audio`. Subscriptions via `react-native-purchases` (RevenueCat). Share cards via `react-native-view-shot` + `expo-sharing`.
 * **Backend:** Node.js + TypeScript, **Fastify**. Thin gateway — holds the AI provider key, never exposes it to the frontend. Deployed to Render (see "Backend hosting" below).
 * **AI:** Google Gemini via `@google/genai`, structured JSON output via `responseSchema`/`responseMimeType` (not tool-use — that's Anthropic's mechanism, see `PROJECT_SPEC.md` §4 if you're reading this after a provider switch).
 
@@ -30,7 +30,7 @@ A React Native mobile app that gives users playful, AI-generated character and e
 ## Prerequisites
 
 * Node.js 20+ and npm
-* An **EAS dev-client build** installed on a physical Android or iOS device — plain Expo Go can no longer run this app. `react-native-vision-camera` and `react-native-purchases` are native modules Expo Go doesn't ship, so the capture screen fails to load without a custom dev client. See "Running on a physical device" below for the build steps. (A free Expo/EAS account covers Android; a real iPhone additionally needs an Apple Developer Program membership, $99/yr, for device provisioning — no Mac required, EAS builds in the cloud.)
+* An **EAS dev-client build** installed on a physical Android or iOS device, or an iOS Simulator / Android Emulator running one — plain Expo Go can no longer run this app. `react-native-vision-camera` (face detection) and `react-native-purchases` (subscriptions) are native modules Expo Go doesn't ship, so the capture screen fails to load without a custom dev client. Build one with `npx eas build --profile development --platform android` (or `ios`) from `frontend/` — see "Running on a physical device" below and `frontend/eas.json`. You only need to rebuild when a native dependency changes; JS changes reload over Metro as usual. (A free Expo/EAS account covers Android; a real iPhone additionally needs an Apple Developer Program membership, $99/yr, for device provisioning — no Mac required, EAS builds in the cloud.)
 * A Google Gemini API key ([aistudio.google.com](https://aistudio.google.com/)) — free tier works for development; see the note on model choice below
 * Your phone and your dev machine **on the same Wi-Fi network** while developing — Metro (the JS bundler) still needs LAN connectivity even though the backend no longer does (see "Backend hosting" below)
 
@@ -68,7 +68,7 @@ npm run dev
 
 You should see `Face Reader backend listening on port 3000`. Leave this running in its own terminal.
 
-> **Model note:** `gemini-2.0-flash` returned a `429` (zero free-tier quota) during development, and `gemini-2.5-flash` started 404ing as "no longer available to new users" on newly-created keys (as of 2026-07-28). The current default, `gemini-flash-latest` (`backend/src/services/readingService.ts`), is Google's auto-updating flash alias and works on the free tier. If you hit quota/404 errors, that's the first thing to check.
+> **Model note:** the default is `gemini-flash-latest` (in `backend/src/services/readingService.ts`) — Google's auto-updating alias for the current recommended flash model, chosen so a dated model being retired doesn't need another manual swap. Two dated models were tried and dropped first: `gemini-2.0-flash` returned a `429` (zero free-tier quota), and `gemini-2.5-flash` started returning a `404` ("no longer available to new users") on newly-created API keys as of 2026-07-28. If you hit quota or availability errors, that's the first thing to check.
 
 ### 2. Frontend setup
 
@@ -89,6 +89,10 @@ Or, if you ran a backend locally via the optional step 1 above:
 EXPO_PUBLIC_API_BASE_URL=http://<your-machine's-LAN-IP>:3000
 ```
 
+Two optional vars belong here too, both off by default:
+* `EXPO_PUBLIC_REVENUECAT_API_KEY` — a RevenueCat **public** SDK key. Leave it unset and the paywall uses a local-only stub that unlocks pro without charging; set it and the paywall calls the real SDK. (Note the name: this is the client-side public key, distinct from the backend's `REVENUECAT_API_KEY`.)
+* `EXPO_PUBLIC_USE_MOCK_API=true` — mock mode, see step 3 below.
+
 Find your LAN IP:
 * **Windows (PowerShell):** `Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -like '192.168.*' -or $_.IPAddress -like '10.*' -or $_.IPAddress -like '172.*' }`
 * **macOS/Linux:** `ipconfig getifaddr en0` (or `hostname -I` on Linux)
@@ -106,6 +110,8 @@ Then start Metro in dev-client mode (see the next section for building/installin
 ```bash
 npx expo start --dev-client
 ```
+
+Open the dev-client build on your phone and point it at the Metro URL shown in the terminal (or press `i`/`a` for a simulator/emulator). Scanning the QR code works too, as long as it's the dev client scanning it and not Expo Go.
 
 ### 3. Testing without a backend or API key at all
 
@@ -145,11 +151,16 @@ You don't rebuild for every code change — only when a native dependency change
 npx expo start --dev-client
 ```
 
-Open the custom dev-client app on your phone (it has your app's own icon, not Expo Go's) and connect to the printed LAN URL, same as Expo Go used to work.
+Open the custom dev-client app on your phone (it has your app's own icon, not Expo Go's) and connect to the printed LAN URL, same as Expo Go used to work — or press `i`/`a` for a simulator/emulator, or scan the QR code (as long as it's the dev client scanning it, not Expo Go).
 
-**Both your phone and your dev machine need to be on the same Wi-Fi network** for Metro (the JS bundle server, port 8081) to work. This no longer applies to the backend connection if you're pointed at the Render-hosted URL (real HTTPS, reachable over the internet) — only Metro itself needs LAN. If your router isolates clients from each other (common on some home/office/guest networks):
-* Easiest fix: use a phone hotspot instead of the shared Wi-Fi — connect your dev machine to your **phone's** hotspot, then use the machine's new IP for Metro (and `frontend/.env`, if pointing at a local backend).
-* `frontend/.env` is read once, when Metro starts — if you change your machine's IP (new network, hotspot toggled, etc.), you must fully restart `npx expo start --dev-client` (not just reload the app) to pick up the change.
+The one thing that reliably trips people up is **network connectivity between your phone and your dev machine**, because two *separate* connections are involved:
+
+1. **Metro (port 8081)** — delivers the app's JS bundle to the dev client. This is what the QR code / printed URL connects to.
+2. **The backend** — a completely separate server, called automatically in the background once the app is loaded; there's no manual "connect" step for this one. Controlled entirely by `EXPO_PUBLIC_API_BASE_URL` in `frontend/.env`. Pointed at the Render-hosted URL (real HTTPS, reachable over the internet), this one no longer needs LAN at all — only Metro does.
+
+**Both your phone and your dev machine need to be on the same Wi-Fi network** for Metro to work. If your router isolates clients from each other (common on some home/office/guest networks), plain LAN mode will fail, and Expo's `--tunnel` flag only fixes Metro, not a locally-hosted backend (irrelevant if you're pointed at the Render URL). If you hit this:
+* Easiest fix: use a phone hotspot instead of the shared Wi-Fi — connect your dev machine to your **phone's** hotspot, then use the machine's new IP (on the hotspot subnet) for Metro (and `frontend/.env`, if pointing at a local backend).
+* `frontend/.env` is read once, when Metro starts — if you change your machine's IP (new network, hotspot toggled, etc.), you must fully restart `npx expo start --dev-client` (not just reload the app), and force-quit + reopen the dev client on the phone to guarantee it's not running a cached bundle with the old URL.
 * If you're using a PowerShell terminal and previously ran `$env:EXPO_PUBLIC_API_BASE_URL = "..."` by hand in that same window, it will silently override `frontend/.env` for the rest of that terminal session. Open a fresh terminal if you're not sure.
 
 ---
@@ -185,7 +196,9 @@ Both should be fully green on a clean checkout.
 
 ## What's not wired up yet
 
-* **RevenueCat real purchases** — the SDK integration is complete and live-tested against a real RevenueCat project (Test Store), but there's no real App Store Connect / Google Play Console product behind it yet — RevenueCat sits on top of those, it doesn't replace them. See `IMPLEMENTATION_PLAN.md` 5.1.
+* **Real subscription purchases** — the RevenueCat SDK is installed and wired end to end (`frontend/src/utils/purchases.ts`, `PaywallScreen.tsx`), live-tested end-to-end against a real RevenueCat project (Test Store purchase dialog, weekly/monthly packages, entitlement check). What's still missing is real App Store Connect / Google Play Console in-app products and the `aura_pro_access` entitlement mapped to them in the RevenueCat dashboard — RevenueCat sits on top of those, it doesn't replace them (see `IMPLEMENTATION_PLAN.md` 5.1). With no `EXPO_PUBLIC_REVENUECAT_API_KEY` set, the paywall falls back to a local-only stub that unlocks pro without charging.
+* **Server-side entitlement enforcement** — `backend/src/middleware/entitlement.ts` is still a permissive stub that lets every request through. `@fastify/rate-limit` (20 req/10 min per IP) is the only thing currently protecting the paid Gemini endpoint.
+* **Paid-tier Gemini key** — Google's free tier may use submitted content to improve its products for users outside the EEA/UK/Switzerland, which contradicts the no-training guarantee the Privacy Policy makes. The production key must be on a billing-enabled project before real user photos hit the endpoint. See `QA_FINDINGS.md`'s Security Review.
 * **App Store / Play Store listings** — don't exist yet. "Rate on App Store" (`frontend/src/utils/storeLinks.ts`) and the share text's store link open a correctly-formed store URL with a placeholder app ID — replace `IOS_APP_STORE_ID` once the App Store Connect app record exists and has a real numeric Apple ID (`ANDROID_PACKAGE_NAME` is already the real, final package name). `app.json`'s `ios.bundleIdentifier`/`android.package` are finalized as of 2026-08-12: `com.arhanbayram.facereader` (see `IMPLEMENTATION_PLAN.md` 5.3).
 
 Check `IMPLEMENTATION_PLAN.md` for the full, up-to-date phase-by-phase status.

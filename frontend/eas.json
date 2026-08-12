@@ -6,11 +6,17 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_REVENUECAT_API_KEY": "test_dnOkuyUaPwbOtClUhmgKiWOIHiR"
+      }
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_REVENUECAT_API_KEY": "test_dnOkuyUaPwbOtClUhmgKiWOIHiR"
+      }
     },
     "production": {
       "autoIncrement": true,

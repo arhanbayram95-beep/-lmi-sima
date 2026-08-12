@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Alert, Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { readingBadgeCard, ReadingResult, ShareableSection } from '../../api/types';
 import { useTranslation } from '../../i18n/useTranslation';
-import { Theme } from '../../ui/theme';
+import { SHARE_CARD_PALETTES, SharePaletteId, Theme } from '../../ui/theme';
 import { getStoreListingUrl } from '../../utils/storeLinks';
 import AnimatedCheckbox from './AnimatedCheckbox';
 import PrimaryButton from './PrimaryButton';
@@ -18,10 +18,47 @@ interface ShareOptionsModalProps {
   onIncludePhotoChange: (value: boolean) => void;
   selectedSectionIds: Set<string>;
   onSelectedSectionIdsChange: (ids: Set<string>) => void;
+  selectedPaletteId: SharePaletteId;
+  onSelectedPaletteIdChange: (id: SharePaletteId) => void;
   // The image-card path still needs the parent's off-screen ShareCard +
   // view-shot ref (see RevealScreen) — this modal only decides *what* goes
   // on the card, not how it's captured.
   onShareImage: () => void;
+}
+
+// One tappable swatch per SHARE_CARD_PALETTES entry (theme.ts) — a radio
+// selection (exactly one active at a time), not a checkbox list like the
+// section picklist below it.
+function PaletteSwatch({
+  paletteId,
+  selected,
+  onSelect,
+}: {
+  paletteId: SharePaletteId;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const palette = SHARE_CARD_PALETTES.find((p) => p.id === paletteId)!;
+  return (
+    <Pressable
+      onPress={onSelect}
+      accessibilityRole="radio"
+      accessibilityState={{ checked: selected }}
+      accessibilityLabel={paletteId}
+      hitSlop={6}
+      testID={`share-palette-${paletteId}`}
+    >
+      <View
+        style={[
+          styles.swatch,
+          { backgroundColor: palette.background, borderColor: palette.accent },
+          selected && styles.swatchSelected,
+        ]}
+      >
+        {selected && <View style={[styles.swatchDot, { backgroundColor: palette.accent }]} />}
+      </View>
+    </Pressable>
+  );
 }
 
 function ShareOptionRow({
@@ -58,6 +95,8 @@ export default function ShareOptionsModal({
   onIncludePhotoChange,
   selectedSectionIds,
   onSelectedSectionIdsChange,
+  selectedPaletteId,
+  onSelectedPaletteIdChange,
   onShareImage,
 }: ShareOptionsModalProps) {
   const t = useTranslation();
@@ -162,6 +201,20 @@ export default function ShareOptionsModal({
                 />
               )}
 
+              <View style={styles.paletteBlock}>
+                <Text style={styles.groupLabel}>{t('share.builder.colorLabel')}</Text>
+                <View style={styles.paletteRow} accessibilityRole="radiogroup" testID="share-palette-row">
+                  {SHARE_CARD_PALETTES.map((palette) => (
+                    <PaletteSwatch
+                      key={palette.id}
+                      paletteId={palette.id}
+                      selected={selectedPaletteId === palette.id}
+                      onSelect={() => onSelectedPaletteIdChange(palette.id)}
+                    />
+                  ))}
+                </View>
+              </View>
+
               <View style={styles.sectionList}>
                 {sections.map((section) => (
                   <AnimatedCheckbox
@@ -257,5 +310,38 @@ const styles = StyleSheet.create({
   },
   sectionList: {
     gap: Theme.spacing.sm,
+  },
+  paletteBlock: {
+    gap: Theme.spacing.xs,
+  },
+  groupLabel: {
+    ...Theme.typography.labelSm,
+    fontSize: 10,
+    color: Theme.colors.text.muted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  paletteRow: {
+    flexDirection: 'row',
+    gap: Theme.spacing.sm,
+  },
+  swatch: {
+    width: 36,
+    height: 36,
+    borderRadius: Theme.radius.full,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  swatchSelected: {
+    shadowColor: Theme.colors.accent.goldSecondary,
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 0 },
+  },
+  swatchDot: {
+    width: 10,
+    height: 10,
+    borderRadius: Theme.radius.full,
   },
 });

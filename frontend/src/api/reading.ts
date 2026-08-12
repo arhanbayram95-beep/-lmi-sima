@@ -1,6 +1,7 @@
-import { API_BASE_URL, USE_MOCK_API } from './config';
+import { API_BASE_URL, assertSecureApiBaseUrl, USE_MOCK_API } from './config';
 import { analyzeReadingMock } from './mockReading';
 import { AnalyzeReadingPayload, ReadingResult } from './types';
+import { getCurrentAppUserId } from '../utils/purchases';
 
 export type {
   AnalyzeReadingPayload,
@@ -11,11 +12,12 @@ export type {
   RelationshipHarmonyResult,
 } from './types';
 
-// 'NO_FACE_DETECTED' is a forward-compatible hook, not yet raised anywhere —
-// on-device face detection is deferred (see QA_FINDINGS.md QA-5 and
-// IMPLEMENTATION_PLAN.md 2.3). Once real detection lands, either the client
-// or the backend can throw this code and AnalyzingScreen will already route
-// to NoFaceDetectedScreen for it.
+// 'NO_FACE_DETECTED' is a forward-compatible hook that nothing raises yet.
+// On-device detection shipped in IMPLEMENTATION_PLAN.md 6.1, but it rejects
+// a faceless frame at the shutter in CaptureScreen — before any API call —
+// so it never travels as an error code. This stays wired for the case where
+// the backend starts reporting it: AnalyzingScreen already routes it to
+// NoFaceDetectedScreen.
 export type ReadingApiErrorCode = 'NO_FACE_DETECTED';
 
 export class ReadingApiError extends Error {
@@ -35,11 +37,25 @@ export async function analyzeReading(payload: AnalyzeReadingPayload): Promise<Re
     return analyzeReadingMock(payload);
   }
 
+  // Thrown here, not at config.ts's module load — see that comment for why
+  // a bad URL needs to surface as a normal catchable rejection instead of
+  // crashing the app at launch.
+  assertSecureApiBaseUrl(API_BASE_URL);
+
+  // Backend-side monitor-mode entitlement check (see backend/src/middleware/
+  // entitlement.ts) — omitted entirely, not sent empty, whenever RevenueCat
+  // isn't configured client-side yet, which is every environment as of this
+  // writing (PROJECT_SPEC.md §6).
+  const appUserId = await getCurrentAppUserId();
+
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}/api/v1/reading/analyze`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(appUserId ? { 'X-RevenueCat-App-User-Id': appUserId } : {}),
+      },
       body: JSON.stringify(payload),
     });
   } catch (cause) {

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { Alert, Share } from 'react-native';
 import React from 'react';
 import RevealScreen from './RevealScreen';
@@ -220,5 +220,50 @@ describe('RevealScreen', () => {
     await waitFor(() =>
       expect(mockSetStringAsync).toHaveBeenCalledWith(expect.stringContaining('Analytical Visionary'))
     );
+  });
+
+  it('pages through the reveal one card at a time instead of one long scroll', () => {
+    render(<RevealScreen />);
+    // 2 captured photos + 5 character_analysis cards (archetype, facial
+    // structure, spirit animal, traits, celebrity).
+    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([1, ' / ', 7]);
+    expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(true);
+    expect(screen.getByTestId('reveal-page-next').props.accessibilityState.disabled).toBe(false);
+
+    fireEvent.press(screen.getByTestId('reveal-page-next'));
+    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([2, ' / ', 7]);
+    expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(false);
+
+    fireEvent.press(screen.getByTestId('reveal-page-dot-6'));
+    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([7, ' / ', 7]);
+    expect(screen.getByTestId('reveal-page-next').props.accessibilityState.disabled).toBe(true);
+  });
+
+  it('resets back to the first page whenever a new reading loads', () => {
+    render(<RevealScreen />);
+    fireEvent.press(screen.getByTestId('reveal-page-dot-3'));
+    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([4, ' / ', 7]);
+
+    act(() => {
+      useAppStore.setState({ reading: RELATIONSHIP_READING });
+    });
+    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([1, ' / ', 6]);
+  });
+
+  it('offers several color options for the share card and applies the chosen one', () => {
+    render(<RevealScreen />);
+    fireEvent.press(screen.getByTestId('share-reading-button'));
+    fireEvent.press(screen.getByTestId('share-option-image'));
+
+    expect(screen.getByTestId('share-palette-crimson')).toBeTruthy();
+    expect(screen.getByTestId('share-palette-burgundy')).toBeTruthy();
+    expect(screen.getByTestId('share-palette-midnight')).toBeTruthy();
+    expect(screen.getByTestId('share-palette-iridescent')).toBeTruthy();
+
+    const flatStyleBefore = Object.assign({}, ...([] as object[]).concat(screen.getByTestId('share-card').props.style));
+    fireEvent.press(screen.getByTestId('share-palette-midnight'));
+    const flatStyleAfter = Object.assign({}, ...([] as object[]).concat(screen.getByTestId('share-card').props.style));
+
+    expect(flatStyleAfter.backgroundColor).not.toBe(flatStyleBefore.backgroundColor);
   });
 });

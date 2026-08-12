@@ -1,7 +1,9 @@
 import Fastify, { FastifyError, FastifyInstance } from 'fastify';
 import { ReadingModelClient } from './services/geminiClient';
+import { RevenueCatClient } from './services/revenueCatClient';
 import { registerCors } from './middleware/cors';
 import { registerRateLimit } from './middleware/rateLimit';
+import { registerSecurityHeaders } from './middleware/securityHeaders';
 import { registerLegalRoutes } from './routes/legal';
 import { registerReadingRoutes } from './routes/reading';
 
@@ -13,13 +15,17 @@ import { registerReadingRoutes } from './routes/reading';
 // plus JSON overhead, with headroom.
 const BODY_LIMIT_BYTES = 25 * 1024 * 1024;
 
-export async function buildApp(readingModelClient: ReadingModelClient): Promise<FastifyInstance> {
+export async function buildApp(
+  readingModelClient: ReadingModelClient,
+  revenueCatClient?: RevenueCatClient
+): Promise<FastifyInstance> {
   const app = Fastify({ logger: false, bodyLimit: BODY_LIMIT_BYTES });
   // Must complete before any route is registered — see the comment on
   // registerRateLimit for why an unawaited call silently no-ops.
   await registerCors(app);
   await registerRateLimit(app);
-  registerReadingRoutes(app, readingModelClient);
+  await registerSecurityHeaders(app);
+  registerReadingRoutes(app, readingModelClient, revenueCatClient);
   registerLegalRoutes(app);
 
   // Defense-in-depth: every expected failure path already responds with a

@@ -1,6 +1,6 @@
 import * as Sharing from 'expo-sharing';
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 import DisclaimerFooter from '../components/common/DisclaimerFooter';
@@ -8,34 +8,40 @@ import FadeInView from '../components/common/FadeInView';
 import PrimaryButton from '../components/common/PrimaryButton';
 import ShareCard from '../components/common/ShareCard';
 import ShareOptionsModal from '../components/common/ShareOptionsModal';
+import SwipeablePager from '../components/common/SwipeablePager';
 import {
   BadgeSummaryCard,
   ChecklistCard,
   HighlightCard,
   MetadataBadgeRow,
-  PhotoStripCard,
+  PhotoPageCard,
   PillsCard,
   ReadingScoreCard,
 } from '../components/common/ReadingCards';
 import { ReadingResult, readingShareableSections } from '../api/types';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
-import { Theme } from '../ui/theme';
+import { DEFAULT_SHARE_PALETTE_ID, SharePaletteId, Theme } from '../ui/theme';
 
 type Translate = ReturnType<typeof useTranslation>;
 
-// One card stack per module, in the order the reading reads best: the
-// captured photos, then the hook (badge tag), then progressively more
-// detail as it goes — score only survives for relationship_harmony now
-// (see systemPrompt.ts). Each module's shape is guaranteed by its own
-// response schema — see backend readingSchema.ts.
+// One page per photo, then one card stack per module, in the order the
+// reading reads best: the captured photos first (each its own page — see
+// PhotoPageCard's comment on why this isn't a nested sub-carousel), then
+// the hook (badge tag), then progressively more detail as it goes — score
+// only survives for relationship_harmony now (see systemPrompt.ts). Each
+// module's shape is guaranteed by its own response schema — see backend
+// readingSchema.ts. RevealScreen pages through this list one card at a
+// time (see SwipeablePager below) rather than a single long scroll.
 function readingCards(reading: ReadingResult, images: string[], t: Translate): React.ReactNode[] {
-  const photos = <PhotoStripCard key="photos" images={images} testID="reveal-photos" />;
+  const photos = images.map((photo, i) => (
+    <PhotoPageCard key={`photo-${i}`} photo={photo} testID={i === 0 ? 'reveal-photos' : undefined} />
+  ));
 
   switch (reading.module) {
     case 'character_analysis':
       return [
-        photos,
+        ...photos,
         <BadgeSummaryCard key="archetype" card={reading.archetype_card} icon="🎭" testID="archetype-card" />,
         <BadgeSummaryCard
           key="facial-structure"
@@ -78,7 +84,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
       ];
     case 'relationship_harmony':
       return [
-        photos,
+        ...photos,
         <BadgeSummaryCard key="vibe" card={reading.vibe_card} icon="💞" testID="archetype-card" />,
         <ReadingScoreCard
           key="score"
@@ -107,7 +113,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
       ];
     case 'career_path':
       return [
-        photos,
+        ...photos,
         <BadgeSummaryCard key="work" card={reading.work_archetype_card} icon="💼" testID="archetype-card" />,
         <PillsCard
           key="domains"
@@ -135,25 +141,30 @@ export default function RevealScreen() {
   const t = useTranslation();
   const shareCardRef = useRef<View>(null);
   const insets = useSafeAreaInsets();
+  const [pageIndex, setPageIndex] = useState(0);
   const [shareOptionsVisible, setShareOptionsVisible] = useState(false);
   const [includePhotoInCard, setIncludePhotoInCard] = useState(false);
   const [selectedSectionIds, setSelectedSectionIds] = useState<Set<string>>(new Set());
+  const [selectedPaletteId, setSelectedPaletteId] = useState<SharePaletteId>(DEFAULT_SHARE_PALETTE_ID);
 
   // The captured photos are still in memory when this screen mounts (never
-  // persisted, per PROJECT_SPEC.md §3) — shown at the top of the card stack
-  // below, then purged the moment the user leaves, however they leave.
+  // persisted, per PROJECT_SPEC.md §3) — shown as the opening pages of the
+  // card-by-card reveal below, then purged the moment the user leaves,
+  // however they leave.
   useEffect(() => clearImages, [clearImages]);
 
   // Every section starts selected — the builder is an opt-out picker, not
   // an opt-in one, so a user who never opens it still gets the full card.
+  // A fresh reading also always opens back on its first page/card.
   useEffect(() => {
     if (reading) setSelectedSectionIds(new Set(readingShareableSections(reading).map((section) => section.id)));
+    setPageIndex(0);
   }, [reading]);
 
   // The off-screen ShareCard below already re-renders with the current
-  // includePhotoInCard/images state, so capturing it here always reflects
-  // whatever the user picked in ShareOptionsModal — no extra plumbing
-  // needed between the toggle and the capture.
+  // includePhotoInCard/images/palette state, so capturing it here always
+  // reflects whatever the user picked in ShareOptionsModal — no extra
+  // plumbing needed between the builder and the capture.
   //
   // React Native's built-in Share.share only honors its `url` field on
   // iOS -- on Android it's silently dropped, so the OS share sheet still
@@ -181,20 +192,67 @@ export default function RevealScreen() {
     );
   }
 
+  // Recomputed on every render rather than memoized — cheap pure functions
+  // over already-fetched data, not worth the hook overhead (see CLAUDE.md
+  // "don't add complexity beyond what the task requires").
+  const cards = readingCards(reading, images, t);
+  const lastPageIndex = cards.length - 1;
+
   return (
     <View style={styles.container} testID="reveal-screen">
       <View style={styles.header}>
         <Text style={styles.title}>{t('reveal.title')}</Text>
+        {/* Plain digits, no i18n needed — reinforces there's more to swipe
+            through, which is the point of paging the reveal card by card
+            instead of one long scroll. */}
+        <Text style={styles.pageCounter} testID="reveal-page-counter">
+          {pageIndex + 1} / {cards.length}
+        </Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {readingCards(reading, images, t).map((card, index) => (
-          <FadeInView key={index} delay={index * 70}>
-            {card}
-          </FadeInView>
+      <SwipeablePager index={pageIndex} onIndexChange={setPageIndex} style={styles.pager}>
+        {cards.map((card, index) => (
+          <ScrollView key={index} contentContainerStyle={styles.pageContent} showsVerticalScrollIndicator={false}>
+            <FadeInView delay={index === 0 ? 0 : 80}>{card}</FadeInView>
+          </ScrollView>
         ))}
-        <DisclaimerFooter />
-      </ScrollView>
+      </SwipeablePager>
+
+      <View style={styles.pageNav} testID="reveal-page-nav">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('reveal.previousCard')}
+          accessibilityState={{ disabled: pageIndex === 0 }}
+          disabled={pageIndex === 0}
+          onPress={() => setPageIndex((current) => Math.max(0, current - 1))}
+          style={[styles.navArrow, pageIndex === 0 && styles.navArrowDisabled]}
+          testID="reveal-page-prev"
+        >
+          <Text style={styles.navArrowGlyph}>‹</Text>
+        </Pressable>
+
+        <View style={styles.pageDots} accessibilityLabel={t('reveal.cardProgress')}>
+          {cards.map((_, index) => (
+            <Pressable key={index} hitSlop={8} onPress={() => setPageIndex(index)} testID={`reveal-page-dot-${index}`}>
+              <View style={[styles.pageDot, index === pageIndex && styles.pageDotActive]} />
+            </Pressable>
+          ))}
+        </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('reveal.nextCard')}
+          accessibilityState={{ disabled: pageIndex === lastPageIndex }}
+          disabled={pageIndex === lastPageIndex}
+          onPress={() => setPageIndex((current) => Math.min(lastPageIndex, current + 1))}
+          style={[styles.navArrow, pageIndex === lastPageIndex && styles.navArrowDisabled]}
+          testID="reveal-page-next"
+        >
+          <Text style={styles.navArrowGlyph}>›</Text>
+        </Pressable>
+      </View>
+
+      <DisclaimerFooter />
 
       <View style={[styles.footer, { paddingBottom: Theme.spacing.sm + insets.bottom }]}>
         <PrimaryButton
@@ -213,6 +271,7 @@ export default function RevealScreen() {
           ref={shareCardRef}
           sections={readingShareableSections(reading).filter((section) => selectedSectionIds.has(section.id))}
           photo={includePhotoInCard ? images[0] : undefined}
+          paletteId={selectedPaletteId}
         />
       </View>
 
@@ -226,6 +285,8 @@ export default function RevealScreen() {
         onIncludePhotoChange={setIncludePhotoInCard}
         selectedSectionIds={selectedSectionIds}
         onSelectedSectionIdsChange={setSelectedSectionIds}
+        selectedPaletteId={selectedPaletteId}
+        onSelectedPaletteIdChange={setSelectedPaletteId}
         onShareImage={handleShareImage}
       />
     </View>
@@ -238,6 +299,9 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.background.start,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingTop: Theme.spacing.xl,
     paddingHorizontal: Theme.spacing.gutter,
     paddingBottom: Theme.spacing.sm,
@@ -246,13 +310,67 @@ const styles = StyleSheet.create({
     ...Theme.typography.headlineLg,
     color: Theme.colors.accent.goldSecondary,
   },
+  pageCounter: {
+    ...Theme.typography.labelSm,
+    fontSize: 12,
+    color: Theme.colors.text.muted,
+  },
+  // Fills the space between the header and the page-nav/disclaimer/action
+  // footer below — each child page is its own vertical ScrollView so a
+  // card taller than the available height still scrolls, independent of
+  // the horizontal swipe between cards.
+  pager: {
+    flex: 1,
+  },
   // Tighter than Theme.spacing.containerPadding (20) — the reveal cards
   // read bigger and closer to the design_examples reference with less
   // margin eating into their width.
-  scrollContent: {
+  pageContent: {
     paddingHorizontal: 8,
+    paddingTop: Theme.spacing.xs,
     paddingBottom: Theme.spacing.md,
+  },
+  pageNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: Theme.spacing.sm,
+    paddingBottom: Theme.spacing.xs,
+  },
+  navArrow: {
+    width: 36,
+    height: 36,
+    borderRadius: Theme.radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Theme.colors.surface.glassBackground,
+    borderWidth: 1,
+    borderColor: Theme.colors.surface.glassBorder,
+  },
+  navArrowDisabled: {
+    opacity: 0.3,
+  },
+  navArrowGlyph: {
+    ...Theme.typography.headlineMd,
+    fontSize: 20,
+    lineHeight: 22,
+    color: Theme.colors.accent.goldSecondary,
+  },
+  pageDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  pageDot: {
+    width: 6,
+    height: 6,
+    borderRadius: Theme.radius.full,
+    backgroundColor: 'rgba(255, 223, 158, 0.3)',
+  },
+  pageDotActive: {
+    width: 8,
+    height: 8,
+    backgroundColor: Theme.colors.accent.goldSecondary,
   },
   footer: {
     flexDirection: 'row',

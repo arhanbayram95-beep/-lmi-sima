@@ -351,3 +351,100 @@ mechanic. See Phase 7.3 in `IMPLEMENTATION_PLAN.md` for the full build.
   can't usefully photograph someone else while looking at their own
   selfie view. Not explicitly requested, but the feature wouldn't work
   well in practice without it.
+
+---
+
+## Pass 3 — 2026-08-07 (full-stack test audit + coverage sweep)
+
+Scope: fresh checkout (both `node_modules` absent — reinstalled), full
+`tsc --noEmit` + Jest on both sides as a baseline, then a Jest coverage
+sweep to find logic that no test was actually exercising, plus a doc-vs-code
+audit. Baseline was already green: backend 5 suites/38 tests at 96% stmt
+coverage, frontend 28 suites/142 tests at 85.4% stmt / 75.5% branch.
+
+- [x] **PASS3-1: Abandoned readings leaked their photos into the next capture
+  session** — the one real bug this pass. `AnalyzingScreen` left `images`
+  populated on *every* exit path except success: "Back to Analyze" from the
+  error state, and the `NO_FACE_DETECTED` route. Only the success path hands
+  the photos to `RevealScreen`, which is the sole caller that purges them
+  (on unmount). Two consequences, one privacy and one functional: captured
+  photos sat in the Zustand store for the rest of the session against
+  process-and-discard (`PROJECT_SPEC.md` §3), and the next capture session's
+  `addImage()` calls appended onto the stale array — overshooting
+  `MODULE_PHOTO_COUNTS` and failing the count check with a misleading
+  "we couldn't complete your reading," with no way out but an app restart.
+  Reproduced with a failing test first (both paths), then fixed via an
+  `abandonReading()` helper that clears before navigating.
+  Note the count-mismatch error state was itself unreachable-by-design
+  before this and self-heals now: leaving it purges the bad array.
+
+- [x] **PASS3-2: The share-card/history helpers had no direct test at all**
+  `api/types.ts` sat at 58% stmt / 37.5% branch — `readingBadgeCard`,
+  `readingScoreCard` and `readingShareableSections` each switch on `module`,
+  and only the `character_analysis` arm was ever executed (incidentally, via
+  `RevealScreen.test.tsx`). The `career_path` arms were entirely unexecuted.
+  These fail soft, not loud: a missed arm renders a blank history row or
+  silently drops a section from a user's share card. Added `api/types.test.ts`
+  covering all three modules through all three helpers, plus id-uniqueness
+  (`RevealScreen` keys its section picker off those ids) and a lockstep
+  assertion that `MODULE_PHOTO_COUNTS` still matches the backend's numbers.
+  58% → 100%.
+
+- [x] **PASS3-3: The purchase flow — the money path — was the least-covered
+  screen** `PaywallScreen.tsx` was at 58% stmt / 46% branch: every test ran
+  against the unconfigured RevenueCat fallback, so *no* test touched a real
+  purchase, restore, entitlement check, or offerings fetch. Those branches
+  hang off `isPurchasesConfigured`, a module-level const read from
+  `process.env` at import time, so they're unreachable without mocking
+  `utils/purchases` wholesale — hence a separate
+  `PaywallScreen.configured.test.tsx` rather than another describe block.
+  Covers: real store prices replacing the static `$4.99` copy, the loading
+  placeholder that exists to stop a visible price flip, offerings-fetch
+  failure falling back to static prices, purchase success, purchase
+  succeeding with *no* active entitlement (the "product not mapped to
+  `aura_pro_access` in the dashboard" case), purchase failure, user
+  cancellation staying silent, and all three restore outcomes. 58% → 97%.
+  Gotcha worth remembering: `jest.mock`'s factory is hoisted above every
+  declaration in the file, so a `class PurchaseCancelledError` declared at
+  file scope is still in its TDZ when the mocked module is imported — the
+  screen's `instanceof` check then throws `TypeError: Right-hand side of
+  'instanceof' is not an object` instead of classifying the error. Declare
+  it inside the factory and `require` it back out.
+
+- [x] **PASS3-4: `ResultsScreen`'s entire history list was untested**
+  Only the empty state had coverage (54% stmt / 25% branch) — the list
+  rendering, the per-module badge lookup, and `openEntry`'s reopen-a-past-
+  reading path all had zero. Added tests for all three. 54% → 95%.
+
+- [x] **PASS3-5: Docs described a version of the app that no longer exists**
+  Not cosmetic — `frontend/AGENTS.md` (loaded as `frontend/CLAUDE.md`)
+  instructed every future agent session to read the **Expo SDK 54** docs, two
+  majors behind the SDK 57 / RN 0.86 the app actually runs on, and root
+  `CLAUDE.md` told them to mock `expo-camera` and `expo-av` — neither of which
+  is installed any more. `README.md` was the worst of the three: it claimed
+  RevenueCat was "intentionally not installed yet" and on-device face
+  detection was unbuilt (both shipped — 5.1 groundwork and 6.1), that the app
+  "is built to run in plain Expo Go" (two native modules make that
+  impossible), SDK 54, `expo-camera`/`expo-av`, and `gemini-2.5-flash` as
+  "the current default" when `readingService.ts` moved to
+  `gemini-flash-latest` after 2.5-flash started 404ing. `PROJECT_SPEC.md`
+  and `IMPLEMENTATION_PLAN.md` were both accurate throughout — the drift was
+  confined to the orientation docs. Rewrote all three against the code, and
+  replaced README's stale "not wired up yet" list with the genuine remaining
+  blockers (real store products, the permissive server-side entitlement stub,
+  the free-tier Gemini key vs. the Privacy Policy's no-training guarantee).
+  Also corrected two in-code comments that outlived their subject:
+  `NoFaceDetectedScreen`'s "nothing routes here yet" (CaptureScreen does) and
+  `api/reading.ts`'s "on-device face detection is deferred" (it shipped).
+
+Result: frontend 30 suites / 168 tests (was 28/142), 90.6% stmt / 83.9%
+branch (was 85.4/75.5); backend unchanged at 5 suites / 38 tests, 96%.
+Both `tsc --noEmit` runs clean.
+
+### Not fixed — flagged, unchanged from the Security Review above
+- `requireActiveEntitlement` is still a permissive stub; `@fastify/rate-limit`
+  (20 req/10 min per IP) remains the only thing protecting the paid Gemini
+  endpoint. Still blocked on real store products, same as 5.1.
+- The Gemini key is still free-tier. Unchanged blocker for the Privacy
+  Policy's no-training claim outside the EEA/UK/Switzerland — must move to a
+  billing-enabled project before real user photos hit the endpoint.
