@@ -181,6 +181,35 @@ entertainment framing.
     required for the App Store Connect / Play Console privacy policy URL
     field, which plain in-app modal text can't satisfy. See `PROJECT_SPEC.md`
     §3.
+  - **2026-08-12: Apple Developer Program obtained; bundle identifier
+    finalized.** `ios.bundleIdentifier` / `android.package` changed from the
+    `app.faceai.facereader` placeholder to `com.arhanbayram.facereader`
+    (product owner decision — no domain is owned, so this is a personal-name
+    reverse-DNS identifier; Apple/Google don't require the string to
+    resolve). This is now considered permanent. `ShareCard.tsx`'s footer
+    also dropped its `faceai.app` mention (same unowned-domain issue,
+    user-facing copy). `storeLinks.ts`'s `ANDROID_PACKAGE_NAME` updated to
+    match; `IOS_APP_STORE_ID` stays a placeholder — that numeric ID doesn't
+    exist until an App Store Connect app record is created.
+    `ios.infoPlist.ITSAppUsesNonExemptEncryption: false` added — surfaced by
+    a real `eas build` attempt as a hard requirement (app only does standard
+    HTTPS/TLS, no custom encryption, so `false` is correct).
+    EAS/Expo account confirmed already logged in (`arhan_bayram` /
+    `arhanbayrams-team`, matches the existing `extra.eas.projectId`) — that
+    blocker from the note above is resolved.
+    **Still blocked on the user, cannot be done by an agent:** an
+    `eas build --platform ios --profile preview` (or `production`) run
+    itself needs to be started interactively by the user in their own
+    terminal — EAS has no iOS credentials yet and must authenticate against
+    the new Apple Developer Program membership (Apple ID login + 2FA, or an
+    App Store Connect API key) to generate a Distribution Certificate and
+    Provisioning Profile; a non-interactive attempt from this pass
+    confirmed it fails fast with "couldn't find any credentials suitable
+    for internal distribution, run in interactive mode" rather than hanging.
+    An agent should not hold or relay Apple ID credentials/2FA codes.
+    TestFlight distribution additionally needs the App Store Connect app
+    record created first (not done yet) and `eas submit -p ios` run
+    afterward.
 
 ---
 
@@ -266,7 +295,7 @@ here too (2026-07-26) — tackle both together when ready for a dev-client build
       network path was fine. Added `android.usesCleartextTraffic: true` to
       `app.json` — **must come back out (or be scoped to dev builds only)
       before a real production submission**, once the backend has a real
-      HTTPS domain.
+      HTTPS domain. **Resolved 2026-08-05** — see 8.12 below.
 
 ---
 
@@ -416,6 +445,29 @@ relationship/career-specific content a generic reading wouldn't deliver.
   Next/Get Started footer, PaywallScreen's Subscribe footer. Verified live
   on-device (uiautomator dump confirmed the button bounds, then confirmed
   the fixed build's builder flow reaches the native share sheet).
+- [x] **8.11 Fix Story Card share producing empty messages; richer text
+  share** (2026-08-05) — The product owner reported the share sheet
+  rejecting sends with "empty messages cannot be sent." Root cause: RN's
+  `Share.share({ url: uri })` only honors `url` on iOS; on Android the
+  share intent went out with no message and no attachment. Switched to
+  `expo-sharing`'s `shareAsync()` (new dependency — see PROJECT_SPEC.md),
+  which correctly attaches the captured PNG on both platforms. Also
+  expanded the "Quick Message"/"Copy Text" template to pull in the next
+  two cards after the badge (previously badge + one-line summary only)
+  and append the app's store link via the existing `getStoreListingUrl()`
+  helper — same placeholder-until-real-listing caveat already documented
+  in `SettingsScreen.tsx`'s `SHARE_MESSAGE`.
+- [x] **8.12 Backend live on Render; drop the cleartext exception**
+  (2026-08-05) — Backend deployed to Render's free tier via the
+  `render.yaml` blueprint (see PROJECT_SPEC.md §3, "Backend hosting"),
+  confirmed live at `https://face-reader-backend-h0qb.onrender.com`
+  (verified: root path 404s as expected, `POST /api/v1/reading/analyze`
+  with an empty body returns the real Fastify validation error, not a
+  connection failure). `frontend/.env`'s `EXPO_PUBLIC_API_BASE_URL` now
+  points at that URL instead of the dev machine's LAN IP, and
+  `android.usesCleartextTraffic` is removed from `app.json` — no longer
+  needed now that the backend serves real HTTPS, closing out the TODO
+  from 6.1.
 
 ---
 
@@ -446,12 +498,15 @@ Found and fixed during first real iOS dev-client testing.
 - [x] **9.5 Share-card theme swatches made more impactful** — 36px to
   56px, a checkmark + stronger glow/scale on the selected swatch instead of
   a small centered dot.
-- [x] **9.6 ShareCard disclaimer removed** (product decision, explicitly
+- [x] **9.6 ShareCard footer removed** (product decision, explicitly
   confirmed overriding CLAUDE.md's disclaimer-lock default) — "For
-  entertainment purposes only" dropped from the share-card footer; kept the
-  `faceai.app` attribution. The in-app disclaimer (`DisclaimerFooter`, every
-  result screen) is unchanged and unaffected — this was the card that
-  leaves the app, not the app's own disclaimer surface.
+  entertainment purposes only" dropped from the share-card footer. Merged
+  with a concurrent change dropping the `faceai.app` attribution from the
+  same line (not an owned domain — see 8.12's Render URL work), so the
+  footer is gone entirely rather than partially. The in-app disclaimer
+  (`DisclaimerFooter`, every result screen) is unchanged and unaffected —
+  this was the card that leaves the app, not the app's own disclaimer
+  surface.
 - [x] **9.7 Softened "AI" language in flavor copy, all 10 locales**
   (product decision) — reworded onboarding/paywall/analyzing/share/welcome
   copy that called the reading "AI" (e.g. "Unlock Full AI Face Insights" →

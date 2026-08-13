@@ -230,6 +230,33 @@ context objects, which resolves back through the same `moduleNameMapper`
 entry instead of the real package, so it was simpler to mock the whole
 package with a fixed zero-inset object than fight that self-reference.
 
+**New dependency (2026-08-05):** `expo-sharing` (`~57.0.8`, `npx expo
+install`, config plugin auto-registered in `app.json`). Fixes a real
+on-device bug: RevealScreen's Story Card share used React Native's
+built-in `Share.share({ url: uri })` to send the captured PNG — `url` is
+an **iOS-only** field on that API, silently dropped on Android, so the
+native share sheet still opened (nothing tells it the intent is empty)
+but carried neither a message nor an attachment, and the receiving app
+(WhatsApp, etc.) rejected it as an empty message. `expo-sharing`'s
+`shareAsync(uri, { mimeType, dialogTitle })` is the correct cross-platform
+way to actually attach a local file (`FileProvider` under the hood on
+Android). React Native's `Share.share({ message })` is unaffected by this
+and stays in use for the text-only "Quick Message" option.
+
+**Backend hosting (2026-08-05):** deployed to Render's free tier via the
+`render.yaml` blueprint at the repo root (Docker service pointed at
+`backend/`, `GEMINI_API_KEY`/`REVENUECAT_API_KEY` set as dashboard
+secrets — see `render.yaml`'s `sync: false` entries). Live at
+`https://face-reader-backend-h0qb.onrender.com`. Chosen over Railway/
+Fly.io/Cloud Run/DigitalOcean for being the only option that's both
+genuinely free (no card) and Docker-native; the free tier spins the
+service down after 15 min idle (~30-60s cold start on the next request)
+— revisit the paid Starter tier ($7/mo, no migration needed) if that
+becomes a real user complaint. `frontend/.env`'s
+`EXPO_PUBLIC_API_BASE_URL` points here now instead of a LAN IP, and
+`android.usesCleartextTraffic` was removed from `app.json` since this is
+real HTTPS.
+
 ---
 
 ## 4. AI Integration Notes (current: Google Gemini)

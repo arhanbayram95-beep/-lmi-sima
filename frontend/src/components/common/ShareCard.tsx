@@ -49,8 +49,6 @@ const ShareCard = forwardRef<View, ShareCardProps>(({ sections, photo, paletteId
           </View>
         ))}
       </View>
-
-      <Text style={styles.footer}>faceai.app</Text>
     </View>
   );
 });
@@ -97,11 +95,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Theme.colors.text.primary,
     textAlign: 'center',
-  },
-  footer: {
-    ...Theme.typography.labelSm,
-    color: Theme.colors.text.muted,
-    textAlign: 'center',
-    marginBottom: Theme.spacing.md,
   },
 });

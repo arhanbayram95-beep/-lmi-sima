@@ -4,6 +4,7 @@ import { Alert, Modal, Pressable, Share, StyleSheet, Text, View } from 'react-na
 import { readingBadgeCard, ReadingResult, ShareableSection } from '../../api/types';
 import { useTranslation } from '../../i18n/useTranslation';
 import { SHARE_CARD_PALETTES, SharePaletteId, Theme } from '../../ui/theme';
+import { getStoreListingUrl } from '../../utils/storeLinks';
 import AnimatedCheckbox from './AnimatedCheckbox';
 import PrimaryButton from './PrimaryButton';
 
@@ -116,9 +117,22 @@ export default function ShareOptionsModal({
     onSelectedSectionIdsChange(next);
   };
 
+  // Pulls in the next two cards after the badge (every module's first
+  // section duplicates the badge/summary already shown — see
+  // readingShareableSections) so the shared text carries real substance
+  // instead of just the headline tag.
   const buildShareText = () => {
     const badge = readingBadgeCard(reading);
-    return t('share.shareTextTemplate', { badge: badge.badge_tag, summary: badge.summary });
+    const highlights = sections
+      .slice(1, 3)
+      .map((section) => `✦ ${section.title}: ${section.body}`)
+      .join('\n');
+    return t('share.shareTextTemplate', {
+      badge: badge.badge_tag,
+      summary: badge.summary,
+      details: highlights ? `${highlights}\n\n` : '',
+      link: `\n\n${getStoreListingUrl()}`,
+    });
   };
 
   const handleShareImage = () => {

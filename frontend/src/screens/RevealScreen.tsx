@@ -1,5 +1,6 @@
+import * as Sharing from 'expo-sharing';
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 import DisclaimerFooter from '../components/common/DisclaimerFooter';
@@ -167,11 +168,20 @@ export default function RevealScreen() {
   // includePhotoInCard/images/palette state, so capturing it here always
   // reflects whatever the user picked in ShareOptionsModal — no extra
   // plumbing needed between the builder and the capture.
+  //
+  // React Native's built-in Share.share only honors its `url` field on
+  // iOS -- on Android it's silently dropped, so the OS share sheet still
+  // opens (it has no way to know the intent is empty) but carries neither
+  // a message nor an attachment, and the receiving app (WhatsApp, etc.)
+  // rejects it as an empty message. expo-sharing's shareAsync is the
+  // correct cross-platform way to actually attach a local image file.
   const handleShareImage = async () => {
     if (!shareCardRef.current) return;
     try {
       const uri = await captureRef(shareCardRef, { format: 'png', quality: 0.9 });
-      await Share.share({ url: uri });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: t('share.optionImage.title') });
+      }
     } catch {
       // Sharing is a nice-to-have — never block the reveal flow on failure.
     }
