@@ -125,6 +125,16 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
           testID="domains-card"
           groups={[{ pills: reading.domains_card.top_industry_pills }]}
         />,
+        <PillsCard
+          key="strengths-growth"
+          title={reading.strengths_growth_card.title}
+          icon="⚖️"
+          testID="strengths-growth-card"
+          groups={[
+            { label: t('reveal.strengths'), pills: reading.strengths_growth_card.strength_pills },
+            { label: t('reveal.growthEdges'), pills: reading.strengths_growth_card.growth_pills, tone: 'caution' },
+          ]}
+        />,
         <ChecklistCard
           key="roles"
           title={reading.recommendations_card.title}
@@ -228,14 +238,6 @@ export default function RevealScreen() {
           <Text style={styles.navArrowGlyph}>‹</Text>
         </Pressable>
 
-        {/* Plain digits, no i18n needed — reinforces there's more to swipe
-            through, which is the point of paging the reveal card by card
-            instead of one long scroll. Sits between the arrows now instead
-            of the header, replacing the dot row entirely. */}
-        <Text style={styles.pageCounter} accessibilityLabel={t('reveal.cardProgress')} testID="reveal-page-counter">
-          {pageIndex + 1} / {cards.length}
-        </Text>
-
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('reveal.nextCard')}
@@ -307,11 +309,6 @@ const styles = StyleSheet.create({
     ...Theme.typography.headlineLg,
     color: Theme.colors.accent.goldSecondary,
   },
-  pageCounter: {
-    ...Theme.typography.labelSm,
-    fontSize: 12,
-    color: Theme.colors.text.muted,
-  },
   // Fills the space between the header and the page-nav/disclaimer/action
   // footer below — each child page is its own vertical ScrollView so a
   // card taller than the available height still scrolls, independent of
@@ -331,7 +328,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Theme.spacing.sm,
+    // Wider than the old arrow-counter-arrow gap (spacing.sm) — with
+    // nothing between them now, the two arrows need real separation of
+    // their own or they read as one cramped control instead of two.
+    gap: Theme.spacing.lg,
     paddingBottom: Theme.spacing.xs,
   },
   navArrow: {

@@ -132,6 +132,11 @@ export interface CareerPathResult {
     title: string;
     top_industry_pills: string[];
   };
+  strengths_growth_card: {
+    title: string;
+    strength_pills: string[];
+    growth_pills: string[];
+  };
   recommendations_card: {
     title: string;
     checklist_items: ChecklistItem[];
@@ -222,7 +227,7 @@ function checklistCard(title: string, description: string, headlineDescription: 
       title: { type: Type.STRING, description: `Always exactly "${title}".`, enum: [title] },
       checklist_items: {
         type: Type.ARRAY,
-        minItems: '2',
+        minItems: '3',
         maxItems: '4',
         description,
         items: {
@@ -296,7 +301,7 @@ const characterAnalysisSchema: Schema = {
         title: { type: Type.STRING, description: 'Always exactly "Facial Trait Analysis".', enum: ['Facial Trait Analysis'] },
         metadata_badges: {
           type: Type.ARRAY,
-          minItems: '2',
+          minItems: '3',
           maxItems: '4',
           description:
             'Short key/value observations about visible expression features, e.g. key "Eye Energy" value "Direct & Piercing". Descriptive of expression and structure only.',
@@ -329,7 +334,7 @@ const characterAnalysisSchema: Schema = {
         match_description: {
           type: Type.STRING,
           description:
-            'Two to three sentences, vivid and specific — the richest writing in the reading. How they carry a room, hold a gaze, shift between warmth and focus. Never a claim about physical resemblance or shared facial features.',
+            'Three to four sentences, vivid and specific — the richest writing in the reading. How they carry a room, hold a gaze, shift between warmth and focus, across several concrete beats rather than one general impression. Never a claim about physical resemblance or shared facial features.',
         },
       },
       required: ['title', 'match_name', 'match_description'],
@@ -409,13 +414,33 @@ const careerPathSchema: Schema = {
       },
       required: ['title', 'top_industry_pills'],
     },
+    strengths_growth_card: {
+      type: Type.OBJECT,
+      properties: {
+        title: { type: Type.STRING, description: 'Always exactly "Strengths & Growth Areas".', enum: ['Strengths & Growth Areas'] },
+        strength_pills: pillArray('Three or four genuine workplace strengths this archetype brings.', 3, 4),
+        growth_pills: pillArray(
+          'Two or three gentle growth edges for this work style, phrased as tendencies to balance rather than flaws, deficits, or performance issues. Never clinical, never something a person would feel judged by.',
+          2,
+          3
+        ),
+      },
+      required: ['title', 'strength_pills', 'growth_pills'],
+    },
     recommendations_card: checklistCard(
       'Ideal Role Matches',
-      'Two to four role suggestions that fit the archetype.',
+      'Three or four role suggestions that fit the archetype.',
       'A concrete role title, e.g. "Systems Architect / Lead Engineer".'
     ),
   },
-  required: ['module', 'work_archetype_card', 'catchphrase_card', 'domains_card', 'recommendations_card'],
+  required: [
+    'module',
+    'work_archetype_card',
+    'catchphrase_card',
+    'domains_card',
+    'strengths_growth_card',
+    'recommendations_card',
+  ],
 };
 
 export const READING_SCHEMAS: Record<ReadingModuleId, Schema> = {

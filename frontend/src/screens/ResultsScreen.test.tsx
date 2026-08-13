@@ -36,6 +36,11 @@ const CAREER_READING: CareerPathResult = {
   },
   catchphrase_card: { title: 'Work Catchphrase', badge_tag: '"Built the Spreadsheet, Ran the Room"', summary: 'Fits the structured thinking.' },
   domains_card: { title: 'Recommended Industries', top_industry_pills: ['Product Design'] },
+  strengths_growth_card: {
+    title: 'Strengths & Growth Areas',
+    strength_pills: ['Structured Thinking'],
+    growth_pills: ['Pacing Energy'],
+  },
   recommendations_card: {
     title: 'Ideal Role Matches',
     checklist_items: [{ headline: 'Systems Architect', description: 'End-to-end ownership.' }],

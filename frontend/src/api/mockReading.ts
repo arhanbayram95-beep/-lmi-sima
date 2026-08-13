@@ -98,6 +98,11 @@ const MOCK_READING_RESULTS: Record<ReadingModuleId, ReadingResult> = {
       title: 'Recommended Industries',
       top_industry_pills: ['Engineering & R&D', 'Strategic Consulting', 'Creative Tech Leadership'],
     },
+    strengths_growth_card: {
+      title: 'Strengths & Growth Areas',
+      strength_pills: ['Structured Thinking', 'Calm Under Pressure', 'Long-Range Focus'],
+      growth_pills: ['Pacing Energy', 'Delegating Early'],
+    },
     recommendations_card: {
       title: 'Ideal Role Matches',
       checklist_items: [

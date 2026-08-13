@@ -560,10 +560,6 @@ export const translations = {
     en: 'Next card', zh: '下一张', hi: 'अगला कार्ड', es: 'Tarjeta siguiente', fr: 'Carte suivante',
     ar: 'البطاقة التالية', bn: 'পরবর্তী কার্ড', pt: 'Cartão seguinte', ru: 'Следующая карточка', ur: 'اگلا کارڈ',
   },
-  'reveal.cardProgress': {
-    en: 'Card progress', zh: '卡片进度', hi: 'कार्ड प्रगति', es: 'Progreso de las tarjetas', fr: 'Progression des cartes',
-    ar: 'تقدم البطاقات', bn: 'কার্ড অগ্রগতি', pt: 'Progresso dos cartões', ru: 'Прогресс карточек', ur: 'کارڈ کی پیش رفت',
-  },
   'share.modalTitle': {
     en: 'Share Your Reading', zh: '分享你的解读', hi: 'अपनी रीडिंग शेयर करें', es: 'Comparte tu lectura',
     fr: 'Partagez votre lecture', ar: 'شارك قراءتك', bn: 'আপনার রিডিং শেয়ার করুন', pt: 'Partilhe a sua leitura',

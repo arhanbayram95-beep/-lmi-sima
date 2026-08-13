@@ -102,6 +102,11 @@ const CAREER: CareerPathResult = {
     title: 'Recommended Industries',
     top_industry_pills: ['Product Design', 'Applied Research', 'Venture Building'],
   },
+  strengths_growth_card: {
+    title: 'Strengths & Growth Areas',
+    strength_pills: ['Structured Thinking', 'Calm Under Pressure'],
+    growth_pills: ['Pacing Energy'],
+  },
   recommendations_card: {
     title: 'Ideal Role Matches',
     checklist_items: [
@@ -161,6 +166,7 @@ describe('readingShareableSections', () => {
       'work',
       'catchphrase',
       'domains',
+      'strengths-growth',
       'recommendations',
     ]);
   });
@@ -170,6 +176,7 @@ describe('readingShareableSections', () => {
       'Career Archetype',
       'Work Catchphrase',
       'Recommended Industries',
+      'Strengths & Growth Areas',
       'Ideal Role Matches',
     ]);
   });

@@ -533,3 +533,40 @@ Found and fixed during first real iOS dev-client testing.
   included in `readingShareableSections()`'s picklist, and added to
   `mockReading.ts`'s fixtures. Backend (52 tests) and frontend (179 tests)
   suites both green.
+- [x] **9.9 Page counter removed entirely** (product direction, follow-up to
+  9.4) — the "n / total" text between the arrows is gone too; just prev/
+  next arrows now, with more gap between them since nothing sits between
+  them anymore. `reveal.cardProgress` (its accessibility label) dropped
+  from `translations.ts` as unused. Tests rewritten to assert paging via
+  the arrows' disabled-state transitions instead of the removed counter
+  text, since that's the only positional signal left in the DOM.
+- [x] **9.10 Variety guidance strengthened** — `VARIETY_GUIDANCE`
+  (systemPrompt.ts) now explicitly asks the model to weigh several
+  candidates and pick the least obvious one before committing to any
+  open-ended pick, and extends the same push to phrasing/sentence
+  structure, not just named picks (celebrity, spirit animal, archetype,
+  catchphrase) — product ask: "much more various outcomes."
+- [x] **9.11 Career Match: new "Strengths & Growth Areas" card** — a
+  two-column pill breakdown (`strengths_growth_card: { strength_pills,
+  growth_pills }`), same pattern as Character Analysis' `traits_card` and
+  Relationship Harmony's `dynamics_card`, reusing the existing `PillsCard`
+  component. Growth pills stay framed as tendencies to balance, never
+  flaws/deficits/performance issues, consistent with how `growth_pills`
+  is already framed everywhere else in this app — CLAUDE.md's "no
+  negative or trust-undermining claims" applies here same as elsewhere,
+  so this delivers the requested strengths/weaknesses table without the
+  blunt "weaknesses" framing. Positioned between Recommended Industries
+  and Ideal Role Matches (which stays the richest, last card). Added to
+  `readingSchema.ts`/`systemPrompt.ts` (backend) and `api/types.ts`/
+  `RevealScreen.tsx`/`mockReading.ts` (frontend).
+- [x] **9.12 Richer content across all three modules** — `checklistCard`'s
+  minimum items bumped 2→3 (Relationship Harmony's Harmony Recommendations,
+  Career Match's Ideal Role Matches both get a third suggestion minimum);
+  Character Analysis' `traits_card.metadata_badges` minimum bumped 2→3;
+  `celebrity_match_card.match_description` bumped from two-to-three
+  sentences to three-to-four, "across several concrete beats rather than
+  one general impression." `minItems`/`maxItems` are Gemini-generation-time
+  hints only (confirmed: `assertConformsToSchema` in `readingService.ts`
+  doesn't re-check array counts, only presence/type), so this needed no
+  fixture changes to keep tests passing — only the new 9.11 field did.
+  Backend (52 tests) and frontend (179 tests) suites both green again.

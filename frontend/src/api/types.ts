@@ -114,6 +114,11 @@ export interface CareerPathResult {
     title: string;
     top_industry_pills: string[];
   };
+  strengths_growth_card: {
+    title: string;
+    strength_pills: string[];
+    growth_pills: string[];
+  };
   recommendations_card: {
     title: string;
     checklist_items: ChecklistItem[];
@@ -234,6 +239,11 @@ export function readingShareableSections(reading: ReadingResult): ShareableSecti
           id: 'domains',
           title: reading.domains_card.title,
           body: reading.domains_card.top_industry_pills.join(', '),
+        },
+        {
+          id: 'strengths-growth',
+          title: reading.strengths_growth_card.title,
+          body: `Strengths: ${reading.strengths_growth_card.strength_pills.join(', ')}`,
         },
         {
           id: 'recommendations',

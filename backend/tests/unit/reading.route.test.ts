@@ -31,6 +31,11 @@ const CAREER_READING = {
   work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 'One punchy sentence.' },
   catchphrase_card: { title: 'Work Catchphrase', badge_tag: '"Built the Spreadsheet, Ran the Room"', summary: 'One line on why it fits.' },
   domains_card: { title: 'Recommended Industries', top_industry_pills: ['Engineering & R&D'] },
+  strengths_growth_card: {
+    title: 'Strengths & Growth Areas',
+    strength_pills: ['Structured Thinking'],
+    growth_pills: ['Pacing Energy'],
+  },
   recommendations_card: {
     title: 'Ideal Role Matches',
     checklist_items: [{ headline: 'Systems Architect', description: 'Structured problem-solving.' }],

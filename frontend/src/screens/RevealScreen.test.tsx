@@ -234,30 +234,28 @@ describe('RevealScreen', () => {
 
   it('pages through the reveal one card at a time instead of one long scroll', () => {
     render(<RevealScreen />);
-    // 2 captured photos + 6 character_analysis cards (archetype, catchphrase,
-    // facial structure, spirit animal, traits, celebrity).
-    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([1, ' / ', 8]);
     expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(true);
     expect(screen.getByTestId('reveal-page-next').props.accessibilityState.disabled).toBe(false);
 
     fireEvent.press(screen.getByTestId('reveal-page-next'));
-    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([2, ' / ', 8]);
     expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(false);
 
+    // 2 captured photos + 6 character_analysis cards (archetype, catchphrase,
+    // facial structure, spirit animal, traits, celebrity) = 8 pages total;
+    // already moved forward once above, so 6 more presses reaches the last.
     for (let i = 0; i < 6; i++) fireEvent.press(screen.getByTestId('reveal-page-next'));
-    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([8, ' / ', 8]);
     expect(screen.getByTestId('reveal-page-next').props.accessibilityState.disabled).toBe(true);
   });
 
   it('resets back to the first page whenever a new reading loads', () => {
     render(<RevealScreen />);
-    for (let i = 0; i < 3; i++) fireEvent.press(screen.getByTestId('reveal-page-next'));
-    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([4, ' / ', 8]);
+    fireEvent.press(screen.getByTestId('reveal-page-next'));
+    expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(false);
 
     act(() => {
       useAppStore.setState({ reading: RELATIONSHIP_READING });
     });
-    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([1, ' / ', 7]);
+    expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(true);
   });
 
   it('offers several color options for the share card and applies the chosen one', () => {
