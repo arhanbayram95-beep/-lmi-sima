@@ -357,6 +357,24 @@ export const translations = {
     ar: 'ألغِ في أي وقت · دفع آمن', bn: 'যেকোনো সময় বাতিল করুন · নিরাপদ পেমেন্ট', pt: 'Cancele quando quiser · Pagamento seguro',
     ru: 'Отмена в любой момент · Безопасная оплата', ur: 'کسی بھی وقت منسوخ کریں · محفوظ ادائیگی',
   },
+  // Apple App Store Review Guideline §3.1.2's auto-renewal disclosure —
+  // deliberately separate from paywall.reassurance above (that one stays a
+  // short marketing line; this one carries the exact required elements:
+  // auto-renews, the 24-hour cancellation window, and where to manage it).
+  // No price embedded here since both plan cards already show their own
+  // real price directly above this text.
+  'paywall.renewalDisclosure': {
+    en: "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in your device's account settings.",
+    zh: '除非在当前订阅周期结束前至少24小时取消，否则将自动续订。你可以随时在设备的账户设置中管理或取消。',
+    hi: 'मौजूदा अवधि समाप्त होने से कम से कम 24 घंटे पहले रद्द न करने पर यह स्वतः नवीनीकृत हो जाएगा। आप इसे कभी भी अपने डिवाइस की खाता सेटिंग्स में प्रबंधित या रद्द कर सकते हैं।',
+    es: 'Se renueva automáticamente a menos que se cancele al menos 24 horas antes de que finalice el período actual. Puedes gestionarlo o cancelarlo en cualquier momento desde la configuración de tu cuenta.',
+    fr: "Se renouvelle automatiquement sauf annulation au moins 24 heures avant la fin de la période en cours. Vous pouvez le gérer ou l'annuler à tout moment dans les paramètres de votre compte.",
+    ar: 'يتجدد تلقائيًا ما لم يتم الإلغاء قبل 24 ساعة على الأقل من انتهاء الفترة الحالية. يمكنك إدارته أو إلغاءه في أي وقت من إعدادات حساب جهازك.',
+    bn: 'বর্তমান মেয়াদ শেষ হওয়ার অন্তত ২৪ ঘণ্টা আগে বাতিল না করলে এটি স্বয়ংক্রিয়ভাবে নবায়ন হবে। আপনি যেকোনো সময় আপনার ডিভাইসের অ্যাকাউন্ট সেটিংসে এটি পরিচালনা বা বাতিল করতে পারেন।',
+    pt: 'Renova-se automaticamente, a menos que seja cancelado pelo menos 24 horas antes do final do período atual. Pode gerir ou cancelar a qualquer momento nas definições da conta do seu dispositivo.',
+    ru: 'Автоматически продлевается, если не отменить как минимум за 24 часа до окончания текущего периода. Вы можете управлять подпиской или отменить её в любое время в настройках учётной записи устройства.',
+    ur: 'موجودہ مدت ختم ہونے سے کم از کم 24 گھنٹے پہلے منسوخ نہ کرنے پر یہ خودکار طور پر تجدید ہو جائے گا۔ آپ اسے کسی بھی وقت اپنے ڈیوائس کی اکاؤنٹ سیٹنگز میں منظم یا منسوخ کر سکتے ہیں۔',
+  },
   'paywall.monthlyName': {
     en: 'Monthly Pass', zh: '月度订阅', hi: 'मासिक पास', es: 'Pase mensual', fr: 'Pass mensuel', ar: 'اشتراك شهري',
     bn: 'মাসিক পাস', pt: 'Passe mensal', ru: 'Месячный абонемент', ur: 'ماہانہ پاس',

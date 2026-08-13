@@ -239,6 +239,9 @@ export default function PaywallScreen() {
           disabled={purchasing || (isPurchasesConfigured && !(selectedPlan === 'weekly' ? weeklyPackage : monthlyPackage))}
         />
         <Text style={styles.reassurance}>{t('paywall.reassurance')}</Text>
+        <Text style={styles.renewalDisclosure} testID="paywall-renewal-disclosure">
+          {t('paywall.renewalDisclosure')}
+        </Text>
 
         <View style={styles.footerLinks}>
           <Pressable onPress={handleRestorePurchases} accessibilityRole="button" testID="paywall-restore-purchases">
@@ -429,6 +432,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Theme.colors.text.muted,
     textAlign: 'center',
+  },
+  // Apple's required auto-renewal disclosure (App Store Review Guideline
+  // §3.1.2) — quieter than reassurance above since it's fine-print, but
+  // still legible per the same standard the rest of the app's legal copy
+  // holds to.
+  renewalDisclosure: {
+    ...Theme.typography.labelSm,
+    fontSize: 9,
+    color: Theme.colors.text.muted,
+    textAlign: 'center',
+    marginTop: 2,
   },
   footerLinks: {
     flexDirection: 'row',

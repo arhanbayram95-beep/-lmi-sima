@@ -11,7 +11,7 @@ interface LegalSection {
   body: string;
 }
 
-const LEGAL_LAST_UPDATED = 'August 4, 2026';
+const LEGAL_LAST_UPDATED = 'August 13, 2026';
 const LEGAL_CONTACT_EMAIL = 'fevzi.bayram@boun.edu.tr';
 
 const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
@@ -110,7 +110,7 @@ const TERMS_SECTIONS: LegalSection[] = [
   {
     heading: 'Subscriptions & Free Trial',
     body:
-      'Full access to Face Reader is offered through auto-renewing weekly or monthly subscriptions, managed through your App Store or Google Play account via RevenueCat. Where offered, a free trial converts automatically into a paid subscription at the end of the trial period unless cancelled beforehand. You can view, manage, or cancel your subscription at any time from your device\'s account settings — cancellation is designed to be as simple as signing up.',
+      'Full access to Face Reader is offered through auto-renewing weekly or monthly subscriptions, managed through your App Store or Google Play account via RevenueCat. Payment is charged to your Apple ID or Google Play account at confirmation of purchase. Your subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period; your account will be charged for renewal within 24 hours prior to the end of the current period, at the cost of the plan you selected. Where offered, a free trial converts automatically into a paid subscription at the end of the trial period unless cancelled beforehand, and any unused portion of a free trial is forfeited when you purchase a subscription. You can view, manage, or cancel your subscription at any time from your device\'s account settings — cancellation is designed to be as simple as signing up.',
   },
   {
     heading: 'Acceptable Use',

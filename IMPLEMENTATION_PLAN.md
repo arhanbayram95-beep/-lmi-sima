@@ -582,3 +582,16 @@ Found and fixed during first real iOS dev-client testing.
   Frontend suite: 177 tests (down from 179 — the component's own test and
   RevealScreen's "always renders the disclaimer" assertion both removed
   along with what they were testing).
+- [x] **9.14 Apple §3.1.2 subscription-disclosure gaps closed** — audited
+  the paywall/Terms against Apple's required auto-renewable-subscription
+  disclosures (the most common subscription-app rejection reason).
+  `legal.ts`'s "Subscriptions & Free Trial" section now states payment
+  charges to the Apple ID/Google Play account at confirmation, the exact
+  24-hour renewal/cancellation window (was vague "unless cancelled
+  beforehand"), and that an unused free-trial portion is forfeited on
+  purchase; `LEGAL_LAST_UPDATED` bumped to August 13, 2026. New
+  `paywall.renewalDisclosure` (all 10 locales) renders directly under the
+  Subscribe button in `PaywallScreen.tsx`, deliberately separate from the
+  existing `paywall.reassurance` marketing line — no price embedded in it
+  since both plan cards already show their own real price above it.
+  Backend (52 tests) and frontend (177 tests) suites both green.
