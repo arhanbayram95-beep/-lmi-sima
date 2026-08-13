@@ -30,18 +30,6 @@ export const translations = {
     en: 'Settings', zh: '设置', hi: 'सेटिंग्स', es: 'Ajustes', fr: 'Paramètres',
     ar: 'الإعدادات', bn: 'সেটিংস', pt: 'Definições', ru: 'Настройки', ur: 'ترتیبات',
   },
-  'disclaimer.text': {
-    en: 'For entertainment purposes only. Face Reader does not provide clinical, psychological, or diagnostic assessments. Photos are processed in memory and never stored.',
-    zh: '仅供娱乐使用。Face Reader 不提供任何临床、心理或诊断评估。照片仅在内存中处理，绝不会被存储。',
-    hi: 'केवल मनोरंजन हेतु। Face Reader कोई नैदानिक, मनोवैज्ञानिक या डायग्नोस्टिक मूल्यांकन प्रदान नहीं करता। फ़ोटो केवल मेमोरी में प्रोसेस होती हैं और कभी संग्रहीत नहीं की जातीं।',
-    es: 'Solo con fines de entretenimiento. Face Reader no ofrece evaluaciones clínicas, psicológicas ni de diagnóstico. Las fotos se procesan en memoria y nunca se almacenan.',
-    fr: 'À des fins de divertissement uniquement. Face Reader ne fournit aucune évaluation clinique, psychologique ou diagnostique. Les photos sont traitées en mémoire et ne sont jamais stockées.',
-    ar: 'لأغراض الترفيه فقط. لا يقدم Face Reader أي تقييمات سريرية أو نفسية أو تشخيصية. تتم معالجة الصور في الذاكرة فقط ولا يتم تخزينها أبدًا.',
-    bn: 'শুধুমাত্র বিনোদনের উদ্দেশ্যে। Face Reader কোনো ক্লিনিক্যাল, মনস্তাত্ত্বিক বা রোগনির্ণয়মূলক মূল্যায়ন প্রদান করে না। ছবিগুলো শুধু মেমোরিতে প্রক্রিয়া করা হয় এবং কখনো সংরক্ষণ করা হয় না।',
-    pt: 'Apenas para fins de entretenimento. O Face Reader não fornece avaliações clínicas, psicológicas ou de diagnóstico. As fotos são processadas na memória e nunca armazenadas.',
-    ru: 'Только в развлекательных целях. Face Reader не предоставляет клинических, психологических или диагностических заключений. Фото обрабатываются только в памяти и никогда не сохраняются.',
-    ur: 'صرف تفریحی مقاصد کے لیے۔ Face Reader کوئی طبی، نفسیاتی یا تشخیصی جائزہ فراہم نہیں کرتا۔ تصاویر صرف میموری میں پروسیس ہوتی ہیں اور کبھی محفوظ نہیں کی جاتیں۔',
-  },
   'onboarding.step0.headline': {
     en: 'Modern Expression Reading', zh: '现代表情解读', hi: 'आधुनिक एक्सप्रेशन रीडिंग',
     es: 'Lectura de expresiones moderna', fr: "Lecture d'expressions moderne",

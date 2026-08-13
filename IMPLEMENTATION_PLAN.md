@@ -570,3 +570,15 @@ Found and fixed during first real iOS dev-client testing.
   doesn't re-check array counts, only presence/type), so this needed no
   fixture changes to keep tests passing — only the new 9.11 field did.
   Backend (52 tests) and frontend (179 tests) suites both green again.
+- [x] **9.13 In-app disclaimer (`DisclaimerFooter`) removed from
+  RevealScreen** — explicit product override of CLAUDE.md's disclaimer
+  lock, confirmed after flagging the App Store review/liability
+  implications directly (this is the persistent entertainment-only notice
+  shown on every result inside the app, not the ShareCard footer from 9.6,
+  which only affected images shared externally). `DisclaimerFooter.tsx`/
+  `.test.tsx` deleted outright (no other screen imported it — PaywallScreen
+  has its own separate disclaimer surface, untouched, out of scope of this
+  request), `disclaimer.text` dropped from `translations.ts` as orphaned.
+  Frontend suite: 177 tests (down from 179 — the component's own test and
+  RevealScreen's "always renders the disclaimer" assertion both removed
+  along with what they were testing).

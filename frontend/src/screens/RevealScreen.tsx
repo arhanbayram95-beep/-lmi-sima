@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
-import DisclaimerFooter from '../components/common/DisclaimerFooter';
 import FadeInView from '../components/common/FadeInView';
 import PrimaryButton from '../components/common/PrimaryButton';
 import ShareCard from '../components/common/ShareCard';
@@ -250,8 +249,6 @@ export default function RevealScreen() {
           <Text style={styles.navArrowGlyph}>›</Text>
         </Pressable>
       </View>
-
-      <DisclaimerFooter />
 
       <View style={[styles.footer, { paddingBottom: Theme.spacing.sm + insets.bottom }]}>
         <PrimaryButton

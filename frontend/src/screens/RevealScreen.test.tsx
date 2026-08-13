@@ -143,11 +143,6 @@ describe('RevealScreen', () => {
     expect(screen.getByText('Strategic Thinking')).toBeTruthy();
   });
 
-  it('always renders the entertainment disclaimer', () => {
-    render(<RevealScreen />);
-    expect(screen.getAllByText(/entertainment purposes only/i).length).toBeGreaterThan(0);
-  });
-
   it('prompts for a rating after each completed reading instead of dropping straight back home', () => {
     render(<RevealScreen />);
     fireEvent.press(screen.getByText('Done'));
