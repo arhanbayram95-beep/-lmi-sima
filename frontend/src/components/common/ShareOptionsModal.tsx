@@ -51,10 +51,10 @@ function PaletteSwatch({
         style={[
           styles.swatch,
           { backgroundColor: palette.background, borderColor: palette.accent },
-          selected && styles.swatchSelected,
+          selected && [styles.swatchSelected, { shadowColor: palette.accent }],
         ]}
       >
-        {selected && <View style={[styles.swatchDot, { backgroundColor: palette.accent }]} />}
+        {selected && <Text style={[styles.swatchCheck, { color: palette.accent }]}>✓</Text>}
       </View>
     </Pressable>
   );
@@ -312,22 +312,29 @@ const styles = StyleSheet.create({
     gap: Theme.spacing.sm,
   },
   swatch: {
-    width: 36,
-    height: 36,
+    width: 56,
+    height: 56,
     borderRadius: Theme.radius.full,
-    borderWidth: 2,
+    borderWidth: 3,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Bigger, bolder selected state than a small centered dot — a full
+  // checkmark plus a stronger glow and a slight scale-up, so the active
+  // theme choice reads clearly at a glance instead of blending into the
+  // row (product feedback: the swatches felt too quiet to register as a
+  // real choice).
   swatchSelected: {
-    shadowColor: Theme.colors.accent.goldSecondary,
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
+    transform: [{ scale: 1.1 }],
+    shadowOpacity: 0.85,
+    shadowRadius: 14,
     shadowOffset: { width: 0, height: 0 },
   },
-  swatchDot: {
-    width: 10,
-    height: 10,
-    borderRadius: Theme.radius.full,
+  swatchCheck: {
+    fontSize: 20,
+    fontWeight: '700',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowRadius: 4,
+    textShadowOffset: { width: 0, height: 1 },
   },
 });

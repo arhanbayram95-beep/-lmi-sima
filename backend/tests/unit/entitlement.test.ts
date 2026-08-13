@@ -11,6 +11,7 @@ const PHOTOS_3 = ['base64-calm', 'base64-bright', 'base64-deep'];
 const CHARACTER_READING = {
   module: 'character_analysis',
   archetype_card: { title: 'Character Archetype', badge_tag: 'Analytical Visionary', summary: 'One punchy sentence.' },
+  catchphrase_card: { title: 'Signature Catchphrase', badge_tag: '"Quiet Storm, Loud Impact"', summary: 'One line on why it fits.' },
   facial_structure_card: { title: 'Facial Structure', shape_tag: 'Oval', description: 'Structural description.' },
   spirit_animal_card: { title: 'Spirit Animal Match', animal: 'Wolf', description: 'Symbolic description.' },
   traits_card: {

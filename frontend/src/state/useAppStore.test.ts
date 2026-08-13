@@ -81,6 +81,7 @@ describe('useAppStore', () => {
     const reading: ReadingResult = {
       module: 'career_path',
       work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 's' },
+      catchphrase_card: { title: 'Work Catchphrase', badge_tag: '"Built the Spreadsheet, Ran the Room"', summary: 's' },
       domains_card: { title: 'Recommended Industries', top_industry_pills: ['Engineering & R&D'] },
       recommendations_card: { title: 'Ideal Role Matches', checklist_items: [] },
     };

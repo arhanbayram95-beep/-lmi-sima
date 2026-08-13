@@ -15,7 +15,7 @@ import { PRIVACY_POLICY_URL, TERMS_URL } from '../utils/legalLinks';
 
 // No published store URL yet — add it here once Face Reader is live on the
 // App Store / Play Store so the share message includes a real link.
-const SHARE_MESSAGE = 'Check out Face Reader — playful AI character readings from your photos! ✦';
+const SHARE_MESSAGE = 'Check out Face Reader — playful character readings from your photos! ✦';
 
 interface SettingsRowConfig {
   label: string;

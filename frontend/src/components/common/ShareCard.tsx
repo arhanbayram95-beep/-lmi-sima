@@ -50,7 +50,7 @@ const ShareCard = forwardRef<View, ShareCardProps>(({ sections, photo, paletteId
         ))}
       </View>
 
-      <Text style={styles.footer}>For entertainment purposes only · faceai.app</Text>
+      <Text style={styles.footer}>faceai.app</Text>
     </View>
   );
 });

@@ -14,6 +14,11 @@ const MOCK_READING_RESULTS: Record<ReadingModuleId, ReadingResult> = {
       badge_tag: 'Analytical Visionary',
       summary: 'Placeholder pseudo-API output for testing, not a real reading.',
     },
+    catchphrase_card: {
+      title: 'Signature Catchphrase',
+      badge_tag: '"Quiet Storm, Loud Impact"',
+      summary: 'Placeholder pseudo-API output for testing, not a real reading.',
+    },
     facial_structure_card: {
       title: 'Facial Structure',
       shape_tag: 'Oval',
@@ -49,6 +54,11 @@ const MOCK_READING_RESULTS: Record<ReadingModuleId, ReadingResult> = {
       summary:
         'Placeholder pseudo-API output for testing, not a real reading. One brings steady reassurance, the other brings momentum — the two meet somewhere comfortable.',
     },
+    catchphrase_card: {
+      title: 'Duo Catchphrase',
+      badge_tag: '"Calm Meets Chaos, On Purpose"',
+      summary: 'Placeholder pseudo-API output for testing, not a real reading.',
+    },
     chemistry_score_card: {
       title: 'Chemistry & Synergy Score',
       overall_score: 92,
@@ -77,6 +87,11 @@ const MOCK_READING_RESULTS: Record<ReadingModuleId, ReadingResult> = {
     work_archetype_card: {
       title: 'Career Archetype',
       badge_tag: 'Strategic Innovator',
+      summary: 'Placeholder pseudo-API output for testing, not a real reading.',
+    },
+    catchphrase_card: {
+      title: 'Work Catchphrase',
+      badge_tag: '"Built the Spreadsheet, Ran the Room"',
       summary: 'Placeholder pseudo-API output for testing, not a real reading.',
     },
     domains_card: {

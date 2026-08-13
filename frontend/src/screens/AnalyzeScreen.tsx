@@ -139,10 +139,14 @@ const styles = StyleSheet.create({
   header: {
     // paddingTop stays at spacing.xl — there's no SafeAreaView in this app,
     // so this doubles as the status-bar/notch clearance on every screen,
-    // not just visual breathing room. Only the padding below it (and the
-    // horizontal margin, shared with the cards) gets tightened here.
+    // not just visual breathing room.
+    // paddingHorizontal deliberately does NOT reuse HORIZONTAL_MARGIN (that
+    // near-zero value is only for the edge-to-edge module card art below) —
+    // it matches Theme.spacing.gutter, same as ResultsScreen/SettingsScreen
+    // headers, so the title sits at the same horizontal position on all
+    // three tabs instead of reading as misaligned against them.
     paddingTop: Theme.spacing.xl,
-    paddingHorizontal: HORIZONTAL_MARGIN,
+    paddingHorizontal: Theme.spacing.gutter,
     paddingBottom: Theme.spacing.xs,
     gap: Theme.spacing.xs,
   },

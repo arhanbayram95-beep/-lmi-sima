@@ -22,6 +22,11 @@ const CHARACTER: CharacterAnalysisResult = {
     badge_tag: 'Analytical Visionary',
     summary: 'You read as someone people trust instantly.',
   },
+  catchphrase_card: {
+    title: 'Signature Catchphrase',
+    badge_tag: '"Quiet Storm, Loud Impact"',
+    summary: 'The line fits the steady, direct gaze.',
+  },
   facial_structure_card: {
     title: 'Facial Structure',
     shape_tag: 'Oval',
@@ -51,6 +56,11 @@ const RELATIONSHIP: RelationshipHarmonyResult = {
     title: 'Relational Archetype',
     badge_tag: 'Grounded & Playful Harmonizer',
     summary: 'Two styles that meet in the middle.',
+  },
+  catchphrase_card: {
+    title: 'Duo Catchphrase',
+    badge_tag: '"Calm Meets Chaos, On Purpose"',
+    summary: 'The line fits how these two balance each other.',
   },
   chemistry_score_card: {
     title: 'Chemistry & Synergy Score',
@@ -82,6 +92,11 @@ const CAREER: CareerPathResult = {
     title: 'Career Archetype',
     badge_tag: 'Strategic Innovator',
     summary: 'You settle fastest in rooms that reward long-range thinking.',
+  },
+  catchphrase_card: {
+    title: 'Work Catchphrase',
+    badge_tag: '"Built the Spreadsheet, Ran the Room"',
+    summary: 'The line fits the long-range, structured thinking.',
   },
   domains_card: {
     title: 'Recommended Industries',
@@ -123,6 +138,7 @@ describe('readingShareableSections', () => {
   it('offers one section per card of a character analysis reading', () => {
     expect(readingShareableSections(CHARACTER).map((section) => section.id)).toEqual([
       'archetype',
+      'catchphrase',
       'facial-structure',
       'spirit-animal',
       'traits',
@@ -133,6 +149,7 @@ describe('readingShareableSections', () => {
   it('offers one section per card of a relationship harmony reading', () => {
     expect(readingShareableSections(RELATIONSHIP).map((section) => section.id)).toEqual([
       'vibe',
+      'catchphrase',
       'chemistry',
       'dynamics',
       'guidance',
@@ -142,6 +159,7 @@ describe('readingShareableSections', () => {
   it('offers one section per card of a career path reading', () => {
     expect(readingShareableSections(CAREER).map((section) => section.id)).toEqual([
       'work',
+      'catchphrase',
       'domains',
       'recommendations',
     ]);
@@ -150,6 +168,7 @@ describe('readingShareableSections', () => {
   it('titles every section with the card title straight off the reading', () => {
     expect(readingShareableSections(CAREER).map((section) => section.title)).toEqual([
       'Career Archetype',
+      'Work Catchphrase',
       'Recommended Industries',
       'Ideal Role Matches',
     ]);

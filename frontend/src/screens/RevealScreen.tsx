@@ -42,6 +42,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
       return [
         ...photos,
         <BadgeSummaryCard key="archetype" card={reading.archetype_card} icon="🎭" testID="archetype-card" />,
+        <BadgeSummaryCard key="catchphrase" card={reading.catchphrase_card} icon="💬" testID="catchphrase-card" />,
         <BadgeSummaryCard
           key="facial-structure"
           card={{
@@ -85,6 +86,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
       return [
         ...photos,
         <BadgeSummaryCard key="vibe" card={reading.vibe_card} icon="💞" testID="archetype-card" />,
+        <BadgeSummaryCard key="catchphrase" card={reading.catchphrase_card} icon="💬" testID="catchphrase-card" />,
         <ReadingScoreCard
           key="score"
           card={reading.chemistry_score_card}
@@ -114,6 +116,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
       return [
         ...photos,
         <BadgeSummaryCard key="work" card={reading.work_archetype_card} icon="💼" testID="archetype-card" />,
+        <BadgeSummaryCard key="catchphrase" card={reading.catchphrase_card} icon="💬" testID="catchphrase-card" />,
         <PillsCard
           key="domains"
           title={reading.domains_card.title}
@@ -192,12 +195,6 @@ export default function RevealScreen() {
     <View style={styles.container} testID="reveal-screen">
       <View style={styles.header}>
         <Text style={styles.title}>{t('reveal.title')}</Text>
-        {/* Plain digits, no i18n needed — reinforces there's more to swipe
-            through, which is the point of paging the reveal card by card
-            instead of one long scroll. */}
-        <Text style={styles.pageCounter} testID="reveal-page-counter">
-          {pageIndex + 1} / {cards.length}
-        </Text>
       </View>
 
       <SwipeablePager index={pageIndex} onIndexChange={setPageIndex} style={styles.pager}>
@@ -221,13 +218,13 @@ export default function RevealScreen() {
           <Text style={styles.navArrowGlyph}>‹</Text>
         </Pressable>
 
-        <View style={styles.pageDots} accessibilityLabel={t('reveal.cardProgress')}>
-          {cards.map((_, index) => (
-            <Pressable key={index} hitSlop={8} onPress={() => setPageIndex(index)} testID={`reveal-page-dot-${index}`}>
-              <View style={[styles.pageDot, index === pageIndex && styles.pageDotActive]} />
-            </Pressable>
-          ))}
-        </View>
+        {/* Plain digits, no i18n needed — reinforces there's more to swipe
+            through, which is the point of paging the reveal card by card
+            instead of one long scroll. Sits between the arrows now instead
+            of the header, replacing the dot row entirely. */}
+        <Text style={styles.pageCounter} accessibilityLabel={t('reveal.cardProgress')} testID="reveal-page-counter">
+          {pageIndex + 1} / {cards.length}
+        </Text>
 
         <Pressable
           accessibilityRole="button"
@@ -345,22 +342,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     lineHeight: 22,
     color: Theme.colors.accent.goldSecondary,
-  },
-  pageDots: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  pageDot: {
-    width: 6,
-    height: 6,
-    borderRadius: Theme.radius.full,
-    backgroundColor: 'rgba(255, 223, 158, 0.3)',
-  },
-  pageDotActive: {
-    width: 8,
-    height: 8,
-    backgroundColor: Theme.colors.accent.goldSecondary,
   },
   footer: {
     flexDirection: 'row',

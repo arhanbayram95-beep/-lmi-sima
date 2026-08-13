@@ -78,8 +78,12 @@ const styles = StyleSheet.create({
   },
   ripple: {
     position: 'absolute',
-    width: 128,
-    height: 128,
+    // AppLogo's "lg" badge is 168x168 (AppLogo.tsx badgeLg) — the ring's
+    // base size must clear that so it starts outside the artwork and grows
+    // outward, instead of starting smaller than the logo and animating
+    // through it.
+    width: 190,
+    height: 190,
     borderRadius: Theme.radius.full,
     borderWidth: 1.5,
     borderColor: Theme.colors.accent.goldSecondary,

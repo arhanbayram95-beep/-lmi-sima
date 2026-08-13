@@ -69,7 +69,6 @@ export default function CaptureScreen() {
   const { hasPermission, requestPermission } = useCameraPermission();
   const [stepIndex, setStepIndex] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
-  const [hasFace, setHasFace] = useState(false);
   // usePhotoOutput/outputs must stay reference-stable across renders — a
   // fresh options object or array literal here reconfigures (unbinds and
   // rebinds) the native camera session on every re-render, including the
@@ -123,14 +122,27 @@ export default function CaptureScreen() {
   // straight to NoFaceDetectedScreen instead of capturing, same
   // process-and-discard treatment as an abandoned capture (handleCancel
   // above), rather than letting a bad frame reach the backend.
+  // A ref, not useState: hasFace is only ever read once, at shutter-press
+  // time (handleCapture below) — it never drives what's rendered. ML Kit's
+  // per-frame result flips true/false constantly under normal handheld
+  // conditions (a blink, tiny head motion, angle); making it state meant
+  // every flip re-rendered this screen, which re-renders vision-camera-
+  // face-detector's <Camera> wrapper, which rebuilds its `outputs` array on
+  // every render (not memoized upstream, confirmed in node_modules) and
+  // forces the native session to unbind/rebind — visible on-device as the
+  // camera preview flashing black and freezing, as often as detection
+  // flickered. A ref update triggers no re-render at all, so this sidesteps
+  // the problem entirely instead of trying to filter the flicker out.
+  const hasFaceRef = useRef(false);
+
   const handleFacesDetected = useCallback((faces: Face[]) => {
-    setHasFace(faces.length > 0);
+    hasFaceRef.current = faces.length > 0;
   }, []);
 
   const handleCapture = async () => {
     if (isCapturing) return;
 
-    if (!hasFace) {
+    if (!hasFaceRef.current) {
       clearImages();
       goToScreen('noFaceDetected');
       return;

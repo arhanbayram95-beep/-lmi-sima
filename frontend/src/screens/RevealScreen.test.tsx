@@ -22,6 +22,11 @@ const READING: CharacterAnalysisResult = {
     badge_tag: 'Analytical Visionary',
     summary: 'You read as someone people trust instantly.',
   },
+  catchphrase_card: {
+    title: 'Signature Catchphrase',
+    badge_tag: '"Quiet Storm, Loud Impact"',
+    summary: 'Fits the steady, direct gaze.',
+  },
   facial_structure_card: {
     title: 'Facial Structure',
     shape_tag: 'Oval',
@@ -50,6 +55,11 @@ const RELATIONSHIP_READING: RelationshipHarmonyResult = {
     title: 'Relational Archetype',
     badge_tag: 'Grounded & Playful Harmonizer',
     summary: 'Two styles that meet in the middle.',
+  },
+  catchphrase_card: {
+    title: 'Duo Catchphrase',
+    badge_tag: '"Calm Meets Chaos, On Purpose"',
+    summary: 'Fits how these two balance each other.',
   },
   chemistry_score_card: {
     title: 'Chemistry & Synergy Score',
@@ -214,30 +224,30 @@ describe('RevealScreen', () => {
 
   it('pages through the reveal one card at a time instead of one long scroll', () => {
     render(<RevealScreen />);
-    // 2 captured photos + 5 character_analysis cards (archetype, facial
-    // structure, spirit animal, traits, celebrity).
-    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([1, ' / ', 7]);
+    // 2 captured photos + 6 character_analysis cards (archetype, catchphrase,
+    // facial structure, spirit animal, traits, celebrity).
+    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([1, ' / ', 8]);
     expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(true);
     expect(screen.getByTestId('reveal-page-next').props.accessibilityState.disabled).toBe(false);
 
     fireEvent.press(screen.getByTestId('reveal-page-next'));
-    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([2, ' / ', 7]);
+    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([2, ' / ', 8]);
     expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(false);
 
-    fireEvent.press(screen.getByTestId('reveal-page-dot-6'));
-    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([7, ' / ', 7]);
+    for (let i = 0; i < 6; i++) fireEvent.press(screen.getByTestId('reveal-page-next'));
+    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([8, ' / ', 8]);
     expect(screen.getByTestId('reveal-page-next').props.accessibilityState.disabled).toBe(true);
   });
 
   it('resets back to the first page whenever a new reading loads', () => {
     render(<RevealScreen />);
-    fireEvent.press(screen.getByTestId('reveal-page-dot-3'));
-    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([4, ' / ', 7]);
+    for (let i = 0; i < 3; i++) fireEvent.press(screen.getByTestId('reveal-page-next'));
+    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([4, ' / ', 8]);
 
     act(() => {
       useAppStore.setState({ reading: RELATIONSHIP_READING });
     });
-    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([1, ' / ', 6]);
+    expect(screen.getByTestId('reveal-page-counter').props.children).toEqual([1, ' / ', 7]);
   });
 
   it('offers several color options for the share card and applies the chosen one', () => {

@@ -84,6 +84,7 @@ export interface MetadataBadge {
 export interface CharacterAnalysisResult {
   module: 'character_analysis';
   archetype_card: BadgeCard;
+  catchphrase_card: BadgeCard;
   facial_structure_card: {
     title: string;
     shape_tag: FaceShape;
@@ -110,6 +111,7 @@ export interface CharacterAnalysisResult {
 export interface RelationshipHarmonyResult {
   module: 'relationship_harmony';
   vibe_card: BadgeCard;
+  catchphrase_card: BadgeCard;
   chemistry_score_card: ScoreCard;
   dynamics_card: {
     title: string;
@@ -125,6 +127,7 @@ export interface RelationshipHarmonyResult {
 export interface CareerPathResult {
   module: 'career_path';
   work_archetype_card: BadgeCard;
+  catchphrase_card: BadgeCard;
   domains_card: {
     title: string;
     top_industry_pills: string[];
@@ -249,6 +252,11 @@ const characterAnalysisSchema: Schema = {
       'A short, striking archetype name of two to three words, e.g. "Analytical Visionary". Title case, no article in front.',
       'One punchy sentence on the dominant character vibe read from visible facial structure, gaze and expression range across the three photos — a hook, not an explanation. Specific enough that it could not be pasted onto a different person.'
     ),
+    catchphrase_card: badgeCard(
+      'Signature Catchphrase',
+      'A short, quotable one-liner, under 8 words, that captures this person\'s energy — phrased like a movie tagline or a bold nickname. Punchy and fun, wrapped in quotation marks.',
+      'One sentence on why this line fits, grounded in something actually visible across the three photos.'
+    ),
     facial_structure_card: {
       type: Type.OBJECT,
       properties: {
@@ -330,6 +338,7 @@ const characterAnalysisSchema: Schema = {
   required: [
     'module',
     'archetype_card',
+    'catchphrase_card',
     'facial_structure_card',
     'spirit_animal_card',
     'traits_card',
@@ -345,6 +354,11 @@ const relationshipHarmonySchema: Schema = {
       'Relational Archetype',
       'A short, striking archetype name for how these two expression styles meet, two to three words, e.g. "Grounded & Playful Harmonizer".',
       'One punchy sentence on how the two expression styles play off each other — a hook, not an explanation.'
+    ),
+    catchphrase_card: badgeCard(
+      'Duo Catchphrase',
+      'A short, quotable one-liner, under 8 words, capturing this pair\'s shared energy — like a buddy-movie tagline. Fun and warm, wrapped in quotation marks.',
+      'One sentence on why this line fits both of them.'
     ),
     chemistry_score_card: scoreCard(
       'Chemistry & Synergy Score',
@@ -370,7 +384,7 @@ const relationshipHarmonySchema: Schema = {
       'A short imperative title for the suggestion, e.g. "Direct Communication".'
     ),
   },
-  required: ['module', 'vibe_card', 'chemistry_score_card', 'dynamics_card', 'guidance_card'],
+  required: ['module', 'vibe_card', 'catchphrase_card', 'chemistry_score_card', 'dynamics_card', 'guidance_card'],
 };
 
 const careerPathSchema: Schema = {
@@ -381,6 +395,11 @@ const careerPathSchema: Schema = {
       'Career Archetype',
       'A short, striking work archetype name of two to three words, e.g. "Strategic Innovator".',
       'One punchy sentence on the working environments and roles that suit this natural composure and expression style — a hook, not an explanation.'
+    ),
+    catchphrase_card: badgeCard(
+      'Work Catchphrase',
+      'A short, quotable one-liner, under 8 words, capturing this person\'s work energy — like a confident job-title mashup. Fun and punchy, wrapped in quotation marks.',
+      'One sentence on why this line fits their working style.'
     ),
     domains_card: {
       type: Type.OBJECT,
@@ -396,7 +415,7 @@ const careerPathSchema: Schema = {
       'A concrete role title, e.g. "Systems Architect / Lead Engineer".'
     ),
   },
-  required: ['module', 'work_archetype_card', 'domains_card', 'recommendations_card'],
+  required: ['module', 'work_archetype_card', 'catchphrase_card', 'domains_card', 'recommendations_card'],
 };
 
 export const READING_SCHEMAS: Record<ReadingModuleId, Schema> = {

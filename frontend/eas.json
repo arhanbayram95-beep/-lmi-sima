@@ -20,7 +20,10 @@
     },
     "production": {
       "autoIncrement": true,
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://face-reader-backend-h0qb.onrender.com"
+      }
     }
   },
   "submit": {

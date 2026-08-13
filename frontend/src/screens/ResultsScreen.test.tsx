@@ -11,6 +11,7 @@ const CHARACTER_READING: CharacterAnalysisResult = {
     badge_tag: 'Analytical Visionary',
     summary: 'You read as someone people trust instantly.',
   },
+  catchphrase_card: { title: 'Signature Catchphrase', badge_tag: '"Quiet Storm, Loud Impact"', summary: 'Fits the steady gaze.' },
   facial_structure_card: { title: 'Facial Structure', shape_tag: 'Oval', description: 'Balanced proportions.' },
   spirit_animal_card: { title: 'Spirit Animal Match', animal: 'Wolf', description: 'A steady gaze.' },
   traits_card: {
@@ -33,6 +34,7 @@ const CAREER_READING: CareerPathResult = {
     badge_tag: 'Strategic Innovator',
     summary: 'You settle fastest in long-range rooms.',
   },
+  catchphrase_card: { title: 'Work Catchphrase', badge_tag: '"Built the Spreadsheet, Ran the Room"', summary: 'Fits the structured thinking.' },
   domains_card: { title: 'Recommended Industries', top_industry_pills: ['Product Design'] },
   recommendations_card: {
     title: 'Ideal Role Matches',

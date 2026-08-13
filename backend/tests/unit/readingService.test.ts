@@ -27,6 +27,7 @@ const MODULE_RESPONSES: Record<ReadingModuleId, Record<string, unknown>> = {
   'three-expression': {
     module: 'character_analysis',
     archetype_card: { title: 'Character Archetype', badge_tag: 'Analytical Visionary', summary: 'One punchy sentence.' },
+    catchphrase_card: { title: 'Signature Catchphrase', badge_tag: '"Quiet Storm, Loud Impact"', summary: 'One line on why it fits.' },
     facial_structure_card: { title: 'Facial Structure', shape_tag: 'Oval', description: 'Structural description.' },
     spirit_animal_card: { title: 'Spirit Animal Match', animal: 'Wolf', description: 'Symbolic description.' },
     traits_card: {
@@ -40,6 +41,7 @@ const MODULE_RESPONSES: Record<ReadingModuleId, Record<string, unknown>> = {
   'relationship-harmony': {
     module: 'relationship_harmony',
     vibe_card: { title: 'Relational Archetype', badge_tag: 'Grounded & Playful Harmonizer', summary: 'One punchy sentence.' },
+    catchphrase_card: { title: 'Duo Catchphrase', badge_tag: '"Calm Meets Chaos, On Purpose"', summary: 'One line on why it fits.' },
     chemistry_score_card: scoreCard('Chemistry & Synergy Score', ['Empathy', 'Communication', 'Attachment', 'Energy Match']),
     dynamics_card: {
       title: 'Relationship Dynamics',
@@ -54,6 +56,7 @@ const MODULE_RESPONSES: Record<ReadingModuleId, Record<string, unknown>> = {
   'career-match': {
     module: 'career_path',
     work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 'One punchy sentence.' },
+    catchphrase_card: { title: 'Work Catchphrase', badge_tag: '"Built the Spreadsheet, Ran the Room"', summary: 'One line on why it fits.' },
     domains_card: { title: 'Recommended Industries', top_industry_pills: ['Engineering & R&D'] },
     recommendations_card: {
       title: 'Ideal Role Matches',

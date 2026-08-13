@@ -416,3 +416,65 @@ relationship/career-specific content a generic reading wouldn't deliver.
   Next/Get Started footer, PaywallScreen's Subscribe footer. Verified live
   on-device (uiautomator dump confirmed the button bounds, then confirmed
   the fixed build's builder flow reaches the native share sheet).
+
+---
+
+## Phase 9: On-Device Bug Fixes, Reveal Polish, Catchphrase Card (2026-08-13)
+Found and fixed during first real iOS dev-client testing.
+- [x] **9.1 Fixed capture-screen camera freeze/black-flash** — traced to
+  `react-native-vision-camera-face-detector`'s `<Camera>` wrapper rebuilding
+  its `outputs` array on every render (confirmed in `node_modules`, not
+  memoized upstream), which forced the native session to unbind/rebind.
+  `CaptureScreen`'s per-frame `onFacesDetected` result was wired to
+  `useState`, so every detection flicker (constant under normal handheld
+  conditions) re-rendered the screen and triggered it. `hasFace` is now a
+  ref instead — it's only ever read once, at shutter-press time, and never
+  drove rendering, so a ref update triggers no re-render at all.
+- [x] **9.2 `AnalyzeScreen` header alignment fix** — its header reused
+  `HORIZONTAL_MARGIN` (4px, meant only for the edge-to-edge module card
+  art) for its own padding, sitting well left of `ResultsScreen`/
+  `SettingsScreen` headers (`Theme.spacing.gutter`, 16px). Decoupled.
+- [x] **9.3 LoadingScreen ripple/logo overlap fix** — the ripple rings'
+  base size (128px) was smaller than `AppLogo`'s `lg` badge (168px), so
+  early in the animation the ring started inside the artwork and grew
+  through it instead of starting outside it. Bumped to 190px.
+- [x] **9.4 RevealScreen page indicator: dots removed, counter relocated**
+  — the "n / total" counter moved from the header into the arrow row,
+  replacing the dot row (tap-to-jump-any-page) entirely; now prev arrow /
+  counter / next arrow only. Product direction: dots read as visual clutter
+  once the counter already conveys position.
+- [x] **9.5 Share-card theme swatches made more impactful** — 36px to
+  56px, a checkmark + stronger glow/scale on the selected swatch instead of
+  a small centered dot.
+- [x] **9.6 ShareCard disclaimer removed** (product decision, explicitly
+  confirmed overriding CLAUDE.md's disclaimer-lock default) — "For
+  entertainment purposes only" dropped from the share-card footer; kept the
+  `faceai.app` attribution. The in-app disclaimer (`DisclaimerFooter`, every
+  result screen) is unchanged and unaffected — this was the card that
+  leaves the app, not the app's own disclaimer surface.
+- [x] **9.7 Softened "AI" language in flavor copy, all 10 locales**
+  (product decision) — reworded onboarding/paywall/analyzing/share/welcome
+  copy that called the reading "AI" (e.g. "Unlock Full AI Face Insights" →
+  "Unlock Full Face Insights", "Our AI is generating your reading..." →
+  "Your reading is taking shape..."). Deliberately left
+  `review.body`'s "helps us train our AI models" untouched — a data-use
+  disclosure, not reading-flavor marketing. `legal.ts`/`legalContent.ts`
+  untouched per CLAUDE.md — this was flavor copy only, not the legal or
+  system-prompt safety text.
+- [x] **9.8 New "Catchphrase" card, all three modules** — a short quotable
+  one-liner (backend `catchphrase_card: BadgeCard`, e.g. `"Quiet Storm,
+  Loud Impact"` for Character Analysis, `"Calm Meets Chaos, On Purpose"`
+  for Relationship Harmony, `"Built the Spreadsheet, Ran the Room"` for
+  Career Match) plus one sentence on why it fits. Positioned as card #2 in
+  each module's build, right after the opening archetype/vibe/work-
+  archetype hook — a second, still-brief punchy beat before the reading
+  deepens, per `STRUCTURE_GUIDANCE`'s "build, not a flat list" rule. Added
+  to `readingSchema.ts`'s three schemas/interfaces (and their `required`
+  arrays — validated by `assertConformsToSchema`, no separate validator
+  code needed), `systemPrompt.ts`'s three module prompts, mirrored in
+  frontend `api/types.ts`, rendered via the existing `BadgeSummaryCard`
+  (no new frontend component needed — reuses the same title/badge_tag/
+  summary shape as `archetype_card`/`vibe_card`/`work_archetype_card`),
+  included in `readingShareableSections()`'s picklist, and added to
+  `mockReading.ts`'s fixtures. Backend (52 tests) and frontend (179 tests)
+  suites both green.

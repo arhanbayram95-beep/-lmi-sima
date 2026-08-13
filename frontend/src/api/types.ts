@@ -66,6 +66,7 @@ export type FaceShape = 'Oval' | 'Round' | 'Square' | 'Heart' | 'Diamond' | 'Obl
 export interface CharacterAnalysisResult {
   module: 'character_analysis';
   archetype_card: BadgeCard;
+  catchphrase_card: BadgeCard;
   facial_structure_card: {
     title: string;
     shape_tag: FaceShape;
@@ -92,6 +93,7 @@ export interface CharacterAnalysisResult {
 export interface RelationshipHarmonyResult {
   module: 'relationship_harmony';
   vibe_card: BadgeCard;
+  catchphrase_card: BadgeCard;
   chemistry_score_card: ScoreCard;
   dynamics_card: {
     title: string;
@@ -107,6 +109,7 @@ export interface RelationshipHarmonyResult {
 export interface CareerPathResult {
   module: 'career_path';
   work_archetype_card: BadgeCard;
+  catchphrase_card: BadgeCard;
   domains_card: {
     title: string;
     top_industry_pills: string[];
@@ -162,6 +165,11 @@ export function readingShareableSections(reading: ReadingResult): ShareableSecti
           body: `${reading.archetype_card.badge_tag} — ${reading.archetype_card.summary}`,
         },
         {
+          id: 'catchphrase',
+          title: reading.catchphrase_card.title,
+          body: `${reading.catchphrase_card.badge_tag} — ${reading.catchphrase_card.summary}`,
+        },
+        {
           id: 'facial-structure',
           title: reading.facial_structure_card.title,
           body: `${reading.facial_structure_card.shape_tag} face shape — ${reading.facial_structure_card.description}`,
@@ -190,6 +198,11 @@ export function readingShareableSections(reading: ReadingResult): ShareableSecti
           body: `${reading.vibe_card.badge_tag} — ${reading.vibe_card.summary}`,
         },
         {
+          id: 'catchphrase',
+          title: reading.catchphrase_card.title,
+          body: `${reading.catchphrase_card.badge_tag} — ${reading.catchphrase_card.summary}`,
+        },
+        {
           id: 'chemistry',
           title: reading.chemistry_score_card.title,
           body: `Overall score: ${reading.chemistry_score_card.overall_score}`,
@@ -211,6 +224,11 @@ export function readingShareableSections(reading: ReadingResult): ShareableSecti
           id: 'work',
           title: reading.work_archetype_card.title,
           body: `${reading.work_archetype_card.badge_tag} — ${reading.work_archetype_card.summary}`,
+        },
+        {
+          id: 'catchphrase',
+          title: reading.catchphrase_card.title,
+          body: `${reading.catchphrase_card.badge_tag} — ${reading.catchphrase_card.summary}`,
         },
         {
           id: 'domains',
