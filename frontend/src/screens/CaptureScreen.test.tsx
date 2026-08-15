@@ -49,6 +49,12 @@ jest.mock('../utils/sound', () => ({
   playPromptChime: () => mockPlayPromptChime(),
 }));
 
+const mockWarmUpBackend = jest.fn();
+
+jest.mock('../api/reading', () => ({
+  warmUpBackend: () => mockWarmUpBackend(),
+}));
+
 function detectFace() {
   act(() => {
     latestOnFacesDetected?.([{}]);
@@ -68,9 +74,15 @@ describe('CaptureScreen', () => {
     mockRequestPermission.mockClear();
     mockPlayCaptureChime.mockClear();
     mockPlayPromptChime.mockClear();
+    mockWarmUpBackend.mockClear();
     mockHasPermission = true;
     latestOnFacesDetected = undefined;
     useAppStore.setState({ screen: 'capture', images: [], selectedModule: 'three-expression' });
+  });
+
+  it('pre-warms the backend on mount, to absorb a Render cold start during framing', () => {
+    render(<CaptureScreen />);
+    expect(mockWarmUpBackend).toHaveBeenCalledTimes(1);
   });
 
   it('prompts for camera access when permission is not granted', () => {

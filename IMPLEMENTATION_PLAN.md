@@ -876,3 +876,31 @@ was actually run throughout.
   frontend change needed. `tsc --noEmit` clean on both frontend and
   backend, backend suite 8/8 suites, 55/55 tests, frontend suite
   unaffected (30/30, 180/180).
+- [x] **10.17 Mitigated frequent 502s from Render free-tier cold
+  starts** — "way too many 502 errors" traced to PROJECT_SPEC.md §3's
+  already-flagged risk: the free-tier container spins down after 15 min
+  idle and takes ~30-60s to cold-start, during which Render's proxy
+  returns 502. Two code-side mitigations, both non-billing (the actual
+  fix — the paid Starter tier — stays a flagged cost decision for the
+  product owner, not applied here):
+  - `backend/src/routes/health.ts`'s `GET /health` (rate-limit exempt,
+    same as `/legal/*`) exists purely as a pre-warm target, not real
+    uptime monitoring.
+  - `frontend/src/api/reading.ts`'s new `warmUpBackend()` fires a
+    fire-and-forget ping at it from `CaptureScreen`'s mount — the
+    earliest point in the flow with real user time ahead of it
+    (framing/retaking three shots) to absorb the cold start before
+    Submit. No-ops in mock-API mode; swallows every failure, since it's
+    purely a head start and `analyzeReading()`'s own checks are what
+    surface a real problem.
+  - `analyzeReading()` also now retries specifically on a 502 response
+    (up to 3 attempts, 3s/6s backoff) — every other failure (4xx,
+    non-502 5xx, network error) still fails on the first attempt, since
+    retrying those wouldn't help.
+  - `CaptureScreen.test.tsx` mocks `../api/reading`'s `warmUpBackend`
+    (new dependency the test didn't have before) and asserts it fires
+    once on mount. `reading.test.ts` gained fake-timer-driven tests for
+    both the retry-then-succeed and exhaust-retries-then-throw 502
+    paths, plus coverage for `warmUpBackend` in both real and mock API
+    modes. `tsc --noEmit` clean on both sides; backend 9/9 suites,
+    57/57 tests; frontend 30/30 suites, 186/186 tests.

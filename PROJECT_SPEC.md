@@ -257,6 +257,22 @@ becomes a real user complaint. `frontend/.env`'s
 `android.usesCleartextTraffic` was removed from `app.json` since this is
 real HTTPS.
 
+**Cold-start 502 mitigation (2026-08-15):** became a real complaint
+("way too many 502 errors") — mitigated in code without changing the
+Render plan: `GET /health` (`backend/src/routes/health.ts`, rate-limit
+exempt) exists purely as a pre-warm target, and `frontend/src/api/
+reading.ts`'s `warmUpBackend()` fire-and-forget-pings it from
+`CaptureScreen`'s mount, the earliest point in the flow with real user
+time ahead of it (framing/retaking shots) to absorb the ~30-60s cold
+start before the user ever hits Submit. `analyzeReading()` itself now
+also retries specifically on a 502 response (up to 3 attempts, 3s/6s
+backoff) — anything else (4xx, non-502 5xx, network failure) still fails
+immediately, retrying wouldn't help those. This reduces but does not
+eliminate the underlying issue: a cold start after a long idle gap can
+still exceed the pre-warm's head start plus the retry budget. The actual
+fix is still the paid Starter tier noted above — flagged to the product
+owner as a cost decision, not applied here.
+
 ---
 
 ## 4. AI Integration Notes (current: Google Gemini)

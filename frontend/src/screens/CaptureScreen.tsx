@@ -7,6 +7,7 @@ import { Camera, type Face } from 'react-native-vision-camera-face-detector';
 import PrimaryButton from '../components/common/PrimaryButton';
 import { useTranslation } from '../i18n/useTranslation';
 import { TranslationKey } from '../i18n/translations';
+import { warmUpBackend } from '../api/reading';
 import { ReadingModuleId } from '../api/types';
 import { useAppStore } from '../state/useAppStore';
 import { Theme } from '../ui/theme';
@@ -108,6 +109,13 @@ export default function CaptureScreen() {
       ])
     ).start();
   }, [pulse]);
+
+  // Fired here, not on the analyze call itself — see warmUpBackend's own
+  // comment. This is the earliest point in the flow with real user time
+  // ahead of it (framing/retaking shots) to absorb a Render cold start.
+  useEffect(() => {
+    warmUpBackend();
+  }, []);
 
   useEffect(() => {
     if (stepIndex > 0) {

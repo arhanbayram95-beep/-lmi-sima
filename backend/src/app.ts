@@ -4,6 +4,7 @@ import { RevenueCatClient } from './services/revenueCatClient';
 import { registerCors } from './middleware/cors';
 import { registerRateLimit } from './middleware/rateLimit';
 import { registerSecurityHeaders } from './middleware/securityHeaders';
+import { registerHealthRoute } from './routes/health';
 import { registerLegalRoutes } from './routes/legal';
 import { registerReadingRoutes } from './routes/reading';
 
@@ -27,6 +28,7 @@ export async function buildApp(
   await registerSecurityHeaders(app);
   registerReadingRoutes(app, readingModelClient, revenueCatClient);
   registerLegalRoutes(app);
+  registerHealthRoute(app);
 
   // Defense-in-depth: every expected failure path already responds with a
   // sanitized message (ReadingServiceError handling in routes/reading.ts;
