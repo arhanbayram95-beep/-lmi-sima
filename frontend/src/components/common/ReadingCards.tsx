@@ -1,11 +1,58 @@
 import * as Haptics from 'expo-haptics';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Image, LayoutAnimation, Platform, Pressable, StyleSheet, Text, UIManager, View } from 'react-native';
+import {
+  Animated,
+  Image,
+  LayoutAnimation,
+  Platform,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  Text,
+  UIManager,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { BadgeCard, ChecklistItem, FaceShape, MetadataBadge, MetricIcon, ScoreCard } from '../../api/types';
 import { Theme } from '../../ui/theme';
 import FaceShapeIcon from './FaceShapeIcon';
 import GlassCard from './GlassCard';
 import RarityBadge from './RarityBadge';
+
+// Product feedback (2026-08-15): the reveal cards read as too plain, and
+// asked for tarot-style ornate framing specifically — flagged and declined
+// (CLAUDE.md's Entertainment Framing explicitly bans "medieval, Ottoman, or
+// ancient fortune-telling tropes," and ornate gold filigree/Roman-numeral
+// card borders reads exactly as that). This is the same visual ambition —
+// every card gets real framing, not just a bare glass rectangle — recast
+// as viewfinder-style scan corners, which reads as "AI is actively
+// analyzing this" (this app's actual register) rather than "ancient
+// artifact." A shared local wrapper, not a change to GlassCard itself,
+// since GlassCard is used all over the app (Settings, Paywall, Onboarding)
+// and this framing is specific to the reveal screen's cards.
+function ScanCorners() {
+  return (
+    <>
+      <View style={[styles.scanCorner, styles.scanCornerTL]} pointerEvents="none" />
+      <View style={[styles.scanCorner, styles.scanCornerTR]} pointerEvents="none" />
+      <View style={[styles.scanCorner, styles.scanCornerBL]} pointerEvents="none" />
+      <View style={[styles.scanCorner, styles.scanCornerBR]} pointerEvents="none" />
+    </>
+  );
+}
+
+function ReadingGlassCard({
+  children,
+  style,
+  testID,
+}: React.PropsWithChildren<{ style?: StyleProp<ViewStyle>; testID?: string }>) {
+  return (
+    <GlassCard style={style} testID={testID}>
+      <ScanCorners />
+      {children}
+    </GlassCard>
+  );
+}
 
 // LayoutAnimation needs an explicit opt-in on Android (iOS has it on by
 // default) — powers the accordion expand/collapse in ChecklistCard below.
@@ -100,26 +147,26 @@ export function FacialStructureCard({
   testID?: string;
 }) {
   return (
-    <GlassCard style={styles.card} testID={testID}>
+    <ReadingGlassCard style={styles.card} testID={testID}>
       <CardHeader icon={icon} title={title} raritySeed={shapeTag} />
       <FaceShapeIcon shape={shapeTag} />
       <View style={styles.badgeChip}>
         <Text style={styles.badgeChipText}>{shapeTag}</Text>
       </View>
       <Text style={styles.summary}>{description}</Text>
-    </GlassCard>
+    </ReadingGlassCard>
   );
 }
 
 export function BadgeSummaryCard({ card, icon, testID }: { card: BadgeCard; icon?: string; testID?: string }) {
   return (
-    <GlassCard style={styles.card} testID={testID}>
+    <ReadingGlassCard style={styles.card} testID={testID}>
       <CardHeader icon={icon} title={card.title} raritySeed={card.badge_tag} />
       <View style={styles.badgeChip}>
         <Text style={styles.badgeChipText}>{card.badge_tag}</Text>
       </View>
       <Text style={styles.summary}>{card.summary}</Text>
-    </GlassCard>
+    </ReadingGlassCard>
   );
 }
 
@@ -167,7 +214,7 @@ export function ReadingScoreCard({
   testID?: string;
 }) {
   return (
-    <GlassCard style={styles.card} testID={testID}>
+    <ReadingGlassCard style={styles.card} testID={testID}>
       <CardHeader icon={icon} title={card.title} raritySeed={card.title} />
 
       <View style={styles.dial} testID="score-dial">
@@ -180,7 +227,7 @@ export function ReadingScoreCard({
           <MetricBar key={metric.label} metric={metric} />
         ))}
       </View>
-    </GlassCard>
+    </ReadingGlassCard>
   );
 }
 
@@ -198,7 +245,7 @@ export function PillsCard({
   testID,
 }: React.PropsWithChildren<{ title: string; icon?: string; groups: PillGroup[]; testID?: string }>) {
   return (
-    <GlassCard style={styles.card} testID={testID}>
+    <ReadingGlassCard style={styles.card} testID={testID}>
       <CardHeader icon={icon} title={title} raritySeed={title} />
       {children}
       {groups.map((group, index) => (
@@ -213,7 +260,7 @@ export function PillsCard({
           </View>
         </View>
       ))}
-    </GlassCard>
+    </ReadingGlassCard>
   );
 }
 
@@ -259,7 +306,7 @@ export function ChecklistCard({
   };
 
   return (
-    <GlassCard style={styles.card} testID={testID}>
+    <ReadingGlassCard style={styles.card} testID={testID}>
       <CardHeader icon={icon} title={title} raritySeed={title} />
       {items.map((item, index) => {
         const expanded = expandedIndex === index;
@@ -285,7 +332,7 @@ export function ChecklistCard({
           </Pressable>
         );
       })}
-    </GlassCard>
+    </ReadingGlassCard>
   );
 }
 
@@ -315,17 +362,36 @@ export function HighlightCard({
   testID?: string;
 }) {
   const [revealed, setRevealed] = useState(false);
-  const fade = useRef(new Animated.Value(0)).current;
+  const [showBack, setShowBack] = useState(false);
+  const flip = useRef(new Animated.Value(0)).current;
 
+  // Real 3D card flip, not a fade — two-phase animation (0->0.5 rotates
+  // the front face away, the content swap happens exactly at the halfway
+  // callback when the card is edge-on and nothing is visible anyway,
+  // 0.5->1 rotates the back face in). A single continuous 0->180deg spin
+  // with a mid-flight content swap was the first thing tried and rejected:
+  // the new content would render mirrored past 90deg, since it'd still be
+  // riding the same rotation that started facing the wrong way. The
+  // duplicate 0.5 breakpoint below is what makes the interpolation treat
+  // the two phases as separate rotations (0deg->90deg, then -90deg->0deg)
+  // instead of one continuous 0deg->180deg sweep.
   const reveal = () => {
     if (revealed) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRevealed(true);
-    Animated.timing(fade, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Animated.timing(flip, { toValue: 0.5, duration: 250, useNativeDriver: true }).start(() => {
+      setShowBack(true);
+      Animated.timing(flip, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+    });
   };
 
+  const rotateY = flip.interpolate({
+    inputRange: [0, 0.5, 0.5, 1],
+    outputRange: ['0deg', '90deg', '-90deg', '0deg'],
+  });
+
   return (
-    <GlassCard style={styles.card} testID={testID}>
+    <ReadingGlassCard style={styles.card} testID={testID}>
       <CardHeader icon={icon} title={title} raritySeed={name} />
       <Pressable
         onPress={reveal}
@@ -334,14 +400,16 @@ export function HighlightCard({
         accessibilityState={{ expanded: revealed }}
         testID={testID ? `${testID}-reveal` : undefined}
       >
-        <Text style={styles.matchName}>{name}</Text>
-        {revealed ? (
-          <Animated.Text style={[styles.summary, { opacity: fade }]}>{description}</Animated.Text>
-        ) : (
-          <Text style={styles.revealHint}>{tapHint}</Text>
-        )}
+        <Animated.View style={{ transform: [{ perspective: 800 }, { rotateY }] }}>
+          <Text style={styles.matchName}>{name}</Text>
+          {showBack ? (
+            <Text style={styles.summary}>{description}</Text>
+          ) : (
+            <Text style={styles.revealHint}>{tapHint}</Text>
+          )}
+        </Animated.View>
       </Pressable>
-    </GlassCard>
+    </ReadingGlassCard>
   );
 }
 
@@ -359,6 +427,44 @@ const styles = StyleSheet.create({
   },
   card: {
     gap: Theme.spacing.xs,
+  },
+  // Viewfinder-style scan corners (see ScanCorners/ReadingGlassCard) — an
+  // L-shaped bracket per corner, not a full border, reads as an active
+  // scan frame rather than a static picture frame.
+  scanCorner: {
+    position: 'absolute',
+    width: 18,
+    height: 18,
+    borderColor: Theme.colors.accent.goldSecondary,
+    opacity: 0.85,
+  },
+  scanCornerTL: {
+    top: 10,
+    left: 10,
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderTopLeftRadius: 6,
+  },
+  scanCornerTR: {
+    top: 10,
+    right: 10,
+    borderTopWidth: 2,
+    borderRightWidth: 2,
+    borderTopRightRadius: 6,
+  },
+  scanCornerBL: {
+    bottom: 10,
+    left: 10,
+    borderBottomWidth: 2,
+    borderLeftWidth: 2,
+    borderBottomLeftRadius: 6,
+  },
+  scanCornerBR: {
+    bottom: 10,
+    right: 10,
+    borderBottomWidth: 2,
+    borderRightWidth: 2,
+    borderBottomRightRadius: 6,
   },
   cardHeaderRow: {
     flexDirection: 'row',

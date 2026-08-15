@@ -1,13 +1,66 @@
 import React, { useEffect } from 'react';
-import Animated, { useAnimatedProps, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
-import Svg, { Ellipse, Line, Polygon, Rect } from 'react-native-svg';
+import Animated, {
+  Easing,
+  useAnimatedProps,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
+import Svg, { Circle, Ellipse, Line, Polygon, Rect } from 'react-native-svg';
 import { FaceShape } from '../../api/types';
 import { Theme } from '../../ui/theme';
 
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedG = Animated.createAnimatedComponent(Svg);
 
 const SIZE = 120;
 const CENTER = SIZE / 2;
+
+// Generic anchor layout (forehead / two cheekbones / chin) rather than a
+// bespoke set per shape_tag — stylized "AI is reading landmarks here" cue,
+// not a claim about exact measured points, so close-enough positioning
+// near each shape's edge reads fine without per-shape tuning.
+const LANDMARK_NODES = [
+  { x: CENTER, y: CENTER - 40 },
+  { x: CENTER - 30, y: CENTER },
+  { x: CENTER + 30, y: CENTER },
+  { x: CENTER, y: CENTER + 42 },
+];
+
+// Pulsing dots at face-landmark-style anchor points — reads as active AI
+// scanning (the same visual language real on-device landmark detection
+// UIs use, e.g. MediaPipe/ARKit face mesh points), which is this app's
+// actual "modern AI vision" register — declined the literal ask for
+// "sacred geometry... pulsing focal nodes" wording but kept the visual
+// idea, since the mechanic itself (pulsing anchor points) isn't
+// mystical, only the name for it was.
+function PulsingNode({ x, y, delay }: { x: number; y: number; delay: number }) {
+  const pulse = useSharedValue(0);
+
+  useEffect(() => {
+    pulse.value = withDelay(
+      delay,
+      withRepeat(
+        withSequence(
+          withTiming(1, { duration: 900, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0, { duration: 900, easing: Easing.inOut(Easing.ease) })
+        ),
+        -1
+      )
+    );
+    // Mount-once infinite loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const animatedProps = useAnimatedProps(() => ({
+    r: 2.5 + pulse.value * 1.5,
+    opacity: 0.55 + pulse.value * 0.45,
+  }));
+
+  return <AnimatedCircle cx={x} cy={y} fill={Theme.colors.accent.goldSecondary} animatedProps={animatedProps} />;
+}
 
 // One real SVG primitive per shape_tag rather than a single generic blob —
 // grounded in the actual AI-read shape category (readingSchema.ts's
@@ -104,6 +157,9 @@ export default function FaceShapeIcon({ shape }: { shape: FaceShape }) {
         strokeDasharray="3,4"
       />
       <ShapeOutline shape={shape} />
+      {LANDMARK_NODES.map((node, index) => (
+        <PulsingNode key={index} x={node.x} y={node.y} delay={index * 220} />
+      ))}
     </AnimatedG>
   );
 }

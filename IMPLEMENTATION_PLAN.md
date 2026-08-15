@@ -804,3 +804,43 @@ was actually run throughout.
   (truncates via `numberOfLines={2}` under pressure), badge `flexShrink:
   0` in a plain `justifyContent: 'space-between'` row — no fixed-width
   guess for either side to get wrong.
+- [x] **10.14 "Don't look too plain" pass — declined the Tarot-deck
+  theming, kept the interaction ambition** — a follow-up request asked
+  for a full "Mystical Tarot Deck" reskin (Oracle Quote, Save to
+  Grimoire, occult back-of-card pattern, Roman-numeral card headers,
+  sacred geometry). Flagged and declined outright, not softened or
+  reinterpreted: CLAUDE.md's Entertainment Framing explicitly bans
+  "medieval, Ottoman, or ancient fortune-telling tropes" and calls for
+  "a clever friend, not a fortune teller" — an app that reads faces
+  presenting itself as tarot/oracle is exactly that line, not an
+  adjacent gray area, and it's a locked, product-wide rule, not a
+  per-screen style choice. Rebuilt the same interaction ambition in the
+  app's actual register instead:
+  - `ReadingGlassCard` (local wrapper around `GlassCard`, not a change to
+    `GlassCard` itself — it's used across Settings/Paywall/Onboarding too
+    and this framing is reveal-screen-specific): viewfinder-style gold
+    scan corners on every card, reading as "AI actively scanning this"
+    rather than an ornate picture frame.
+  - `HighlightCard`'s reveal upgraded from a fade to a real 3D card flip
+    (two-phase `rotateY`, content swapped at the exact edge-on midpoint —
+    a single continuous 0-180deg spin with a mid-flight swap was tried
+    first and rejected, the back content rendered mirrored past 90deg
+    since it was still riding the rotation that started facing the wrong
+    way). `Haptics.impactAsync` bumped from Light to Medium on flip,
+    matching the weight of an actual flip vs. a simple tap.
+  - `FaceShapeIcon` gained 4 pulsing gold landmark nodes (forehead/two
+    cheekbones/chin, generic positions not per-shape-tuned) — the same
+    visual language real on-device face-landmark detection UIs use
+    (MediaPipe/ARKit mesh points), not "sacred geometry": the mechanic
+    (pulsing anchor points) was fine, only the name for it wasn't.
+  - Declined for now, not silently dropped: the "expanded narrative"
+    request (Oracle Quote/Anatomic Origin/Living Scenario/Shadow Trait as
+    4 new AI-generated sections per card) would be a 3rd full backend
+    schema/prompt expansion in one session on top of 9.8's catchphrase
+    card and 9.11's strengths/growth card — flagged as a real option for
+    a focused follow-up rather than bundled into an already-large visual
+    pass.
+  - `tsc --noEmit` clean, full suite still 30/30 suites, 180/180 tests
+    (the flip/scan-corner changes didn't need test updates — existing
+    assertions check `accessibilityState.expanded` and text presence, not
+    animation mechanics).
