@@ -844,3 +844,17 @@ was actually run throughout.
     (the flip/scan-corner changes didn't need test updates — existing
     assertions check `accessibilityState.expanded` and text presence, not
     animation mechanics).
+- [x] **10.15 Fixed HighlightCard flip not rendering on-device** — 10.14's
+  flip used core RN `Animated` with a `perspective` transform under
+  `useNativeDriver: true`; on-device only the `ScanCorners` decoration
+  showed up (confirming the bundle was current), the flip itself never
+  visibly rotated — a known unreliable combination in core Animated on
+  some RN/platform builds. Rebuilt on `react-native-reanimated`
+  (`useSharedValue`/`useAnimatedStyle`/`withTiming`/`interpolate`,
+  aliased `ReAnimated`/`reInterpolate` to avoid colliding with the
+  file's existing core-`Animated` import used by `MetricBar`'s fill
+  bar), preserving the same two-phase 0→90deg / -90deg→0deg rotation
+  with the content swap driven by `runOnJS(setShowBack)` at the
+  `withTiming` completion callback, landing exactly at the edge-on
+  midpoint as before. `tsc --noEmit` clean, full suite 30/30 suites,
+  180/180 tests.
