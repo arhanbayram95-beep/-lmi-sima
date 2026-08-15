@@ -22,51 +22,120 @@ const scoreCard = (title: string, labels: string[]) => ({
   breakdown_metrics: labels.map((label, i) => ({ label, score: 80 + i * 3, icon: 'eye' })),
 });
 
+// Shared by every deep master card across all three modules — see
+// MasterCardNarrative in readingSchema.ts.
+const narrative = (heroHook: string) => ({
+  hero_hook: heroHook,
+  anatomical_decoding: ['Jawline reads decisive.', 'Eyes read direct.', 'Brow line reads composed.'],
+  living_scenario: ['Paragraph one.', 'Paragraph two.', 'Paragraph three.'],
+  actionable_insight: { headline: 'Balance Point', description: 'A short growth note.' },
+});
+
+const mythicTale = (title: string) => ({
+  tale_title: title,
+  paragraphs: ['Fable paragraph one.', 'Fable paragraph two.', 'Fable paragraph three.'],
+});
+
 // Fixtures mirror the shape each module's responseSchema forces — see
 // readingSchema.ts. Never the real API in tests, per CLAUDE.md.
 const MODULE_RESPONSES: Record<ReadingModuleId, Record<string, unknown>> = {
   'three-expression': {
     module: 'character_analysis',
-    archetype_card: { title: 'Character Archetype', badge_tag: 'Analytical Visionary', summary: 'One punchy sentence.' },
-    catchphrase_card: { title: 'Signature Catchphrase', badge_tag: '"Quiet Storm, Loud Impact"', summary: 'One line on why it fits.' },
-    facial_structure_card: { title: 'Facial Structure', shape_tag: 'Oval', description: 'Structural description.' },
-    spirit_animal_card: { title: 'Spirit Animal Match', animal: 'Wolf', description: 'Symbolic description.' },
-    traits_card: {
-      title: 'Facial Trait Analysis',
-      metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],
-      strength_pills: ['Strategic Thinking'],
-      growth_pills: ['Pacing Energy'],
+    oracle_match_card: {
+      title: 'The Archetype & Oracle Match',
+      archetype_tag: 'Analytical Visionary',
+      oracle_match_name: 'A Public Figure',
+      facial_landmark_resonance: { percent: 94, archetype_label: 'High-Brow Deadpan Archetypes' },
+      aura: { name: 'Crimson Ember', intensity_percent: 82, explanation: 'Driven by prominent brow tension.' },
+      ...narrative('A striking hero hook.'),
     },
-    celebrity_match_card: { title: 'Celebrity Archetype Match', match_name: 'A Public Figure', match_description: 'Same register.' },
+    sacred_anatomy_card: {
+      title: 'Facial Geometry & Sacred Anatomy',
+      shape_tag: 'Oval',
+      golden_ratio_score: { percent: 91, explanation: 'Balanced forehead-to-chin ratio.' },
+      structural_dominance: { brow_percent: 70, cheekbone_percent: 55, jaw_percent: 40 },
+      ...narrative('Geometry hero hook.'),
+    },
+    animal_totem_card: {
+      title: 'The Animal Totem & Primal Energy',
+      spirit_animal: 'Wolf',
+      instinctual_radar: [{ left_trait: 'Pack Loyalty', left_percent: 78, right_trait: 'Lone Independence' }],
+      ...narrative('Totem hero hook.'),
+    },
+    trait_symphony_card: {
+      title: 'Trait Symphony & Behavioral Polarities',
+      polarity_meters: [{ left_trait: 'Observant Irony', left_percent: 78, right_trait: 'Direct Earnestness' }],
+      rarity_index: { one_in_n: 420, trait_reason: 'This exact eye-to-brow symmetry.' },
+      ...narrative('Symphony hero hook.'),
+    },
+    shadow_arcana_card: {
+      title: 'The Secret Signature & Shadow Arcana',
+      signature_catchphrase: '"Quiet Storm, Loud Impact"',
+      shadow_traits: ['Overthinking Under Pressure'],
+      life_advice: 'Lean into the pause before you speak.',
+      mythic_tale: mythicTale('The Trial of the Ember Wolf'),
+      ...narrative('Shadow hero hook.'),
+    },
   },
   'relationship-harmony': {
     module: 'relationship_harmony',
-    vibe_card: { title: 'Relational Archetype', badge_tag: 'Grounded & Playful Harmonizer', summary: 'One punchy sentence.' },
-    catchphrase_card: { title: 'Duo Catchphrase', badge_tag: '"Calm Meets Chaos, On Purpose"', summary: 'One line on why it fits.' },
-    chemistry_score_card: scoreCard('Chemistry & Synergy Score', ['Empathy', 'Communication', 'Attachment', 'Energy Match']),
-    dynamics_card: {
-      title: 'Relationship Dynamics',
-      best_chemistry_pills: ['Grounded Calmness'],
-      vibes_to_avoid_pills: ['Superficial Drama'],
+    bond_oracle_card: {
+      title: 'The Bond Archetype & Oracle Match',
+      bond_archetype_tag: 'Grounded & Playful Harmonizer',
+      duo_oracle_match: 'A Famous Duo',
+      bond_resonance: { percent: 88, archetype_label: 'Steady-Anchor & Spark Pairings' },
+      aura: { name: 'Amber Tide', intensity_percent: 76, explanation: 'Driven by complementary energy levels.' },
+      ...narrative('Bond hero hook.'),
     },
-    guidance_card: {
-      title: 'Harmony Recommendations',
-      checklist_items: [{ headline: 'Direct Communication', description: 'Say it early and plainly.' }],
+    chemistry_geometry_card: {
+      title: 'Chemistry Geometry & Synergy Score',
+      synergy_score: scoreCard('Synergy Score', ['Empathy', 'Communication', 'Attachment', 'Energy Match']),
+      ...narrative('Chemistry hero hook.'),
+    },
+    instinctual_dynamics_card: {
+      title: 'Instinctual Dynamics & Primal Rhythm',
+      dynamics_radar: [{ left_trait: 'Playful Push-Pull', left_percent: 78, right_trait: 'Steady Anchoring' }],
+      ...narrative('Dynamics hero hook.'),
+    },
+    bond_shadow_arcana_card: {
+      title: 'The Secret Signature & Shadow Arcana of the Bond',
+      duo_catchphrase: '"Calm Meets Chaos, On Purpose"',
+      shadow_traits: ['Overplanning Spontaneous Moments'],
+      guidance_checklist: [{ headline: 'Direct Communication', description: 'Say it early and plainly.' }],
+      mythic_tale: mythicTale('The Bound Wayfarers'),
+      ...narrative('Bond shadow hero hook.'),
     },
   },
   'career-match': {
     module: 'career_path',
-    work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 'One punchy sentence.' },
-    catchphrase_card: { title: 'Work Catchphrase', badge_tag: '"Built the Spreadsheet, Ran the Room"', summary: 'One line on why it fits.' },
-    domains_card: { title: 'Recommended Industries', top_industry_pills: ['Engineering & R&D'] },
-    strengths_growth_card: {
-      title: 'Strengths & Growth Areas',
-      strength_pills: ['Structured Thinking'],
-      growth_pills: ['Pacing Energy'],
+    career_oracle_card: {
+      title: 'The Career Archetype & Oracle Match',
+      work_archetype_tag: 'Strategic Innovator',
+      career_oracle_match: 'A Public Figure',
+      career_resonance: { percent: 90, archetype_label: 'Calm-Under-Fire Builders' },
+      aura: { name: 'Slate Ember', intensity_percent: 80, explanation: 'Driven by composed decision-making.' },
+      ...narrative('Career hero hook.'),
     },
-    recommendations_card: {
-      title: 'Ideal Role Matches',
-      checklist_items: [{ headline: 'Systems Architect', description: 'Structured problem-solving under pressure.' }],
+    industry_geometry_card: {
+      title: 'Industry Geometry & Work-Style Radar',
+      work_style_radar: [{ left_trait: 'Deep-Focus Craft', left_percent: 74, right_trait: 'Fast-Paced Hustle' }],
+      top_industry_pills: ['Engineering & R&D'],
+      ...narrative('Industry hero hook.'),
+    },
+    career_trait_symphony_card: {
+      title: 'Trait Symphony & Working Polarities',
+      polarity_meters: [{ left_trait: 'Structured Thinking', left_percent: 82, right_trait: 'Improvised Adaptation' }],
+      rarity_index: { one_in_n: 310, trait_reason: 'This exact pacing under deadline pressure.' },
+      ...narrative('Trait hero hook.'),
+    },
+    career_shadow_arcana_card: {
+      title: 'The Secret Signature & Shadow Arcana',
+      work_catchphrase: '"Built the Spreadsheet, Ran the Room"',
+      shadow_traits: ['Over-Preparing for Small Stakes'],
+      role_recommendations: [{ headline: 'Systems Architect', description: 'Structured problem-solving under pressure.' }],
+      life_advice: 'Let one plan stay unfinished on purpose.',
+      mythic_tale: mythicTale('The Architect of the Long Road'),
+      ...narrative('Career shadow hero hook.'),
     },
   },
 };
@@ -89,7 +158,7 @@ describe('generateReading', () => {
 
     const result = await generateReading(makeClient(generateContent), PHOTOS_3);
 
-    expect(result).toMatchObject({ archetype_card: { badge_tag: 'Analytical Visionary' } });
+    expect(result).toMatchObject({ oracle_match_card: { archetype_tag: 'Analytical Visionary' } });
     expect(generateContent).toHaveBeenCalledTimes(1);
   });
 
@@ -164,7 +233,7 @@ describe('generateReading', () => {
 
     const result = await generateReading(makeClient(generateContent), PHOTOS_3);
 
-    expect(result).toMatchObject({ archetype_card: { badge_tag: 'Analytical Visionary' } });
+    expect(result).toMatchObject({ oracle_match_card: { archetype_tag: 'Analytical Visionary' } });
     expect(generateContent).toHaveBeenCalledTimes(2);
   });
 
@@ -198,7 +267,7 @@ describe('generateReading', () => {
 
     const result = await generateReading(makeClient(generateContent), PHOTOS_3);
 
-    expect(result).toMatchObject({ archetype_card: { badge_tag: 'Analytical Visionary' } });
+    expect(result).toMatchObject({ oracle_match_card: { archetype_tag: 'Analytical Visionary' } });
     expect(generateContent).toHaveBeenCalledTimes(2);
   });
 
@@ -215,20 +284,24 @@ describe('generateReading', () => {
   });
 
   it('throws when a card the module renders is missing from the response', async () => {
-    const { celebrity_match_card, ...withoutCelebrity } = MODULE_RESPONSES['three-expression'];
-    const generateContent = jest.fn().mockResolvedValue(textResponse(withoutCelebrity));
+    const { shadow_arcana_card, ...withoutShadowArcana } = MODULE_RESPONSES['three-expression'];
+    const generateContent = jest.fn().mockResolvedValue(textResponse(withoutShadowArcana));
 
     await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
   });
 
-  // Regression: a live Gemini response once came back with domains_card
-  // present but missing top_industry_pills, which the old top-level-only
+  // Regression: a live Gemini response once came back with a card present
+  // but missing one of its own array fields, which an old top-level-only
   // check let through — ReadingCards.tsx's `.map()` over the missing array
   // then crashed RevealScreen for the career-match module in production.
   it('throws when a card is present but missing one of its own required nested fields', async () => {
+    const { top_industry_pills, ...industryGeometryWithoutPills } = MODULE_RESPONSES['career-match'].industry_geometry_card as Record<
+      string,
+      unknown
+    >;
     const malformed = {
       ...MODULE_RESPONSES['career-match'],
-      domains_card: { title: 'Recommended Industries' },
+      industry_geometry_card: industryGeometryWithoutPills,
     };
     const generateContent = jest.fn().mockResolvedValue(textResponse(malformed));
 
@@ -240,7 +313,10 @@ describe('generateReading', () => {
   it('throws when a required array field comes back as the wrong type', async () => {
     const malformed = {
       ...MODULE_RESPONSES['career-match'],
-      recommendations_card: { title: 'Ideal Role Matches', checklist_items: 'not an array' },
+      career_shadow_arcana_card: {
+        ...(MODULE_RESPONSES['career-match'].career_shadow_arcana_card as Record<string, unknown>),
+        role_recommendations: 'not an array',
+      },
     };
     const generateContent = jest.fn().mockResolvedValue(textResponse(malformed));
 
