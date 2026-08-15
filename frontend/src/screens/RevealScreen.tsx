@@ -6,21 +6,28 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 import FadeInView from '../components/common/FadeInView';
 import GestureCardDeck from '../components/common/GestureCardDeck';
+import MasterCard from '../components/common/MasterCard';
+import {
+  AdviceNote,
+  AuraStat,
+  ChecklistRows,
+  GoldenRatioStat,
+  IndustryPillsRow,
+  MutedPillsRow,
+  NameChip,
+  RarityStat,
+  ResonanceStat,
+  StructuralDominanceStat,
+  SynergyScoreDial,
+} from '../components/common/MasterCardStats';
+import PolarityMeterBar from '../components/common/PolarityMeterBar';
 import PrimaryButton from '../components/common/PrimaryButton';
+import { PhotoPageCard } from '../components/common/ReadingCards';
 import ShareCard from '../components/common/ShareCard';
 import ShareOptionsModal, { MAX_SELECTABLE_SECTIONS } from '../components/common/ShareOptionsModal';
 import StoryProgressBar from '../components/common/StoryProgressBar';
-import {
-  BadgeSummaryCard,
-  ChecklistCard,
-  FacialStructureCard,
-  HighlightCard,
-  MetadataBadgeRow,
-  PhotoPageCard,
-  PillsCard,
-  ReadingScoreCard,
-} from '../components/common/ReadingCards';
-import { ReadingResult, readingShareableSections } from '../api/types';
+import TapToRevealCard from '../components/common/TapToRevealCard';
+import { PolarityMeter, ReadingResult, readingShareableSections } from '../api/types';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { DEFAULT_SHARE_PALETTE_ID, SharePaletteId, Theme } from '../ui/theme';
@@ -28,124 +35,234 @@ import { playSwipeChime } from '../utils/sound';
 
 type Translate = ReturnType<typeof useTranslation>;
 
-// One page per photo, then one card stack per module, in the order the
-// reading reads best: the captured photos first (each its own page — see
-// PhotoPageCard's comment on why this isn't a nested sub-carousel), then
-// the hook (badge tag), then progressively more detail as it goes — score
-// only survives for relationship_harmony now (see systemPrompt.ts). Each
-// module's shape is guaranteed by its own response schema — see backend
-// readingSchema.ts. RevealScreen pages through this list one card at a
-// time (see SwipeablePager below) rather than a single long scroll.
+function PolarityMeters({ meters }: { meters: PolarityMeter[] }) {
+  return (
+    <View style={styles.meterStack}>
+      {meters.map((meter, index) => (
+        <PolarityMeterBar
+          key={index}
+          leftTrait={meter.left_trait}
+          leftPercent={meter.left_percent}
+          rightTrait={meter.right_trait}
+        />
+      ))}
+    </View>
+  );
+}
+
+// One page per photo, then one deep master card per page, in the order
+// each module's reading reads best: the captured photos first (each its
+// own page — see PhotoPageCard's comment on why this isn't a nested
+// sub-carousel), then the oracle-match hook, building to the richest
+// Shadow Arcana card last. Every card is wrapped in TapToRevealCard's
+// veil-then-flip ritual, with MasterCard rendering the shared narrative
+// shape (hero_hook/anatomical_decoding/living_scenario/actionable_insight
+// — identical across all three modules, see api/types.ts) plus a
+// per-card statsSection built from MasterCardStats' small, focused
+// pieces. Each module's shape is guaranteed by its own response schema —
+// see backend readingSchema.ts. RevealScreen pages through this list one
+// card at a time (see GestureCardDeck below) rather than a single long
+// scroll.
 function readingCards(reading: ReadingResult, images: string[], t: Translate): React.ReactNode[] {
   const photos = images.map((photo, i) => (
     <PhotoPageCard key={`photo-${i}`} photo={photo} testID={i === 0 ? 'reveal-photos' : undefined} />
   ));
+  const tapHint = t('reveal.tapToUnveil');
 
   switch (reading.module) {
-    case 'character_analysis':
+    case 'character_analysis': {
+      const { oracle_match_card, sacred_anatomy_card, animal_totem_card, trait_symphony_card, shadow_arcana_card } = reading;
       return [
         ...photos,
-        <BadgeSummaryCard key="archetype" card={reading.archetype_card} icon="🎭" testID="archetype-card" />,
-        <BadgeSummaryCard key="catchphrase" card={reading.catchphrase_card} icon="💬" testID="catchphrase-card" />,
-        <FacialStructureCard
-          key="facial-structure"
-          title={reading.facial_structure_card.title}
-          shapeTag={reading.facial_structure_card.shape_tag}
-          description={reading.facial_structure_card.description}
-          icon="📐"
-          testID="facial-structure-card"
-        />,
-        <HighlightCard
-          key="spirit-animal"
-          title={reading.spirit_animal_card.title}
-          icon="🐾"
-          name={reading.spirit_animal_card.animal}
-          description={reading.spirit_animal_card.description}
-          tapHint={t('reveal.tapToReveal')}
-          testID="spirit-animal-card"
-        />,
-        <PillsCard
-          key="traits"
-          title={reading.traits_card.title}
-          icon="✨"
-          testID="traits-card"
-          groups={[
-            { label: t('reveal.strengths'), pills: reading.traits_card.strength_pills },
-            { label: t('reveal.growthEdges'), pills: reading.traits_card.growth_pills, tone: 'caution' },
-          ]}
-        >
-          <MetadataBadgeRow badges={reading.traits_card.metadata_badges} />
-        </PillsCard>,
-        <HighlightCard
-          key="celebrity"
-          title={reading.celebrity_match_card.title}
-          icon="⭐"
-          name={reading.celebrity_match_card.match_name}
-          description={reading.celebrity_match_card.match_description}
-          tapHint={t('reveal.tapToReveal')}
-          testID="celebrity-card"
-        />,
+        <TapToRevealCard key="oracle-match" icon="🎭" title={oracle_match_card.title} tapHint={tapHint} testID="oracle-match-card">
+          <MasterCard
+            icon="🎭"
+            title={oracle_match_card.title}
+            narrative={oracle_match_card}
+            statsSection={
+              <>
+                <NameChip label={oracle_match_card.archetype_tag} />
+                <ResonanceStat resonance={oracle_match_card.facial_landmark_resonance} />
+                <AuraStat aura={oracle_match_card.aura} />
+              </>
+            }
+          />
+        </TapToRevealCard>,
+        <TapToRevealCard key="sacred-anatomy" icon="📐" title={sacred_anatomy_card.title} tapHint={tapHint} testID="sacred-anatomy-card">
+          <MasterCard
+            icon="📐"
+            title={sacred_anatomy_card.title}
+            narrative={sacred_anatomy_card}
+            statsSection={
+              <>
+                <GoldenRatioStat shapeTag={sacred_anatomy_card.shape_tag} score={sacred_anatomy_card.golden_ratio_score} />
+                <StructuralDominanceStat dominance={sacred_anatomy_card.structural_dominance} />
+              </>
+            }
+          />
+        </TapToRevealCard>,
+        <TapToRevealCard key="animal-totem" icon="🐾" title={animal_totem_card.title} tapHint={tapHint} testID="animal-totem-card">
+          <MasterCard
+            icon="🐾"
+            title={animal_totem_card.title}
+            narrative={animal_totem_card}
+            statsSection={
+              <>
+                <NameChip label={animal_totem_card.spirit_animal} />
+                <PolarityMeters meters={animal_totem_card.instinctual_radar} />
+              </>
+            }
+          />
+        </TapToRevealCard>,
+        <TapToRevealCard key="trait-symphony" icon="🎼" title={trait_symphony_card.title} tapHint={tapHint} testID="trait-symphony-card">
+          <MasterCard
+            icon="🎼"
+            title={trait_symphony_card.title}
+            narrative={trait_symphony_card}
+            statsSection={
+              <>
+                <PolarityMeters meters={trait_symphony_card.polarity_meters} />
+                <RarityStat rarity={trait_symphony_card.rarity_index} />
+              </>
+            }
+          />
+        </TapToRevealCard>,
+        <TapToRevealCard key="shadow-arcana" icon="🌑" title={shadow_arcana_card.title} tapHint={tapHint} testID="shadow-arcana-card">
+          <MasterCard
+            icon="🌑"
+            title={shadow_arcana_card.title}
+            narrative={shadow_arcana_card}
+            mythicTale={shadow_arcana_card.mythic_tale}
+            statsSection={
+              <>
+                <NameChip label={shadow_arcana_card.signature_catchphrase} />
+                <MutedPillsRow pills={shadow_arcana_card.shadow_traits} testID="shadow-traits" />
+                <AdviceNote text={shadow_arcana_card.life_advice} />
+              </>
+            }
+          />
+        </TapToRevealCard>,
       ];
-    case 'relationship_harmony':
+    }
+    case 'relationship_harmony': {
+      const { bond_oracle_card, chemistry_geometry_card, instinctual_dynamics_card, bond_shadow_arcana_card } = reading;
       return [
         ...photos,
-        <BadgeSummaryCard key="vibe" card={reading.vibe_card} icon="💞" testID="archetype-card" />,
-        <BadgeSummaryCard key="catchphrase" card={reading.catchphrase_card} icon="💬" testID="catchphrase-card" />,
-        <ReadingScoreCard
-          key="score"
-          card={reading.chemistry_score_card}
-          overallLabel={t('reveal.overallLabel')}
-          icon="🔥"
-          testID="score-card"
-        />,
-        <PillsCard
-          key="dynamics"
-          title={reading.dynamics_card.title}
-          icon="🌊"
-          testID="dynamics-card"
-          groups={[
-            { label: t('reveal.bestChemistry'), pills: reading.dynamics_card.best_chemistry_pills },
-            { label: t('reveal.vibesToAvoid'), pills: reading.dynamics_card.vibes_to_avoid_pills, tone: 'caution' },
-          ]}
-        />,
-        <ChecklistCard
-          key="guidance"
-          title={reading.guidance_card.title}
-          icon="✅"
-          items={reading.guidance_card.checklist_items}
-          testID="checklist-card"
-        />,
+        <TapToRevealCard key="bond-oracle" icon="💞" title={bond_oracle_card.title} tapHint={tapHint} testID="bond-oracle-card">
+          <MasterCard
+            icon="💞"
+            title={bond_oracle_card.title}
+            narrative={bond_oracle_card}
+            statsSection={
+              <>
+                <NameChip label={bond_oracle_card.bond_archetype_tag} />
+                <ResonanceStat resonance={bond_oracle_card.bond_resonance} />
+                <AuraStat aura={bond_oracle_card.aura} />
+              </>
+            }
+          />
+        </TapToRevealCard>,
+        <TapToRevealCard key="chemistry-geometry" icon="🔥" title={chemistry_geometry_card.title} tapHint={tapHint} testID="chemistry-geometry-card">
+          <MasterCard
+            icon="🔥"
+            title={chemistry_geometry_card.title}
+            narrative={chemistry_geometry_card}
+            statsSection={
+              <SynergyScoreDial
+                overallScore={chemistry_geometry_card.synergy_score.overall_score}
+                overallLabel={t('reveal.overallLabel')}
+                metrics={chemistry_geometry_card.synergy_score.breakdown_metrics}
+              />
+            }
+          />
+        </TapToRevealCard>,
+        <TapToRevealCard key="instinctual-dynamics" icon="🌊" title={instinctual_dynamics_card.title} tapHint={tapHint} testID="instinctual-dynamics-card">
+          <MasterCard
+            icon="🌊"
+            title={instinctual_dynamics_card.title}
+            narrative={instinctual_dynamics_card}
+            statsSection={<PolarityMeters meters={instinctual_dynamics_card.dynamics_radar} />}
+          />
+        </TapToRevealCard>,
+        <TapToRevealCard key="bond-shadow-arcana" icon="🌑" title={bond_shadow_arcana_card.title} tapHint={tapHint} testID="bond-shadow-arcana-card">
+          <MasterCard
+            icon="🌑"
+            title={bond_shadow_arcana_card.title}
+            narrative={bond_shadow_arcana_card}
+            mythicTale={bond_shadow_arcana_card.mythic_tale}
+            statsSection={
+              <>
+                <NameChip label={bond_shadow_arcana_card.duo_catchphrase} />
+                <MutedPillsRow pills={bond_shadow_arcana_card.shadow_traits} testID="shadow-traits" />
+                <ChecklistRows items={bond_shadow_arcana_card.guidance_checklist} testID="guidance-checklist" />
+              </>
+            }
+          />
+        </TapToRevealCard>,
       ];
-    case 'career_path':
+    }
+    case 'career_path': {
+      const { career_oracle_card, industry_geometry_card, career_trait_symphony_card, career_shadow_arcana_card } = reading;
       return [
         ...photos,
-        <BadgeSummaryCard key="work" card={reading.work_archetype_card} icon="💼" testID="archetype-card" />,
-        <BadgeSummaryCard key="catchphrase" card={reading.catchphrase_card} icon="💬" testID="catchphrase-card" />,
-        <PillsCard
-          key="domains"
-          title={reading.domains_card.title}
-          icon="🧭"
-          testID="domains-card"
-          groups={[{ pills: reading.domains_card.top_industry_pills }]}
-        />,
-        <PillsCard
-          key="strengths-growth"
-          title={reading.strengths_growth_card.title}
-          icon="⚖️"
-          testID="strengths-growth-card"
-          groups={[
-            { label: t('reveal.strengths'), pills: reading.strengths_growth_card.strength_pills },
-            { label: t('reveal.growthEdges'), pills: reading.strengths_growth_card.growth_pills, tone: 'caution' },
-          ]}
-        />,
-        <ChecklistCard
-          key="roles"
-          title={reading.recommendations_card.title}
-          icon="✅"
-          items={reading.recommendations_card.checklist_items}
-          testID="checklist-card"
-        />,
+        <TapToRevealCard key="career-oracle" icon="💼" title={career_oracle_card.title} tapHint={tapHint} testID="career-oracle-card">
+          <MasterCard
+            icon="💼"
+            title={career_oracle_card.title}
+            narrative={career_oracle_card}
+            statsSection={
+              <>
+                <NameChip label={career_oracle_card.work_archetype_tag} />
+                <ResonanceStat resonance={career_oracle_card.career_resonance} />
+                <AuraStat aura={career_oracle_card.aura} />
+              </>
+            }
+          />
+        </TapToRevealCard>,
+        <TapToRevealCard key="industry-geometry" icon="🧭" title={industry_geometry_card.title} tapHint={tapHint} testID="industry-geometry-card">
+          <MasterCard
+            icon="🧭"
+            title={industry_geometry_card.title}
+            narrative={industry_geometry_card}
+            statsSection={
+              <>
+                <PolarityMeters meters={industry_geometry_card.work_style_radar} />
+                <IndustryPillsRow pills={industry_geometry_card.top_industry_pills} />
+              </>
+            }
+          />
+        </TapToRevealCard>,
+        <TapToRevealCard key="career-trait-symphony" icon="🎼" title={career_trait_symphony_card.title} tapHint={tapHint} testID="career-trait-symphony-card">
+          <MasterCard
+            icon="🎼"
+            title={career_trait_symphony_card.title}
+            narrative={career_trait_symphony_card}
+            statsSection={
+              <>
+                <PolarityMeters meters={career_trait_symphony_card.polarity_meters} />
+                <RarityStat rarity={career_trait_symphony_card.rarity_index} />
+              </>
+            }
+          />
+        </TapToRevealCard>,
+        <TapToRevealCard key="career-shadow-arcana" icon="🌑" title={career_shadow_arcana_card.title} tapHint={tapHint} testID="career-shadow-arcana-card">
+          <MasterCard
+            icon="🌑"
+            title={career_shadow_arcana_card.title}
+            narrative={career_shadow_arcana_card}
+            mythicTale={career_shadow_arcana_card.mythic_tale}
+            statsSection={
+              <>
+                <NameChip label={career_shadow_arcana_card.work_catchphrase} />
+                <MutedPillsRow pills={career_shadow_arcana_card.shadow_traits} testID="shadow-traits" />
+                <ChecklistRows items={career_shadow_arcana_card.role_recommendations} testID="role-recommendations" />
+                <AdviceNote text={career_shadow_arcana_card.life_advice} />
+              </>
+            }
+          />
+        </TapToRevealCard>,
       ];
+    }
   }
 }
 
@@ -329,6 +446,10 @@ export default function RevealScreen() {
 }
 
 const styles = StyleSheet.create({
+  meterStack: {
+    marginTop: Theme.spacing.sm,
+    gap: Theme.spacing.sm,
+  },
   container: {
     flex: 1,
     backgroundColor: Theme.colors.background.start,

@@ -34,6 +34,39 @@ aesthetic that reads instantly as "fun astrology-adjacent app" to a US or EU use
   Store reviews for comparable apps). Disclaimers stay non-negotiable — they're
   just delivered in a light, on-brand voice instead of a heavy medieval one.
 
+**Reveal screen "deep master card" redesign (2026-08-15):** a full rebuild of
+the results screen across all three modules, explicitly authorized as an
+override of CLAUDE.md's then-standing "no oracle" tone rule — see CLAUDE.md's
+Entertainment Framing section for the exact authorized scope and what's
+still off-limits (real historical/religious traditions, fabricated-statistic
+framing). Each module now returns 4-5 consolidated master cards (down from
+5-6 smaller badge/pill cards) sharing one narrative shape across every
+module — `hero_hook` (headline), `anatomical_decoding` (concrete bullets),
+`living_scenario` (a grounded 3-paragraph vignette), `actionable_insight` (a
+growth-edge callout) — see `backend/src/services/readingSchema.ts`'s
+`MasterCardNarrative`. Every flavor metric (aura, resonance, rarity index,
+dual-sided polarity meters) now requires a real generated explanation
+grounding it, direct fix for product feedback that the pre-redesign
+palette-name aura badge read as meaningless filler next to real trait
+content — polarity meter sides must be genuine trait pairs, never a color/
+gem name standing in for one. Each module's Shadow Arcana card also carries
+a `mythic_tale`: a short fantastical fable, deliberately a different
+register from `living_scenario`, whose protagonist(s) still have to mirror
+the person's real archetype rather than being generic fantasy filler.
+
+Frontend: `TapToRevealCard` (veiled card-back + Reanimated 3D flip ritual,
+haptic + chime on tap) wraps `MasterCard` (the generic narrative renderer,
+identical across all three modules) plus a per-card `statsSection` built
+from small focused pieces in `MasterCardStats.tsx` (aura, resonance,
+rarity, polarity meters via `PolarityMeterBar.tsx`, structural dominance,
+synergy score dial, accordion checklists). Card headers are a plain two-
+child flex row (icon + `numberOfLines`-capped title, nothing absolutely
+positioned) — the "fix header overlap" ask is solved structurally here,
+not patched, since no stat is ever crammed into the header row anymore.
+The pre-redesign `ReadingCards.tsx` card renderers (badge/checklist/pills/
+highlight/score cards) and `RarityBadge.tsx` (the palette-name aura) were
+deleted as fully superseded, not deprecated in place.
+
 ---
 
 ## 2. Core User Flow & Capture Mechanics

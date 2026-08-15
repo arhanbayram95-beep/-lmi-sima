@@ -705,26 +705,19 @@ export const translations = {
     en: 'Overall', zh: '综合', hi: 'कुल', es: 'General', fr: 'Global',
     ar: 'الإجمالي', bn: 'সামগ্রিক', pt: 'Geral', ru: 'Общий', ur: 'مجموعی',
   },
-  'reveal.strengths': {
-    en: 'Strengths', zh: '优势', hi: 'ताकत', es: 'Fortalezas', fr: 'Forces',
-    ar: 'نقاط القوة', bn: 'শক্তি', pt: 'Pontos fortes', ru: 'Сильные стороны', ur: 'خوبیاں',
+  'reveal.tapToUnveil': {
+    en: 'Tap to Unveil Your Oracle ✨', zh: '点击揭晓神谕 ✨', hi: 'अपना ओरेकल देखने के लिए टैप करें ✨',
+    es: 'Toca para revelar tu oráculo ✨', fr: 'Touchez pour révéler votre oracle ✨', ar: 'اضغط لكشف عرافتك ✨',
+    bn: 'আপনার ওরাকল দেখতে ট্যাপ করুন ✨', pt: 'Toque para revelar o seu oráculo ✨',
+    ru: 'Нажмите, чтобы открыть ваш оракул ✨', ur: 'اپنا اوریکل دیکھنے کے لیے ٹیپ کریں ✨',
   },
-  'reveal.growthEdges': {
-    en: 'Growth Edges', zh: '成长空间', hi: 'विकास के क्षेत्र', es: 'Áreas de crecimiento', fr: 'Axes de progression',
-    ar: 'مجالات النمو', bn: 'বৃদ্ধির ক্ষেত্র', pt: 'Áreas de crescimento', ru: 'Зоны роста', ur: 'ترقی کے پہلو',
+  'reveal.whatItSays': {
+    en: 'What It Says', zh: '特征解读', hi: 'क्या कहता है', es: 'Lo que revela', fr: 'Ce que ça révèle',
+    ar: 'ماذا يقول', bn: 'এটি যা বলে', pt: 'O que revela', ru: 'Что это говорит', ur: 'یہ کیا کہتا ہے',
   },
-  'reveal.tapToReveal': {
-    en: 'Tap to reveal ✨', zh: '点击揭晓 ✨', hi: 'देखने के लिए टैप करें ✨', es: 'Toca para revelar ✨',
-    fr: 'Touchez pour révéler ✨', ar: 'اضغط للكشف ✨', bn: 'দেখতে ট্যাপ করুন ✨', pt: 'Toque para revelar ✨',
-    ru: 'Нажмите, чтобы узнать ✨', ur: 'دیکھنے کے لیے ٹیپ کریں ✨',
-  },
-  'reveal.bestChemistry': {
-    en: 'Best Chemistry', zh: '最佳默契', hi: 'बेहतरीन तालमेल', es: 'Mejor química', fr: 'Meilleure alchimie',
-    ar: 'أفضل انسجام', bn: 'সেরা রসায়ন', pt: 'Melhor química', ru: 'Лучшая химия', ur: 'بہترین ہم آہنگی',
-  },
-  'reveal.vibesToAvoid': {
-    en: 'Vibes to Avoid', zh: '需要避开的氛围', hi: 'बचने योग्य बातें', es: 'Dinámicas a evitar', fr: 'Dynamiques à éviter',
-    ar: 'أنماط يُفضّل تجنّبها', bn: 'এড়িয়ে চলার বিষয়', pt: 'Dinâmicas a evitar', ru: 'Чего избегать', ur: 'جن سے بچنا ہے',
+  'reveal.livingScenario': {
+    en: 'The Living Scenario', zh: '生动场景', hi: 'जीवंत परिदृश्य', es: 'El escenario vivo', fr: 'Le scénario vivant',
+    ar: 'المشهد الحي', bn: 'জীবন্ত দৃশ্য', pt: 'O cenário vivo', ru: 'Живая сцена', ur: 'زندہ منظرنامہ',
   },
 } satisfies Record<string, Record<LanguageCode, string>>;
 

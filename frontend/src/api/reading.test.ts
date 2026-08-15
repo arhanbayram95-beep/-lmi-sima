@@ -134,7 +134,7 @@ describe('analyzeReading (pseudo-API mode)', () => {
     const result = await analyzeReading(PAYLOAD);
 
     expect(result.module).toBe('character_analysis');
-    expect(result.archetype_card.badge_tag).toBeTruthy();
+    expect(result.oracle_match_card.archetype_tag).toBeTruthy();
     expect(global.fetch).not.toHaveBeenCalled();
   });
 

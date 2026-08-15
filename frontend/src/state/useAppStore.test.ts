@@ -78,13 +78,43 @@ describe('useAppStore', () => {
 
   it('holds the most recent reading result and can clear it', () => {
     expect(useAppStore.getState().reading).toBeNull();
+    const narrative = {
+      hero_hook: 'h',
+      anatomical_decoding: ['a', 'b', 'c'],
+      living_scenario: ['p1', 'p2', 'p3'],
+      actionable_insight: { headline: 'h', description: 'd' },
+    };
     const reading: ReadingResult = {
       module: 'career_path',
-      work_archetype_card: { title: 'Career Archetype', badge_tag: 'Strategic Innovator', summary: 's' },
-      catchphrase_card: { title: 'Work Catchphrase', badge_tag: '"Built the Spreadsheet, Ran the Room"', summary: 's' },
-      domains_card: { title: 'Recommended Industries', top_industry_pills: ['Engineering & R&D'] },
-      strengths_growth_card: { title: 'Strengths & Growth Areas', strength_pills: ['Structured Thinking'], growth_pills: ['Pacing Energy'] },
-      recommendations_card: { title: 'Ideal Role Matches', checklist_items: [] },
+      career_oracle_card: {
+        title: 'The Career Archetype & Oracle Match',
+        work_archetype_tag: 'Strategic Innovator',
+        career_oracle_match: 'A Public Figure',
+        career_resonance: { percent: 90, archetype_label: 'Calm-Under-Fire Builders' },
+        aura: { name: 'Slate Ember', intensity_percent: 80, explanation: 'e' },
+        ...narrative,
+      },
+      industry_geometry_card: {
+        title: 'Industry Geometry & Work-Style Radar',
+        work_style_radar: [{ left_trait: 'Deep-Focus Craft', left_percent: 74, right_trait: 'Fast-Paced Hustle' }],
+        top_industry_pills: ['Engineering & R&D'],
+        ...narrative,
+      },
+      career_trait_symphony_card: {
+        title: 'Trait Symphony & Working Polarities',
+        polarity_meters: [{ left_trait: 'Structured Thinking', left_percent: 82, right_trait: 'Improvised Adaptation' }],
+        rarity_index: { one_in_n: 310, trait_reason: 'r' },
+        ...narrative,
+      },
+      career_shadow_arcana_card: {
+        title: 'The Secret Signature & Shadow Arcana',
+        work_catchphrase: '"Built the Spreadsheet, Ran the Room"',
+        shadow_traits: ['Over-Preparing for Small Stakes'],
+        role_recommendations: [],
+        life_advice: 'a',
+        mythic_tale: { tale_title: 't', paragraphs: ['p1', 'p2', 'p3'] },
+        ...narrative,
+      },
     };
     useAppStore.getState().setReading(reading);
     expect(useAppStore.getState().reading).toEqual(reading);

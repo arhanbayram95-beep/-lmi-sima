@@ -55,6 +55,14 @@ export function playSwipeChime(): Promise<void> {
   return playOneShot(PROMPT_CHIME);
 }
 
+// Fires when a TapToRevealCard unveils — reuses the prompt chime asset
+// (already a "gentle bell/sparkle" register, see the file header comment)
+// rather than sourcing a new "celestial chime" asset, for the same reason
+// playSwipeChime does: no audio-generation tool available in this project.
+export function playRevealChime(): Promise<void> {
+  return playOneShot(PROMPT_CHIME);
+}
+
 export interface AmbientLoopHandle {
   stop: () => Promise<void>;
 }

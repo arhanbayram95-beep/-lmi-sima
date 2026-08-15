@@ -37,12 +37,6 @@ export interface ScoreMetric {
   icon: MetricIcon;
 }
 
-export interface BadgeCard {
-  title: string;
-  badge_tag: string;
-  summary: string;
-}
-
 export interface ScoreCard {
   title: string;
   overall_score: number;
@@ -54,98 +48,227 @@ export interface ChecklistItem {
   description: string;
 }
 
-export interface MetadataBadge {
-  key: string;
-  value: string;
+// A display-normalized "headline" shape — no reading card is actually
+// shaped like this anymore (see the 2026-08-15 master-card redesign), but
+// ResultsScreen's history list wants one consistent shape regardless of
+// module, so readingBadgeCard() below synthesizes this from whichever
+// module-specific oracle card the reading actually carries.
+export interface BadgeCard {
+  title: string;
+  badge_tag: string;
+  summary: string;
 }
 
 // Read from jawline/cheekbone/forehead-chin geometry — never an
 // attractiveness judgment, just a shape label.
 export type FaceShape = 'Oval' | 'Round' | 'Square' | 'Heart' | 'Diamond' | 'Oblong' | 'Triangle';
 
+// Shared across every "deep master card" in every module — see
+// MasterCardNarrative in the backend's readingSchema.ts for why this exact
+// shape has to be identical everywhere: it's what lets one MasterCard
+// renderer component (components/common/MasterCard.tsx) cover all three
+// modules' cards.
+export interface MasterCardNarrative {
+  hero_hook: string;
+  anatomical_decoding: string[];
+  living_scenario: string[];
+  actionable_insight: {
+    headline: string;
+    description: string;
+  };
+}
+
+// A dual-sided percentage bar. Both sides are meant to be real, specific
+// traits — never a color/gem/palette name (see PROJECT_SPEC.md's
+// 2026-08-15 metric-honesty note).
+export interface PolarityMeter {
+  left_trait: string;
+  left_percent: number;
+  right_trait: string;
+}
+
+export interface AuraProfile {
+  name: string;
+  intensity_percent: number;
+  explanation: string;
+}
+
+// A flavor "1 in N" rarity stat — playful, not a real population statistic.
+export interface RarityIndex {
+  one_in_n: number;
+  trait_reason: string;
+}
+
+// A short fantastical fable, distinct from living_scenario's grounded
+// register — only on each module's Shadow Arcana card.
+export interface MythicTale {
+  tale_title: string;
+  paragraphs: string[];
+}
+
+export interface OracleMatchCard extends MasterCardNarrative {
+  title: string;
+  archetype_tag: string;
+  oracle_match_name: string;
+  facial_landmark_resonance: {
+    percent: number;
+    archetype_label: string;
+  };
+  aura: AuraProfile;
+}
+
+export interface SacredAnatomyCard extends MasterCardNarrative {
+  title: string;
+  shape_tag: FaceShape;
+  golden_ratio_score: {
+    percent: number;
+    explanation: string;
+  };
+  structural_dominance: {
+    brow_percent: number;
+    cheekbone_percent: number;
+    jaw_percent: number;
+  };
+}
+
+export interface AnimalTotemCard extends MasterCardNarrative {
+  title: string;
+  spirit_animal: string;
+  instinctual_radar: PolarityMeter[];
+}
+
+export interface TraitSymphonyCard extends MasterCardNarrative {
+  title: string;
+  polarity_meters: PolarityMeter[];
+  rarity_index: RarityIndex;
+}
+
+export interface ShadowArcanaCard extends MasterCardNarrative {
+  title: string;
+  signature_catchphrase: string;
+  shadow_traits: string[];
+  life_advice: string;
+  mythic_tale: MythicTale;
+}
+
 export interface CharacterAnalysisResult {
   module: 'character_analysis';
-  archetype_card: BadgeCard;
-  catchphrase_card: BadgeCard;
-  facial_structure_card: {
-    title: string;
-    shape_tag: FaceShape;
-    description: string;
+  oracle_match_card: OracleMatchCard;
+  sacred_anatomy_card: SacredAnatomyCard;
+  animal_totem_card: AnimalTotemCard;
+  trait_symphony_card: TraitSymphonyCard;
+  shadow_arcana_card: ShadowArcanaCard;
+}
+
+export interface BondOracleCard extends MasterCardNarrative {
+  title: string;
+  bond_archetype_tag: string;
+  duo_oracle_match: string;
+  bond_resonance: {
+    percent: number;
+    archetype_label: string;
   };
-  spirit_animal_card: {
-    title: string;
-    animal: string;
-    description: string;
-  };
-  traits_card: {
-    title: string;
-    metadata_badges: MetadataBadge[];
-    strength_pills: string[];
-    growth_pills: string[];
-  };
-  celebrity_match_card: {
-    title: string;
-    match_name: string;
-    match_description: string;
-  };
+  aura: AuraProfile;
+}
+
+export interface ChemistryGeometryCard extends MasterCardNarrative {
+  title: string;
+  synergy_score: ScoreCard;
+}
+
+export interface InstinctualDynamicsCard extends MasterCardNarrative {
+  title: string;
+  dynamics_radar: PolarityMeter[];
+}
+
+export interface BondShadowArcanaCard extends MasterCardNarrative {
+  title: string;
+  duo_catchphrase: string;
+  shadow_traits: string[];
+  guidance_checklist: ChecklistItem[];
+  mythic_tale: MythicTale;
 }
 
 export interface RelationshipHarmonyResult {
   module: 'relationship_harmony';
-  vibe_card: BadgeCard;
-  catchphrase_card: BadgeCard;
-  chemistry_score_card: ScoreCard;
-  dynamics_card: {
-    title: string;
-    best_chemistry_pills: string[];
-    vibes_to_avoid_pills: string[];
+  bond_oracle_card: BondOracleCard;
+  chemistry_geometry_card: ChemistryGeometryCard;
+  instinctual_dynamics_card: InstinctualDynamicsCard;
+  bond_shadow_arcana_card: BondShadowArcanaCard;
+}
+
+export interface CareerOracleCard extends MasterCardNarrative {
+  title: string;
+  work_archetype_tag: string;
+  career_oracle_match: string;
+  career_resonance: {
+    percent: number;
+    archetype_label: string;
   };
-  guidance_card: {
-    title: string;
-    checklist_items: ChecklistItem[];
-  };
+  aura: AuraProfile;
+}
+
+export interface IndustryGeometryCard extends MasterCardNarrative {
+  title: string;
+  work_style_radar: PolarityMeter[];
+  top_industry_pills: string[];
+}
+
+export interface CareerTraitSymphonyCard extends MasterCardNarrative {
+  title: string;
+  polarity_meters: PolarityMeter[];
+  rarity_index: RarityIndex;
+}
+
+export interface CareerShadowArcanaCard extends MasterCardNarrative {
+  title: string;
+  work_catchphrase: string;
+  shadow_traits: string[];
+  role_recommendations: ChecklistItem[];
+  life_advice: string;
+  mythic_tale: MythicTale;
 }
 
 export interface CareerPathResult {
   module: 'career_path';
-  work_archetype_card: BadgeCard;
-  catchphrase_card: BadgeCard;
-  domains_card: {
-    title: string;
-    top_industry_pills: string[];
-  };
-  strengths_growth_card: {
-    title: string;
-    strength_pills: string[];
-    growth_pills: string[];
-  };
-  recommendations_card: {
-    title: string;
-    checklist_items: ChecklistItem[];
-  };
+  career_oracle_card: CareerOracleCard;
+  industry_geometry_card: IndustryGeometryCard;
+  career_trait_symphony_card: CareerTraitSymphonyCard;
+  career_shadow_arcana_card: CareerShadowArcanaCard;
 }
 
 export type ReadingResult = CharacterAnalysisResult | RelationshipHarmonyResult | CareerPathResult;
 
-// Every module leads with a badge card; the share card and any "what did I
-// get" summary read from it without caring which module produced it.
+// Every module leads with an oracle-match-style card; ResultsScreen's
+// history list reads a normalized headline from it without caring which
+// module produced the reading.
 export function readingBadgeCard(reading: ReadingResult): BadgeCard {
   switch (reading.module) {
     case 'character_analysis':
-      return reading.archetype_card;
+      return {
+        title: reading.oracle_match_card.title,
+        badge_tag: reading.oracle_match_card.archetype_tag,
+        summary: reading.oracle_match_card.hero_hook,
+      };
     case 'relationship_harmony':
-      return reading.vibe_card;
+      return {
+        title: reading.bond_oracle_card.title,
+        badge_tag: reading.bond_oracle_card.bond_archetype_tag,
+        summary: reading.bond_oracle_card.hero_hook,
+      };
     case 'career_path':
-      return reading.work_archetype_card;
+      return {
+        title: reading.career_oracle_card.title,
+        badge_tag: reading.career_oracle_card.work_archetype_tag,
+        summary: reading.career_oracle_card.hero_hook,
+      };
   }
 }
 
-// Only relationship_harmony still carries a score card — character_analysis
-// and career_path dropped theirs so the reading opens on a short, punchy
-// badge instead of a number (see systemPrompt.ts's top-catchy/bottom-detail
-// structure).
+// Only relationship_harmony still carries a score card, on its Chemistry
+// Geometry master card.
 export function readingScoreCard(reading: ReadingResult): ScoreCard | undefined {
-  return reading.module === 'relationship_harmony' ? reading.chemistry_score_card : undefined;
+  return reading.module === 'relationship_harmony' ? reading.chemistry_geometry_card.synergy_score : undefined;
 }
 
 export interface ShareableSection {
@@ -154,101 +277,87 @@ export interface ShareableSection {
   body: string;
 }
 
-// Every card a module's reading carries, flattened into a picklist for the
-// share card builder (see ShareOptionsModal) — the user chooses which of
-// these actually go on their card, rather than the card being a fixed,
-// non-negotiable layout. Card titles come straight off the reading itself
-// (already English-only from the AI response, same as everywhere else this
-// app displays them — see RevealScreen), not re-translated here.
+// Every master card a module's reading carries, flattened into a picklist
+// for the share card builder (see ShareOptionsModal) — the user chooses
+// which of these actually go on their card. Card titles come straight off
+// the reading itself (already English-only from the AI response, same as
+// everywhere else this app displays them — see RevealScreen), not
+// re-translated here. Body text leads with the hero_hook, the same "this
+// is the screenshot-able line" field the cards themselves lead with.
 export function readingShareableSections(reading: ReadingResult): ShareableSection[] {
   switch (reading.module) {
     case 'character_analysis':
       return [
         {
-          id: 'archetype',
-          title: reading.archetype_card.title,
-          body: `${reading.archetype_card.badge_tag} — ${reading.archetype_card.summary}`,
+          id: 'oracle-match',
+          title: reading.oracle_match_card.title,
+          body: `${reading.oracle_match_card.archetype_tag} — ${reading.oracle_match_card.hero_hook}`,
         },
         {
-          id: 'catchphrase',
-          title: reading.catchphrase_card.title,
-          body: `${reading.catchphrase_card.badge_tag} — ${reading.catchphrase_card.summary}`,
+          id: 'sacred-anatomy',
+          title: reading.sacred_anatomy_card.title,
+          body: `${reading.sacred_anatomy_card.shape_tag} — ${reading.sacred_anatomy_card.hero_hook}`,
         },
         {
-          id: 'facial-structure',
-          title: reading.facial_structure_card.title,
-          body: `${reading.facial_structure_card.shape_tag} face shape — ${reading.facial_structure_card.description}`,
+          id: 'animal-totem',
+          title: reading.animal_totem_card.title,
+          body: `${reading.animal_totem_card.spirit_animal} — ${reading.animal_totem_card.hero_hook}`,
         },
         {
-          id: 'spirit-animal',
-          title: reading.spirit_animal_card.title,
-          body: `${reading.spirit_animal_card.animal} — ${reading.spirit_animal_card.description}`,
+          id: 'trait-symphony',
+          title: reading.trait_symphony_card.title,
+          body: reading.trait_symphony_card.hero_hook,
         },
         {
-          id: 'traits',
-          title: reading.traits_card.title,
-          body: `Strengths: ${reading.traits_card.strength_pills.join(', ')}`,
-        },
-        {
-          id: 'celebrity',
-          title: reading.celebrity_match_card.title,
-          body: `${reading.celebrity_match_card.match_name} — ${reading.celebrity_match_card.match_description}`,
+          id: 'shadow-arcana',
+          title: reading.shadow_arcana_card.title,
+          body: `${reading.shadow_arcana_card.signature_catchphrase} — ${reading.shadow_arcana_card.hero_hook}`,
         },
       ];
     case 'relationship_harmony':
       return [
         {
-          id: 'vibe',
-          title: reading.vibe_card.title,
-          body: `${reading.vibe_card.badge_tag} — ${reading.vibe_card.summary}`,
+          id: 'bond-oracle',
+          title: reading.bond_oracle_card.title,
+          body: `${reading.bond_oracle_card.bond_archetype_tag} — ${reading.bond_oracle_card.hero_hook}`,
         },
         {
-          id: 'catchphrase',
-          title: reading.catchphrase_card.title,
-          body: `${reading.catchphrase_card.badge_tag} — ${reading.catchphrase_card.summary}`,
+          id: 'chemistry-geometry',
+          title: reading.chemistry_geometry_card.title,
+          body: `Synergy score: ${reading.chemistry_geometry_card.synergy_score.overall_score} — ${reading.chemistry_geometry_card.hero_hook}`,
         },
         {
-          id: 'chemistry',
-          title: reading.chemistry_score_card.title,
-          body: `Overall score: ${reading.chemistry_score_card.overall_score}`,
+          id: 'instinctual-dynamics',
+          title: reading.instinctual_dynamics_card.title,
+          body: reading.instinctual_dynamics_card.hero_hook,
         },
         {
-          id: 'dynamics',
-          title: reading.dynamics_card.title,
-          body: `Best chemistry: ${reading.dynamics_card.best_chemistry_pills.join(', ')}`,
-        },
-        {
-          id: 'guidance',
-          title: reading.guidance_card.title,
-          body: reading.guidance_card.checklist_items.map((item) => item.headline).join(', '),
+          id: 'bond-shadow-arcana',
+          title: reading.bond_shadow_arcana_card.title,
+          body: `${reading.bond_shadow_arcana_card.duo_catchphrase} — ${reading.bond_shadow_arcana_card.hero_hook}`,
         },
       ];
     case 'career_path':
       return [
         {
-          id: 'work',
-          title: reading.work_archetype_card.title,
-          body: `${reading.work_archetype_card.badge_tag} — ${reading.work_archetype_card.summary}`,
+          id: 'career-oracle',
+          title: reading.career_oracle_card.title,
+          body: `${reading.career_oracle_card.work_archetype_tag} — ${reading.career_oracle_card.hero_hook}`,
         },
         {
-          id: 'catchphrase',
-          title: reading.catchphrase_card.title,
-          body: `${reading.catchphrase_card.badge_tag} — ${reading.catchphrase_card.summary}`,
+          id: 'industry-geometry',
+          title: reading.industry_geometry_card.title,
+          body: reading.industry_geometry_card.top_industry_pills.join(', '),
         },
         {
-          id: 'domains',
-          title: reading.domains_card.title,
-          body: reading.domains_card.top_industry_pills.join(', '),
+          id: 'career-trait-symphony',
+          title: reading.career_trait_symphony_card.title,
+          body: reading.career_trait_symphony_card.hero_hook,
         },
         {
-          id: 'strengths-growth',
-          title: reading.strengths_growth_card.title,
-          body: `Strengths: ${reading.strengths_growth_card.strength_pills.join(', ')}`,
-        },
-        {
-          id: 'recommendations',
-          title: reading.recommendations_card.title,
-          body: reading.recommendations_card.checklist_items.map((item) => item.headline).join(', '),
+          id: 'career-shadow-arcana',
+          title: reading.career_shadow_arcana_card.title,
+          body: `${reading.career_shadow_arcana_card.work_catchphrase} — ${reading.career_shadow_arcana_card.hero_hook}`,
         },
       ];
   }

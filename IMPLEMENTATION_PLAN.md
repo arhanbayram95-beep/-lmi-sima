@@ -938,3 +938,103 @@ was actually run throughout.
     a later attempt; the existing 503-retry and 400-no-retry tests still
     pass unchanged under the new denylist logic. `tsc --noEmit` clean,
     backend suite 9/9 suites, 58/58 tests.
+- [x] **10.19 "Deep Master Card" Oracle/Arcana redesign — full reveal
+  screen rebuild across all 3 modules** — a detailed, explicit redesign
+  brief asked for a "ritualistic" tap-to-reveal mechanic, full-height
+  deep-lore multi-section cards, and Oracle/Arcana/Shadow-Arcana
+  terminology. Flagged before starting (same conflict as 10.14's Tarot
+  Deck decline, now escalated with a second concrete problem: the
+  brief's example metrics — "94% correlation... across geometric facial
+  datasets", "1 in 420 Scans" — are fabricated statistics presented as
+  real data, not just a tone question). Product owner explicitly
+  overrode both: "ship it as literally specified." Updated CLAUDE.md's
+  Entertainment Framing section itself to record the override precisely
+  (Oracle/Arcana vocabulary authorized; real historical/religious
+  framing and fabricated-statistic claims still off-limits; safety
+  rules — no clinical language, no negative claims — never overridden).
+  Two follow-up mid-turn corrections from the product owner shaped the
+  final design: (1) system prompts can be edited freely for longer,
+  richer content — no separate authorization needed per field; (2) the
+  pre-existing `RarityBadge` aura concept (a palette color name picked
+  by hash, e.g. "Velvet Aura") was called out as meaningless filler once
+  seen next to real trait content — direct root cause for this
+  redesign's METRIC_GUIDANCE requiring every flavor stat to carry a real
+  generated explanation, and for polarity meter sides having to be
+  genuine trait pairs, never a color/gem name. Also took the initiative
+  (per explicit product direction: "be generative... make their results
+  richer too") to bring the same treatment to Relationship Harmony and
+  Career Match, adapted to what actually fits a pair/career context
+  rather than forcing character-analysis-specific concepts (Spirit
+  Animal, Sacred Anatomy) onto them.
+  - **Backend** (`readingSchema.ts`, `systemPrompt.ts`): new shared
+    building blocks — `MasterCardNarrative` (hero_hook/
+    anatomical_decoding/living_scenario/actionable_insight, identical
+    across every card in every module), `PolarityMeter`, `AuraProfile`,
+    `RarityIndex`, `MythicTale` (a distinct fantastical-fable register
+    on each module's Shadow Arcana card, separate from the grounded
+    living_scenario — added mid-session at product request, protagonist
+    must still mirror the reading's real archetype). Character Analysis
+    → 5 cards (Oracle Match, Sacred Anatomy, Animal Totem, Trait
+    Symphony, Shadow Arcana); Relationship Harmony and Career Match each
+    consolidated to 4. `checklistCard` refactored to share a
+    `checklistItemsArraySchema` helper (needed since `guidance_checklist`/
+    `role_recommendations` now sit as bare array properties, not
+    wrapped in their own titled sub-object). Removed the now-fully-
+    unused `badgeCard()` helper and `BadgeCard`/`MetadataBadge`
+    interfaces. Live-verified against the real Gemini API: three-
+    expression's 5-card schema (the most complex) and career-match's
+    4-card schema both returned complete, valid structured output
+    (career-match's response also correctly exercised the existing
+    no-face-detected safety path); relationship-harmony hit Gemini's
+    known capacity flakiness during verification, not a schema issue —
+    it shares the identical building blocks as the two that succeeded.
+  - **Frontend**: new `TapToRevealCard` (ornate obsidian/gold-filigree
+    frame — reusing only existing locked `Theme.colors.*` tokens, no new
+    hex values — veiled card-back with a pulsing Reanimated glow and a
+    "Tap to Unveil Your Oracle" prompt, then the same proven two-phase
+    Reanimated 3D flip from 10.15's `HighlightCard` fix, medium haptic +
+    a new `playRevealChime` reusing the existing prompt-chime asset).
+    New `MasterCard` (the generic narrative renderer, identical across
+    all 3 modules — this is also where the explicit "fix header
+    overlap" ask got solved structurally rather than patched: headers
+    are a plain two-child flex row, icon + `numberOfLines`-capped title,
+    and no stat is ever crammed into the header row anymore since every
+    per-card metric now renders in its own `statsSection` block below
+    the hero_hook). New `MasterCardStats.tsx` (small focused pieces:
+    `NameChip`, `AuraStat`, `ResonanceStat`, `RarityStat`,
+    `GoldenRatioStat` + `FaceShapeIcon` reuse, `StructuralDominanceStat`,
+    `SynergyScoreDial`, `IndustryPillsRow`, `MutedPillsRow`,
+    `AdviceNote`, and `ChecklistRows` — an accordion, the explicit
+    "interactive accordions/expansion pins" ask). New
+    `PolarityMeterBar.tsx` (dual-sided animated bar). `ReadingCards.tsx`
+    trimmed to just `PhotoPageCard` — every other renderer it held
+    (badge/checklist/pills/highlight/score cards, `ScanCorners`/
+    `ReadingGlassCard`) was fully superseded, deleted rather than kept
+    alongside the new system. `RarityBadge.tsx` deleted outright — its
+    entire premise (a hash-picked palette name) is the specific thing
+    this redesign's metric-honesty rule exists to prevent recurring.
+    `api/types.ts`, `api/mockReading.ts` rewritten to mirror the new
+    backend shapes exactly. `readingBadgeCard()`/`readingShareableSections()`
+    adapted (ResultsScreen's history rows and the ShareCard/
+    ShareOptionsModal builder needed no other changes — both already
+    consumed readings only through these two generic helpers).
+    `RevealScreen.tsx`'s `readingCards()` fully rewritten to compose
+    `TapToRevealCard`+`MasterCard`+stats for all 13 card variants across
+    3 modules; `GestureCardDeck`/`StoryProgressBar`/swipe-gesture/share-
+    flow infrastructure untouched (page count changed — 5 cards for
+    character-analysis, 4 for the other two — but the pager mechanism
+    itself already handled a variable page count correctly).
+  - New i18n keys (`reveal.tapToUnveil`, `reveal.whatItSays`,
+    `reveal.livingScenario`) across all 10 locales; removed now-fully-
+    unused keys (`reveal.strengths`/`growthEdges`/`tapToReveal`/
+    `bestChemistry`/`vibesToAvoid` — only ever consumed by the deleted
+    `ReadingCards.tsx` renderers).
+  - `RevealScreen.test.tsx` rewritten for the new testIDs and the
+    veiled-until-tapped behavior (every content assertion now presses
+    a card's own `-reveal` testID first — `GestureCardDeck` mounts every
+    page simultaneously, confirmed by reading its source, so this works
+    without needing to swipe to a page first). `types.test.ts`,
+    `ResultsScreen.test.tsx`, `useAppStore.test.ts`, `reading.test.ts`
+    fixtures updated to the new shapes. `tsc --noEmit` clean on both
+    frontend and backend; backend suite 9/9 suites, 58/58 tests;
+    frontend suite 30/30 suites, 188/188 tests.

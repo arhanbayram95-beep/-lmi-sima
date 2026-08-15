@@ -15,11 +15,13 @@ jest.mock('expo-clipboard', () => ({
   setStringAsync: (...args: unknown[]) => mockSetStringAsync(...args),
 }));
 
-// GestureCardDeck plays a swipe chime — same reasoning as
-// AnalyzingScreen.test.tsx: mock the app's own sound.ts wrapper rather
-// than expo-audio itself, since real expo-audio doesn't load under Jest.
+// GestureCardDeck plays a swipe chime, and TapToRevealCard plays a reveal
+// chime — same reasoning as AnalyzingScreen.test.tsx: mock the app's own
+// sound.ts wrapper rather than expo-audio itself, since real expo-audio
+// doesn't load under Jest.
 jest.mock('../utils/sound', () => ({
   playSwipeChime: jest.fn().mockResolvedValue(undefined),
+  playRevealChime: jest.fn().mockResolvedValue(undefined),
 }));
 
 const mockShareAsync = jest.fn().mockResolvedValue(undefined);
@@ -28,74 +30,103 @@ jest.mock('expo-sharing', () => ({
   shareAsync: (...args: unknown[]) => mockShareAsync(...args),
 }));
 
+// Shared by every deep master card across all three modules — see
+// MasterCardNarrative in api/types.ts.
+const narrative = (heroHook: string) => ({
+  hero_hook: heroHook,
+  anatomical_decoding: ['Jawline reads decisive.', 'Eyes read direct.', 'Brow line reads composed.'],
+  living_scenario: ['Paragraph one.', 'Paragraph two.', 'Paragraph three.'],
+  actionable_insight: { headline: 'Balance Point', description: 'A short growth note.' },
+});
+
+const mythicTale = (title: string) => ({
+  tale_title: title,
+  paragraphs: ['Fable paragraph one.', 'Fable paragraph two.', 'Fable paragraph three.'],
+});
+
 const READING: CharacterAnalysisResult = {
   module: 'character_analysis',
-  archetype_card: {
-    title: 'Character Archetype',
-    badge_tag: 'Analytical Visionary',
-    summary: 'You read as someone people trust instantly.',
+  oracle_match_card: {
+    title: 'The Archetype & Oracle Match',
+    archetype_tag: 'Analytical Visionary',
+    oracle_match_name: 'A Public Figure',
+    facial_landmark_resonance: { percent: 94, archetype_label: 'High-Brow Deadpan Archetypes' },
+    aura: { name: 'Crimson Ember', intensity_percent: 82, explanation: 'Driven by prominent brow tension.' },
+    ...narrative('You read as someone people trust instantly.'),
   },
-  catchphrase_card: {
-    title: 'Signature Catchphrase',
-    badge_tag: '"Quiet Storm, Loud Impact"',
-    summary: 'Fits the steady, direct gaze.',
-  },
-  facial_structure_card: {
-    title: 'Facial Structure',
+  sacred_anatomy_card: {
+    title: 'Facial Geometry & Sacred Anatomy',
     shape_tag: 'Oval',
-    description: 'Balanced proportions with a defined jawline.',
+    golden_ratio_score: { percent: 91, explanation: 'Balanced proportions with a defined jawline.' },
+    structural_dominance: { brow_percent: 70, cheekbone_percent: 55, jaw_percent: 40 },
+    ...narrative('Geometry hero hook.'),
   },
-  spirit_animal_card: {
-    title: 'Spirit Animal Match',
-    animal: 'Wolf',
-    description: 'A steady gaze and defined jawline read as sharp awareness.',
+  animal_totem_card: {
+    title: 'The Animal Totem & Primal Energy',
+    spirit_animal: 'Wolf',
+    instinctual_radar: [{ left_trait: 'Pack Loyalty', left_percent: 78, right_trait: 'Lone Independence' }],
+    ...narrative('A steady gaze and defined jawline read as sharp awareness.'),
   },
-  traits_card: {
-    title: 'Facial Trait Analysis',
-    metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],
-    strength_pills: ['Strategic Thinking'],
-    growth_pills: ['Pacing Energy'],
+  trait_symphony_card: {
+    title: 'Trait Symphony & Behavioral Polarities',
+    polarity_meters: [{ left_trait: 'Observant Irony', left_percent: 78, right_trait: 'Direct Earnestness' }],
+    rarity_index: { one_in_n: 420, trait_reason: 'This exact eye-to-brow symmetry.' },
+    ...narrative('Symphony hero hook.'),
   },
-  celebrity_match_card: {
-    title: 'Celebrity Archetype Match',
-    match_name: 'A Public Figure',
-    match_description: 'Same calm-under-pressure register.',
+  shadow_arcana_card: {
+    title: 'The Secret Signature & Shadow Arcana',
+    signature_catchphrase: '"Quiet Storm, Loud Impact"',
+    shadow_traits: ['Overthinking Under Pressure'],
+    life_advice: 'Lean into the pause before you speak.',
+    mythic_tale: mythicTale('The Trial of the Ember Wolf'),
+    ...narrative('Same calm-under-pressure register.'),
   },
 };
+
 const RELATIONSHIP_READING: RelationshipHarmonyResult = {
   module: 'relationship_harmony',
-  vibe_card: {
-    title: 'Relational Archetype',
-    badge_tag: 'Grounded & Playful Harmonizer',
-    summary: 'Two styles that meet in the middle.',
+  bond_oracle_card: {
+    title: 'The Bond Archetype & Oracle Match',
+    bond_archetype_tag: 'Grounded & Playful Harmonizer',
+    duo_oracle_match: 'A Famous Duo',
+    bond_resonance: { percent: 88, archetype_label: 'Steady-Anchor & Spark Pairings' },
+    aura: { name: 'Amber Tide', intensity_percent: 76, explanation: 'Driven by complementary energy levels.' },
+    ...narrative('Two styles that meet in the middle.'),
   },
-  catchphrase_card: {
-    title: 'Duo Catchphrase',
-    badge_tag: '"Calm Meets Chaos, On Purpose"',
-    summary: 'Fits how these two balance each other.',
+  chemistry_geometry_card: {
+    title: 'Chemistry Geometry & Synergy Score',
+    synergy_score: {
+      title: 'Synergy Score',
+      overall_score: 91,
+      breakdown_metrics: [
+        { label: 'Empathy', score: 88, icon: 'heart' },
+        { label: 'Communication', score: 84, icon: 'chat' },
+        { label: 'Attachment', score: 79, icon: 'shield' },
+        { label: 'Energy Match', score: 95, icon: 'zap' },
+      ],
+    },
+    ...narrative('The numbers back up what the vibe already says.'),
   },
-  chemistry_score_card: {
-    title: 'Chemistry & Synergy Score',
-    overall_score: 91,
-    breakdown_metrics: [
-      { label: 'Empathy', score: 88, icon: 'heart' },
-      { label: 'Communication', score: 84, icon: 'chat' },
-      { label: 'Attachment', score: 79, icon: 'shield' },
-      { label: 'Energy Match', score: 95, icon: 'zap' },
-    ],
+  instinctual_dynamics_card: {
+    title: 'Instinctual Dynamics & Primal Rhythm',
+    dynamics_radar: [{ left_trait: 'Playful Push-Pull', left_percent: 78, right_trait: 'Steady Anchoring' }],
+    ...narrative('A rhythm that balances spark with steadiness.'),
   },
-  dynamics_card: {
-    title: 'Relationship Dynamics',
-    best_chemistry_pills: ['Grounded Calmness'],
-    vibes_to_avoid_pills: ['Superficial Drama'],
-  },
-  guidance_card: {
-    title: 'Harmony Recommendations',
-    checklist_items: [{ headline: 'Direct Communication', description: 'Say it early and plainly.' }],
+  bond_shadow_arcana_card: {
+    title: 'The Secret Signature & Shadow Arcana of the Bond',
+    duo_catchphrase: '"Calm Meets Chaos, On Purpose"',
+    shadow_traits: ['Overplanning Spontaneous Moments'],
+    guidance_checklist: [{ headline: 'Direct Communication', description: 'Say it early and plainly.' }],
+    mythic_tale: mythicTale('The Bound Wayfarers'),
+    ...narrative('Fits how these two balance each other.'),
   },
 };
 
 const PHOTOS = ['base64-calm', 'base64-bright'];
+
+function reveal(testID: string) {
+  fireEvent.press(screen.getByTestId(`${testID}-reveal`));
+}
 
 describe('RevealScreen', () => {
   beforeEach(() => {
@@ -111,43 +142,72 @@ describe('RevealScreen', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders the captured photos, badge tag, and detail cards for the module', () => {
+  it('renders the captured photos and every deep master card for the module', () => {
     render(<RevealScreen />);
-    // The badge tag and summary also appear in the off-screen ShareCard used
-    // for react-native-view-shot capture, so there are legitimately two.
-    expect(screen.getAllByText('Analytical Visionary').length).toBeGreaterThan(0);
     expect(screen.getByTestId('reveal-photos')).toBeTruthy();
-    expect(screen.getByTestId('traits-card')).toBeTruthy();
-    expect(screen.getByTestId('celebrity-card')).toBeTruthy();
+    expect(screen.getByTestId('oracle-match-card')).toBeTruthy();
+    expect(screen.getByTestId('sacred-anatomy-card')).toBeTruthy();
+    expect(screen.getByTestId('animal-totem-card')).toBeTruthy();
+    expect(screen.getByTestId('trait-symphony-card')).toBeTruthy();
+    expect(screen.getByTestId('shadow-arcana-card')).toBeTruthy();
   });
 
-  it('renders the facial structure and spirit animal cards, grounded in physical features', () => {
+  it('veils every card until tapped, then unveils its content', () => {
     render(<RevealScreen />);
-    expect(screen.getByTestId('facial-structure-card')).toBeTruthy();
+    expect(screen.queryByText('You read as someone people trust instantly.')).toBeNull();
+
+    reveal('oracle-match-card');
+
+    expect(screen.getByText('You read as someone people trust instantly.')).toBeTruthy();
+  });
+
+  it('unveils the oracle match card with its archetype tag, resonance and aura', () => {
+    render(<RevealScreen />);
+    reveal('oracle-match-card');
+
+    // The archetype tag also appears in the off-screen ShareCard used for
+    // react-native-view-shot capture, so there are legitimately two.
+    expect(screen.getAllByText('Analytical Visionary').length).toBeGreaterThan(0);
+    expect(screen.getByText(/94%/)).toBeTruthy();
+    expect(screen.getByText(/Crimson Ember/)).toBeTruthy();
+  });
+
+  it('unveils the sacred anatomy and animal totem cards, grounded in physical features', () => {
+    render(<RevealScreen />);
+    reveal('sacred-anatomy-card');
+    reveal('animal-totem-card');
+
     expect(screen.getByText('Oval')).toBeTruthy();
-    expect(screen.getByTestId('spirit-animal-card')).toBeTruthy();
-    expect(screen.getByText('Wolf')).toBeTruthy();
+    expect(screen.getAllByText(/Wolf/).length).toBeGreaterThan(0);
   });
 
-  it('does not render a score card for character_analysis — only relationship_harmony kept one', () => {
+  it('unveils the trait symphony card with polarity meters and a rarity index', () => {
     render(<RevealScreen />);
-    expect(screen.queryByTestId('score-card')).toBeNull();
+    reveal('trait-symphony-card');
+
+    expect(screen.getByText('Observant Irony')).toBeTruthy();
+    expect(screen.getByText('Direct Earnestness')).toBeTruthy();
+    expect(screen.getByText(/1 in 420/)).toBeTruthy();
   });
 
-  it('renders the overall score and every sub-score for relationship_harmony', () => {
+  it('unveils the chemistry geometry card with the synergy score and every sub-metric for relationship_harmony', () => {
     useAppStore.setState({ reading: RELATIONSHIP_READING });
     render(<RevealScreen />);
-    expect(screen.getByTestId('score-card')).toBeTruthy();
+    reveal('chemistry-geometry-card');
+
     expect(screen.getByText('Empathy')).toBeTruthy();
     // The overall score also appears in the off-screen ShareCard, so there
-    // are legitimately two — same reasoning as the badge tag check above.
+    // are legitimately two.
     expect(screen.getAllByText('91').length).toBeGreaterThan(0);
   });
 
-  it('renders growth edges without alarming framing', () => {
+  it('unveils the shadow arcana card with its shadow traits and mythic tale', () => {
     render(<RevealScreen />);
-    expect(screen.getByText('Pacing Energy')).toBeTruthy();
-    expect(screen.getByText('Strategic Thinking')).toBeTruthy();
+    reveal('shadow-arcana-card');
+
+    expect(screen.getByText('Overthinking Under Pressure')).toBeTruthy();
+    expect(screen.getByText('The Trial of the Ember Wolf')).toBeTruthy();
+    expect(screen.getByText('Fable paragraph one.')).toBeTruthy();
   });
 
   it('prompts for a rating after each completed reading instead of dropping straight back home', () => {
@@ -181,31 +241,20 @@ describe('RevealScreen', () => {
     fireEvent.press(screen.getByTestId('share-option-image'));
 
     expect(screen.getByTestId('share-include-photo-checkbox')).toBeTruthy();
-    expect(screen.getByTestId('share-section-archetype')).toBeTruthy();
-    expect(screen.getByTestId('share-section-celebrity')).toBeTruthy();
+    expect(screen.getByTestId('share-section-oracle-match')).toBeTruthy();
+    expect(screen.getByTestId('share-section-shadow-arcana')).toBeTruthy();
   });
 
-  // character_analysis has 6 shareable sections; a photo + all 6 selected
-  // was the flexible ShareCard getting tall enough that view-shot's
-  // capture sometimes silently dropped content — capping selection at
-  // MAX_SELECTABLE_SECTIONS (5) is the fix, both for the default
-  // selection (see the "excludes an unchecked section" test's spirit-
-  // animal/celebrity note above) and for manual selection here.
-  it('caps section selection at 5 — celebrity starts unchecked and disabled until something else is dropped', () => {
+  // character_analysis has exactly 5 shareable sections now (one per master
+  // card), matching MAX_SELECTABLE_SECTIONS exactly — every section starts
+  // selected and none is capped out, unlike the pre-redesign 6-card module.
+  it('offers every section pre-selected since the module has exactly 5 master cards', () => {
     render(<RevealScreen />);
     fireEvent.press(screen.getByTestId('share-reading-button'));
     fireEvent.press(screen.getByTestId('share-option-image'));
 
-    expect(screen.getByTestId('share-section-celebrity').props.accessibilityState.checked).toBe(false);
-    expect(screen.getByTestId('share-section-celebrity').props.accessibilityState.disabled).toBe(true);
-
-    fireEvent.press(screen.getByTestId('share-section-celebrity'));
-    expect(screen.getByTestId('share-section-celebrity').props.accessibilityState.checked).toBe(false);
-
-    fireEvent.press(screen.getByTestId('share-section-archetype'));
-    expect(screen.getByTestId('share-section-celebrity').props.accessibilityState.disabled).toBe(false);
-    fireEvent.press(screen.getByTestId('share-section-celebrity'));
-    expect(screen.getByTestId('share-section-celebrity').props.accessibilityState.checked).toBe(true);
+    expect(screen.getByTestId('share-section-shadow-arcana').props.accessibilityState.checked).toBe(true);
+    expect(screen.getByTestId('share-section-shadow-arcana').props.accessibilityState.disabled).toBe(false);
   });
 
   it('captures the share card and opens the native share sheet once the card is built', async () => {
@@ -225,18 +274,15 @@ describe('RevealScreen', () => {
 
   it('excludes an unchecked section from the off-screen share card', async () => {
     render(<RevealScreen />);
-    // spirit-animal, not celebrity — celebrity is character_analysis's 6th
-    // shareable section, and the default selection is capped at
-    // MAX_SELECTABLE_SECTIONS (5, see ShareOptionsModal/RevealScreen), so
-    // it isn't pre-selected at all now. spirit-animal (5th) still is.
-    // Present twice pre-uncheck: once in the visible spirit-animal card,
-    // once in the off-screen ShareCard (same reasoning as the badge-tag/
-    // score checks above — both render the reading simultaneously).
+    reveal('animal-totem-card');
+    // Present twice pre-uncheck: once in the unveiled animal totem card,
+    // once in the off-screen ShareCard (same reasoning as the archetype
+    // tag/score checks above — both render the reading simultaneously).
     expect(screen.getAllByText(/Wolf/).length).toBe(2);
 
     fireEvent.press(screen.getByTestId('share-reading-button'));
     fireEvent.press(screen.getByTestId('share-option-image'));
-    fireEvent.press(screen.getByTestId('share-section-spirit-animal'));
+    fireEvent.press(screen.getByTestId('share-section-animal-totem'));
 
     expect(screen.getAllByText(/Wolf/).length).toBe(1);
   });
@@ -269,10 +315,11 @@ describe('RevealScreen', () => {
     fireEvent.press(screen.getByTestId('reveal-page-next'));
     expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(false);
 
-    // 2 captured photos + 6 character_analysis cards (archetype, catchphrase,
-    // facial structure, spirit animal, traits, celebrity) = 8 pages total;
-    // already moved forward once above, so 6 more presses reaches the last.
-    for (let i = 0; i < 6; i++) fireEvent.press(screen.getByTestId('reveal-page-next'));
+    // 2 captured photos + 5 character_analysis master cards (oracle match,
+    // sacred anatomy, animal totem, trait symphony, shadow arcana) = 7
+    // pages total; already moved forward once above, so 5 more presses
+    // reaches the last.
+    for (let i = 0; i < 5; i++) fireEvent.press(screen.getByTestId('reveal-page-next'));
     expect(screen.getByTestId('reveal-page-next').props.accessibilityState.disabled).toBe(true);
   });
 

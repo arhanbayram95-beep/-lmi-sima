@@ -4,46 +4,86 @@ import ResultsScreen from './ResultsScreen';
 import { CareerPathResult, CharacterAnalysisResult } from '../api/types';
 import { useAppStore } from '../state/useAppStore';
 
+const narrative = {
+  hero_hook: 'h',
+  anatomical_decoding: ['a', 'b', 'c'],
+  living_scenario: ['p1', 'p2', 'p3'],
+  actionable_insight: { headline: 'h', description: 'd' },
+};
+
+const mythicTale = { tale_title: 't', paragraphs: ['p1', 'p2', 'p3'] };
+
 const CHARACTER_READING: CharacterAnalysisResult = {
   module: 'character_analysis',
-  archetype_card: {
-    title: 'Character Archetype',
-    badge_tag: 'Analytical Visionary',
-    summary: 'You read as someone people trust instantly.',
+  oracle_match_card: {
+    title: 'The Archetype & Oracle Match',
+    archetype_tag: 'Analytical Visionary',
+    oracle_match_name: 'A Public Figure',
+    facial_landmark_resonance: { percent: 94, archetype_label: 'High-Brow Deadpan Archetypes' },
+    aura: { name: 'Crimson Ember', intensity_percent: 82, explanation: 'e' },
+    ...narrative,
+    hero_hook: 'You read as someone people trust instantly.',
   },
-  catchphrase_card: { title: 'Signature Catchphrase', badge_tag: '"Quiet Storm, Loud Impact"', summary: 'Fits the steady gaze.' },
-  facial_structure_card: { title: 'Facial Structure', shape_tag: 'Oval', description: 'Balanced proportions.' },
-  spirit_animal_card: { title: 'Spirit Animal Match', animal: 'Wolf', description: 'A steady gaze.' },
-  traits_card: {
-    title: 'Facial Trait Analysis',
-    metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],
-    strength_pills: ['Strategic Thinking'],
-    growth_pills: ['Pacing Energy'],
+  sacred_anatomy_card: {
+    title: 'Facial Geometry & Sacred Anatomy',
+    shape_tag: 'Oval',
+    golden_ratio_score: { percent: 91, explanation: 'Balanced proportions.' },
+    structural_dominance: { brow_percent: 70, cheekbone_percent: 55, jaw_percent: 40 },
+    ...narrative,
   },
-  celebrity_match_card: {
-    title: 'Celebrity Archetype Match',
-    match_name: 'A Public Figure',
-    match_description: 'Same register.',
+  animal_totem_card: {
+    title: 'The Animal Totem & Primal Energy',
+    spirit_animal: 'Wolf',
+    instinctual_radar: [{ left_trait: 'Pack Loyalty', left_percent: 78, right_trait: 'Lone Independence' }],
+    ...narrative,
+  },
+  trait_symphony_card: {
+    title: 'Trait Symphony & Behavioral Polarities',
+    polarity_meters: [{ left_trait: 'Observant Irony', left_percent: 78, right_trait: 'Direct Earnestness' }],
+    rarity_index: { one_in_n: 420, trait_reason: 'r' },
+    ...narrative,
+  },
+  shadow_arcana_card: {
+    title: 'The Secret Signature & Shadow Arcana',
+    signature_catchphrase: '"Quiet Storm, Loud Impact"',
+    shadow_traits: ['Overthinking Under Pressure'],
+    life_advice: 'a',
+    mythic_tale: mythicTale,
+    ...narrative,
   },
 };
 
 const CAREER_READING: CareerPathResult = {
   module: 'career_path',
-  work_archetype_card: {
-    title: 'Career Archetype',
-    badge_tag: 'Strategic Innovator',
-    summary: 'You settle fastest in long-range rooms.',
+  career_oracle_card: {
+    title: 'The Career Archetype & Oracle Match',
+    work_archetype_tag: 'Strategic Innovator',
+    career_oracle_match: 'A Public Figure',
+    career_resonance: { percent: 90, archetype_label: 'Calm-Under-Fire Builders' },
+    aura: { name: 'Slate Ember', intensity_percent: 80, explanation: 'e' },
+    ...narrative,
+    hero_hook: 'You settle fastest in long-range rooms.',
   },
-  catchphrase_card: { title: 'Work Catchphrase', badge_tag: '"Built the Spreadsheet, Ran the Room"', summary: 'Fits the structured thinking.' },
-  domains_card: { title: 'Recommended Industries', top_industry_pills: ['Product Design'] },
-  strengths_growth_card: {
-    title: 'Strengths & Growth Areas',
-    strength_pills: ['Structured Thinking'],
-    growth_pills: ['Pacing Energy'],
+  industry_geometry_card: {
+    title: 'Industry Geometry & Work-Style Radar',
+    work_style_radar: [{ left_trait: 'Deep-Focus Craft', left_percent: 74, right_trait: 'Fast-Paced Hustle' }],
+    top_industry_pills: ['Product Design'],
+    ...narrative,
   },
-  recommendations_card: {
-    title: 'Ideal Role Matches',
-    checklist_items: [{ headline: 'Systems Architect', description: 'End-to-end ownership.' }],
+  career_trait_symphony_card: {
+    title: 'Trait Symphony & Working Polarities',
+    polarity_meters: [{ left_trait: 'Structured Thinking', left_percent: 82, right_trait: 'Improvised Adaptation' }],
+    rarity_index: { one_in_n: 310, trait_reason: 'r' },
+    ...narrative,
+  },
+  career_shadow_arcana_card: {
+    title: 'The Secret Signature & Shadow Arcana',
+    work_catchphrase: '"Built the Spreadsheet, Ran the Room"',
+    shadow_traits: ['Over-Preparing for Small Stakes'],
+    role_recommendations: [{ headline: 'Systems Architect', description: 'End-to-end ownership.' }],
+    life_advice: 'a',
+    mythic_tale: mythicTale,
+    ...narrative,
   },
 };
 

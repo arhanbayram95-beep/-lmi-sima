@@ -15,124 +15,164 @@ import {
 // one switches on `module`, so every module needs its own case exercised:
 // a missed branch surfaces as a blank history row or a share card silently
 // dropping a section, not as a type error.
+const narrative = (heroHook: string) => ({
+  hero_hook: heroHook,
+  anatomical_decoding: ['Jawline reads decisive.', 'Eyes read direct.', 'Brow line reads composed.'],
+  living_scenario: ['Paragraph one.', 'Paragraph two.', 'Paragraph three.'],
+  actionable_insight: { headline: 'Balance Point', description: 'A short growth note.' },
+});
+
+const mythicTale = (title: string) => ({
+  tale_title: title,
+  paragraphs: ['Fable paragraph one.', 'Fable paragraph two.', 'Fable paragraph three.'],
+});
+
 const CHARACTER: CharacterAnalysisResult = {
   module: 'character_analysis',
-  archetype_card: {
-    title: 'Character Archetype',
-    badge_tag: 'Analytical Visionary',
-    summary: 'You read as someone people trust instantly.',
+  oracle_match_card: {
+    title: 'The Archetype & Oracle Match',
+    archetype_tag: 'Analytical Visionary',
+    oracle_match_name: 'A Public Figure',
+    facial_landmark_resonance: { percent: 94, archetype_label: 'High-Brow Deadpan Archetypes' },
+    aura: { name: 'Crimson Ember', intensity_percent: 82, explanation: 'Driven by prominent brow tension.' },
+    ...narrative('You read as someone people trust instantly.'),
   },
-  catchphrase_card: {
-    title: 'Signature Catchphrase',
-    badge_tag: '"Quiet Storm, Loud Impact"',
-    summary: 'The line fits the steady, direct gaze.',
-  },
-  facial_structure_card: {
-    title: 'Facial Structure',
+  sacred_anatomy_card: {
+    title: 'Facial Geometry & Sacred Anatomy',
     shape_tag: 'Oval',
-    description: 'Balanced proportions with a defined jawline.',
+    golden_ratio_score: { percent: 91, explanation: 'Balanced forehead-to-chin ratio.' },
+    structural_dominance: { brow_percent: 70, cheekbone_percent: 55, jaw_percent: 40 },
+    ...narrative('Balanced proportions with a defined jawline.'),
   },
-  spirit_animal_card: {
-    title: 'Spirit Animal Match',
-    animal: 'Wolf',
-    description: 'A steady gaze reads as sharp awareness.',
+  animal_totem_card: {
+    title: 'The Animal Totem & Primal Energy',
+    spirit_animal: 'Wolf',
+    instinctual_radar: [{ left_trait: 'Pack Loyalty', left_percent: 78, right_trait: 'Lone Independence' }],
+    ...narrative('A steady gaze reads as sharp awareness.'),
   },
-  traits_card: {
-    title: 'Facial Trait Analysis',
-    metadata_badges: [{ key: 'Eye Energy', value: 'Direct & Piercing' }],
-    strength_pills: ['Strategic Thinking', 'Quiet Authority'],
-    growth_pills: ['Pacing Energy'],
+  trait_symphony_card: {
+    title: 'Trait Symphony & Behavioral Polarities',
+    polarity_meters: [{ left_trait: 'Observant Irony', left_percent: 78, right_trait: 'Direct Earnestness' }],
+    rarity_index: { one_in_n: 420, trait_reason: 'This exact eye-to-brow symmetry.' },
+    ...narrative('A rare blend of composure and wit.'),
   },
-  celebrity_match_card: {
-    title: 'Celebrity Archetype Match',
-    match_name: 'A Public Figure',
-    match_description: 'Same calm-under-pressure register.',
+  shadow_arcana_card: {
+    title: 'The Secret Signature & Shadow Arcana',
+    signature_catchphrase: '"Quiet Storm, Loud Impact"',
+    shadow_traits: ['Overthinking Under Pressure'],
+    life_advice: 'Lean into the pause before you speak.',
+    mythic_tale: mythicTale('The Trial of the Ember Wolf'),
+    ...narrative('The line fits the steady, direct gaze.'),
   },
 };
 
 const RELATIONSHIP: RelationshipHarmonyResult = {
   module: 'relationship_harmony',
-  vibe_card: {
-    title: 'Relational Archetype',
-    badge_tag: 'Grounded & Playful Harmonizer',
-    summary: 'Two styles that meet in the middle.',
+  bond_oracle_card: {
+    title: 'The Bond Archetype & Oracle Match',
+    bond_archetype_tag: 'Grounded & Playful Harmonizer',
+    duo_oracle_match: 'A Famous Duo',
+    bond_resonance: { percent: 88, archetype_label: 'Steady-Anchor & Spark Pairings' },
+    aura: { name: 'Amber Tide', intensity_percent: 76, explanation: 'Driven by complementary energy levels.' },
+    ...narrative('Two styles that meet in the middle.'),
   },
-  catchphrase_card: {
-    title: 'Duo Catchphrase',
-    badge_tag: '"Calm Meets Chaos, On Purpose"',
-    summary: 'The line fits how these two balance each other.',
+  chemistry_geometry_card: {
+    title: 'Chemistry Geometry & Synergy Score',
+    synergy_score: {
+      title: 'Synergy Score',
+      overall_score: 91,
+      breakdown_metrics: [
+        { label: 'Empathy', score: 88, icon: 'heart' },
+        { label: 'Communication', score: 84, icon: 'chat' },
+        { label: 'Attachment', score: 79, icon: 'shield' },
+        { label: 'Energy Match', score: 95, icon: 'zap' },
+      ],
+    },
+    ...narrative('The numbers back up what the vibe already says.'),
   },
-  chemistry_score_card: {
-    title: 'Chemistry & Synergy Score',
-    overall_score: 91,
-    breakdown_metrics: [
-      { label: 'Empathy', score: 88, icon: 'heart' },
-      { label: 'Communication', score: 84, icon: 'chat' },
-      { label: 'Attachment', score: 79, icon: 'shield' },
-      { label: 'Energy Match', score: 95, icon: 'zap' },
-    ],
+  instinctual_dynamics_card: {
+    title: 'Instinctual Dynamics & Primal Rhythm',
+    dynamics_radar: [{ left_trait: 'Playful Push-Pull', left_percent: 78, right_trait: 'Steady Anchoring' }],
+    ...narrative('A rhythm that balances spark with steadiness.'),
   },
-  dynamics_card: {
-    title: 'Relationship Dynamics',
-    best_chemistry_pills: ['Grounded Calmness', 'Shared Humour'],
-    vibes_to_avoid_pills: ['Superficial Drama'],
-  },
-  guidance_card: {
-    title: 'Harmony Recommendations',
-    checklist_items: [
+  bond_shadow_arcana_card: {
+    title: 'The Secret Signature & Shadow Arcana of the Bond',
+    duo_catchphrase: '"Calm Meets Chaos, On Purpose"',
+    shadow_traits: ['Overplanning Spontaneous Moments'],
+    guidance_checklist: [
       { headline: 'Direct Communication', description: 'Say it early and plainly.' },
       { headline: 'Shared Downtime', description: 'Protect the unstructured hours.' },
     ],
+    mythic_tale: mythicTale('The Bound Wayfarers'),
+    ...narrative('The line fits how these two balance each other.'),
   },
 };
 
 const CAREER: CareerPathResult = {
   module: 'career_path',
-  work_archetype_card: {
-    title: 'Career Archetype',
-    badge_tag: 'Strategic Innovator',
-    summary: 'You settle fastest in rooms that reward long-range thinking.',
+  career_oracle_card: {
+    title: 'The Career Archetype & Oracle Match',
+    work_archetype_tag: 'Strategic Innovator',
+    career_oracle_match: 'A Public Figure',
+    career_resonance: { percent: 90, archetype_label: 'Calm-Under-Fire Builders' },
+    aura: { name: 'Slate Ember', intensity_percent: 80, explanation: 'Driven by composed decision-making.' },
+    ...narrative('You settle fastest in rooms that reward long-range thinking.'),
   },
-  catchphrase_card: {
-    title: 'Work Catchphrase',
-    badge_tag: '"Built the Spreadsheet, Ran the Room"',
-    summary: 'The line fits the long-range, structured thinking.',
-  },
-  domains_card: {
-    title: 'Recommended Industries',
+  industry_geometry_card: {
+    title: 'Industry Geometry & Work-Style Radar',
+    work_style_radar: [{ left_trait: 'Deep-Focus Craft', left_percent: 74, right_trait: 'Fast-Paced Hustle' }],
     top_industry_pills: ['Product Design', 'Applied Research', 'Venture Building'],
+    ...narrative('Structured environments bring out your best thinking.'),
   },
-  strengths_growth_card: {
-    title: 'Strengths & Growth Areas',
-    strength_pills: ['Structured Thinking', 'Calm Under Pressure'],
-    growth_pills: ['Pacing Energy'],
+  career_trait_symphony_card: {
+    title: 'Trait Symphony & Working Polarities',
+    polarity_meters: [{ left_trait: 'Structured Thinking', left_percent: 82, right_trait: 'Improvised Adaptation' }],
+    rarity_index: { one_in_n: 310, trait_reason: 'This exact pacing under deadline pressure.' },
+    ...narrative('A rare blend of patience and drive.'),
   },
-  recommendations_card: {
-    title: 'Ideal Role Matches',
-    checklist_items: [
+  career_shadow_arcana_card: {
+    title: 'The Secret Signature & Shadow Arcana',
+    work_catchphrase: '"Built the Spreadsheet, Ran the Room"',
+    shadow_traits: ['Over-Preparing for Small Stakes'],
+    role_recommendations: [
       { headline: 'Systems Architect', description: 'Owning the shape of a thing end to end.' },
       { headline: 'Research Lead', description: 'Setting direction rather than executing a brief.' },
     ],
+    life_advice: 'Let one plan stay unfinished on purpose.',
+    mythic_tale: mythicTale('The Architect of the Long Road'),
+    ...narrative('The line fits the long-range, structured thinking.'),
   },
 };
 
 const ALL_READINGS: ReadingResult[] = [CHARACTER, RELATIONSHIP, CAREER];
 
 describe('readingBadgeCard', () => {
-  it('returns the leading badge card for every module', () => {
-    expect(readingBadgeCard(CHARACTER)).toBe(CHARACTER.archetype_card);
-    expect(readingBadgeCard(RELATIONSHIP)).toBe(RELATIONSHIP.vibe_card);
-    expect(readingBadgeCard(CAREER)).toBe(CAREER.work_archetype_card);
+  it('returns a normalized headline for every module', () => {
+    expect(readingBadgeCard(CHARACTER)).toEqual({
+      title: 'The Archetype & Oracle Match',
+      badge_tag: 'Analytical Visionary',
+      summary: 'You read as someone people trust instantly.',
+    });
+    expect(readingBadgeCard(RELATIONSHIP)).toEqual({
+      title: 'The Bond Archetype & Oracle Match',
+      badge_tag: 'Grounded & Playful Harmonizer',
+      summary: 'Two styles that meet in the middle.',
+    });
+    expect(readingBadgeCard(CAREER)).toEqual({
+      title: 'The Career Archetype & Oracle Match',
+      badge_tag: 'Strategic Innovator',
+      summary: 'You settle fastest in rooms that reward long-range thinking.',
+    });
   });
 });
 
 describe('readingScoreCard', () => {
-  it('returns the chemistry score card for relationship harmony', () => {
-    expect(readingScoreCard(RELATIONSHIP)).toBe(RELATIONSHIP.chemistry_score_card);
+  it('returns the synergy score card for relationship harmony', () => {
+    expect(readingScoreCard(RELATIONSHIP)).toBe(RELATIONSHIP.chemistry_geometry_card.synergy_score);
   });
 
-  // Character analysis and career path deliberately dropped their score
-  // cards so the reading opens on a badge, not a number (see api/types.ts).
+  // Character analysis and career path deliberately carry no score card so
+  // the reading opens on a hook, not a number (see api/types.ts).
   it('returns undefined for the modules that carry no score', () => {
     expect(readingScoreCard(CHARACTER)).toBeUndefined();
     expect(readingScoreCard(CAREER)).toBeUndefined();
@@ -140,54 +180,47 @@ describe('readingScoreCard', () => {
 });
 
 describe('readingShareableSections', () => {
-  it('offers one section per card of a character analysis reading', () => {
+  it('offers one section per master card of a character analysis reading', () => {
     expect(readingShareableSections(CHARACTER).map((section) => section.id)).toEqual([
-      'archetype',
-      'catchphrase',
-      'facial-structure',
-      'spirit-animal',
-      'traits',
-      'celebrity',
+      'oracle-match',
+      'sacred-anatomy',
+      'animal-totem',
+      'trait-symphony',
+      'shadow-arcana',
     ]);
   });
 
-  it('offers one section per card of a relationship harmony reading', () => {
+  it('offers one section per master card of a relationship harmony reading', () => {
     expect(readingShareableSections(RELATIONSHIP).map((section) => section.id)).toEqual([
-      'vibe',
-      'catchphrase',
-      'chemistry',
-      'dynamics',
-      'guidance',
+      'bond-oracle',
+      'chemistry-geometry',
+      'instinctual-dynamics',
+      'bond-shadow-arcana',
     ]);
   });
 
-  it('offers one section per card of a career path reading', () => {
+  it('offers one section per master card of a career path reading', () => {
     expect(readingShareableSections(CAREER).map((section) => section.id)).toEqual([
-      'work',
-      'catchphrase',
-      'domains',
-      'strengths-growth',
-      'recommendations',
+      'career-oracle',
+      'industry-geometry',
+      'career-trait-symphony',
+      'career-shadow-arcana',
     ]);
   });
 
   it('titles every section with the card title straight off the reading', () => {
     expect(readingShareableSections(CAREER).map((section) => section.title)).toEqual([
-      'Career Archetype',
-      'Work Catchphrase',
-      'Recommended Industries',
-      'Strengths & Growth Areas',
-      'Ideal Role Matches',
+      'The Career Archetype & Oracle Match',
+      'Industry Geometry & Work-Style Radar',
+      'Trait Symphony & Working Polarities',
+      'The Secret Signature & Shadow Arcana',
     ]);
   });
 
   it('flattens list-shaped cards into readable prose rather than raw arrays', () => {
     const sections = readingShareableSections(CAREER);
-    expect(sections.find((section) => section.id === 'domains')?.body).toBe(
+    expect(sections.find((section) => section.id === 'industry-geometry')?.body).toBe(
       'Product Design, Applied Research, Venture Building'
-    );
-    expect(sections.find((section) => section.id === 'recommendations')?.body).toBe(
-      'Systems Architect, Research Lead'
     );
   });
 
