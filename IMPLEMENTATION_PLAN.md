@@ -764,3 +764,17 @@ was actually run throughout.
   of which are the 3 added here) — neither touched, out of scope for this
   pass, flagged as a follow-up instead of bundling an unrelated dependency
   bump into this change.
+- [x] **10.11 Fixed frequent 502s — retry transient Gemini 503s**
+  (2026-08-15) — live testing found `gemini-flash-latest` returning a real
+  503 UNAVAILABLE ("This model is currently experiencing high demand...")
+  on roughly 2 of every 3 calls in a short burst; confirmed via direct SDK
+  calls bypassing this app entirely (a standalone debug script, deleted
+  after use), so this is Google's model capacity, not this app's key,
+  config, or code — every occurrence was surfacing as a hard 502 with zero
+  retry, so a single short-lived capacity blip read as a broken feature.
+  `readingService.ts`'s `generateContentWithRetry` now retries up to 2
+  more times (600ms/1200ms backoff) on 429/500/503 specifically
+  (`ApiError.status`, real SDK error class) before giving up as the same
+  `ReadingServiceError` → 502 as before. New tests cover retry-then-
+  succeed, exhausting all 3 attempts, and NOT retrying a genuinely
+  non-retryable error (a real 400). Backend suite: 55 tests (up from 52).

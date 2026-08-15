@@ -1,3 +1,4 @@
+import { ApiError } from '@google/genai';
 import { ReadingModelClient } from '../../src/services/geminiClient';
 import { generateReading, ReadingServiceError } from '../../src/services/readingService';
 import { READING_SCHEMAS, ReadingModuleId } from '../../src/services/readingSchema';
@@ -148,6 +149,38 @@ describe('generateReading', () => {
     const generateContent = jest.fn().mockRejectedValue(new Error('ECONNRESET'));
 
     await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
+  });
+
+  // 2026-08-15: live testing found gemini-flash-latest returning a real
+  // 503 "high demand" on a large fraction of calls in a short burst —
+  // confirmed via direct SDK calls, Google's model capacity, not this
+  // app's key/config. Every occurrence surfaced as a hard 502 with no
+  // retry, so a single short-lived blip looked like a broken feature.
+  it('retries once on a transient 503 from Gemini and succeeds', async () => {
+    const generateContent = jest
+      .fn()
+      .mockRejectedValueOnce(new ApiError({ message: 'high demand', status: 503 }))
+      .mockResolvedValueOnce(textResponse(MODULE_RESPONSES['three-expression']));
+
+    const result = await generateReading(makeClient(generateContent), PHOTOS_3);
+
+    expect(result).toMatchObject({ archetype_card: { badge_tag: 'Analytical Visionary' } });
+    expect(generateContent).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives up as a ReadingServiceError after repeated 503s', async () => {
+    const generateContent = jest.fn().mockRejectedValue(new ApiError({ message: 'high demand', status: 503 }));
+
+    await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
+    // Initial attempt + 2 retries, per MAX_GENERATION_ATTEMPTS.
+    expect(generateContent).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not retry a non-retryable API error (e.g. a real 400)', async () => {
+    const generateContent = jest.fn().mockRejectedValue(new ApiError({ message: 'bad request', status: 400 }));
+
+    await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
+    expect(generateContent).toHaveBeenCalledTimes(1);
   });
 
   it('throws when the model responds with no text output', async () => {

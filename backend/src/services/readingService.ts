@@ -1,4 +1,4 @@
-import { Schema, Type } from '@google/genai';
+import { ApiError, Schema, Type } from '@google/genai';
 import { ReadingModelClient } from './geminiClient';
 import {
   MODULE_PHOTO_COUNTS,
@@ -26,6 +26,43 @@ const MODEL = 'gemini-flash-latest';
 // VARIETY_GUIDANCE in systemPrompt.ts, which does the same job in words.
 const READING_TEMPERATURE = 1.3;
 
+// 2026-08-15: live testing found `gemini-flash-latest` returning a real
+// 503 UNAVAILABLE ("This model is currently experiencing high demand...")
+// on roughly 2 of every 3 calls in a short burst — confirmed via direct
+// SDK calls bypassing this app entirely, so it's Google's model capacity,
+// not this app's key/config/code. Reported on-device as a 502 "couldn't
+// complete your reading" on every occurrence, with no retry — a single
+// short-lived capacity blip was surfacing as a hard failure. 429 (rate
+// limit) and 500 are included alongside 503 since they're the same kind
+// of "try again shortly" response, not a real request problem.
+const RETRYABLE_STATUS_CODES = new Set([429, 500, 503]);
+const MAX_GENERATION_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 600;
+
+function isRetryableApiError(error: unknown): boolean {
+  return error instanceof ApiError && typeof error.status === 'number' && RETRYABLE_STATUS_CODES.has(error.status);
+}
+
+async function generateContentWithRetry(
+  client: ReadingModelClient,
+  params: Parameters<ReadingModelClient['models']['generateContent']>[0]
+): ReturnType<ReadingModelClient['models']['generateContent']> {
+  for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
+    try {
+      return await client.models.generateContent(params);
+    } catch (error) {
+      if (!isRetryableApiError(error) || attempt === MAX_GENERATION_ATTEMPTS) {
+        throw error;
+      }
+      console.error(`Gemini call failed (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS}), retrying:`, error);
+      await new Promise((resolve) => setTimeout(resolve, RETRY_BASE_DELAY_MS * attempt));
+    }
+  }
+  // Unreachable — the loop always either returns or throws — but keeps
+  // TypeScript satisfied that every path returns a value.
+  throw new Error('unreachable');
+}
+
 // process-and-discard per PROJECT_SPEC.md §3: this function never persists
 // the incoming base64 strings anywhere (no disk, no db, no in-memory cache
 // outside its own call stack), and holds no reference to them after it
@@ -45,7 +82,7 @@ export async function generateReading(
 
   let responseText: string | undefined;
   try {
-    const response = await client.models.generateContent({
+    const response = await generateContentWithRetry(client, {
       model: MODEL,
       contents: [
         {
