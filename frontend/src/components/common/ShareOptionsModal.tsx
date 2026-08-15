@@ -1,6 +1,6 @@
 import * as Clipboard from 'expo-clipboard';
 import React, { useState } from 'react';
-import { Alert, Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { readingBadgeCard, ReadingResult, ShareableSection } from '../../api/types';
 import { useTranslation } from '../../i18n/useTranslation';
 import { SHARE_CARD_PALETTES, SharePaletteId, Theme } from '../../ui/theme';
@@ -235,7 +235,13 @@ export default function ShareOptionsModal({
 
               <View style={styles.paletteBlock}>
                 <Text style={styles.groupLabel}>{t('share.builder.colorLabel')}</Text>
-                <View style={styles.paletteRow} accessibilityRole="radiogroup" testID="share-palette-row">
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.paletteRow}
+                  accessibilityRole="radiogroup"
+                  testID="share-palette-row"
+                >
                   {SHARE_CARD_PALETTES.map((palette) => (
                     <PaletteSwatch
                       key={palette.id}
@@ -244,7 +250,7 @@ export default function ShareOptionsModal({
                       onSelect={() => onSelectedPaletteIdChange(palette.id)}
                     />
                   ))}
-                </View>
+                </ScrollView>
               </View>
 
               <View style={styles.sectionListHeader}>
@@ -374,13 +380,15 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  // flexWrap since 9 palettes at 56px each no longer fit one row inside
-  // the modal's width — wraps into 3 neat rows of 3 instead of overflowing
-  // or needing a separate horizontal scroll view.
+  // A horizontal slider, not a wrapped grid — product feedback (2026-08-15):
+  // 9 palettes at 56px each wrapped into 3 stacked rows read as too crowded
+  // inside an already content-heavy builder sheet. A single swipeable row
+  // keeps every option reachable without eating three rows of vertical
+  // space the section picklist below it also needs.
   paletteRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: Theme.spacing.sm,
+    paddingVertical: 2,
   },
   swatchWrap: {
     alignItems: 'center',

@@ -1038,3 +1038,32 @@ was actually run throughout.
     fixtures updated to the new shapes. `tsc --noEmit` clean on both
     frontend and backend; backend suite 9/9 suites, 58/58 tests;
     frontend suite 30/30 suites, 188/188 tests.
+- [x] **10.20 Share builder polish — palette slider, story+photo text
+  drop fix** — post-redesign feedback after seeing 10.19 live.
+  - Palette picker felt crowded (9 swatches wrapped into 3 stacked rows
+    inside an already content-heavy builder sheet). Converted
+    `ShareOptionsModal`'s palette row from a wrapped `View` to a
+    horizontal `ScrollView` — a single swipeable row instead of 3,
+    same swatches/testIDs/interaction, just laid out differently.
+  - **Real bug, not cosmetic**: selecting Story format together with
+    Include Photo silently dropped the share card's text. Root cause —
+    `ShareCard`'s `'story'` layout gives the card a *fixed* 9:16 height,
+    but `body` (photo + hero text + badges) sized itself off natural
+    content rather than being flex-bounded to that fixed canvas. A
+    full-square photo (aspectRatio 1 at the card's own width) alone ate
+    more than half the fixed height, pushing the hero text past the
+    card's actual laid-out bounds — `react-native-view-shot`'s
+    `captureRef` snapshots exactly that frame, so the text was silently
+    cropped out of the captured image even though it was still mounted
+    in the tree (nothing errored, nothing warned). Fixed by bounding the
+    flex chain in story mode (`body` gets `flex: 1`, so `heroSection`'s
+    pre-existing `flex: 1` finally has real space to claim) and capping
+    the photo to a fixed 150px height instead of a full aspect-ratio
+    square specifically in story mode, so the fixed canvas has
+    guaranteed room left for the rest. Flexible layout untouched (no
+    fixed ceiling to overflow past there by construction).
+  - `ShareCard.test.tsx` gained 3 tests: hero text and badges still
+    render with a photo in story layout; the photo gets the capped
+    150px-height style (not aspectRatio) specifically in story layout;
+    flexible layout's photo stays a full square, unaffected by the cap.
+    `tsc --noEmit` clean, frontend suite 30/30 suites, 191/191 tests.

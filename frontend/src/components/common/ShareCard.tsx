@@ -56,11 +56,11 @@ const ShareCard = forwardRef<View, ShareCardProps>(
           <AppLogo showWordmark />
         </View>
 
-        <View style={styles.body}>
+        <View style={[styles.body, isStory && styles.bodyStory]}>
           {photo && (
             <Image
               source={{ uri: `data:image/jpeg;base64,${photo}` }}
-              style={styles.photo}
+              style={[styles.photo, isStory && styles.photoStory]}
               resizeMode="cover"
               testID="share-card-photo"
             />
@@ -120,12 +120,32 @@ const styles = StyleSheet.create({
   body: {
     gap: Theme.spacing.lg,
   },
+  // Bounds `body` to the rest of the fixed 9:16 canvas (see cardStory
+  // below) so a flex:1 child like heroSection has real space to claim
+  // instead of none — without this, `body` sized itself off its natural
+  // content, which meant a photo (a full square) could push hero text
+  // past the card's laid-out bounds. react-native-view-shot's captureRef
+  // snapshots exactly that laid-out frame, so anything pushed past it was
+  // silently cropped out of the resulting image rather than erroring —
+  // "insta story + photo drops the text" (2026-08-15).
+  bodyStory: {
+    flex: 1,
+  },
   photo: {
     width: '100%',
     aspectRatio: 1,
     borderRadius: Theme.radius.lg,
     borderWidth: 1,
     borderColor: Theme.colors.surface.glassBorder,
+  },
+  // A capped height instead of a full aspect-ratio square specifically in
+  // story mode — the fixed 9:16 canvas has to fit branding, the photo,
+  // the hero text, and up to 3 badge chips all at once, and a full square
+  // photo (would be 360px on a 360px-wide card) alone left too little of
+  // the fixed canvas for the rest.
+  photoStory: {
+    aspectRatio: undefined,
+    height: 150,
   },
   section: {
     gap: Theme.spacing.xs,
