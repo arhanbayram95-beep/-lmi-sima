@@ -183,6 +183,25 @@ describe('generateReading', () => {
     expect(generateContent).toHaveBeenCalledTimes(1);
   });
 
+  // 2026-08-15 (later same day): a hung request in production showed the
+  // SDK doesn't always fail with a clean ApiError — a stalled connection
+  // or an aborted timeout throws whatever shape the underlying fetch/abort
+  // layer produces, which isn't guaranteed to be `instanceof ApiError`.
+  // Retryability switched from an allowlist of known-good statuses to a
+  // denylist of known-bad ones specifically so this class of error still
+  // gets retried instead of silently falling through as non-retryable.
+  it('retries a non-ApiError failure (e.g. a timed-out or stalled connection)', async () => {
+    const generateContent = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('The operation was aborted due to timeout'))
+      .mockResolvedValueOnce(textResponse(MODULE_RESPONSES['three-expression']));
+
+    const result = await generateReading(makeClient(generateContent), PHOTOS_3);
+
+    expect(result).toMatchObject({ archetype_card: { badge_tag: 'Analytical Visionary' } });
+    expect(generateContent).toHaveBeenCalledTimes(2);
+  });
+
   it('throws when the model responds with no text output', async () => {
     const generateContent = jest.fn().mockResolvedValue({ text: undefined });
 

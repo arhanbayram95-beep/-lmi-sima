@@ -32,15 +32,34 @@ const READING_TEMPERATURE = 1.3;
 // SDK calls bypassing this app entirely, so it's Google's model capacity,
 // not this app's key/config/code. Reported on-device as a 502 "couldn't
 // complete your reading" on every occurrence, with no retry — a single
-// short-lived capacity blip was surfacing as a hard failure. 429 (rate
-// limit) and 500 are included alongside 503 since they're the same kind
-// of "try again shortly" response, not a real request problem.
-const RETRYABLE_STATUS_CODES = new Set([429, 500, 503]);
+// short-lived capacity blip was surfacing as a hard failure.
+//
+// 2026-08-15 (later same day): a second, distinct failure mode showed up
+// in production — a request that hung with zero bytes back for 90+
+// seconds, not a fast structured error. Root cause: nothing anywhere in
+// this call chain ever set a timeout (the `@google/genai` client has none
+// by default — see its `HttpOptions.timeout`), so a stalled connection to
+// Gemini just hung the request indefinitely instead of failing and
+// retrying. `TIMEOUT_MS_PER_ATTEMPT` below closes that gap. A timed-out
+// request throws whatever the SDK's underlying fetch/abort layer throws
+// (not necessarily an `ApiError`), which is exactly why retryability
+// switched from an allowlist of known-good `ApiError` statuses to a
+// denylist below: an allowlist silently treats every error shape it
+// wasn't written for — including a timeout — as non-retryable, which is
+// the wrong default here. Real, structural failures (bad request, bad
+// auth, unknown model) are the only things actually worth failing fast
+// on; everything else — 429, 5xx, a raw network error, a timeout abort —
+// is worth one more try before giving up.
+const NON_RETRYABLE_STATUS_CODES = new Set([400, 401, 403, 404]);
 const MAX_GENERATION_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 600;
+const TIMEOUT_MS_PER_ATTEMPT = 25_000;
 
-function isRetryableApiError(error: unknown): boolean {
-  return error instanceof ApiError && typeof error.status === 'number' && RETRYABLE_STATUS_CODES.has(error.status);
+function isRetryableError(error: unknown): boolean {
+  if (error instanceof ApiError && typeof error.status === 'number') {
+    return !NON_RETRYABLE_STATUS_CODES.has(error.status);
+  }
+  return true;
 }
 
 async function generateContentWithRetry(
@@ -51,7 +70,7 @@ async function generateContentWithRetry(
     try {
       return await client.models.generateContent(params);
     } catch (error) {
-      if (!isRetryableApiError(error) || attempt === MAX_GENERATION_ATTEMPTS) {
+      if (!isRetryableError(error) || attempt === MAX_GENERATION_ATTEMPTS) {
         throw error;
       }
       console.error(`Gemini call failed (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS}), retrying:`, error);
@@ -98,6 +117,7 @@ export async function generateReading(
         responseMimeType: 'application/json',
         responseSchema: READING_SCHEMAS[moduleId],
         temperature: READING_TEMPERATURE,
+        httpOptions: { timeout: TIMEOUT_MS_PER_ATTEMPT },
       },
     });
     responseText = response.text;

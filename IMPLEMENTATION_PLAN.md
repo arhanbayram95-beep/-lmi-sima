@@ -904,3 +904,37 @@ was actually run throughout.
     paths, plus coverage for `warmUpBackend` in both real and mock API
     modes. `tsc --noEmit` clean on both sides; backend 9/9 suites,
     57/57 tests; frontend 30/30 suites, 186/186 tests.
+- [x] **10.18 Found and fixed the real cause of the 502s — Gemini quota
+  exhaustion, then a missing call timeout** — 10.17's mitigation was
+  real but incomplete: it treated every 502 as a Render cold start,
+  when the actual backend was itself the one returning 502 (see
+  `routes/reading.ts`'s `ReadingServiceError` → 502 mapping). Live
+  diagnosis (direct SDK calls to Gemini using the real key, bypassing
+  this app entirely) found two distinct, compounding causes:
+  - `gemini-flash-latest`, the auto-updating alias PROJECT_SPEC.md §4
+    deliberately chose, had rolled forward to `gemini-3.7-flash` on
+    Google's own schedule — exactly the risk flagged when that alias
+    was picked. That model's free tier allows only 20 requests/day on
+    this key/project, already exhausted. Fixed for now by rotating
+    `GEMINI_API_KEY` (locally and in Render's dashboard — Render env
+    vars are a separate secret from `.env`, `render.yaml`'s `sync:
+    false`) to a key with available quota; billing on the Google Cloud
+    project is still the real long-term fix, flagged to the product
+    owner as a cost decision.
+  - After rotating the key, a second failure surfaced: a request that
+    hung 90+ seconds with zero bytes back. Root cause — nothing in the
+    whole chain (`@google/genai` client, this service's retry loop,
+    Fastify) ever set a timeout, so a stalled Gemini connection just
+    hung forever. Fixed in `readingService.ts`: added
+    `config.httpOptions.timeout` (`TIMEOUT_MS_PER_ATTEMPT`, 25s) per
+    attempt, and switched the retry check from `isRetryableApiError`
+    (an allowlist of known-good `ApiError` statuses — 429/500/503) to
+    `isRetryableError` (a denylist of known-bad ones —
+    400/401/403/404), since a timeout/abort doesn't necessarily throw a
+    clean `ApiError` and was silently falling through the old allowlist
+    as non-retryable.
+  - `readingService.test.ts` gained a test asserting a raw non-`ApiError`
+    failure (a timeout/abort shape) still gets retried and succeeds on
+    a later attempt; the existing 503-retry and 400-no-retry tests still
+    pass unchanged under the new denylist logic. `tsc --noEmit` clean,
+    backend suite 9/9 suites, 58/58 tests.

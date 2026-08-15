@@ -273,6 +273,22 @@ still exceed the pre-warm's head start plus the retry budget. The actual
 fix is still the paid Starter tier noted above — flagged to the product
 owner as a cost decision, not applied here.
 
+**Correction — the real "502" cause wasn't Render at all (2026-08-15,
+same day):** the mitigation above stands (it's still a real, if smaller,
+contributor), but live diagnosis of a continuing "cannot get past 502"
+report found the actual cause was the backend's own 502 response —
+`routes/reading.ts` maps any `ReadingServiceError` to HTTP 502, and
+`readingService.ts` throws that specifically when the Gemini call itself
+fails. Confirmed via a direct SDK call bypassing this app entirely, using
+the same `GEMINI_API_KEY`: `gemini-flash-latest` (the auto-updating alias
+§4 deliberately chose) had rolled forward to `gemini-3.7-flash` on
+Google's own schedule, and that model's free tier on this key/project
+allows only 20 requests/day — already exhausted. See §4's retry/timeout
+notes for the follow-up fix once the key was rotated to one with
+available quota. Long-term fix is still enabling billing on the Google
+Cloud project behind the key (removes the daily cap entirely) — a cost
+decision for the product owner, not applied here.
+
 ---
 
 ## 4. AI Integration Notes (current: Google Gemini)
@@ -348,6 +364,26 @@ owner as a cost decision, not applied here.
   alone on purpose — those are intentionally short hooks and UI chrome
   (STRUCTURE_GUIDANCE's "build, not a flat list" framing), not the part
   that read as thin.
+* **Gemini call timeout + retry-policy fix (2026-08-15):** root-caused a
+  "cannot get past 502" report to two compounding issues, confirmed via
+  direct SDK calls bypassing this app (see §3's cold-start correction
+  note for the first — a `gemini-flash-latest` alias rollover to
+  `gemini-3.7-flash` hit that model's 20/day free-tier quota on this
+  key; fixed by rotating to a key with available quota, billing still
+  the long-term fix). The second, found afterward: a production request
+  hung for 90+ seconds with zero bytes back, because nothing in the
+  whole call chain — the `@google/genai` client, this service's own
+  retry loop, Fastify itself — ever set a timeout, so a stalled
+  connection to Gemini just hung indefinitely instead of failing and
+  retrying. Fixed in `readingService.ts`: `config.httpOptions.timeout`
+  (`TIMEOUT_MS_PER_ATTEMPT`, 25s) now bounds each `generateContent`
+  attempt. Since a timeout/abort doesn't necessarily throw a clean
+  `ApiError` the way a structured 429/503 does, retryability switched
+  from an allowlist of known-good `ApiError` statuses to a denylist of
+  known-bad ones (`400`/`401`/`403`/`404` — real request/auth/model
+  problems that retrying can't fix); everything else, including a raw
+  non-`ApiError` failure, is now retried instead of silently treated as
+  fatal just because its shape wasn't anticipated.
 
 ---
 
