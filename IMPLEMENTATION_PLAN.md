@@ -1067,3 +1067,29 @@ was actually run throughout.
     150px-height style (not aspectRatio) specifically in story layout;
     flexible layout's photo stays a full square, unaffected by the cap.
     `tsc --noEmit` clean, frontend suite 30/30 suites, 191/191 tests.
+- [x] **10.21 Hardened the story+photo fix — hard caps, not estimates**
+  — user reported 10.20's fix still failed on some readings. Root cause
+  of the gap: the flex-bounding fix was correct but only *estimated*
+  that a 150px photo would leave enough of the fixed 9:16 canvas for
+  the hero text — a long hero_hook plus wrapped badges could still
+  exceed the actual space left, and nothing capped the text length or
+  hard-clipped the frame, so it could still silently overflow past
+  `captureRef`'s captured bounds in heavier content. Per explicit
+  direction ("if necessary don't allow the user to overfill the card"),
+  replaced the estimate with hard guarantees in `ShareCard.tsx`:
+  - Badges drop from 3 to 1 (`STORY_BADGE_LIMIT_WITH_PHOTO`) specifically
+    when a photo is also present — frees up guaranteed room for the
+    hero text, which is more valuable content than a couple of tiny
+    badge chips repeating card titles.
+  - `heroBody` gets a hard `numberOfLines` cap (3 with a photo, 5
+    without) — worst case is now a truncated sentence with an ellipsis,
+    never vanished text.
+  - `cardStory` gained `overflow: 'hidden'` as a defense-in-depth
+    backstop — belt and suspenders so any still-untested content
+    combination clips visibly at the frame's edge at worst, rather than
+    silently disappearing from the capture the way the original bug did.
+  - `ShareCard.test.tsx`: updated the photo+story regression test for
+    the new 1-badge cap, added a test confirming the badge count drops
+    specifically because of the photo, and a test confirming
+    `numberOfLines` differs correctly with vs. without a photo. `tsc
+    --noEmit` clean, frontend suite 30/30 suites, 193/193 tests.

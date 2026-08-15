@@ -23,12 +23,27 @@ interface ShareCardProps {
   // (in practice: the module's archetype/vibe/work-archetype card, since
   // readingShareableSections always puts it first) becomes a big hero
   // treatment; everything else after it renders as compact badge chips
-  // instead of full paragraphs, capped at 3 so the fixed canvas doesn't
-  // overflow.
+  // instead of full paragraphs, capped at 3 (or 1 when a photo is also
+  // included — see STORY_BADGE_LIMIT_WITH_PHOTO) so the fixed canvas
+  // never has more content than it can guarantee room for.
   layout?: 'flexible' | 'story';
 }
 
 const STORY_BADGE_LIMIT = 3;
+// A photo already claims a fixed chunk of the fixed 9:16 canvas — capping
+// badges to 1 instead of 3 when one's present buys the hero text more
+// guaranteed room, rather than relying on it "probably" fitting (see
+// heroBody's numberOfLines below for the hard backstop either way).
+const STORY_BADGE_LIMIT_WITH_PHOTO = 1;
+// Hard caps, not estimates — a long hero_hook plus wrapped badges could
+// still exceed the space actually left after a fixed-height photo even
+// with generous layout math, and react-native-view-shot's captureRef only
+// captures the card's own laid-out frame: anything that overflowed past
+// it before was silently missing from the image, not just visually tight.
+// numberOfLines truncates with an ellipsis instead — worse case is a
+// clipped sentence, never vanished text.
+const STORY_HERO_LINES_WITH_PHOTO = 3;
+const STORY_HERO_LINES = 5;
 
 // Vertical, story-ready card captured via react-native-view-shot (see
 // RevealScreen). Rendered off-screen — never shown directly in the normal
@@ -43,7 +58,7 @@ const ShareCard = forwardRef<View, ShareCardProps>(
     const palette = shareCardPalette(paletteId);
     const isStory = layout === 'story';
     const [hero, ...rest] = sections;
-    const badges = rest.slice(0, STORY_BADGE_LIMIT);
+    const badges = rest.slice(0, photo ? STORY_BADGE_LIMIT_WITH_PHOTO : STORY_BADGE_LIMIT);
 
     return (
       <View
@@ -70,7 +85,9 @@ const ShareCard = forwardRef<View, ShareCardProps>(
               {hero && (
                 <View style={styles.heroSection} testID="share-card-hero">
                   <Text style={[styles.heroTitle, { color: palette.accent }]}>{hero.title}</Text>
-                  <Text style={styles.heroBody}>{hero.body}</Text>
+                  <Text style={styles.heroBody} numberOfLines={photo ? STORY_HERO_LINES_WITH_PHOTO : STORY_HERO_LINES}>
+                    {hero.body}
+                  </Text>
                 </View>
               )}
               {badges.length > 0 && (
@@ -164,8 +181,14 @@ const styles = StyleSheet.create({
   },
   // Fixed, not minHeight — the whole point of 'story' layout is a
   // guaranteed 9:16 canvas regardless of how much content is selected.
+  // overflow: 'hidden' is a hard backstop, not the primary fix (that's
+  // bodyStory's flex-bounding plus heroBody's numberOfLines cap) — belt
+  // and suspenders so a still-untested content combination clips at the
+  // frame's edge at worst, rather than silently vanishing from the
+  // captured image the way the pre-fix version did.
   cardStory: {
     height: (CARD_WIDTH * 16) / 9,
+    overflow: 'hidden',
   },
   heroSection: {
     flex: 1,

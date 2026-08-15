@@ -78,19 +78,40 @@ describe('ShareCard', () => {
   });
 
   // Regression (2026-08-15): story layout's fixed 9:16 canvas has to fit
-  // branding, the photo, the hero text and up to 3 badges all at once. A
+  // branding, the photo, the hero text and badges all at once. A
   // full-square photo (aspectRatio 1 at the card's own width) alone left
   // too little of the fixed canvas for `body` — which wasn't itself
   // flex-bounded — to lay out the hero text within the card's actual
   // captured bounds, so react-native-view-shot's captureRef silently
   // cropped it out of the resulting image even though it still mounted.
-  it('still renders the hero text and badges when a photo is included in story layout', () => {
+  // First fix (flex-bounding + a capped photo height) turned out to only
+  // narrow the failure, not close it — a long enough hero sentence plus
+  // wrapped badges could still exceed the space actually left. This is
+  // the hardened version: badges drop to 1 (not 3) when a photo is also
+  // present, and the hero text itself gets a hard numberOfLines cap
+  // rather than relying on the remaining space "probably" being enough.
+  it('still renders the hero text when a photo is included in story layout', () => {
     render(<ShareCard sections={STORY_SECTIONS} photo="ZmFrZS1iYXNlNjQ=" layout="story" />);
 
     expect(screen.getByTestId('share-card-photo')).toBeTruthy();
     expect(screen.getByTestId('share-card-hero')).toBeTruthy();
     expect(screen.getByText('Strategic Innovator')).toBeTruthy();
+  });
+
+  it('drops to a single badge when a photo is also present in story layout, to guarantee the hero text room', () => {
+    render(<ShareCard sections={STORY_SECTIONS} photo="ZmFrZS1iYXNlNjQ=" layout="story" />);
+
     expect(screen.getByText('Work Catchphrase')).toBeTruthy();
+    expect(screen.queryByText('Recommended Industries')).toBeNull();
+    expect(screen.queryByText('Strengths & Growth Areas')).toBeNull();
+  });
+
+  it('caps the hero text to fewer lines when a photo is present, more when it is not', () => {
+    const { rerender } = render(<ShareCard sections={STORY_SECTIONS} photo="ZmFrZS1iYXNlNjQ=" layout="story" />);
+    expect(screen.getByText('Strategic Innovator').props.numberOfLines).toBe(3);
+
+    rerender(<ShareCard sections={STORY_SECTIONS} layout="story" />);
+    expect(screen.getByText('Strategic Innovator').props.numberOfLines).toBe(5);
   });
 
   it('caps the photo to a fixed height instead of a full square specifically in story layout', () => {
