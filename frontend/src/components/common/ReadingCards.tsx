@@ -59,11 +59,22 @@ const METRIC_GLYPHS: Record<MetricIcon, string> = {
 // already unique to that card's content (a badge_tag, a name, a title) so
 // it's stable across re-renders of the same reading but differs from card
 // to card and reading to reading.
+// Two real flex children (title group flex:1, badge flexShrink:0) rather
+// than an absolutely-positioned badge over a guessed padding reservation —
+// the badge's text length varies (aura names differ in length, percent is
+// 1-2 digits), and a fixed padding sized for the *average* case overlapped
+// the title whenever a longer badge rendered wider than the reserved gap.
+// Flexbox has no such ceiling to guess wrong: the title truncates first if
+// the row is ever actually too narrow for both.
 function CardHeader({ icon, title, raritySeed }: { icon?: string; title: string; raritySeed?: string }) {
   return (
-    <View style={styles.cardHeader}>
-      {icon && <Text style={styles.cardHeaderIcon}>{icon}</Text>}
-      <Text style={styles.cardTitle}>{title}</Text>
+    <View style={styles.cardHeaderRow}>
+      <View style={styles.cardHeaderTitleGroup}>
+        {icon && <Text style={styles.cardHeaderIcon}>{icon}</Text>}
+        <Text style={styles.cardTitle} numberOfLines={2}>
+          {title}
+        </Text>
+      </View>
       {raritySeed && <RarityBadge seed={raritySeed} />}
     </View>
   );
@@ -349,14 +360,17 @@ const styles = StyleSheet.create({
   card: {
     gap: Theme.spacing.xs,
   },
-  cardHeader: {
-    position: 'relative',
+  cardHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  cardHeaderTitleGroup: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    // Clears the rarity badge (absolute, top-right) from overlapping the
-    // title on cards with a short icon+title row.
-    paddingRight: 96,
   },
   cardHeaderIcon: {
     fontSize: 30,

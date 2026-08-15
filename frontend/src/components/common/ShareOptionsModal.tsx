@@ -8,6 +8,15 @@ import { getStoreListingUrl } from '../../utils/storeLinks';
 import AnimatedCheckbox from './AnimatedCheckbox';
 import PrimaryButton from './PrimaryButton';
 
+// The flexible-layout ShareCard has no max height — every selected section
+// stacks as a full paragraph block. Product report (2026-08-15): with a
+// photo plus most/all of a 5-6-section module selected, the resulting
+// off-screen view gets tall enough that react-native-view-shot's capture
+// sometimes silently fails or comes back missing content ("insights"
+// dropped from the shared image) rather than throwing a catchable error.
+// Capping selection is the fix, not detecting the failure after the fact.
+export const MAX_SELECTABLE_SECTIONS = 5;
+
 interface ShareOptionsModalProps {
   visible: boolean;
   onClose: () => void;
@@ -127,6 +136,7 @@ export default function ShareOptionsModal({
     if (next.has(id)) {
       next.delete(id);
     } else {
+      if (next.size >= MAX_SELECTABLE_SECTIONS) return;
       next.add(id);
     }
     onSelectedSectionIdsChange(next);
@@ -237,16 +247,27 @@ export default function ShareOptionsModal({
                 </View>
               </View>
 
+              <View style={styles.sectionListHeader}>
+                <Text style={styles.groupLabel}>{t('share.builder.sectionsLabel')}</Text>
+                <Text style={styles.sectionCapHint}>
+                  {selectedSectionIds.size}/{MAX_SELECTABLE_SECTIONS}
+                </Text>
+              </View>
               <View style={styles.sectionList}>
-                {sections.map((section) => (
-                  <AnimatedCheckbox
-                    key={section.id}
-                    checked={selectedSectionIds.has(section.id)}
-                    onToggle={() => toggleSection(section.id)}
-                    label={section.title}
-                    testID={`share-section-${section.id}`}
-                  />
-                ))}
+                {sections.map((section) => {
+                  const checked = selectedSectionIds.has(section.id);
+                  const atCap = !checked && selectedSectionIds.size >= MAX_SELECTABLE_SECTIONS;
+                  return (
+                    <AnimatedCheckbox
+                      key={section.id}
+                      checked={checked}
+                      onToggle={() => toggleSection(section.id)}
+                      label={section.title}
+                      disabled={atCap}
+                      testID={`share-section-${section.id}`}
+                    />
+                  );
+                })}
               </View>
 
               <PrimaryButton
@@ -329,6 +350,16 @@ const styles = StyleSheet.create({
     ...Theme.typography.bodyMd,
     fontSize: 12,
     color: Theme.colors.text.secondary,
+  },
+  sectionListHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sectionCapHint: {
+    ...Theme.typography.labelSm,
+    fontSize: 10,
+    color: Theme.colors.text.muted,
   },
   sectionList: {
     gap: Theme.spacing.sm,

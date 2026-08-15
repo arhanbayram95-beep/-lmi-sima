@@ -778,3 +778,29 @@ was actually run throughout.
   `ReadingServiceError` → 502 as before. New tests cover retry-then-
   succeed, exhausting all 3 attempts, and NOT retrying a genuinely
   non-retryable error (a real 400). Backend suite: 55 tests (up from 52).
+- [x] **10.12 Share card selection cap (fixes intermittent capture
+  failures)** — the flexible-layout ShareCard has no max height; with a
+  photo plus most/all of a 5-6-section module selected, the off-screen
+  view got tall enough that react-native-view-shot's capture sometimes
+  silently failed or came back missing content ("insights" dropped from
+  the shared image) rather than throwing a catchable error — product
+  report, 2026-08-15. `MAX_SELECTABLE_SECTIONS` (5, exported from
+  ShareOptionsModal.tsx) caps both manual selection (already-unchecked
+  boxes past the cap go disabled, not hidden — a vanished option reads as
+  a bug, greyed-and-inert reads as "at the limit") and the *default*
+  selection in RevealScreen.tsx, which needed fixing too: "every section
+  starts selected" (2026-08-05) meant a user who never opened the builder
+  could still hit the same too-tall capture with a 6-section module.
+  `AnimatedCheckbox` gained a `disabled` prop. New tests cover the cap
+  directly (celebrity starts unchecked+disabled, becomes selectable once
+  something else is dropped) — the existing "excludes an unchecked
+  section" test had to switch from celebrity (6th, now excluded from the
+  default 5) to spirit-animal (5th, still defaults on).
+- [x] **10.13 Fixed rarity badge/title collision** — `CardHeader`'s badge
+  was absolutely positioned over a `paddingRight: 96` guess meant to clear
+  it, but the badge itself allows up to 170px (aura names vary in length,
+  percent is 1-2 digits) — any badge wider than the guessed padding
+  overlapped the title. Replaced with real flexbox: title group `flex: 1`
+  (truncates via `numberOfLines={2}` under pressure), badge `flexShrink:
+  0` in a plain `justifyContent: 'space-between'` row — no fixed-width
+  guess for either side to get wrong.

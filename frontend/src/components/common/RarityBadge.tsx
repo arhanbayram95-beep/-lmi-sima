@@ -39,17 +39,18 @@ export default function RarityBadge({ seed }: { seed: string }) {
 }
 
 const styles = StyleSheet.create({
+  // A normal flex row sibling now (see CardHeader), not absolutely
+  // positioned — flexShrink: 0 so the title's flex:1 sibling is the one
+  // that truncates under space pressure, never this.
   badge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
+    flexShrink: 0,
     backgroundColor: 'rgba(235, 201, 131, 0.12)',
     borderWidth: 1,
     borderColor: 'rgba(235, 201, 131, 0.35)',
     borderRadius: Theme.radius.full,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    maxWidth: 170,
+    maxWidth: 150,
   },
   text: {
     ...Theme.typography.labelSm,

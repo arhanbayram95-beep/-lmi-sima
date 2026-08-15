@@ -641,6 +641,10 @@ export const translations = {
     en: 'Card color', zh: '卡片颜色', hi: 'कार्ड का रंग', es: 'Color de la tarjeta', fr: 'Couleur de la carte',
     ar: 'لون البطاقة', bn: 'কার্ডের রঙ', pt: 'Cor do cartão', ru: 'Цвет карточки', ur: 'کارڈ کا رنگ',
   },
+  'share.builder.sectionsLabel': {
+    en: 'Sections', zh: '内容板块', hi: 'सेक्शन', es: 'Secciones', fr: 'Sections',
+    ar: 'الأقسام', bn: 'বিভাগ', pt: 'Secções', ru: 'Разделы', ur: 'حصے',
+  },
   'share.builder.createButton': {
     en: 'Create & Share', zh: '创建并分享', hi: 'बनाएं और शेयर करें', es: 'Crear y compartir', fr: 'Créer et partager',
     ar: 'إنشاء ومشاركة', bn: 'তৈরি করুন ও শেয়ার করুন', pt: 'Criar e partilhar', ru: 'Создать и поделиться',

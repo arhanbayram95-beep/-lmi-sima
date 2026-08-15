@@ -8,7 +8,7 @@ import FadeInView from '../components/common/FadeInView';
 import GestureCardDeck from '../components/common/GestureCardDeck';
 import PrimaryButton from '../components/common/PrimaryButton';
 import ShareCard from '../components/common/ShareCard';
-import ShareOptionsModal from '../components/common/ShareOptionsModal';
+import ShareOptionsModal, { MAX_SELECTABLE_SECTIONS } from '../components/common/ShareOptionsModal';
 import StoryProgressBar from '../components/common/StoryProgressBar';
 import {
   BadgeSummaryCard,
@@ -171,11 +171,21 @@ export default function RevealScreen() {
   // however they leave.
   useEffect(() => clearImages, [clearImages]);
 
-  // Every section starts selected — the builder is an opt-out picker, not
-  // an opt-in one, so a user who never opens it still gets the full card.
+  // Every section starts selected, up to MAX_SELECTABLE_SECTIONS — the
+  // builder is an opt-out picker, not an opt-in one, so a user who never
+  // opens it still gets a full-looking card, just not necessarily
+  // *every* section for a 6-section module: capped the same as manual
+  // selection is (see ShareOptionsModal), since an uncapped default was
+  // exactly how a capture could still end up too tall to reliably render
+  // even for someone who never touched the builder at all.
   // A fresh reading also always opens back on its first page/card.
   useEffect(() => {
-    if (reading) setSelectedSectionIds(new Set(readingShareableSections(reading).map((section) => section.id)));
+    if (reading) {
+      const ids = readingShareableSections(reading)
+        .slice(0, MAX_SELECTABLE_SECTIONS)
+        .map((section) => section.id);
+      setSelectedSectionIds(new Set(ids));
+    }
     setPageIndex(0);
   }, [reading]);
 

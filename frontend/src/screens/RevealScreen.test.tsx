@@ -185,6 +185,29 @@ describe('RevealScreen', () => {
     expect(screen.getByTestId('share-section-celebrity')).toBeTruthy();
   });
 
+  // character_analysis has 6 shareable sections; a photo + all 6 selected
+  // was the flexible ShareCard getting tall enough that view-shot's
+  // capture sometimes silently dropped content — capping selection at
+  // MAX_SELECTABLE_SECTIONS (5) is the fix, both for the default
+  // selection (see the "excludes an unchecked section" test's spirit-
+  // animal/celebrity note above) and for manual selection here.
+  it('caps section selection at 5 — celebrity starts unchecked and disabled until something else is dropped', () => {
+    render(<RevealScreen />);
+    fireEvent.press(screen.getByTestId('share-reading-button'));
+    fireEvent.press(screen.getByTestId('share-option-image'));
+
+    expect(screen.getByTestId('share-section-celebrity').props.accessibilityState.checked).toBe(false);
+    expect(screen.getByTestId('share-section-celebrity').props.accessibilityState.disabled).toBe(true);
+
+    fireEvent.press(screen.getByTestId('share-section-celebrity'));
+    expect(screen.getByTestId('share-section-celebrity').props.accessibilityState.checked).toBe(false);
+
+    fireEvent.press(screen.getByTestId('share-section-archetype'));
+    expect(screen.getByTestId('share-section-celebrity').props.accessibilityState.disabled).toBe(false);
+    fireEvent.press(screen.getByTestId('share-section-celebrity'));
+    expect(screen.getByTestId('share-section-celebrity').props.accessibilityState.checked).toBe(true);
+  });
+
   it('captures the share card and opens the native share sheet once the card is built', async () => {
     render(<RevealScreen />);
     fireEvent.press(screen.getByTestId('share-reading-button'));
@@ -202,16 +225,20 @@ describe('RevealScreen', () => {
 
   it('excludes an unchecked section from the off-screen share card', async () => {
     render(<RevealScreen />);
-    // Present twice pre-uncheck: once in the visible celebrity-card, once in
-    // the off-screen ShareCard (same reasoning as the badge-tag/score checks
-    // above — both render the reading simultaneously).
-    expect(screen.getAllByText(/A Public Figure/).length).toBe(2);
+    // spirit-animal, not celebrity — celebrity is character_analysis's 6th
+    // shareable section, and the default selection is capped at
+    // MAX_SELECTABLE_SECTIONS (5, see ShareOptionsModal/RevealScreen), so
+    // it isn't pre-selected at all now. spirit-animal (5th) still is.
+    // Present twice pre-uncheck: once in the visible spirit-animal card,
+    // once in the off-screen ShareCard (same reasoning as the badge-tag/
+    // score checks above — both render the reading simultaneously).
+    expect(screen.getAllByText(/Wolf/).length).toBe(2);
 
     fireEvent.press(screen.getByTestId('share-reading-button'));
     fireEvent.press(screen.getByTestId('share-option-image'));
-    fireEvent.press(screen.getByTestId('share-section-celebrity'));
+    fireEvent.press(screen.getByTestId('share-section-spirit-animal'));
 
-    expect(screen.getAllByText(/A Public Figure/).length).toBe(1);
+    expect(screen.getAllByText(/Wolf/).length).toBe(1);
   });
 
   it('shares a text summary from the quick-message option', async () => {

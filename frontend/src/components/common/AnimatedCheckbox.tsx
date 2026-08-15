@@ -7,9 +7,13 @@ interface AnimatedCheckboxProps {
   onToggle: () => void;
   label: string;
   testID?: string;
+  // Stays visible rather than disappearing — a row that vanishes once a
+  // selection cap is hit reads as a bug ("where did that option go?"),
+  // greyed-and-inert reads as "you're at the limit."
+  disabled?: boolean;
 }
 
-export default function AnimatedCheckbox({ checked, onToggle, label, testID }: AnimatedCheckboxProps) {
+export default function AnimatedCheckbox({ checked, onToggle, label, testID, disabled }: AnimatedCheckboxProps) {
   const checkScale = useRef(new Animated.Value(checked ? 1 : 0)).current;
   const boxScale = useRef(new Animated.Value(1)).current;
   const glow = useRef(new Animated.Value(checked ? 1 : 0)).current;
@@ -25,6 +29,7 @@ export default function AnimatedCheckbox({ checked, onToggle, label, testID }: A
   }, [checked, checkScale, glow]);
 
   const handlePress = () => {
+    if (disabled) return;
     Animated.sequence([
       Animated.spring(boxScale, { toValue: 0.88, useNativeDriver: true, speed: 50, bounciness: 0 }),
       Animated.spring(boxScale, { toValue: 1, useNativeDriver: true, speed: 20, bounciness: 14 }),
@@ -39,10 +44,11 @@ export default function AnimatedCheckbox({ checked, onToggle, label, testID }: A
 
   return (
     <Pressable
-      style={styles.row}
+      style={[styles.row, disabled && styles.rowDisabled]}
       onPress={handlePress}
+      disabled={disabled}
       accessibilityRole="checkbox"
-      accessibilityState={{ checked }}
+      accessibilityState={{ checked, disabled }}
       testID={testID}
     >
       <Animated.View style={{ transform: [{ scale: boxScale }] }}>
@@ -70,6 +76,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+  rowDisabled: {
+    opacity: 0.4,
   },
   box: {
     width: 24,
