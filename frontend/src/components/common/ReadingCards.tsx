@@ -13,6 +13,13 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import ReAnimated, {
+  interpolate as reInterpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { BadgeCard, ChecklistItem, FaceShape, MetadataBadge, MetricIcon, ScoreCard } from '../../api/types';
 import { Theme } from '../../ui/theme';
 import FaceShapeIcon from './FaceShapeIcon';
@@ -363,7 +370,7 @@ export function HighlightCard({
 }) {
   const [revealed, setRevealed] = useState(false);
   const [showBack, setShowBack] = useState(false);
-  const flip = useRef(new Animated.Value(0)).current;
+  const flip = useSharedValue(0);
 
   // Real 3D card flip, not a fade — two-phase animation (0->0.5 rotates
   // the front face away, the content swap happens exactly at the halfway
@@ -375,19 +382,32 @@ export function HighlightCard({
   // duplicate 0.5 breakpoint below is what makes the interpolation treat
   // the two phases as separate rotations (0deg->90deg, then -90deg->0deg)
   // instead of one continuous 0deg->180deg sweep.
+  //
+  // Built on react-native-reanimated, not core RN Animated — core
+  // Animated's `perspective` transform has a known history of unreliable
+  // behavior specifically when combined with useNativeDriver (silently
+  // dropped or misbehaving on some RN versions/platforms), and this needed
+  // perspective for the 3D effect to read as a flip instead of the view
+  // just squashing to a line. Reanimated's worklet-driven transforms don't
+  // have that same gap, and it's already proven reliable elsewhere in this
+  // exact file's ecosystem (GestureCardDeck, FaceShapeIcon).
   const reveal = () => {
     if (revealed) return;
     setRevealed(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Animated.timing(flip, { toValue: 0.5, duration: 250, useNativeDriver: true }).start(() => {
-      setShowBack(true);
-      Animated.timing(flip, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+    flip.value = withTiming(0.5, { duration: 300 }, (finished) => {
+      if (finished) {
+        runOnJS(setShowBack)(true);
+        flip.value = withTiming(1, { duration: 300 });
+      }
     });
   };
 
-  const rotateY = flip.interpolate({
-    inputRange: [0, 0.5, 0.5, 1],
-    outputRange: ['0deg', '90deg', '-90deg', '0deg'],
+  const flipStyle = useAnimatedStyle(() => {
+    const deg = reInterpolate(flip.value, [0, 0.5, 0.5, 1], [0, 90, -90, 0]);
+    return {
+      transform: [{ perspective: 800 }, { rotateY: `${deg}deg` }],
+    };
   });
 
   return (
@@ -400,14 +420,14 @@ export function HighlightCard({
         accessibilityState={{ expanded: revealed }}
         testID={testID ? `${testID}-reveal` : undefined}
       >
-        <Animated.View style={{ transform: [{ perspective: 800 }, { rotateY }] }}>
+        <ReAnimated.View style={flipStyle}>
           <Text style={styles.matchName}>{name}</Text>
           {showBack ? (
             <Text style={styles.summary}>{description}</Text>
           ) : (
             <Text style={styles.revealHint}>{tapHint}</Text>
           )}
-        </Animated.View>
+        </ReAnimated.View>
       </Pressable>
     </ReadingGlassCard>
   );
