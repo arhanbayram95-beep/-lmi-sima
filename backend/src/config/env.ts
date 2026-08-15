@@ -1,4 +1,11 @@
-import 'dotenv/config';
+// override: true — a stray GEMINI_API_KEY already present in the shell
+// environment (a leftover export from some tutorial/dotfile, observed
+// on-device 2026-08-15) otherwise silently wins over .env, since dotenv's
+// default behavior never overwrites a variable that's already set. .env is
+// the authoritative source for local dev secrets in this project, so it
+// must always win regardless of what the shell happens to have exported.
+import { config } from 'dotenv';
+config({ override: true });
 
 export interface AppEnv {
   port: number;

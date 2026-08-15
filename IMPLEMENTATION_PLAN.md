@@ -595,3 +595,20 @@ Found and fixed during first real iOS dev-client testing.
   existing `paywall.reassurance` marketing line — no price embedded in it
   since both plan cards already show their own real price above it.
   Backend (52 tests) and frontend (177 tests) suites both green.
+- [x] **9.15 Fixed 502 on every real reading — stray shell env var was
+  shadowing GEMINI_API_KEY** (2026-08-15) — a placeholder-looking
+  `GEMINI_API_KEY=AIza...` was set somewhere in the local shell environment
+  (source not tracked down — not in `.bashrc`/`.profile`/`.zshrc`/
+  `/etc/profile.d`/systemd user env, but present in every fresh login
+  shell); `dotenv`'s default behavior never overrides a variable that's
+  already set, so it silently won over the real key in `backend/.env`,
+  and every live Gemini call failed with "API key not valid" — wrapped
+  generically by `readingService.ts`'s catch-all as "Failed to reach the
+  Gemini API." (502), indistinguishable from a real network failure
+  without checking the actual thrown error. `config/env.ts` now calls
+  `dotenv`'s `config({ override: true })` so `.env` always wins regardless
+  of what the shell happens to have exported — reproduced with a live
+  Gemini call (confirmed broken with the stray var present, confirmed
+  fixed with the code change even with the stray var still set), verified
+  again against the actually-running dev server after `tsx watch`
+  auto-restarted it. Backend suite (52 tests) still green.
