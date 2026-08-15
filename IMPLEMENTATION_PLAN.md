@@ -612,3 +612,54 @@ Found and fixed during first real iOS dev-client testing.
   fixed with the code change even with the stray var still set), verified
   again against the actually-running dev server after `tsx watch`
   auto-restarted it. Backend suite (52 tests) still green.
+- [x] **9.16 Fixed AnalyzingScreen spinner getting stuck after repeated
+  retries** — pulse/spin were native-driver `Animated.loop()`s started
+  once at mount and left running indefinitely; on-device testing found
+  the spinner could stop visibly advancing after several retries (not
+  traced to one root line — the native driver's loop state getting
+  wedged after enough start/stop churn). Every retry now explicitly stops
+  whatever loop is running, resets both values, and starts a fresh one,
+  so the spinner can never be stuck on a dead animation regardless of
+  the previous loop's actual state. Also added an in-flight guard so a
+  rapid double-tap on "Try Again" can't fire two overlapping
+  `analyzeReading()` calls racing each other's resolution.
+- [x] **9.17 Reveal screen made interactive; 9 share-card color options**
+  (product feedback: reveal screen "too plain," share palettes "too
+  similar") —
+  - `CardHeader` bigger and glowing (18px plain gold → 22px with a soft
+    text-shadow, icon 22px → 30px) so every card opens with the same
+    visual weight the punchline text already had, not just the hook card.
+  - `ChecklistCard` (Harmony Recommendations, Ideal Role Matches) is now
+    an accordion — headline always visible, description (already the
+    richest writing per `STRUCTURE_GUIDANCE`) hidden until tapped, one
+    open at a time, `LayoutAnimation` for the expand/collapse, haptic on
+    toggle. First item starts open so the card doesn't read as empty
+    before any interaction.
+  - `HighlightCard` (Spirit Animal Match, Celebrity Archetype Match) now
+    shows the name immediately but holds the description behind a "Tap to
+    reveal ✨" prompt, fading in on tap. New `reveal.tapToReveal` key,
+    all 10 locales.
+  - `ReadingScoreCard`'s four sub-score bars now animate their fill width
+    from 0 on mount (staggered 150ms delay) instead of appearing
+    pre-filled — the score number itself stays immediate/synchronous
+    (a count-up version was tried and reverted: it starts at 0 and
+    animates via `requestAnimationFrame`, which doesn't resolve
+    synchronously in the test environment and broke the existing
+    "renders the overall score" assertion — not worth chasing for a
+    minor flourish).
+  - `SHARE_CARD_PALETTES` (theme.ts) expanded from 4 to the full 3x3 grid
+    of the 3 locked background tokens x 3 locked accent tokens (still no
+    new hex values — `crimsonPrimary` just hadn't been used as a card
+    accent before, only gold/iridescent had). Named, not just id'd
+    (Crimson/Ember/Amethyst/Burgundy/Rosewood/Velvet/Nightfall/Eclipse/
+    Midnight) — at 56px two palettes sharing an accent read as near-
+    identical circles, so the picker now shows a name label per swatch;
+    the full-size share card itself makes the background difference
+    obvious even where the tiny swatch doesn't. `paletteRow` wraps
+    (3 rows of 3) instead of overflowing. `iridescent` id renamed
+    `amethyst`, test reference updated.
+  - Frontend suite: 177 tests, still green (verified the accordion/reveal
+    changes didn't silently need test updates — no test asserted on
+    checklist description text or highlight-card description text being
+    immediately rendered, only on the always-visible headline/name, which
+    is why nothing broke).

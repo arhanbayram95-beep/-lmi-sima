@@ -57,29 +57,70 @@ export type ThemeColors = typeof Theme.colors;
 
 // Share-card color options (see ShareOptionsModal's builder). Every value
 // here is one already defined in Theme.colors above — no new hex values,
-// per the "colors are locked" rule at the top of this file — just
-// recombined so the card background/accent pairing can differ from the
-// app chrome's own crimson-on-obsidian default while staying inside the
-// locked palette.
+// per the "colors are locked" rule at the top of this file. Product
+// feedback (2026-08-15): the original 4 leaned on the same gold/iridescent
+// accents repeatedly, so they read as near-duplicates in the picker. This
+// is the full 3x3 grid of the 3 locked backgrounds x 3 locked accents —
+// crimsonPrimary included as a card accent for the first time, not just
+// app chrome — so every option is a genuinely different combination rather
+// than a shade of one already covered. Named (not just id'd) so the picker
+// can label each swatch — at 56px, two options sharing an accent read
+// similarly as tiny circles, but the full-size share card makes the
+// background difference obvious, and a name lets someone pick by that
+// difference before seeing it rendered.
 export const SHARE_CARD_PALETTES = [
   {
     id: 'crimson',
+    name: 'Crimson',
     background: Theme.colors.background.start,
     accent: Theme.colors.accent.goldSecondary,
   },
   {
+    id: 'ember',
+    name: 'Ember',
+    background: Theme.colors.background.start,
+    accent: Theme.colors.accent.crimsonPrimary,
+  },
+  {
+    id: 'amethyst',
+    name: 'Amethyst',
+    background: Theme.colors.background.start,
+    accent: Theme.colors.accent.iridescentShimmer,
+  },
+  {
     id: 'burgundy',
+    name: 'Burgundy',
     background: Theme.colors.background.middle,
     accent: Theme.colors.accent.goldSecondary,
   },
   {
-    id: 'midnight',
-    background: Theme.colors.background.end,
+    id: 'rosewood',
+    name: 'Rosewood',
+    background: Theme.colors.background.middle,
+    accent: Theme.colors.accent.crimsonPrimary,
+  },
+  {
+    id: 'velvet',
+    name: 'Velvet',
+    background: Theme.colors.background.middle,
     accent: Theme.colors.accent.iridescentShimmer,
   },
   {
-    id: 'iridescent',
-    background: Theme.colors.background.start,
+    id: 'nightfall',
+    name: 'Nightfall',
+    background: Theme.colors.background.end,
+    accent: Theme.colors.accent.goldSecondary,
+  },
+  {
+    id: 'eclipse',
+    name: 'Eclipse',
+    background: Theme.colors.background.end,
+    accent: Theme.colors.accent.crimsonPrimary,
+  },
+  {
+    id: 'midnight',
+    name: 'Midnight',
+    background: Theme.colors.background.end,
     accent: Theme.colors.accent.iridescentShimmer,
   },
 ] as const;

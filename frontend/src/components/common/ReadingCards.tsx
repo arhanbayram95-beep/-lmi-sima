@@ -1,8 +1,15 @@
-import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Image, LayoutAnimation, Platform, Pressable, StyleSheet, Text, UIManager, View } from 'react-native';
 import { BadgeCard, ChecklistItem, MetadataBadge, MetricIcon, ScoreCard } from '../../api/types';
 import { Theme } from '../../ui/theme';
 import GlassCard from './GlassCard';
+
+// LayoutAnimation needs an explicit opt-in on Android (iOS has it on by
+// default) — powers the accordion expand/collapse in ChecklistCard below.
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 // The presentational half of a reading. Every module's reveal is assembled
 // from these cards (see RevealScreen) — they take already-fetched data as
@@ -54,6 +61,7 @@ function CardHeader({ icon, title }: { icon?: string; title: string }) {
   );
 }
 
+
 export function BadgeSummaryCard({ card, icon, testID }: { card: BadgeCard; icon?: string; testID?: string }) {
   return (
     <GlassCard style={styles.card} testID={testID}>
@@ -63,6 +71,38 @@ export function BadgeSummaryCard({ card, icon, testID }: { card: BadgeCard; icon
       </View>
       <Text style={styles.summary}>{card.summary}</Text>
     </GlassCard>
+  );
+}
+
+function MetricBar({ metric }: { metric: ScoreCard['breakdown_metrics'][number] }) {
+  // Percentage-width animation can't use the native driver (layout
+  // properties are main-thread only), but it's one bar animating once on
+  // mount, not a gesture-driven loop — the JS-thread cost is negligible.
+  const fill = useRef(new Animated.Value(0)).current;
+  const targetPercent = Math.max(0, Math.min(100, metric.score));
+
+  useEffect(() => {
+    Animated.timing(fill, { toValue: targetPercent, duration: 700, delay: 150, useNativeDriver: false }).start();
+    // Mount-once fill — re-animating on every re-render (e.g. parent state
+    // changes elsewhere on the page) would look like the bar keeps resetting.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <View style={styles.metric}>
+      <View style={styles.metricHeader}>
+        <Text style={styles.metricGlyph}>{METRIC_GLYPHS[metric.icon]}</Text>
+        <Text style={styles.metricLabel} numberOfLines={1}>
+          {metric.label}
+        </Text>
+        <Text style={styles.metricScore}>{metric.score}</Text>
+      </View>
+      <View style={styles.metricTrack}>
+        <Animated.View
+          style={[styles.metricFill, { width: fill.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] }) }]}
+        />
+      </View>
+    </View>
   );
 }
 
@@ -88,20 +128,7 @@ export function ReadingScoreCard({
 
       <View style={styles.metricGrid}>
         {card.breakdown_metrics.map((metric) => (
-          <View key={metric.label} style={styles.metric}>
-            <View style={styles.metricHeader}>
-              <Text style={styles.metricGlyph}>{METRIC_GLYPHS[metric.icon]}</Text>
-              <Text style={styles.metricLabel} numberOfLines={1}>
-                {metric.label}
-              </Text>
-              <Text style={styles.metricScore}>{metric.score}</Text>
-            </View>
-            <View style={styles.metricTrack}>
-              {/* Clamped because the bar is a fill percentage, and a score
-                  outside 0-100 would render as a bar wider than its track. */}
-              <View style={[styles.metricFill, { width: `${Math.max(0, Math.min(100, metric.score))}%` }]} />
-            </View>
-          </View>
+          <MetricBar key={metric.label} metric={metric} />
         ))}
       </View>
     </GlassCard>
@@ -154,6 +181,15 @@ export function MetadataBadgeRow({ badges }: { badges: MetadataBadge[] }) {
   );
 }
 
+// Accordion, not a flat list — product feedback: the reveal screen read as
+// too plain, wanted "more details come up when interacted" specifically.
+// Headline stays always visible (so the collapsed card still reads as
+// substantial, not empty); the description — already the richest writing
+// in the reading per systemPrompt.ts's STRUCTURE_GUIDANCE — is the payoff
+// for tapping, rather than being dumped all at once. First item starts
+// open so there's something to read without any interaction at all; only
+// one open at a time, classic accordion, so the list stays scannable
+// instead of every item's prose stacking up as one long block again.
 export function ChecklistCard({
   title,
   icon,
@@ -165,20 +201,41 @@ export function ChecklistCard({
   items: ChecklistItem[];
   testID?: string;
 }) {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+
+  const toggle = (index: number) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setExpandedIndex((current) => (current === index ? null : index));
+  };
+
   return (
     <GlassCard style={styles.card} testID={testID}>
       <CardHeader icon={icon} title={title} />
-      {items.map((item) => (
-        <View key={item.headline} style={styles.checkItem}>
-          <View style={styles.checkMark}>
-            <Text style={styles.checkMarkGlyph}>✓</Text>
-          </View>
-          <View style={styles.checkBody}>
-            <Text style={styles.checkHeadline}>{item.headline}</Text>
-            <Text style={styles.checkDescription}>{item.description}</Text>
-          </View>
-        </View>
-      ))}
+      {items.map((item, index) => {
+        const expanded = expandedIndex === index;
+        return (
+          <Pressable
+            key={item.headline}
+            onPress={() => toggle(index)}
+            style={styles.checkItem}
+            accessibilityRole="button"
+            accessibilityState={{ expanded }}
+            testID={`${testID}-item-${index}`}
+          >
+            <View style={styles.checkMark}>
+              <Text style={styles.checkMarkGlyph}>✓</Text>
+            </View>
+            <View style={styles.checkBody}>
+              <View style={styles.checkHeadlineRow}>
+                <Text style={styles.checkHeadline}>{item.headline}</Text>
+                <Text style={[styles.checkChevron, expanded && styles.checkChevronExpanded]}>‹</Text>
+              </View>
+              {expanded && <Text style={styles.checkDescription}>{item.description}</Text>}
+            </View>
+          </Pressable>
+        );
+      })}
     </GlassCard>
   );
 }
@@ -186,24 +243,55 @@ export function ChecklistCard({
 // Generic "one bold word/name + description" card — used for both the
 // Celebrity Archetype Match and the Spirit Animal Match, since they're
 // structurally identical (title, a single striking answer, a description).
+// The name lands immediately (it's the punchy, exciting part — "Wolf",
+// "A Public Figure"), but the description — the richest writing in either
+// module's whole reading — is held back as a tap-to-reveal payoff instead
+// of dumping both at once, per product feedback wanting more interaction
+// on this screen. tapHint is threaded in from RevealScreen (which has
+// useTranslation) rather than imported here, matching this component's
+// existing presentational-only, no-store-no-i18n-access boundary.
 export function HighlightCard({
   title,
   icon,
   name,
   description,
+  tapHint,
   testID,
 }: {
   title: string;
   icon?: string;
   name: string;
   description: string;
+  tapHint: string;
   testID?: string;
 }) {
+  const [revealed, setRevealed] = useState(false);
+  const fade = useRef(new Animated.Value(0)).current;
+
+  const reveal = () => {
+    if (revealed) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setRevealed(true);
+    Animated.timing(fade, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+  };
+
   return (
     <GlassCard style={styles.card} testID={testID}>
       <CardHeader icon={icon} title={title} />
-      <Text style={styles.matchName}>{name}</Text>
-      <Text style={styles.summary}>{description}</Text>
+      <Pressable
+        onPress={reveal}
+        disabled={revealed}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: revealed }}
+        testID={testID ? `${testID}-reveal` : undefined}
+      >
+        <Text style={styles.matchName}>{name}</Text>
+        {revealed ? (
+          <Animated.Text style={[styles.summary, { opacity: fade }]}>{description}</Animated.Text>
+        ) : (
+          <Text style={styles.revealHint}>{tapHint}</Text>
+        )}
+      </Pressable>
     </GlassCard>
   );
 }
@@ -229,12 +317,21 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardHeaderIcon: {
-    fontSize: 22,
+    fontSize: 30,
   },
+  // Bigger and glowing (product feedback: the reveal screen read as too
+  // plain) — was 18/no-shadow, now matches the visual weight the badge
+  // punchline and match-name text already carry elsewhere on this screen,
+  // so every card opens with the same "loud" energy instead of only the
+  // hook card.
   cardTitle: {
     ...Theme.typography.headlineMd,
-    fontSize: 18,
+    fontSize: 22,
+    letterSpacing: -0.2,
     color: Theme.colors.accent.goldSecondary,
+    textShadowColor: 'rgba(235, 201, 131, 0.45)',
+    textShadowRadius: 10,
+    textShadowOffset: { width: 0, height: 0 },
   },
   badgeChip: {
     alignSelf: 'flex-start',
@@ -417,12 +514,31 @@ const styles = StyleSheet.create({
   },
   checkBody: {
     flex: 1,
-    gap: 2,
+    gap: 4,
+  },
+  checkHeadlineRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
   },
   checkHeadline: {
     ...Theme.typography.headlineMd,
-    fontSize: 15,
+    fontSize: 16,
+    flexShrink: 1,
     color: Theme.colors.text.primary,
+  },
+  // A left-pointing chevron rotated to point down when expanded — one
+  // glyph, two states, no extra icon asset needed.
+  checkChevron: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Theme.colors.text.muted,
+    transform: [{ rotate: '90deg' }],
+  },
+  checkChevronExpanded: {
+    color: Theme.colors.accent.goldSecondary,
+    transform: [{ rotate: '-90deg' }],
   },
   checkDescription: {
     ...Theme.typography.bodyMd,
@@ -437,5 +553,11 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(235, 201, 131, 0.4)',
     textShadowRadius: 14,
     textShadowOffset: { width: 0, height: 0 },
+  },
+  revealHint: {
+    ...Theme.typography.labelSm,
+    fontSize: 12,
+    color: Theme.colors.text.muted,
+    marginTop: 4,
   },
 });

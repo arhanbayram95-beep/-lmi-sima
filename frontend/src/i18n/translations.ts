@@ -700,6 +700,11 @@ export const translations = {
     en: 'Growth Edges', zh: '成长空间', hi: 'विकास के क्षेत्र', es: 'Áreas de crecimiento', fr: 'Axes de progression',
     ar: 'مجالات النمو', bn: 'বৃদ্ধির ক্ষেত্র', pt: 'Áreas de crescimento', ru: 'Зоны роста', ur: 'ترقی کے پہلو',
   },
+  'reveal.tapToReveal': {
+    en: 'Tap to reveal ✨', zh: '点击揭晓 ✨', hi: 'देखने के लिए टैप करें ✨', es: 'Toca para revelar ✨',
+    fr: 'Touchez pour révéler ✨', ar: 'اضغط للكشف ✨', bn: 'দেখতে ট্যাপ করুন ✨', pt: 'Toque para revelar ✨',
+    ru: 'Нажмите, чтобы узнать ✨', ur: 'دیکھنے کے لیے ٹیپ کریں ✨',
+  },
   'reveal.bestChemistry': {
     en: 'Best Chemistry', zh: '最佳默契', hi: 'बेहतरीन तालमेल', es: 'Mejor química', fr: 'Meilleure alchimie',
     ar: 'أفضل انسجام', bn: 'সেরা রসায়ন', pt: 'Melhor química', ru: 'Лучшая химия', ur: 'بہترین ہم آہنگی',

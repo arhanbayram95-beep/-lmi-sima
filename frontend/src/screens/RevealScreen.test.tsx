@@ -261,7 +261,7 @@ describe('RevealScreen', () => {
     expect(screen.getByTestId('share-palette-crimson')).toBeTruthy();
     expect(screen.getByTestId('share-palette-burgundy')).toBeTruthy();
     expect(screen.getByTestId('share-palette-midnight')).toBeTruthy();
-    expect(screen.getByTestId('share-palette-iridescent')).toBeTruthy();
+    expect(screen.getByTestId('share-palette-amethyst')).toBeTruthy();
 
     const flatStyleBefore = Object.assign({}, ...([] as object[]).concat(screen.getByTestId('share-card').props.style));
     fireEvent.press(screen.getByTestId('share-palette-midnight'));

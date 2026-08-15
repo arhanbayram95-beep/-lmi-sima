@@ -59,6 +59,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
           icon="🐾"
           name={reading.spirit_animal_card.animal}
           description={reading.spirit_animal_card.description}
+          tapHint={t('reveal.tapToReveal')}
           testID="spirit-animal-card"
         />,
         <PillsCard
@@ -79,6 +80,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
           icon="⭐"
           name={reading.celebrity_match_card.match_name}
           description={reading.celebrity_match_card.match_description}
+          tapHint={t('reveal.tapToReveal')}
           testID="celebrity-card"
         />,
       ];

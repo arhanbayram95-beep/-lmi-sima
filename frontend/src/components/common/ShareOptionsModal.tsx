@@ -44,9 +44,10 @@ function PaletteSwatch({
       onPress={onSelect}
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
-      accessibilityLabel={paletteId}
+      accessibilityLabel={palette.name}
       hitSlop={6}
       testID={`share-palette-${paletteId}`}
+      style={styles.swatchWrap}
     >
       <View
         style={[
@@ -57,6 +58,16 @@ function PaletteSwatch({
       >
         {selected && <Text style={[styles.swatchCheck, { color: palette.accent }]}>✓</Text>}
       </View>
+      {/* Nine options now share only 3 accent colors between them — at
+          this size two sharing an accent can look near-identical as a
+          bare circle, so the name (visible on the full card even when the
+          swatch alone isn't enough) lets someone pick by that instead. */}
+      <Text
+        style={[styles.swatchLabel, selected && { color: palette.accent }]}
+        numberOfLines={1}
+      >
+        {palette.name}
+      </Text>
     </Pressable>
   );
 }
@@ -321,9 +332,18 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
+  // flexWrap since 9 palettes at 56px each no longer fit one row inside
+  // the modal's width — wraps into 3 neat rows of 3 instead of overflowing
+  // or needing a separate horizontal scroll view.
   paletteRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Theme.spacing.sm,
+  },
+  swatchWrap: {
+    alignItems: 'center',
+    gap: 4,
+    width: 64,
   },
   swatch: {
     width: 56,
@@ -350,5 +370,10 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowRadius: 4,
     textShadowOffset: { width: 0, height: 1 },
+  },
+  swatchLabel: {
+    ...Theme.typography.labelSm,
+    fontSize: 10,
+    color: Theme.colors.text.muted,
   },
 });

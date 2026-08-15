@@ -37,10 +37,58 @@ export default function AnalyzingScreen() {
     [clearImages, goToScreen]
   );
 
+  // Pulse/spin are native-driver Animated.loop()s left running indefinitely
+  // from mount — on-device testing found that after several retries the
+  // spinner could visually stop advancing (the loop's internal state
+  // getting wedged after enough start/stop churn from repeated retries,
+  // not something traceable to a single root line). Rather than chase the
+  // exact native-driver mechanism, every retry now explicitly stops
+  // whatever loop is currently running, resets both values to their base
+  // state, and starts a fresh loop — guaranteeing the spinner can never be
+  // stuck showing a dead animation, regardless of what state the previous
+  // one was actually in.
+  const pulseLoop = useRef<Animated.CompositeAnimation | null>(null);
+  const spinLoop = useRef<Animated.CompositeAnimation | null>(null);
+
+  const restartLoadingAnimations = useCallback(() => {
+    pulseLoop.current?.stop();
+    spinLoop.current?.stop();
+    pulse.setValue(1);
+    spin.setValue(0);
+
+    pulseLoop.current = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1.06, duration: 1200, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 1200, useNativeDriver: true }),
+      ])
+    );
+    pulseLoop.current.start();
+
+    spinLoop.current = Animated.loop(
+      Animated.timing(spin, { toValue: 1, duration: 2000, easing: Easing.linear, useNativeDriver: true })
+    );
+    spinLoop.current.start();
+  }, [pulse, spin]);
+
+  // A rapid double-tap on "Try Again" (or the effect below racing a manual
+  // retry) could otherwise fire two overlapping analyzeReading() calls;
+  // whichever resolved last would win regardless of which was actually
+  // most recent, sometimes leaving the screen showing a stale error while
+  // a later success had already fired — indistinguishable on-screen from
+  // "stuck loading" since the spinner branch and error branch could
+  // flicker between each other. This guard makes a retry while one is
+  // already in flight a no-op.
+  const inFlightRef = useRef(false);
+
   const runAnalysis = useCallback(async () => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
     setError(null);
+    restartLoadingAnimations();
+
     if (images.length !== MODULE_PHOTO_COUNTS[selectedModule]) {
       setError(t('analyzing.error.body'));
+      inFlightRef.current = false;
       return;
     }
 
@@ -57,8 +105,10 @@ export default function AnalyzingScreen() {
         return;
       }
       setError(cause instanceof ReadingApiError ? cause.message : t('analyzing.error.body'));
+    } finally {
+      inFlightRef.current = false;
     }
-  }, [images, selectedModule, setReading, logReading, goToScreen, abandonReading, t]);
+  }, [images, selectedModule, setReading, logReading, goToScreen, abandonReading, t, restartLoadingAnimations]);
 
   useEffect(() => {
     runAnalysis();
@@ -84,18 +134,6 @@ export default function AnalyzingScreen() {
       handle?.stop();
     };
   }, []);
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.06, duration: 1200, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1, duration: 1200, useNativeDriver: true }),
-      ])
-    ).start();
-    Animated.loop(
-      Animated.timing(spin, { toValue: 1, duration: 2000, easing: Easing.linear, useNativeDriver: true })
-    ).start();
-  }, [pulse, spin]);
 
   const spinDeg = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
 
