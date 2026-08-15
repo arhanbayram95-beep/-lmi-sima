@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "babel-preset-expo": "~57.0.0",
     "base64-js": "^1.5.1",
     "expo": "~57.0.9",
     "expo-asset": "~57.0.7",
@@ -28,10 +29,13 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.2",
+    "react-native-gesture-handler": "~2.32.0",
     "react-native-nitro-image": "0.15.1",
     "react-native-nitro-modules": "0.36.3",
     "react-native-purchases": "^10.5.0",
+    "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "~5.7.0",
+    "react-native-svg": "15.15.4",
     "react-native-view-shot": "5.1.0",
     "react-native-vision-camera": "5.2.0",
     "react-native-vision-camera-face-detector": "2.0.6",

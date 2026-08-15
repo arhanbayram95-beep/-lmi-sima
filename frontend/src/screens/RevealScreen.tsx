@@ -1,16 +1,19 @@
+import * as Haptics from 'expo-haptics';
 import * as Sharing from 'expo-sharing';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 import FadeInView from '../components/common/FadeInView';
+import GestureCardDeck from '../components/common/GestureCardDeck';
 import PrimaryButton from '../components/common/PrimaryButton';
 import ShareCard from '../components/common/ShareCard';
 import ShareOptionsModal from '../components/common/ShareOptionsModal';
-import SwipeablePager from '../components/common/SwipeablePager';
+import StoryProgressBar from '../components/common/StoryProgressBar';
 import {
   BadgeSummaryCard,
   ChecklistCard,
+  FacialStructureCard,
   HighlightCard,
   MetadataBadgeRow,
   PhotoPageCard,
@@ -21,6 +24,7 @@ import { ReadingResult, readingShareableSections } from '../api/types';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { DEFAULT_SHARE_PALETTE_ID, SharePaletteId, Theme } from '../ui/theme';
+import { playSwipeChime } from '../utils/sound';
 
 type Translate = ReturnType<typeof useTranslation>;
 
@@ -43,13 +47,11 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
         ...photos,
         <BadgeSummaryCard key="archetype" card={reading.archetype_card} icon="🎭" testID="archetype-card" />,
         <BadgeSummaryCard key="catchphrase" card={reading.catchphrase_card} icon="💬" testID="catchphrase-card" />,
-        <BadgeSummaryCard
+        <FacialStructureCard
           key="facial-structure"
-          card={{
-            title: reading.facial_structure_card.title,
-            badge_tag: reading.facial_structure_card.shape_tag,
-            summary: reading.facial_structure_card.description,
-          }}
+          title={reading.facial_structure_card.title}
+          shapeTag={reading.facial_structure_card.shape_tag}
+          description={reading.facial_structure_card.description}
           icon="📐"
           testID="facial-structure-card"
         />,
@@ -152,6 +154,7 @@ export default function RevealScreen() {
   const images = useAppStore((s) => s.images);
   const clearImages = useAppStore((s) => s.clearImages);
   const goToScreen = useAppStore((s) => s.goToScreen);
+  const soundEnabled = useAppStore((s) => s.soundEnabled);
   const t = useTranslation();
   const shareCardRef = useRef<View>(null);
   const insets = useSafeAreaInsets();
@@ -160,6 +163,7 @@ export default function RevealScreen() {
   const [includePhotoInCard, setIncludePhotoInCard] = useState(false);
   const [selectedSectionIds, setSelectedSectionIds] = useState<Set<string>>(new Set());
   const [selectedPaletteId, setSelectedPaletteId] = useState<SharePaletteId>(DEFAULT_SHARE_PALETTE_ID);
+  const [storyLayout, setStoryLayout] = useState(false);
 
   // The captured photos are still in memory when this screen mounts (never
   // persisted, per PROJECT_SPEC.md §3) — shown as the opening pages of the
@@ -212,27 +216,47 @@ export default function RevealScreen() {
   const cards = readingCards(reading, images, t);
   const lastPageIndex = cards.length - 1;
 
+  // Same haptic treatment as a swipe (GestureCardDeck's own commitTo) —
+  // the fallback arrow buttons are still a real way to change cards, not
+  // just a decoration, so they shouldn't feel different from swiping.
+  const goToPage = (target: number) => {
+    const clamped = Math.max(0, Math.min(lastPageIndex, target));
+    if (clamped === pageIndex) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (soundEnabled) playSwipeChime();
+    if (clamped === lastPageIndex) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    setPageIndex(clamped);
+  };
+
   return (
     <View style={styles.container} testID="reveal-screen">
       <View style={styles.header}>
         <Text style={styles.title}>{t('reveal.title')}</Text>
+        <StoryProgressBar count={cards.length} activeIndex={pageIndex} />
       </View>
 
-      <SwipeablePager index={pageIndex} onIndexChange={setPageIndex} style={styles.pager}>
+      <GestureCardDeck index={pageIndex} onIndexChange={setPageIndex} style={styles.pager}>
         {cards.map((card, index) => (
           <ScrollView key={index} contentContainerStyle={styles.pageContent} showsVerticalScrollIndicator={false}>
             <FadeInView delay={index === 0 ? 0 : 80}>{card}</FadeInView>
           </ScrollView>
         ))}
-      </SwipeablePager>
+      </GestureCardDeck>
 
+      {/* The deck above is swipe-driven now (GestureCardDeck) — this row is
+          a deliberately subtle fallback, not the primary way to move
+          between cards, for anyone who doesn't swipe (accessibility,
+          screen readers, or just habit). Same testIDs/behavior as before
+          so nothing about how tests exercise paging needed to change. */}
       <View style={styles.pageNav} testID="reveal-page-nav">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('reveal.previousCard')}
           accessibilityState={{ disabled: pageIndex === 0 }}
           disabled={pageIndex === 0}
-          onPress={() => setPageIndex((current) => Math.max(0, current - 1))}
+          onPress={() => goToPage(pageIndex - 1)}
           style={[styles.navArrow, pageIndex === 0 && styles.navArrowDisabled]}
           testID="reveal-page-prev"
         >
@@ -244,7 +268,7 @@ export default function RevealScreen() {
           accessibilityLabel={t('reveal.nextCard')}
           accessibilityState={{ disabled: pageIndex === lastPageIndex }}
           disabled={pageIndex === lastPageIndex}
-          onPress={() => setPageIndex((current) => Math.min(lastPageIndex, current + 1))}
+          onPress={() => goToPage(pageIndex + 1)}
           style={[styles.navArrow, pageIndex === lastPageIndex && styles.navArrowDisabled]}
           testID="reveal-page-next"
         >
@@ -270,6 +294,7 @@ export default function RevealScreen() {
           sections={readingShareableSections(reading).filter((section) => selectedSectionIds.has(section.id))}
           photo={includePhotoInCard ? images[0] : undefined}
           paletteId={selectedPaletteId}
+          layout={storyLayout ? 'story' : 'flexible'}
         />
       </View>
 
@@ -285,6 +310,8 @@ export default function RevealScreen() {
         onSelectedSectionIdsChange={setSelectedSectionIds}
         selectedPaletteId={selectedPaletteId}
         onSelectedPaletteIdChange={setSelectedPaletteId}
+        storyLayout={storyLayout}
+        onStoryLayoutChange={setStoryLayout}
         onShareImage={handleShareImage}
       />
     </View>
@@ -297,9 +324,7 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.background.start,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: Theme.spacing.sm,
     paddingTop: Theme.spacing.xl,
     paddingHorizontal: Theme.spacing.gutter,
     paddingBottom: Theme.spacing.sm,
@@ -333,24 +358,25 @@ const styles = StyleSheet.create({
     gap: Theme.spacing.lg,
     paddingBottom: Theme.spacing.xs,
   },
+  // Smaller and quieter than before (36px, solid border) — swiping is the
+  // primary way to move between cards now (GestureCardDeck above), so this
+  // row is a fallback, not something that should compete for attention.
   navArrow: {
-    width: 36,
-    height: 36,
+    width: 28,
+    height: 28,
     borderRadius: Theme.radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Theme.colors.surface.glassBackground,
-    borderWidth: 1,
-    borderColor: Theme.colors.surface.glassBorder,
+    backgroundColor: 'transparent',
   },
   navArrowDisabled: {
-    opacity: 0.3,
+    opacity: 0.25,
   },
   navArrowGlyph: {
     ...Theme.typography.headlineMd,
-    fontSize: 20,
-    lineHeight: 22,
-    color: Theme.colors.accent.goldSecondary,
+    fontSize: 17,
+    lineHeight: 19,
+    color: Theme.colors.text.muted,
   },
   footer: {
     flexDirection: 'row',

@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import React, { useState } from 'react';
-import { Alert, Image, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
@@ -22,9 +22,12 @@ interface SettingsRowConfig {
   value?: string;
   onPress?: () => void;
   testID?: string;
+  // Mutually exclusive with onPress/value/chevron — a row is either a
+  // navigate-away/action row or a toggle, never both.
+  toggle?: { value: boolean; onValueChange: (value: boolean) => void };
 }
 
-function SettingsRow({ label, value, onPress, testID, isLast }: SettingsRowConfig & { isLast: boolean }) {
+function SettingsRow({ label, value, onPress, testID, toggle, isLast }: SettingsRowConfig & { isLast: boolean }) {
   return (
     <Pressable
       onPress={onPress}
@@ -36,6 +39,15 @@ function SettingsRow({ label, value, onPress, testID, isLast }: SettingsRowConfi
       <Text style={styles.rowLabel}>{label}</Text>
       <View style={styles.rowRight}>
         {value && <Text style={styles.rowValue}>{value}</Text>}
+        {toggle && (
+          <Switch
+            value={toggle.value}
+            onValueChange={toggle.onValueChange}
+            trackColor={{ false: Theme.colors.surface.glassBorder, true: Theme.colors.accent.crimsonPrimary }}
+            thumbColor={Theme.colors.text.primary}
+            testID={testID ? `${testID}-switch` : undefined}
+          />
+        )}
         {onPress && <Text style={styles.chevron}>›</Text>}
       </View>
       {!isLast && <View style={styles.divider} />}
@@ -92,6 +104,8 @@ export default function SettingsScreen() {
   const anonymousId = useAppStore((s) => s.anonymousId);
   const isProActive = useAppStore((s) => s.isProActive);
   const languageCode = useAppStore((s) => s.languageCode);
+  const soundEnabled = useAppStore((s) => s.soundEnabled);
+  const setSoundEnabled = useAppStore((s) => s.setSoundEnabled);
   const t = useTranslation();
 
   const currentLanguageName =
@@ -167,6 +181,11 @@ export default function SettingsScreen() {
             },
             { label: t('settings.row.rateUs'), onPress: () => goToScreen('review'), testID: 'settings-rate-us' },
             { label: t('settings.row.shareApp'), onPress: handleShareApp, testID: 'settings-share-app' },
+            {
+              label: t('settings.row.soundEffects'),
+              toggle: { value: soundEnabled, onValueChange: setSoundEnabled },
+              testID: 'settings-sound-effects',
+            },
           ]}
         />
 

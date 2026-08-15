@@ -20,6 +20,8 @@ interface ShareOptionsModalProps {
   onSelectedSectionIdsChange: (ids: Set<string>) => void;
   selectedPaletteId: SharePaletteId;
   onSelectedPaletteIdChange: (id: SharePaletteId) => void;
+  storyLayout: boolean;
+  onStoryLayoutChange: (value: boolean) => void;
   // The image-card path still needs the parent's off-screen ShareCard +
   // view-shot ref (see RevealScreen) — this modal only decides *what* goes
   // on the card, not how it's captured.
@@ -108,6 +110,8 @@ export default function ShareOptionsModal({
   onSelectedSectionIdsChange,
   selectedPaletteId,
   onSelectedPaletteIdChange,
+  storyLayout,
+  onStoryLayoutChange,
   onShareImage,
 }: ShareOptionsModalProps) {
   const t = useTranslation();
@@ -211,6 +215,13 @@ export default function ShareOptionsModal({
                   testID="share-include-photo-checkbox"
                 />
               )}
+
+              <AnimatedCheckbox
+                checked={storyLayout}
+                onToggle={() => onStoryLayoutChange(!storyLayout)}
+                label={t('share.storyFormat')}
+                testID="share-story-format-checkbox"
+              />
 
               <View style={styles.paletteBlock}>
                 <Text style={styles.groupLabel}>{t('share.builder.colorLabel')}</Text>

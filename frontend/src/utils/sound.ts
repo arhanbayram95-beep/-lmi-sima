@@ -47,6 +47,14 @@ export function playPromptChime(): Promise<void> {
   return playOneShot(PROMPT_CHIME);
 }
 
+// Reuses the prompt chime asset rather than a new one — same short,
+// subtle register already tuned for a quick UI transition, and this
+// project doesn't have an audio-generation tool to produce a distinct new
+// sound design for the reveal-card swipe specifically.
+export function playSwipeChime(): Promise<void> {
+  return playOneShot(PROMPT_CHIME);
+}
+
 export interface AmbientLoopHandle {
   stop: () => Promise<void>;
 }

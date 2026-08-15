@@ -460,6 +460,10 @@ export const translations = {
     en: 'Share App', zh: '分享应用', hi: 'ऐप शेयर करें', es: 'Compartir app', fr: "Partager l'application", ar: 'مشاركة التطبيق',
     bn: 'অ্যাপ শেয়ার করুন', pt: 'Partilhar app', ru: 'Поделиться приложением', ur: 'ایپ شیئر کریں',
   },
+  'settings.row.soundEffects': {
+    en: 'Sound Effects', zh: '音效', hi: 'साउंड इफ़ेक्ट्स', es: 'Efectos de sonido', fr: 'Effets sonores',
+    ar: 'المؤثرات الصوتية', bn: 'সাউন্ড ইফেক্ট', pt: 'Efeitos sonoros', ru: 'Звуковые эффекты', ur: 'ساؤنڈ ایفیکٹس',
+  },
   'settings.row.privacyPolicy': {
     en: 'Privacy Policy', zh: '隐私政策', hi: 'गोपनीयता नीति', es: 'Política de privacidad', fr: 'Politique de confidentialité',
     ar: 'سياسة الخصوصية', bn: 'গোপনীয়তা নীতি', pt: 'Política de privacidade', ru: 'Политика конфиденциальности', ur: 'پرائیویسی پالیسی',
@@ -575,6 +579,11 @@ export const translations = {
     en: 'Include my photo', zh: '包含我的照片', hi: 'मेरी फ़ोटो शामिल करें', es: 'Incluir mi foto',
     fr: 'Inclure ma photo', ar: 'تضمين صورتي', bn: 'আমার ছবি অন্তর্ভুক্ত করুন', pt: 'Incluir a minha foto',
     ru: 'Добавить моё фото', ur: 'میری تصویر شامل کریں',
+  },
+  'share.storyFormat': {
+    en: 'Story format (9:16)', zh: '故事格式 (9:16)', hi: 'स्टोरी फ़ॉर्मैट (9:16)', es: 'Formato historia (9:16)',
+    fr: 'Format story (9:16)', ar: 'تنسيق القصة (9:16)', bn: 'স্টোরি ফরম্যাট (৯:১৬)', pt: 'Formato story (9:16)',
+    ru: 'Формат истории (9:16)', ur: 'اسٹوری فارمیٹ (9:16)',
   },
   'share.optionImage.title': {
     en: 'Story Card', zh: '故事卡片', hi: 'स्टोरी कार्ड', es: 'Tarjeta para historias', fr: 'Carte pour story',

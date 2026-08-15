@@ -378,3 +378,30 @@ that ship untranspiled syntax.
     permissive stub — server-side entitlement verification needs a
     RevenueCat *secret* key and webhook setup, a separate, security-
     sensitive piece of work out of scope for this groundwork pass.
+
+**Reveal screen gamified redesign (2026-08-15):** `react-native-reanimated`
+(4.5.1), `react-native-gesture-handler` (~2.32.0), and `react-native-svg`
+(15.15.4) added — product ask for real gesture-driven swipe physics and
+shape-tag iconography on the reveal screen, none of which `Animated`/
+`PanResponder` (core RN, everything else in this app so far) do well.
+`babel-preset-expo` already auto-detects and wires `react-native-worklets/
+plugin` when the package is resolvable (confirmed by reading
+`babel-preset-expo`'s own source — same mechanism already powering
+vision-camera's worklets, see the SDK 57 entry above) — no `babel.config.js`
+needed, and one was deliberately *not* added after briefly adding one and
+finding it would double-apply the plugin on top of the auto-detection
+(worklet functions get special serialization; applying that transform twice
+risks broken runtime behavior, not just redundant work) while also losing
+whatever dev/prod/platform context Metro's zero-config invocation passes to
+the preset that a bare `module.exports = { presets: [...] }` wouldn't
+reconstruct correctly. `react-native-gesture-handler` needs `import
+'react-native-gesture-handler'` as the first line of `index.ts` and a
+`GestureHandlerRootView` wrapping `App.tsx`'s root — both added.
+`jest.config.js`'s `transformIgnorePatterns` extended for `react-native-
+reanimated`/`react-native-worklets`/`react-native-gesture-handler`
+(`react-native-svg` was already present in the allowlist from before it was
+an actual dependency). Audio for the new transition-sound toggle uses
+`expo-audio` (`frontend/src/utils/sound.ts`'s existing pattern) — **not**
+`expo-av`, which stays deprecated with no SDK-57-compatible release per the
+entry above; this came up because the original ask named `expo-av`
+specifically.

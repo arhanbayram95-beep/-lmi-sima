@@ -15,6 +15,13 @@ jest.mock('expo-clipboard', () => ({
   setStringAsync: (...args: unknown[]) => mockSetStringAsync(...args),
 }));
 
+// GestureCardDeck plays a swipe chime — same reasoning as
+// AnalyzingScreen.test.tsx: mock the app's own sound.ts wrapper rather
+// than expo-audio itself, since real expo-audio doesn't load under Jest.
+jest.mock('../utils/sound', () => ({
+  playSwipeChime: jest.fn().mockResolvedValue(undefined),
+}));
+
 const mockShareAsync = jest.fn().mockResolvedValue(undefined);
 jest.mock('expo-sharing', () => ({
   isAvailableAsync: jest.fn().mockResolvedValue(true),

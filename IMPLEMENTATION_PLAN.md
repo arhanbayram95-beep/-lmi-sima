@@ -663,3 +663,104 @@ Found and fixed during first real iOS dev-client testing.
     checklist description text or highlight-card description text being
     immediately rendered, only on the always-visible headline/name, which
     is why nothing broke).
+
+---
+
+## Phase 10: Gamified Reveal Screen Redesign (2026-08-15)
+Product ask: "Duolingo/Spotify-Wrapped/Co-Star caliber" overhaul of the
+reveal screen — real swipe physics, richer per-card-type visuals,
+gamification, a story-format share option. Two corrections to the literal
+ask, both flagged before starting: `expo-av` (named in the request) stays
+banned per CLAUDE.md/PROJECT_SPEC.md — deprecated, no SDK-57-compatible
+release — so the new transition sound uses `expo-audio` instead; `npx expo
+typecheck` isn't a real command in this project, `npx tsc --noEmit` is what
+was actually run throughout.
+- [x] **10.1 New dependencies: react-native-reanimated (4.5.1),
+  react-native-gesture-handler (~2.32.0), react-native-svg (15.15.4)** —
+  installed via `expo install` (SDK-57-compatible versions), documented in
+  PROJECT_SPEC.md. No `babel.config.js` added: read `babel-preset-expo`'s
+  own source and confirmed it already auto-detects and wires
+  `react-native-worklets/plugin` whenever the package is resolvable,
+  exactly like it already does for vision-camera's worklets dependency —
+  a babel.config.js was briefly added, then deliberately removed after
+  realizing it would double-apply the plugin on top of that auto-detection
+  and lose Metro's zero-config context options. `index.ts` gained the
+  required `import 'react-native-gesture-handler'` first line; `App.tsx`
+  gained the required `GestureHandlerRootView` wrapper.
+  `jest.config.js` needed three real additions to make any of this
+  testable at all (the official reanimated `mock.js` alone wasn't
+  enough — it still imports from reanimated's real `index.ts`, which pulls
+  in worklets' native initializer regardless): `react-native-worklets`'s
+  own Jest resolver (`react-native-worklets/jest/resolver.js`, which stops
+  Jest resolving worklets' `.native.ts` files), a `moduleNameMapper` entry
+  pointing `react-native-reanimated` at its own `mock.js`, and
+  `react-native-gesture-handler`'s official `jestSetup.js`.
+- [x] **10.2 GestureCardDeck** (`components/common/GestureCardDeck.tsx`) —
+  real pan-gesture-driven paging replacing SwipeablePager on the reveal
+  screen specifically (SwipeablePager itself untouched — onboarding still
+  uses it, and doesn't need reanimated/gesture-handler pulled in for its
+  own simple linear carousel). Every page's scale/opacity is a single
+  `useAnimatedStyle` computed off two shared values (`baseX` settled
+  position, `dragX` live gesture offset), so the whole deck reacts to one
+  drag as a system instead of each page animating independently.
+  Committing a swipe (distance or velocity threshold) fires
+  `Haptics.impactAsync(Light)`, a `Haptics.notificationAsync(Success)` on
+  reaching the last card, and — if enabled — a transition chime.
+- [x] **10.3 StoryProgressBar** — Instagram/Spotify-Wrapped-style segmented
+  bar replacing the removed page counter (9.9) at the top of the screen.
+- [x] **10.4 Fallback nav arrows kept, made deliberately subtle** — swipe
+  is primary now; the arrow row (same testIDs/behavior as before) stays
+  for accessibility/screen-reader users and anyone who doesn't swipe, but
+  shrunk and the same haptic/sound treatment as a swipe wired into it too
+  (`goToPage` in RevealScreen.tsx), so it doesn't feel like a lesser path.
+- [x] **10.5 Bigger card headers** — see 9.17, already done; this phase's
+  goal 1 ("bigger and more exciting headers") was already satisfied by
+  that pass.
+- [x] **10.6 RarityBadge** (`components/common/RarityBadge.tsx`) — top-right
+  of every card via `CardHeader`'s new optional `raritySeed` prop.
+  Deterministic (a hash of the card's own content — badge_tag/title/name,
+  never random), not a real statistic: there's no population of other
+  users' readings anywhere in this app to compute an actual percentile
+  against, and nothing about the copy claims otherwise ("✦ Top {percent}%
+  · {auraName} Aura", same "vibe" register as the rest of the reading).
+  `auraName` reuses `SHARE_CARD_PALETTES`' names (Ember, Amethyst,
+  Rosewood, ...) rather than inventing new flavor text — ties this back to
+  the same visual language the share-card colors already established.
+- [x] **10.7 FaceShapeIcon + FacialStructureCard** — real SVG (react-native-
+  svg primitives — Ellipse/Rect/Polygon, not hand-tuned bezier paths, so
+  geometry is predictable without needing visual iteration to get a custom
+  curve looking right), one shape per real `shape_tag` enum value
+  (readingSchema.ts's FACE_SHAPES), not a fabricated radar chart — there's
+  no numeric per-feature jawline/cheekbone/forehead data in the schema to
+  plot a real one against. A dashed vertical symmetry axis plus a brief
+  mount-time opacity/scale entrance (via `useAnimatedProps`) is the
+  "animated face-symmetry wireframe" the ask specifically named.
+  `BadgeSummaryCard`'s generic rendering of `facial_structure_card`
+  retired in favor of this dedicated component.
+- [x] **10.8 Sound toggle** (`preferencesSlice.ts`, new — in-memory only,
+  same as every other preference in this store today) — Settings → General
+  → Sound Effects, a real `Switch` row (`SettingsRow` gained a `toggle`
+  variant). `sound.ts` gained `playSwipeChime()`, reusing the existing
+  prompt-chime asset rather than a new one (no audio-generation tool
+  available in this environment to design a genuinely new sound).
+  GestureCardDeck and RevealScreen's fallback arrows both check
+  `soundEnabled` before playing it.
+- [x] **10.9 Story-format (9:16) share card** — `ShareCard` gained a
+  `layout?: 'flexible' | 'story'` prop (default unchanged) rather than
+  reverting the 2026-08-05 product decision that deliberately moved away
+  from a fixed 9:16 crop for everyone. `'story'`: fixed height, first
+  selected section (in practice always the archetype/vibe/work-archetype
+  card, since `readingShareableSections` always orders it first) becomes a
+  big hero treatment, up to 3 more selected sections become compact badge
+  chips, anything past that is dropped rather than overflowing the fixed
+  canvas. New checkbox in `ShareOptionsModal`'s builder.
+- [x] **10.10 Verification** — `tsc --noEmit` clean; full suite 30/30
+  suites, 179/179 tests (up from 177 — added real story-layout coverage
+  in `ShareCard.test.tsx` rather than just eyeballing it); `expo-doctor`
+  run as an extra check given how many native modules landed in one pass —
+  2 pre-existing findings surfaced (react-native-nitro-image's New-
+  Architecture flag, already documented in PROJECT_SPEC.md from the
+  vision-camera work; 8 unrelated packages with patch-version drift, none
+  of which are the 3 added here) — neither touched, out of scope for this
+  pass, flagged as a follow-up instead of bundling an unrelated dependency
+  bump into this change.

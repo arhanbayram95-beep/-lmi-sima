@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { LogBox, StyleSheet, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import { Theme } from './src/ui/theme';
@@ -21,12 +22,14 @@ LogBox.ignoreLogs(['ImageCaptureException', 'Camera is closed']);
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <View style={styles.container}>
-        <AppNavigator />
-        <StatusBar style="light" />
-      </View>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={styles.container}>
+      <SafeAreaProvider>
+        <View style={styles.container}>
+          <AppNavigator />
+          <StatusBar style="light" />
+        </View>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 

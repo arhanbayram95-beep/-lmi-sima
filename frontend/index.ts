@@ -1,3 +1,8 @@
+// Must be the first import in the entry file, before anything else touches
+// the gesture system — react-native-gesture-handler's own setup
+// requirement.
+import 'react-native-gesture-handler';
+
 import { registerRootComponent } from 'expo';
 
 import App from './App';

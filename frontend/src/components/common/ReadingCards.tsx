@@ -1,9 +1,11 @@
 import * as Haptics from 'expo-haptics';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Image, LayoutAnimation, Platform, Pressable, StyleSheet, Text, UIManager, View } from 'react-native';
-import { BadgeCard, ChecklistItem, MetadataBadge, MetricIcon, ScoreCard } from '../../api/types';
+import { BadgeCard, ChecklistItem, FaceShape, MetadataBadge, MetricIcon, ScoreCard } from '../../api/types';
 import { Theme } from '../../ui/theme';
+import FaceShapeIcon from './FaceShapeIcon';
 import GlassCard from './GlassCard';
+import RarityBadge from './RarityBadge';
 
 // LayoutAnimation needs an explicit opt-in on Android (iOS has it on by
 // default) — powers the accordion expand/collapse in ChecklistCard below.
@@ -52,20 +54,56 @@ const METRIC_GLYPHS: Record<MetricIcon, string> = {
 // (see files_for_claude/design_examples), while keeping the app's own
 // dark/crimson/gold palette rather than borrowing the reference's light
 // theme.
-function CardHeader({ icon, title }: { icon?: string; title: string }) {
+// raritySeed is optional so a caller can opt a card out (none currently
+// do) — every card that has one shows the badge, keyed off something
+// already unique to that card's content (a badge_tag, a name, a title) so
+// it's stable across re-renders of the same reading but differs from card
+// to card and reading to reading.
+function CardHeader({ icon, title, raritySeed }: { icon?: string; title: string; raritySeed?: string }) {
   return (
     <View style={styles.cardHeader}>
       {icon && <Text style={styles.cardHeaderIcon}>{icon}</Text>}
       <Text style={styles.cardTitle}>{title}</Text>
+      {raritySeed && <RarityBadge seed={raritySeed} />}
     </View>
   );
 }
 
 
+// The one card with a hero SVG visual (FaceShapeIcon) instead of a badge
+// pill — Facial Structure is the one card whose headline finding really is
+// a shape, not a phrase, so it's the one place a real geometric icon (not
+// a fabricated per-feature chart — see FaceShapeIcon's own comment) adds
+// something a text pill can't.
+export function FacialStructureCard({
+  title,
+  shapeTag,
+  description,
+  icon,
+  testID,
+}: {
+  title: string;
+  shapeTag: FaceShape;
+  description: string;
+  icon?: string;
+  testID?: string;
+}) {
+  return (
+    <GlassCard style={styles.card} testID={testID}>
+      <CardHeader icon={icon} title={title} raritySeed={shapeTag} />
+      <FaceShapeIcon shape={shapeTag} />
+      <View style={styles.badgeChip}>
+        <Text style={styles.badgeChipText}>{shapeTag}</Text>
+      </View>
+      <Text style={styles.summary}>{description}</Text>
+    </GlassCard>
+  );
+}
+
 export function BadgeSummaryCard({ card, icon, testID }: { card: BadgeCard; icon?: string; testID?: string }) {
   return (
     <GlassCard style={styles.card} testID={testID}>
-      <CardHeader icon={icon} title={card.title} />
+      <CardHeader icon={icon} title={card.title} raritySeed={card.badge_tag} />
       <View style={styles.badgeChip}>
         <Text style={styles.badgeChipText}>{card.badge_tag}</Text>
       </View>
@@ -119,7 +157,7 @@ export function ReadingScoreCard({
 }) {
   return (
     <GlassCard style={styles.card} testID={testID}>
-      <CardHeader icon={icon} title={card.title} />
+      <CardHeader icon={icon} title={card.title} raritySeed={card.title} />
 
       <View style={styles.dial} testID="score-dial">
         <Text style={styles.dialScore}>{card.overall_score}</Text>
@@ -150,7 +188,7 @@ export function PillsCard({
 }: React.PropsWithChildren<{ title: string; icon?: string; groups: PillGroup[]; testID?: string }>) {
   return (
     <GlassCard style={styles.card} testID={testID}>
-      <CardHeader icon={icon} title={title} />
+      <CardHeader icon={icon} title={title} raritySeed={title} />
       {children}
       {groups.map((group, index) => (
         <View key={group.label ?? index} style={styles.pillGroup}>
@@ -211,7 +249,7 @@ export function ChecklistCard({
 
   return (
     <GlassCard style={styles.card} testID={testID}>
-      <CardHeader icon={icon} title={title} />
+      <CardHeader icon={icon} title={title} raritySeed={title} />
       {items.map((item, index) => {
         const expanded = expandedIndex === index;
         return (
@@ -277,7 +315,7 @@ export function HighlightCard({
 
   return (
     <GlassCard style={styles.card} testID={testID}>
-      <CardHeader icon={icon} title={title} />
+      <CardHeader icon={icon} title={title} raritySeed={name} />
       <Pressable
         onPress={reveal}
         disabled={revealed}
@@ -312,9 +350,13 @@ const styles = StyleSheet.create({
     gap: Theme.spacing.xs,
   },
   cardHeader: {
+    position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    // Clears the rarity badge (absolute, top-right) from overlapping the
+    // title on cards with a short icon+title row.
+    paddingRight: 96,
   },
   cardHeaderIcon: {
     fontSize: 30,

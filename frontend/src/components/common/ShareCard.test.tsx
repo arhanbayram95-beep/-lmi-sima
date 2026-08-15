@@ -9,6 +9,14 @@ const SECTIONS: ShareableSection[] = [
   { id: 'domains', title: 'Recommended Industries', body: 'Engineering & R&D' },
 ];
 
+const STORY_SECTIONS: ShareableSection[] = [
+  { id: 'work', title: 'Career Archetype', body: 'Strategic Innovator' },
+  { id: 'catchphrase', title: 'Work Catchphrase', body: '"Built the Spreadsheet, Ran the Room"' },
+  { id: 'domains', title: 'Recommended Industries', body: 'Engineering & R&D' },
+  { id: 'growth', title: 'Strengths & Growth Areas', body: 'Structured Thinking' },
+  { id: 'roles', title: 'Ideal Role Matches', body: 'Systems Architect' },
+];
+
 describe('ShareCard', () => {
   it('renders every selected section', () => {
     render(<ShareCard sections={SECTIONS} />);
@@ -48,5 +56,24 @@ describe('ShareCard', () => {
     render(<ShareCard sections={SECTIONS} paletteId="midnight" />);
     const flatStyle = Object.assign({}, ...([] as object[]).concat(screen.getByTestId('share-card').props.style));
     expect(flatStyle.backgroundColor).toBe(shareCardPalette('midnight').background);
+  });
+
+  it('defaults to the flexible layout, rendering every section as a full paragraph', () => {
+    render(<ShareCard sections={STORY_SECTIONS} />);
+    expect(screen.queryByTestId('share-card-hero')).toBeNull();
+    expect(screen.getByText('Ideal Role Matches')).toBeTruthy();
+  });
+
+  it('story layout makes the first section a hero and caps the rest at 3 compact badges', () => {
+    render(<ShareCard sections={STORY_SECTIONS} layout="story" />);
+    expect(screen.getByTestId('share-card-hero')).toBeTruthy();
+    expect(screen.getByText('Career Archetype')).toBeTruthy();
+    expect(screen.getByText('Strategic Innovator')).toBeTruthy();
+    // First 3 of the remaining 4 sections become badges...
+    expect(screen.getByText('Work Catchphrase')).toBeTruthy();
+    expect(screen.getByText('Recommended Industries')).toBeTruthy();
+    expect(screen.getByText('Strengths & Growth Areas')).toBeTruthy();
+    // ...the 4th is dropped rather than overflowing the fixed canvas.
+    expect(screen.queryByText('Ideal Role Matches')).toBeNull();
   });
 });
