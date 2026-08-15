@@ -237,7 +237,7 @@ function checklistCard(title: string, description: string, headlineDescription: 
             description: {
               type: Type.STRING,
               description:
-                'Two to three sentences expanding on the headline — this is the richest, most concrete writing in the whole reading, so go into real detail rather than staying generic.',
+                'Four to five sentences expanding on the headline — this is the richest, most concrete writing in the whole reading, so go into real, substantial detail (a genuine paragraph, not a couple of clipped lines) rather than staying generic.',
             },
           },
           required: ['headline', 'description'],
@@ -274,7 +274,7 @@ const characterAnalysisSchema: Schema = {
         description: {
           type: Type.STRING,
           description:
-            'Two to three sentences on the structural basis for this shape — jawline, cheekbones, forehead-to-chin ratio. Purely descriptive geometry, phrased neutrally and constructively; never a judgment of attractiveness, never mentioning race, ethnicity, health, or disability.',
+            'Four to five sentences on the structural basis for this shape — jawline, cheekbones, forehead-to-chin ratio, and how the Rest, Grin and Stern frames each reveal a piece of it. Purely descriptive geometry, phrased neutrally and constructively; never a judgment of attractiveness, never mentioning race, ethnicity, health, or disability. Go past a one-line label into real, specific detail — this should read as genuinely observed, not a summary of itself.',
         },
       },
       required: ['title', 'shape_tag', 'description'],
@@ -290,7 +290,7 @@ const characterAnalysisSchema: Schema = {
         description: {
           type: Type.STRING,
           description:
-            'Two to three sentences connecting specific visible facial structure — jawline definition, eye shape and gaze quality, brow line — to this animal\'s symbolic energy. Descriptive and structural, never a judgment of attractiveness, never mentioning race, ethnicity, health, or disability.',
+            'Four to five sentences connecting specific visible facial structure — jawline definition, eye shape and gaze quality, brow line — to this animal\'s symbolic energy, including at least one concrete beat of how that energy would actually show up in a room. Descriptive and structural, never a judgment of attractiveness, never mentioning race, ethnicity, health, or disability.',
         },
       },
       required: ['title', 'animal', 'description'],
@@ -334,7 +334,7 @@ const characterAnalysisSchema: Schema = {
         match_description: {
           type: Type.STRING,
           description:
-            'Three to four sentences, vivid and specific — the richest writing in the reading. How they carry a room, hold a gaze, shift between warmth and focus, across several concrete beats rather than one general impression. Never a claim about physical resemblance or shared facial features.',
+            'Six to eight sentences, vivid and specific — the richest, longest writing in the entire reading, a real paragraph rather than a couple of lines. How they carry a room, hold a gaze, shift between warmth and focus, handle a pause or a laugh — walk through several distinct concrete beats rather than one general impression, so it reads like an observed character sketch, not a caption. Never a claim about physical resemblance or shared facial features.',
         },
       },
       required: ['title', 'match_name', 'match_description'],

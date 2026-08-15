@@ -858,3 +858,21 @@ was actually run throughout.
   `withTiming` completion callback, landing exactly at the edge-on
   midpoint as before. `tsc --noEmit` clean, full suite 30/30 suites,
   180/180 tests.
+- [x] **10.16 Longer LLM reading output** — feedback that reading copy
+  wasn't substantial enough. No output-token cap existed to raise and no
+  new fields/cards were added — see PROJECT_SPEC.md §4 (2026-08-15) for
+  the full breakdown. Raised sentence-count guidance in
+  `readingSchema.ts`'s prose `description` fields (facial structure and
+  spirit animal 2-3→4-5 sentences, celebrity match 3-4→6-8 sentences, the
+  shared checklist-item description used by Harmony/Career's richest
+  cards 2-3→4-5 sentences), and added an anti-padding line to
+  `systemPrompt.ts`'s shared `STRUCTURE_GUIDANCE` so the model fills that
+  length with new concrete detail rather than restating itself. Left
+  the badge-card hook summaries and all pill/badge fields untouched —
+  intentionally short by design, not the part that read as thin.
+  Confirmed no frontend truncation would clip the longer text (none of
+  the affected `Text` elements in `ReadingCards.tsx` set
+  `numberOfLines`, unlike `cardTitle`/`metricLabel` which do) — no
+  frontend change needed. `tsc --noEmit` clean on both frontend and
+  backend, backend suite 8/8 suites, 55/55 tests, frontend suite
+  unaffected (30/30, 180/180).

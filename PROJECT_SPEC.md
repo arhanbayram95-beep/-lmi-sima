@@ -314,6 +314,24 @@ real HTTPS.
   Metric `icon` values are enum-constrained to the set the app can actually
   render. Scores are a presentation device, not a measurement — the
   "stay in the 68-97 band, never punitive" rule lives in the prompts.
+* **Longer per-field content (2026-08-15):** product feedback that reading
+  copy read as too thin. No new fields or cards — same schema shape, same
+  `MAX_GENERATION_ATTEMPTS`/no output-token cap on the `generateContent`
+  call, so nothing else needed to change to let this land. Raised the
+  sentence-count guidance in each prose field's `description` in
+  `readingSchema.ts`: `facial_structure_card.description` and
+  `spirit_animal_card.description` 2-3 → 4-5 sentences,
+  `celebrity_match_card.match_description` (already the richest card)
+  3-4 → 6-8 sentences, and the shared `checklistCard` item `description`
+  (used by both Relationship Harmony's guidance card and Career Match's
+  recommendations card) 2-3 → 4-5 sentences. `systemPrompt.ts`'s shared
+  `STRUCTURE_GUIDANCE` gained an explicit anti-padding line — hitting a
+  higher sentence count with restated or generic filler isn't the goal,
+  each sentence needs to carry a new concrete observation. Left the
+  archetype/catchphrase badge-card summaries and all pill/badge fields
+  alone on purpose — those are intentionally short hooks and UI chrome
+  (STRUCTURE_GUIDANCE's "build, not a flat list" framing), not the part
+  that read as thin.
 
 ---
 
