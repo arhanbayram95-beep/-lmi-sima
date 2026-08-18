@@ -39,7 +39,14 @@
         }
       ],
       "expo-asset",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Face Reader uses your photo library so you can choose an existing photo for your reading. Photos are processed in memory and never stored.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "extra": {
       "eas": {

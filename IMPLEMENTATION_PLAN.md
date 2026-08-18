@@ -1275,3 +1275,46 @@ was actually run throughout.
     existing content-presence assertions cover this unchanged; styling
     details aren't unit-tested elsewhere in this codebase either.
     `tsc --noEmit` clean, frontend suite 30/30 suites, 196/196 tests.
+
+- [x] **10.28 "Choose from Library" option for capture** — product ask:
+  "add select from the library option for photos, add a little
+  selection menu regarding the overall design."
+  - New dependency: `expo-image-picker` (`~57.0.11`, `npx expo
+    install`) — see PROJECT_SPEC.md's "New dependency (2026-08-18)"
+    entry for the full permission/config-plugin reasoning.
+  - New `frontend/src/components/common/PhotoSourceModal.tsx` — a
+    small custom-styled sheet (same `optionRow`/backdrop pattern as
+    `ShareOptionsModal.tsx`'s menu mode, not a bare native `Alert`, per
+    "regarding the overall design") offering "Take Photo" (just
+    dismisses — the live camera underneath is unchanged and already
+    has its own shutter) and "Choose from Library".
+  - `CaptureScreen.tsx`: a new small icon button (`librarySideButton`,
+    🖼️) sits beside the shutter, with an equal-width empty
+    `shutterSideSlot` on the shutter's other side so the shutter stays
+    visually centered instead of drifting toward the new button.
+    Pressing it opens `PhotoSourceModal`; "Choose from Library" calls
+    `ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images',
+    base64: true, quality: 0.6 })` (matching the camera capture path's
+    existing `quality: 0.6`) — `base64: true` returns the asset's data
+    directly on `asset.base64`, feeding `addImage()` the same way a
+    camera capture does, no extra file-read step and no on-disk
+    intermediate (process-and-discard, §2.2, still holds). Extracted
+    the shared "advance to the next step or go to analyzing" tail of
+    `handleCapture` into `advanceStep()`, reused by both paths instead
+    of duplicating it.
+  - A picked photo deliberately skips the live `hasFaceRef` gate —
+    that ref only ever reflects the *live* camera frame stream (see
+    its own comment in `CaptureScreen.tsx`), so it has nothing
+    meaningful to say about an already-selected static photo. Falls
+    back to the backend's existing no-face-detected handling instead,
+    same "validate at the boundary, trust it past that point" tradeoff
+    already made for the AI call itself.
+  - New i18n keys (`capture.sourceModal.*`) across all 10 locales.
+  - `CaptureScreen.test.tsx`: new `expo-image-picker` mock (same
+    per-module `jest.mock` pattern as the file's other native-module
+    mocks) plus 4 new tests — "Take Photo" touches nothing, a
+    successful pick adds the image and advances same as a capture, a
+    canceled pick is a no-op, and a picked asset with no `base64`
+    surfaces the existing `capture.error.*` alert rather than silently
+    dropping the pick. `tsc --noEmit` clean, frontend suite 30/30
+    suites, 200/200 tests.

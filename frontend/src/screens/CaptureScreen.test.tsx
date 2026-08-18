@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
+import { Alert } from 'react-native';
 import { useAppStore } from '../state/useAppStore';
 import CaptureScreen from './CaptureScreen';
 
@@ -55,6 +56,12 @@ jest.mock('../api/reading', () => ({
   warmUpBackend: () => mockWarmUpBackend(),
 }));
 
+const mockLaunchImageLibraryAsync = jest.fn();
+
+jest.mock('expo-image-picker', () => ({
+  launchImageLibraryAsync: (...args: unknown[]) => mockLaunchImageLibraryAsync(...args),
+}));
+
 function detectFace() {
   act(() => {
     latestOnFacesDetected?.([{}]);
@@ -75,6 +82,7 @@ describe('CaptureScreen', () => {
     mockPlayCaptureChime.mockClear();
     mockPlayPromptChime.mockClear();
     mockWarmUpBackend.mockClear();
+    mockLaunchImageLibraryAsync.mockReset();
     mockHasPermission = true;
     latestOnFacesDetected = undefined;
     useAppStore.setState({ screen: 'capture', images: [], selectedModule: 'three-expression' });
@@ -201,5 +209,61 @@ describe('CaptureScreen', () => {
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('noFaceDetected'));
     expect(useAppStore.getState().images).toEqual([]);
+  });
+
+  describe('choosing a photo from the library', () => {
+    it('opens the source menu and "Take Photo" just dismisses it without touching the picker', () => {
+      render(<CaptureScreen />);
+      fireEvent.press(screen.getByTestId('capture-library-trigger'));
+      fireEvent.press(screen.getByTestId('photo-source-camera'));
+
+      expect(mockLaunchImageLibraryAsync).not.toHaveBeenCalled();
+    });
+
+    it('adds a picked photo and advances the step, same as a camera capture', async () => {
+      mockLaunchImageLibraryAsync.mockResolvedValue({
+        canceled: false,
+        assets: [{ base64: 'PICKED_BASE64' }],
+      });
+      useAppStore.setState({ selectedModule: 'career-match' });
+      render(<CaptureScreen />);
+
+      fireEvent.press(screen.getByTestId('capture-library-trigger'));
+      fireEvent.press(screen.getByTestId('photo-source-library'));
+
+      await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
+      expect(useAppStore.getState().images).toEqual(['PICKED_BASE64']);
+      expect(mockLaunchImageLibraryAsync).toHaveBeenCalledWith(
+        expect.objectContaining({ base64: true, quality: 0.6 })
+      );
+    });
+
+    it('does nothing when the library picker is canceled', async () => {
+      mockLaunchImageLibraryAsync.mockResolvedValue({ canceled: true, assets: null });
+      render(<CaptureScreen />);
+
+      fireEvent.press(screen.getByTestId('capture-library-trigger'));
+      fireEvent.press(screen.getByTestId('photo-source-library'));
+
+      await waitFor(() => expect(mockLaunchImageLibraryAsync).toHaveBeenCalledTimes(1));
+      expect(useAppStore.getState().images).toEqual([]);
+      expect(useAppStore.getState().screen).toBe('capture');
+    });
+
+    it('shows the capture error alert if the picked asset has no photo data', async () => {
+      jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+      mockLaunchImageLibraryAsync.mockResolvedValue({
+        canceled: false,
+        assets: [{ base64: null }],
+      });
+      render(<CaptureScreen />);
+
+      fireEvent.press(screen.getByTestId('capture-library-trigger'));
+      fireEvent.press(screen.getByTestId('photo-source-library'));
+
+      await waitFor(() => expect(Alert.alert).toHaveBeenCalledWith('Capture Failed', expect.any(String)));
+      expect(useAppStore.getState().images).toEqual([]);
+      (Alert.alert as jest.Mock).mockRestore();
+    });
   });
 });

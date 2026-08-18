@@ -1,9 +1,11 @@
 import { fromByteArray } from 'base64-js';
 import * as Haptics from 'expo-haptics';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useCameraPermission, usePhotoOutput, type CameraPosition } from 'react-native-vision-camera';
 import { Camera, type Face } from 'react-native-vision-camera-face-detector';
+import PhotoSourceModal from '../components/common/PhotoSourceModal';
 import PrimaryButton from '../components/common/PrimaryButton';
 import { useTranslation } from '../i18n/useTranslation';
 import { TranslationKey } from '../i18n/translations';
@@ -70,6 +72,7 @@ export default function CaptureScreen() {
   const { hasPermission, requestPermission } = useCameraPermission();
   const [stepIndex, setStepIndex] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [showSourceModal, setShowSourceModal] = useState(false);
   // usePhotoOutput/outputs must stay reference-stable across renders — a
   // fresh options object or array literal here reconfigures (unbinds and
   // rebinds) the native camera session on every re-render, including the
@@ -147,6 +150,43 @@ export default function CaptureScreen() {
     hasFaceRef.current = faces.length > 0;
   }, []);
 
+  const advanceStep = () => {
+    if (stepIndex < steps.length - 1) {
+      setStepIndex(stepIndex + 1);
+    } else {
+      goToScreen('analyzing');
+    }
+  };
+
+  // A library pick skips hasFaceRef entirely — that ref only ever reflects
+  // the *live* camera frame stream (see its own comment above), so it has
+  // nothing meaningful to say about an already-selected static photo. A
+  // picked no-face photo falls through to the backend's existing
+  // no-face-detected handling instead, same "validate at the boundary,
+  // trust it past that point" tradeoff already made for the AI call itself.
+  const handleChooseFromLibrary = async () => {
+    setShowSourceModal(false);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'images',
+        base64: true,
+        quality: 0.6,
+      });
+      if (result.canceled) return;
+
+      const [asset] = result.assets;
+      if (!asset.base64) {
+        throw new Error('Picked photo had no base64 data');
+      }
+
+      addImage(asset.base64);
+      advanceStep();
+    } catch (error) {
+      console.error('Photo library pick failed:', error);
+      Alert.alert(t('capture.error.title'), t('capture.error.body'));
+    }
+  };
+
   const handleCapture = async () => {
     if (isCapturing) return;
 
@@ -218,11 +258,7 @@ export default function CaptureScreen() {
     }
 
     setIsCapturing(false);
-    if (stepIndex < steps.length - 1) {
-      setStepIndex(stepIndex + 1);
-    } else {
-      goToScreen('analyzing');
-    }
+    advanceStep();
   };
 
   if (!hasPermission) {
@@ -289,18 +325,38 @@ export default function CaptureScreen() {
           <Text style={styles.stepTitle}>{currentTitle}</Text>
           <Text style={styles.stepPrompt}>{t(currentStep.promptKey)}</Text>
 
-          <Pressable
-            onPress={handleCapture}
-            disabled={isCapturing}
-            accessibilityRole="button"
-            accessibilityLabel={`Capture ${currentTitle} photo`}
-            testID="shutter-button"
-            style={styles.shutterOuter}
-          >
-            <View style={styles.shutterInner} />
-          </Pressable>
+          <View style={styles.shutterRow}>
+            <View style={styles.shutterSideSlot} />
+            <Pressable
+              onPress={handleCapture}
+              disabled={isCapturing}
+              accessibilityRole="button"
+              accessibilityLabel={`Capture ${currentTitle} photo`}
+              testID="shutter-button"
+              style={styles.shutterOuter}
+            >
+              <View style={styles.shutterInner} />
+            </Pressable>
+            <Pressable
+              onPress={() => setShowSourceModal(true)}
+              disabled={isCapturing}
+              accessibilityRole="button"
+              accessibilityLabel={t('capture.sourceModal.triggerLabel')}
+              testID="capture-library-trigger"
+              style={styles.librarySideButton}
+            >
+              <Text style={styles.libraryIcon}>🖼️</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
+
+      <PhotoSourceModal
+        visible={showSourceModal}
+        onClose={() => setShowSourceModal(false)}
+        onTakePhoto={() => setShowSourceModal(false)}
+        onChooseFromLibrary={handleChooseFromLibrary}
+      />
     </View>
   );
 }
@@ -402,6 +458,17 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     marginBottom: Theme.spacing.sm,
   },
+  shutterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Theme.spacing.md,
+  },
+  // Mirrors librarySideButton's width so the shutter itself stays visually
+  // centered instead of getting pushed left by the button next to it.
+  shutterSideSlot: {
+    width: 48,
+  },
   shutterOuter: {
     width: 76,
     height: 76,
@@ -416,5 +483,18 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: Theme.radius.full,
     backgroundColor: Theme.colors.accent.goldSecondary,
+  },
+  librarySideButton: {
+    width: 48,
+    height: 48,
+    borderRadius: Theme.radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderWidth: 1,
+    borderColor: Theme.colors.surface.glassBorder,
+  },
+  libraryIcon: {
+    fontSize: 20,
   },
 });

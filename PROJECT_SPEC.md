@@ -555,3 +555,33 @@ an actual dependency). Audio for the new transition-sound toggle uses
 `expo-av`, which stays deprecated with no SDK-57-compatible release per the
 entry above; this came up because the original ask named `expo-av`
 specifically.
+
+**New dependency (2026-08-18):** `expo-image-picker` (`~57.0.11`, `npx expo
+install`), for CaptureScreen's new "Choose from Library" option (product
+ask: "add select from the library option for photos"). `frontend/src/
+components/common/PhotoSourceModal.tsx` is a small custom-styled sheet
+(same `optionRow`/backdrop pattern as `ShareOptionsModal.tsx`) offering
+"Take Photo" (closes the sheet, live camera underneath is unchanged) or
+"Choose from Library" (`ImagePicker.launchImageLibraryAsync({ mediaTypes:
+'images', base64: true, quality: 0.6 })`, matching the camera capture
+path's existing `quality: 0.6`). `base64: true` returns the asset's data
+directly on `asset.base64`, so a library pick feeds `addImage()` the same
+way a camera capture does — no extra file-read step, no on-disk
+intermediate (Privacy Architecture, §2.2, still holds: picked images never
+touch disk any more than captured ones do). A picked photo skips the live
+on-device face-detection gate (`hasFaceRef` in CaptureScreen is inherently
+tied to the live camera frame stream, not applicable to a static already-
+selected image) — falls back to the backend's existing no-face-detected
+handling instead, consistent with "validate at the boundary, trust it past
+that point." `app.json` gained an `expo-image-picker` plugin entry setting
+only `photosPermission` (a custom `NSPhotoLibraryUsageDescription` string
+matching the existing camera description's privacy phrasing) and
+`microphonePermission: false` (this app never picks video, so the
+plugin's default `NSMicrophoneUsageDescription`/`RECORD_AUDIO` request is
+unnecessary scope — a stray unused permission is also a common App Store
+review flag); `cameraPermission` was deliberately left unset, since
+`@expo/config-plugins`' `applyPermissions` falls back to whatever's
+already in `infoPlist` when the plugin option is undefined, which
+preserves the existing custom `NSCameraUsageDescription` copy already set
+directly in `ios.infoPlist` rather than overwriting it with the plugin's
+generic default text.

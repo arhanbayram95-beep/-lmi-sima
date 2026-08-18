@@ -137,6 +137,34 @@ export const translations = {
     en: 'Cancel', zh: '取消', hi: 'रद्द करें', es: 'Cancelar', fr: 'Annuler', ar: 'إلغاء', bn: 'বাতিল করুন',
     pt: 'Cancelar', ru: 'Отмена', ur: 'منسوخ کریں',
   },
+  'capture.sourceModal.triggerLabel': {
+    en: 'Choose photo source', zh: '选择照片来源', hi: 'फ़ोटो स्रोत चुनें', es: 'Elegir origen de la foto',
+    fr: 'Choisir la source de la photo', ar: 'اختر مصدر الصورة', bn: 'ছবির উৎস বেছে নিন', pt: 'Escolher origem da foto',
+    ru: 'Выбрать источник фото', ur: 'تصویر کا ذریعہ منتخب کریں',
+  },
+  'capture.sourceModal.title': {
+    en: 'Add a Photo', zh: '添加照片', hi: 'फ़ोटो जोड़ें', es: 'Añadir una foto', fr: 'Ajouter une photo',
+    ar: 'إضافة صورة', bn: 'ছবি যোগ করুন', pt: 'Adicionar uma foto', ru: 'Добавить фото', ur: 'تصویر شامل کریں',
+  },
+  'capture.sourceModal.takePhoto.title': {
+    en: 'Take Photo', zh: '拍照', hi: 'फ़ोटो लें', es: 'Tomar foto', fr: 'Prendre une photo', ar: 'التقاط صورة',
+    bn: 'ছবি তুলুন', pt: 'Tirar foto', ru: 'Сделать фото', ur: 'تصویر لیں',
+  },
+  'capture.sourceModal.takePhoto.subtitle': {
+    en: 'Use your camera now', zh: '立即使用相机', hi: 'अभी अपने कैमरे का उपयोग करें', es: 'Usa tu cámara ahora',
+    fr: 'Utilisez votre caméra maintenant', ar: 'استخدم كاميرتك الآن', bn: 'এখনই আপনার ক্যামেরা ব্যবহার করুন',
+    pt: 'Use a sua câmara agora', ru: 'Использовать камеру сейчас', ur: 'ابھی اپنا کیمرہ استعمال کریں',
+  },
+  'capture.sourceModal.library.title': {
+    en: 'Choose from Library', zh: '从相册选择', hi: 'लाइब्रेरी से चुनें', es: 'Elegir de la biblioteca',
+    fr: 'Choisir dans la bibliothèque', ar: 'الاختيار من المكتبة', bn: 'লাইব্রেরি থেকে বেছে নিন',
+    pt: 'Escolher da biblioteca', ru: 'Выбрать из галереи', ur: 'لائبریری سے منتخب کریں',
+  },
+  'capture.sourceModal.library.subtitle': {
+    en: 'Pick an existing photo', zh: '选择一张现有照片', hi: 'मौजूदा फ़ोटो चुनें', es: 'Elige una foto existente',
+    fr: 'Choisissez une photo existante', ar: 'اختر صورة موجودة', bn: 'একটি বিদ্যমান ছবি বেছে নিন',
+    pt: 'Escolha uma foto existente', ru: 'Выберите существующее фото', ur: 'موجودہ تصویر منتخب کریں',
+  },
   'capture.step.rest.title': {
     en: 'Rest', zh: '休息', hi: 'आराम', es: 'Descanso', fr: 'Repos', ar: 'راحة', bn: 'বিশ্রাম', pt: 'Descanso', ru: 'Покой', ur: 'آرام',
   },
