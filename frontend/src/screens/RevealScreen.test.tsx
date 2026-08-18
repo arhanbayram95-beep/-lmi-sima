@@ -78,7 +78,7 @@ const READING: CharacterAnalysisResult = {
     signature_catchphrase: '"Quiet Storm, Loud Impact"',
     shadow_traits: ['Overthinking Under Pressure'],
     life_advice: 'Lean into the pause before you speak.',
-    mythic_tale: mythicTale('The Trial of the Ember Wolf'),
+    mythic_tale: mythicTale('The Hollow Reckoning'),
     ...narrative('Same calm-under-pressure register.'),
   },
 };
@@ -206,7 +206,7 @@ describe('RevealScreen', () => {
     reveal('shadow-arcana-card');
 
     expect(screen.getByText('Overthinking Under Pressure')).toBeTruthy();
-    expect(screen.getByText('The Trial of the Ember Wolf')).toBeTruthy();
+    expect(screen.getByText('The Hollow Reckoning')).toBeTruthy();
     expect(screen.getByText('Fable paragraph one.')).toBeTruthy();
   });
 

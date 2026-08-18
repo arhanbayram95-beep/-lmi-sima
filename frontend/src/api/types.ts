@@ -277,6 +277,35 @@ export interface ShareableSection {
   body: string;
 }
 
+// The Shadow Arcana card's mythic_tale renders on the reveal screen itself
+// (see MasterCard's mythicTale prop) but was never folded into the
+// shareable section text — product feedback (2026-08-18): the fable is
+// part of "the results" and should travel with the rest of the shadow
+// section when shared, not get left off silently. `\n` line breaks render
+// fine inside ShareCard's single Text node for a section body (React
+// Native Text respects them), so no ShareCard change is needed.
+//
+// Only an excerpt of the first paragraph, not the full three-paragraph
+// fable — flexible layout renders every selected section's full body with
+// no truncation at all (unlike story layout's hard numberOfLines caps),
+// which is exactly the "capture silently drops content" risk
+// MAX_SELECTABLE_SECTIONS was added to prevent in the first place — that
+// cap bounds section *count*, not a single section's length. Capping this
+// excerpt to roughly the same size as another section's hero_hook keeps
+// the shadow-arcana section from being 2-3x longer than its neighbors and
+// reopening that risk (2026-08-18: "make sure everything still fits...
+// create a quota if needed").
+const MYTHIC_TALE_SHARE_EXCERPT_CHARS = 160;
+
+function mythicTaleBody(tale: MythicTale): string {
+  const [firstParagraph = ''] = tale.paragraphs;
+  const excerpt =
+    firstParagraph.length > MYTHIC_TALE_SHARE_EXCERPT_CHARS
+      ? `${firstParagraph.slice(0, MYTHIC_TALE_SHARE_EXCERPT_CHARS).trimEnd()}…`
+      : firstParagraph;
+  return `\n\n${tale.tale_title}\n${excerpt}`;
+}
+
 // Every master card a module's reading carries, flattened into a picklist
 // for the share card builder (see ShareOptionsModal) — the user chooses
 // which of these actually go on their card. Card titles come straight off
@@ -311,7 +340,7 @@ export function readingShareableSections(reading: ReadingResult): ShareableSecti
         {
           id: 'shadow-arcana',
           title: reading.shadow_arcana_card.title,
-          body: `${reading.shadow_arcana_card.signature_catchphrase} — ${reading.shadow_arcana_card.hero_hook}`,
+          body: `${reading.shadow_arcana_card.signature_catchphrase} — ${reading.shadow_arcana_card.hero_hook}${mythicTaleBody(reading.shadow_arcana_card.mythic_tale)}`,
         },
       ];
     case 'relationship_harmony':
@@ -334,7 +363,7 @@ export function readingShareableSections(reading: ReadingResult): ShareableSecti
         {
           id: 'bond-shadow-arcana',
           title: reading.bond_shadow_arcana_card.title,
-          body: `${reading.bond_shadow_arcana_card.duo_catchphrase} — ${reading.bond_shadow_arcana_card.hero_hook}`,
+          body: `${reading.bond_shadow_arcana_card.duo_catchphrase} — ${reading.bond_shadow_arcana_card.hero_hook}${mythicTaleBody(reading.bond_shadow_arcana_card.mythic_tale)}`,
         },
       ];
     case 'career_path':
@@ -357,7 +386,7 @@ export function readingShareableSections(reading: ReadingResult): ShareableSecti
         {
           id: 'career-shadow-arcana',
           title: reading.career_shadow_arcana_card.title,
-          body: `${reading.career_shadow_arcana_card.work_catchphrase} — ${reading.career_shadow_arcana_card.hero_hook}`,
+          body: `${reading.career_shadow_arcana_card.work_catchphrase} — ${reading.career_shadow_arcana_card.hero_hook}${mythicTaleBody(reading.career_shadow_arcana_card.mythic_tale)}`,
         },
       ];
   }

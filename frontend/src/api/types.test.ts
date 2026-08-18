@@ -224,6 +224,38 @@ describe('readingShareableSections', () => {
     );
   });
 
+  // The mythic tale renders on the reveal screen itself but was missing
+  // from the shareable text entirely (2026-08-18 product feedback) — it's
+  // part of "the results" and should travel with the rest of the shadow
+  // section when shared.
+  it('folds the mythic tale into the shadow arcana section body', () => {
+    const body = readingShareableSections(CHARACTER).find((section) => section.id === 'shadow-arcana')?.body;
+    expect(body).toContain('The Trial of the Ember Wolf');
+    expect(body).toContain('Fable paragraph one.');
+  });
+
+  // Only an excerpt, not the full three-paragraph fable — flexible layout
+  // renders every selected section's full body with no truncation at all,
+  // so a single section ballooning in length reopens exactly the capture-
+  // height risk MAX_SELECTABLE_SECTIONS exists to prevent (that cap bounds
+  // section *count*, not one section's length). 2026-08-18: "make sure
+  // everything still fits... create a quota if needed".
+  it('caps the mythic tale excerpt instead of including the full fable', () => {
+    const longTale = {
+      tale_title: 'A Very Long Tale',
+      paragraphs: ['X'.repeat(500), 'This paragraph should never appear.', 'Neither should this one.'],
+    };
+    const reading: CharacterAnalysisResult = {
+      ...CHARACTER,
+      shadow_arcana_card: { ...CHARACTER.shadow_arcana_card, mythic_tale: longTale },
+    };
+    const body = readingShareableSections(reading).find((section) => section.id === 'shadow-arcana')?.body ?? '';
+
+    expect(body.length).toBeLessThan(400);
+    expect(body).toContain('…');
+    expect(body).not.toContain('This paragraph should never appear.');
+  });
+
   // RevealScreen seeds its section picker from these ids and ShareCard keys
   // its rendered rows off them — a duplicate would collapse two cards into
   // one selectable row and drop content from the share card silently.

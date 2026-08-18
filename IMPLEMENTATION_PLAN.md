@@ -1093,3 +1093,30 @@ was actually run throughout.
     specifically because of the photo, and a test confirming
     `numberOfLines` differs correctly with vs. without a photo. `tsc
     --noEmit` clean, frontend suite 30/30 suites, 193/193 tests.
+- [x] **10.22 Folded the mythic tale into the shareable text, with a
+  length quota** — the Shadow Arcana card's fable already rendered on
+  the reveal screen (10.19) but was never included in what actually
+  gets shared — product feedback: "add this little fable, story part
+  to the results". `readingShareableSections()` (`api/types.ts`) now
+  folds the tale title + an excerpt into each module's shadow/arcana
+  section body. Deliberately an excerpt of the first paragraph only
+  (capped at 160 chars, matching the rough size of another section's
+  hero_hook), not the full three paragraphs — flagged and fixed in the
+  same pass ("make sure everything still fits... create a quota if
+  needed"): flexible layout renders every selected section's full body
+  with zero truncation, so a single section ballooning 2-3x longer than
+  its neighbors reopens exactly the capture-height risk
+  `MAX_SELECTABLE_SECTIONS` (10.12) exists to prevent — that cap bounds
+  section *count*, not one section's length, so it needed a companion
+  length cap now that a section can carry meaningfully more content.
+  `types.test.ts` gained tests for both: the tale appearing in the
+  share body, and a synthetic long fable getting truncated with an
+  ellipsis rather than included in full.
+  `RevealScreen.test.tsx`'s mythic-tale fixture title happened to
+  contain "Wolf" (collided with the spirit-animal fixture value once
+  the tale started appearing in the off-screen ShareCard too) — first
+  rename attempt ("...Crimson Ember") collided with a *different*
+  fixture value (the oracle aura's name) for the same reason; settled
+  on "The Hollow Reckoning", checked against every other string value
+  in the fixture first. `tsc --noEmit` clean, frontend suite 30/30
+  suites, 195/195 tests.
