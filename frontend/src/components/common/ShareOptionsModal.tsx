@@ -232,6 +232,16 @@ export default function ShareOptionsModal({
                   checked={includePhoto}
                   onToggle={() => onIncludePhotoChange(!includePhoto)}
                   label={t('share.includePhoto')}
+                  // Photo and text sections are mutually exclusive, not
+                  // just discouraged — the two together needed a stack of
+                  // hard caps (badge/line limits, overflow:hidden) to keep
+                  // from silently clipping content out of the captured
+                  // image (2026-08-15/16), and product decided the
+                  // combination just isn't worth offering as a choice at
+                  // all. Disabling one while the other is active blocks it
+                  // outright rather than letting it be picked and then
+                  // reactively clearing something.
+                  disabled={!includePhoto && selectedSectionIds.size > 0}
                   testID="share-include-photo-checkbox"
                 />
               )}
@@ -272,14 +282,17 @@ export default function ShareOptionsModal({
               <View style={styles.sectionList}>
                 {sections.map((section) => {
                   const checked = selectedSectionIds.has(section.id);
-                  const atCap = !checked && selectedSectionIds.size >= MAX_SELECTABLE_SECTIONS;
+                  // Same mutual-exclusivity rule as the photo checkbox
+                  // above, plus the pre-existing section cap.
+                  const disabled =
+                    !checked && (includePhoto || selectedSectionIds.size >= MAX_SELECTABLE_SECTIONS);
                   return (
                     <AnimatedCheckbox
                       key={section.id}
                       checked={checked}
                       onToggle={() => toggleSection(section.id)}
                       label={section.title}
-                      disabled={atCap}
+                      disabled={disabled}
                       testID={`share-section-${section.id}`}
                     />
                   );
@@ -421,12 +434,16 @@ const styles = StyleSheet.create({
   // Sized a little larger than the swatch and centered behind it via
   // absolute positioning, so it reads as a soft ring rather than a solid
   // halo (low opacity does that job instead of a shadow's blur falloff).
+  // Tightened and dimmed (2026-08-19 product feedback: "minimize the
+  // glow") — a smaller radius past the swatch's own edge plus a lower
+  // opacity than the original pass reads as a subtle accent instead of a
+  // bright halo.
   swatchGlow: {
     position: 'absolute',
-    width: 74,
-    height: 74,
+    width: 64,
+    height: 64,
     borderRadius: Theme.radius.full,
-    opacity: 0.35,
+    opacity: 0.18,
   },
   // Bigger, bolder selected state than a small centered dot — a full
   // checkmark plus a stronger glow and a slight scale-up, so the active

@@ -257,6 +257,30 @@ describe('RevealScreen', () => {
     expect(screen.getByTestId('share-section-shadow-arcana').props.accessibilityState.disabled).toBe(false);
   });
 
+  // Photo and text sections used to be freely combinable, which needed a
+  // stack of hard caps in ShareCard (badge/line limits, overflow: hidden)
+  // to keep from silently clipping content out of the captured image
+  // (2026-08-15/16) — product decision (2026-08-19): stop offering the
+  // combination as a pick at all, not just discourage it.
+  it('makes the include-photo checkbox and the section picklist mutually exclusive', () => {
+    render(<RevealScreen />);
+    fireEvent.press(screen.getByTestId('share-reading-button'));
+    fireEvent.press(screen.getByTestId('share-option-image'));
+
+    // Sections start pre-selected (up to MAX_SELECTABLE_SECTIONS), so the
+    // photo checkbox starts disabled.
+    expect(screen.getByTestId('share-include-photo-checkbox').props.accessibilityState.disabled).toBe(true);
+
+    ['oracle-match', 'sacred-anatomy', 'animal-totem', 'trait-symphony', 'shadow-arcana'].forEach((id) => {
+      fireEvent.press(screen.getByTestId(`share-section-${id}`));
+    });
+
+    expect(screen.getByTestId('share-include-photo-checkbox').props.accessibilityState.disabled).toBe(false);
+    fireEvent.press(screen.getByTestId('share-include-photo-checkbox'));
+
+    expect(screen.getByTestId('share-section-oracle-match').props.accessibilityState.disabled).toBe(true);
+  });
+
   it('captures the share card and opens the native share sheet once the card is built', async () => {
     render(<RevealScreen />);
     fireEvent.press(screen.getByTestId('share-reading-button'));

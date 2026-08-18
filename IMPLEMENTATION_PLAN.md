@@ -1471,3 +1471,36 @@ was actually run throughout.
     started failing once the delay was in place, since they resolved
     before the shutter was actually re-enabled. `tsc --noEmit` clean,
     frontend suite 30/30 suites, 205/205 tests.
+
+- [x] **10.33 Confirmed fixed on-device; share-builder polish** —
+  confirmation the 10.32 crash fix held on a real device, plus two
+  small product asks: "minimize the glow on sharing menu and you cant
+  both add texts and the photo to the sharable card dont make it an
+  option to pick."
+  - `ShareOptionsModal.tsx`: `swatchGlow` (the selected-palette halo)
+    shrunk `74px → 64px` and dimmed `opacity 0.35 → 0.18` — a subtle
+    accent instead of a bright halo.
+  - Include-photo and the section picklist are now mutually exclusive,
+    not just discouraged — they used to be freely combinable, which is
+    exactly what needed the stack of hard caps in `ShareCard.tsx`
+    (badge/line limits, `overflow: hidden`) to keep content from
+    silently clipping out of the captured image (2026-08-15/16).
+    Rather than relaxing those caps further or reactively clearing one
+    selection when the other changes, the include-photo checkbox is
+    now `disabled` whenever any section is selected, and every section
+    checkbox is `disabled` whenever the photo is selected (reusing
+    `AnimatedCheckbox`'s existing `disabled` prop and the same pattern
+    already used for the `MAX_SELECTABLE_SECTIONS` cap) — the
+    combination is blocked outright, not just cleaned up after the
+    fact. `ShareCard.tsx` itself is untouched: its hybrid-handling
+    logic no longer gets exercised by this UI but stays in place as a
+    defensive fallback rather than being stripped out, so a future
+    caller passing both wouldn't silently reintroduce the exact
+    clipping bug this took two rounds to fix.
+  - New `RevealScreen.test.tsx` coverage (no prior standalone
+    `ShareOptionsModal` test file existed — this modal has only ever
+    been tested through the screen that renders it): confirms the
+    photo checkbox starts disabled (sections are pre-selected by
+    default), unchecking every section re-enables it, and checking the
+    photo then disables every section. `tsc --noEmit` clean, frontend
+    suite 30/30 suites, 206/206 tests.
