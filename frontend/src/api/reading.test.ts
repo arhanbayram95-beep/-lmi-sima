@@ -19,12 +19,6 @@ describe('analyzeReading (real API mode)', () => {
     );
   });
 
-  it('throws ReadingApiError when the network request fails', async () => {
-    (global.fetch as jest.Mock).mockRejectedValue(new Error('offline'));
-    const { analyzeReading, ReadingApiError } = require('./reading');
-    await expect(analyzeReading(PAYLOAD)).rejects.toBeInstanceOf(ReadingApiError);
-  });
-
   it('throws ReadingApiError on a non-ok, non-502 response without retrying', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 500 });
     const { analyzeReading, ReadingApiError } = require('./reading');
@@ -34,13 +28,19 @@ describe('analyzeReading (real API mode)', () => {
 
   // 502 gets special-cased retry treatment — it's what Render's free tier
   // returns while a cold-started container is still booting (see
-  // warmUpBackend's comment in reading.ts), not a normal failure.
-  describe('502 cold-start retry', () => {
+  // warmUpBackend's comment in reading.ts), not a normal failure. A raw
+  // fetch() rejection (the network layer itself failing, not a bad HTTP
+  // response) retries on the same schedule as of 2026-08-18 — real device
+  // report: "the network connection is lost" (iOS's
+  // NSURLErrorNetworkConnectionLost) mid-request, a genuinely transient
+  // condition now that a reading can take up to ~50s worst case, not a
+  // hard failure worth giving up on immediately.
+  describe('retry on 502 or a raw network failure', () => {
     afterEach(() => {
       jest.useRealTimers();
     });
 
-    it('retries with backoff and succeeds once the backend wakes up', async () => {
+    it('retries with backoff and succeeds once the backend wakes up (502)', async () => {
       jest.useFakeTimers();
       const result = { headline: 'h', insights: [], narrative: 'n' };
       (global.fetch as jest.Mock)
@@ -66,6 +66,39 @@ describe('analyzeReading (real API mode)', () => {
       const promise = analyzeReading(PAYLOAD);
       // Attach a rejection handler before advancing timers so Jest never
       // observes an unhandled rejection between the two awaited advances.
+      const assertion = expect(promise).rejects.toBeInstanceOf(ReadingApiError);
+
+      await jest.advanceTimersByTimeAsync(3000);
+      await jest.advanceTimersByTimeAsync(6000);
+
+      await assertion;
+      expect(global.fetch).toHaveBeenCalledTimes(3);
+    });
+
+    it('retries with backoff and succeeds after a dropped connection', async () => {
+      jest.useFakeTimers();
+      const result = { headline: 'h', insights: [], narrative: 'n' };
+      (global.fetch as jest.Mock)
+        .mockRejectedValueOnce(new Error('The network connection was lost.'))
+        .mockRejectedValueOnce(new Error('The network connection was lost.'))
+        .mockResolvedValueOnce({ ok: true, json: async () => result });
+
+      const { analyzeReading } = require('./reading');
+      const promise = analyzeReading(PAYLOAD);
+
+      await jest.advanceTimersByTimeAsync(3000);
+      await jest.advanceTimersByTimeAsync(6000);
+
+      await expect(promise).resolves.toEqual(result);
+      expect(global.fetch).toHaveBeenCalledTimes(3);
+    });
+
+    it('gives up and throws ReadingApiError after exhausting retries on a persistent network failure', async () => {
+      jest.useFakeTimers();
+      (global.fetch as jest.Mock).mockRejectedValue(new Error('offline'));
+
+      const { analyzeReading, ReadingApiError } = require('./reading');
+      const promise = analyzeReading(PAYLOAD);
       const assertion = expect(promise).rejects.toBeInstanceOf(ReadingApiError);
 
       await jest.advanceTimersByTimeAsync(3000);

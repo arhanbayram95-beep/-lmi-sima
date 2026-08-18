@@ -33,10 +33,22 @@ export class ReadingApiError extends Error {
 // whole container down after 15 minutes idle and takes up to ~a minute to
 // cold-start back up — the proxy returns 502 for requests that land during
 // that window, not a normal error. A 502 here specifically gets retried
-// with backoff; anything else (4xx, 5xx-not-502, network failure) fails
+// with backoff; a non-502 HTTP response (4xx, 5xx-not-502) fails
 // immediately since retrying wouldn't help. Paired with warmUpBackend()
 // firing as early as capture starts, which usually means the cold start is
 // already over by the time this call lands and these retries are moot.
+//
+// 2026-08-18: a raw network-level failure (the fetch() call itself
+// rejecting, not a bad HTTP response) used to skip retry entirely and
+// throw immediately — real device report: "the network connection is
+// lost" (iOS's NSURLErrorNetworkConnectionLost, surfaced through Expo's
+// native bridge as an ExpoModulesCore Promise rejection), which a genuine
+// analyze request is newly exposed to now that a single reading can take
+// up to ~50s worst case (see backend readingService.ts's dual-key
+// failover, 10.24) — a long enough window for a phone lock/background or
+// a brief network handoff to drop the connection mid-request. That's
+// exactly the kind of transient condition worth one more try, not a hard
+// failure, so it now retries on the same schedule as a 502.
 const MAX_ANALYZE_ATTEMPTS = 3;
 const ANALYZE_RETRY_DELAYS_MS = [3000, 6000];
 
@@ -94,6 +106,10 @@ export async function analyzeReading(payload: AnalyzeReadingPayload): Promise<Re
         body: JSON.stringify(payload),
       });
     } catch (cause) {
+      if (attempt < MAX_ANALYZE_ATTEMPTS) {
+        await delay(ANALYZE_RETRY_DELAYS_MS[attempt - 1]);
+        continue;
+      }
       const detail = cause instanceof Error ? cause.message : String(cause);
       throw new ReadingApiError(
         `Could not reach the Face Reader server. Check your connection and try again. (${detail})`

@@ -1181,3 +1181,23 @@ was actually run throughout.
   cycling test to assert one call each (not two) — both now correctly
   describe the behavior instead of the bug that prompted the fix.
   `tsc --noEmit` clean, backend suite 9/9 suites, 60/60 tests.
+- [x] **10.25 Retry a raw network failure in analyzeReading, not just a
+  502** — real device report, decoded from a garbled native error
+  message: "the network connection is lost", which is iOS's
+  `NSURLErrorNetworkConnectionLost` surfacing through Expo's native
+  bridge as an ExpoModulesCore Promise rejection, wrapped by our own
+  "Could not reach the Face Reader server" message. Root cause:
+  `analyzeReading()` (`api/reading.ts`) only ever retried a clean HTTP
+  502 *response* — a raw `fetch()` rejection (the network layer itself
+  failing, not a bad response) skipped retry entirely and threw
+  immediately. That gap became meaningfully more exposed once a single
+  reading could take up to ~50s worst case (10.24's dual-key failover)
+  — long enough for a phone lock/background or a brief network handoff
+  to plausibly drop the connection mid-request, which is exactly the
+  kind of transient condition worth one more try, not a hard failure.
+  Now retries on the same 3-attempt/3s-6s-backoff schedule as a 502.
+  `reading.test.ts`: renamed the "502 cold-start retry" describe block
+  to cover both cases, added retry-then-succeed and exhaust-then-throw
+  tests for a raw network failure mirroring the existing 502 ones, and
+  removed the old immediate-throw test it superseded. `tsc --noEmit`
+  clean, frontend suite 30/30 suites, 196/196 tests.
