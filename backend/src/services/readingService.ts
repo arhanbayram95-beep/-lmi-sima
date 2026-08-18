@@ -59,10 +59,20 @@ const READING_TEMPERATURE = 1.3;
 // succeed on the second key even if the first is quota-exhausted or
 // mid-outage -- a purely module-based split doesn't help an individual
 // request when its assigned key is the one having a bad moment.
-// Attempts bumped 3 -> 4 so two clients each get a genuinely even two
-// tries rather than an uneven 2:1 split.
+//
+// 2026-08-18 (later same day): first version of this bumped attempts to
+// a flat 4 (two tries per key), which roughly doubled worst-case wait
+// time to 100+ seconds and was reported as "it takes too long" -- live-
+// verified against a real 503 storm where a single un-timed-out direct
+// call took 104 seconds to fail. A second try on the *same* key during
+// a sustained Gemini-wide outage rarely changes the outcome and mostly
+// just adds wait time -- the actual value of a second key is trying it
+// at all, not trying it twice. maxAttemptsFor now scales with how many
+// clients there are: exactly one attempt per client when there's more
+// than one (so 2 keys -> 2 attempts, ~50s worst case instead of ~100s),
+// falling back to the original 3-attempt cushion for a single-client
+// deploy, since same-key retry is the only resilience available there.
 const NON_RETRYABLE_STATUS_CODES = new Set([400, 401, 403, 404]);
-const MAX_GENERATION_ATTEMPTS = 4;
 const RETRY_BASE_DELAY_MS = 600;
 const TIMEOUT_MS_PER_ATTEMPT = 25_000;
 
@@ -73,19 +83,24 @@ function isRetryableError(error: unknown): boolean {
   return true;
 }
 
+function maxAttemptsFor(clientCount: number): number {
+  return clientCount > 1 ? clientCount : 3;
+}
+
 async function generateContentWithRetry(
   clients: ReadingModelClient[],
   params: Parameters<ReadingModelClient['models']['generateContent']>[0]
 ): ReturnType<ReadingModelClient['models']['generateContent']> {
-  for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
+  const maxAttempts = maxAttemptsFor(clients.length);
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const client = clients[(attempt - 1) % clients.length];
     try {
       return await client.models.generateContent(params);
     } catch (error) {
-      if (!isRetryableError(error) || attempt === MAX_GENERATION_ATTEMPTS) {
+      if (!isRetryableError(error) || attempt === maxAttempts) {
         throw error;
       }
-      console.error(`Gemini call failed (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS}), retrying:`, error);
+      console.error(`Gemini call failed (attempt ${attempt}/${maxAttempts}), retrying:`, error);
       await new Promise((resolve) => setTimeout(resolve, RETRY_BASE_DELAY_MS * attempt));
     }
   }

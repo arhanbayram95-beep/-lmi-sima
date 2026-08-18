@@ -1158,3 +1158,26 @@ was actually run throughout.
     7 other test files updated their `buildApp(everyModule(...))` call
     sites for the new array-wrapped signature. `tsc --noEmit` clean,
     backend suite 9/9 suites, 60/60 tests.
+- [x] **10.24 Fixed "it takes too long" — halved worst-case wait for the
+  dual-key setup** — 10.23's first version retried each of the 2 keys
+  twice (4 total attempts), which roughly doubled worst-case wait to
+  100+ seconds; live-verified against a real Gemini high-demand event
+  where a single un-timed-out direct call took 104 seconds to fail.
+  `maxAttemptsFor(clientCount)` (`readingService.ts`) now caps at
+  exactly one attempt per client when more than one is available (2
+  keys → 2 attempts, ~50s worst case instead of ~100s) — trying each
+  key once already captures the failover benefit; a second try on the
+  *same* key during a sustained outage rarely changes the outcome and
+  mostly just adds wait. Single-client deploys (no secondary key) keep
+  the original 3-attempt cushion, since same-key retry is the only
+  resilience available there. `TIMEOUT_MS_PER_ATTEMPT` (25s) left
+  unchanged — real successful generations have taken up to the
+  high-teens/low-20s seconds even in healthy conditions post the
+  longer-output work (10.16/10.19), so shortening it further risks
+  killing legitimately-slow-but-successful calls, trading failures for
+  speed rather than fixing the actual overshoot (attempt count).
+  `readingService.test.ts`: fixed the single-client retry-exhaustion
+  test's now-3 expected call count, and rewrote the two-client
+  cycling test to assert one call each (not two) — both now correctly
+  describe the behavior instead of the bug that prompted the fix.
+  `tsc --noEmit` clean, backend suite 9/9 suites, 60/60 tests.

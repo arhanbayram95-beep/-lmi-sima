@@ -241,8 +241,11 @@ describe('generateReading', () => {
     const generateContent = jest.fn().mockRejectedValue(new ApiError({ message: 'high demand', status: 503 }));
 
     await expect(generateReading([makeClient(generateContent)], PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
-    // Initial attempt + 3 retries, per MAX_GENERATION_ATTEMPTS.
-    expect(generateContent).toHaveBeenCalledTimes(4);
+    // Initial attempt + 2 retries — a single-client call gets the
+    // original 3-attempt cushion (see maxAttemptsFor), since same-key
+    // retry is the only resilience available with no second key to fall
+    // over to.
+    expect(generateContent).toHaveBeenCalledTimes(3);
   });
 
   it('does not retry a non-retryable API error (e.g. a real 400)', async () => {
@@ -271,7 +274,14 @@ describe('generateReading', () => {
     expect(workingContent).toHaveBeenCalledTimes(1);
   });
 
-  it('cycles through both clients across all 4 attempts before giving up', async () => {
+  // 2026-08-18 (later same day): "it takes too long" — an earlier
+  // version of this retried each client twice (4 total attempts),
+  // which roughly doubled worst-case wait to 100+ seconds. Trying each
+  // key once already captures the failover benefit; a second try on
+  // the same key during a sustained outage rarely helps and mostly
+  // just adds wait, so maxAttemptsFor caps at exactly one try per
+  // client when there's more than one available.
+  it('tries each client exactly once (not twice) before giving up, when more than one is available', async () => {
     const clientA = jest.fn().mockRejectedValue(new ApiError({ message: 'high demand', status: 503 }));
     const clientB = jest.fn().mockRejectedValue(new ApiError({ message: 'high demand', status: 503 }));
 
@@ -279,10 +289,8 @@ describe('generateReading', () => {
       generateReading([makeClient(clientA), makeClient(clientB)], PHOTOS_3)
     ).rejects.toBeInstanceOf(ReadingServiceError);
 
-    // Attempts 1/3 hit client A, attempts 2/4 hit client B — an even
-    // two tries each, not a lopsided split.
-    expect(clientA).toHaveBeenCalledTimes(2);
-    expect(clientB).toHaveBeenCalledTimes(2);
+    expect(clientA).toHaveBeenCalledTimes(1);
+    expect(clientB).toHaveBeenCalledTimes(1);
   });
 
   // 2026-08-15 (later same day): a hung request in production showed the
