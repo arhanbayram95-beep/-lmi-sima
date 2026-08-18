@@ -19,6 +19,29 @@ export class ReadingServiceError extends Error {}
 // swap next time a dated model gets deprecated. See PROJECT_SPEC.md §4.
 const MODEL = 'gemini-flash-latest';
 
+// 2026-08-18: direct product ask ("after first fail tell it to switch
+// models") — the 503 "high demand" storms hitting `gemini-flash-latest`
+// (currently `gemini-3.7-flash`, per its own quota-error messages) are
+// specific to that pinned model, so a *different* model is a genuinely
+// separate capacity pool, not just another roll of the same dice a
+// same-model retry is. Live-verified as a real, working, meaningfully
+// faster alternative on this key: `gemini-flash-lite-latest` returned in
+// ~1.1s against the same request `gemini-flash-latest` was timing out on
+// (`gemini-2.5-flash`, tried first, 404s on this key with "no longer
+// available to new users" despite being listed by `models.list()` —
+// Google's own error message pointed at `gemini-3.6-flash` instead, which
+// worked but took 30s; flash-lite was both faster and separately viable).
+// Traded off deliberately: Flash-Lite is a smaller/cheaper model and may
+// read as slightly less rich than the primary model's output — acceptable
+// for a fallback path that only ever fires after the primary already
+// failed once, where a working-but-slightly-lighter reading beats a hard
+// failure. Only the *first* attempt uses the primary model; every retry
+// after that switches to the fallback rather than trying the primary
+// again, since retrying the same overloaded model add exactly the
+// wait-without-benefit problem 10.24 already fixed for the client
+// dimension.
+const FALLBACK_MODEL = 'gemini-flash-lite-latest';
+
 // Product ask (2026-07-28): open-ended picks (celebrity matches, spirit
 // animals, archetype tags) were clustering on the model's own "safe"
 // defaults at the API's default temperature. Pushed up (valid range is
@@ -87,20 +110,28 @@ function maxAttemptsFor(clientCount: number): number {
   return clientCount > 1 ? clientCount : 3;
 }
 
+// Only the first attempt uses the primary model — see FALLBACK_MODEL's
+// comment for why every retry after that switches instead of trying the
+// primary again.
+function modelFor(attempt: number): string {
+  return attempt === 1 ? MODEL : FALLBACK_MODEL;
+}
+
 async function generateContentWithRetry(
   clients: ReadingModelClient[],
-  params: Parameters<ReadingModelClient['models']['generateContent']>[0]
+  params: Omit<Parameters<ReadingModelClient['models']['generateContent']>[0], 'model'>
 ): ReturnType<ReadingModelClient['models']['generateContent']> {
   const maxAttempts = maxAttemptsFor(clients.length);
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const client = clients[(attempt - 1) % clients.length];
+    const model = modelFor(attempt);
     try {
-      return await client.models.generateContent(params);
+      return await client.models.generateContent({ ...params, model });
     } catch (error) {
       if (!isRetryableError(error) || attempt === maxAttempts) {
         throw error;
       }
-      console.error(`Gemini call failed (attempt ${attempt}/${maxAttempts}), retrying:`, error);
+      console.error(`Gemini call failed on ${model} (attempt ${attempt}/${maxAttempts}), retrying:`, error);
       await new Promise((resolve) => setTimeout(resolve, RETRY_BASE_DELAY_MS * attempt));
     }
   }
@@ -129,7 +160,6 @@ export async function generateReading(
   let responseText: string | undefined;
   try {
     const response = await generateContentWithRetry(clients, {
-      model: MODEL,
       contents: [
         {
           role: 'user',

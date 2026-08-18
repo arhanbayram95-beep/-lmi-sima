@@ -423,9 +423,9 @@ decision for the product owner, not applied here.
   "minimize reading fails as much as you can with those two keys".
   `generateReading` (`readingService.ts`) takes an ordered list of
   clients instead of one; `generateContentWithRetry` cycles through
-  every client in the list across its attempts (now 4, up from 3, so
-  two clients each get a genuinely even two tries) rather than
-  hammering the same client repeatedly. `server.ts` puts each module's
+  every client in the list across its attempts rather than hammering
+  the same client repeatedly (attempt count itself later tuned down —
+  see the "it takes too long" correction below). `server.ts` puts each module's
   own key first and the other key second — character analysis (the
   app's main flow, highest traffic) prefers its own key so it isn't
   competing with the other two modules' traffic by default, while
@@ -438,6 +438,32 @@ decision for the product owner, not applied here.
   falls back to the primary client alone for every module (via
   `geminiClient.ts`'s `everyModule()` helper), so a single-key deploy
   keeps working unchanged — every environment before this one.
+* **"It takes too long" correction (2026-08-18, later same day):** the
+  first version of the dual-key failover retried each key twice (4
+  total attempts), which doubled worst-case wait to 100+ seconds —
+  live-verified against a real Gemini high-demand event where a single
+  un-timed-out direct call took 104s to fail. `maxAttemptsFor` now caps
+  at exactly one attempt per client when more than one is available
+  (~50s worst case), falling back to the original 3-attempt cushion for
+  a single-client deploy. Trying each key once already gets the
+  failover benefit; a second try on the same key during a sustained
+  outage rarely changes the outcome and mostly just adds wait.
+* **Model-switch fallback (2026-08-18, later still):** direct product
+  ask, "after first fail tell it to switch models" — the 503 storms are
+  specific to `gemini-flash-latest` (currently `gemini-3.7-flash`), so
+  a different model is a separate capacity pool. `modelFor(attempt)`
+  gives only the first attempt the primary model; every retry after
+  that uses `gemini-flash-lite-latest` instead of trying the primary
+  again. Checked what actually works on this key before picking one —
+  `gemini-2.5-flash` still 404s despite being listed by
+  `models.list()`, `gemini-3.6-flash` worked but took 30s, `gemini-pro-
+  latest` worked but took 80.5s; flash-lite was both fastest (~1.1s
+  trivial, ~12s for a full real reading with the actual schema+prompt)
+  and genuinely viable. Combines with the client-cycling dimension
+  within the same tightened attempt budget above, not stacked as a
+  third dimension of added wait time. Accepted tradeoff: Flash-Lite is
+  a smaller/cheaper model and may read as slightly less rich — fine for
+  a fallback that only fires after the primary already failed once.
 
 ---
 

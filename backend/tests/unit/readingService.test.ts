@@ -274,6 +274,33 @@ describe('generateReading', () => {
     expect(workingContent).toHaveBeenCalledTimes(1);
   });
 
+  // Direct product ask: "after first fail tell it to switch models" — the
+  // primary model (gemini-flash-latest) gets exactly the first attempt;
+  // every retry after that switches to the fallback model instead of
+  // trying the primary again, since a same-model retry doesn't help
+  // during a model-specific capacity storm.
+  it('uses the primary model on the first attempt, then switches to the fallback model on retry', async () => {
+    const generateContent = jest
+      .fn()
+      .mockRejectedValueOnce(new ApiError({ message: 'high demand', status: 503 }))
+      .mockResolvedValueOnce(textResponse(MODULE_RESPONSES['three-expression']));
+
+    await generateReading([makeClient(generateContent)], PHOTOS_3);
+
+    expect(generateContent).toHaveBeenCalledTimes(2);
+    expect(generateContent.mock.calls[0][0].model).toBe('gemini-flash-latest');
+    expect(generateContent.mock.calls[1][0].model).toBe('gemini-flash-lite-latest');
+  });
+
+  it('never retries on the primary model — every attempt after the first uses the fallback', async () => {
+    const generateContent = jest.fn().mockRejectedValue(new ApiError({ message: 'high demand', status: 503 }));
+
+    await expect(generateReading([makeClient(generateContent)], PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
+
+    const models = generateContent.mock.calls.map((call) => call[0].model);
+    expect(models).toEqual(['gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-flash-lite-latest']);
+  });
+
   // 2026-08-18 (later same day): "it takes too long" — an earlier
   // version of this retried each client twice (4 total attempts),
   // which roughly doubled worst-case wait to 100+ seconds. Trying each

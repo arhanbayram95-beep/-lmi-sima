@@ -1201,3 +1201,40 @@ was actually run throughout.
   tests for a raw network failure mirroring the existing 502 ones, and
   removed the old immediate-throw test it superseded. `tsc --noEmit`
   clean, frontend suite 30/30 suites, 196/196 tests.
+- [x] **10.26 Switch models after the first failed attempt** — direct
+  product ask: "after first fail tell it to switch models." The 503
+  "high demand" storms seen throughout this session are specific to
+  `gemini-flash-latest` (currently resolving to `gemini-3.7-flash`), so
+  a different model is a genuinely separate capacity pool, not another
+  roll of the same dice a same-model retry is. Checked what's actually
+  available/working on this key first rather than guessing a model
+  name: `client.models.list()` showed `gemini-2.5-flash` listed but it
+  still 404s ("no longer available to new users") on generateContent
+  despite that — Google's own error pointed at `gemini-3.6-flash`
+  instead, which worked but took 30s; `gemini-pro-latest` worked too
+  but took 80.5s. `gemini-flash-lite-latest` was both fastest (~1.1s
+  for a trivial call, ~12s for a full real career-match reading with
+  the actual schema+prompt — verified, not assumed) and genuinely
+  viable, so that's the fallback.
+  - `readingService.ts`: new `modelFor(attempt)` — attempt 1 uses the
+    primary model, every attempt after that uses `FALLBACK_MODEL`
+    rather than retrying the primary again (retrying an overloaded
+    model doesn't help, same reasoning as 10.24's client-retry fix).
+    `generateContentWithRetry`'s params type dropped the fixed `model`
+    field (now `Omit<..., 'model'>`) since it's injected per-attempt
+    instead of fixed once at the call site. Combines with the existing
+    client-cycling dimension: with 2 keys, attempt 1 = key A + primary
+    model, attempt 2 = key B + fallback model, covering two independent
+    failover axes within the same tightened 2-attempt budget 10.24
+    already established, not stacking a third dimension of wait time
+    on top of it.
+  - Accepted tradeoff, stated explicitly: Flash-Lite is a smaller/
+    cheaper model and may read as slightly less rich than the primary
+    model's output. Acceptable for a fallback path that only ever fires
+    after the primary already failed once — a working-but-lighter
+    reading beats a hard failure.
+  - `readingService.test.ts` gained 2 tests asserting the actual
+    `model` param sent on each attempt (not just call counts, which the
+    existing tests already covered) — first attempt primary, every
+    retry after that the fallback, never retrying the primary itself.
+    `tsc --noEmit` clean, backend suite 9/9 suites, 62/62 tests.
