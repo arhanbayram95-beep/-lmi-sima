@@ -98,6 +98,6 @@ Playful AI photo reads: your character, your chemistry, your career vibe.
 - [x] Support URL/page — live at `sites.google.com/view/face-app-main/home/support`
 - [x] Copyright holder name for App Store Connect — `2026 Arhan Bayram`
 - [x] Confirmed `fevzi.bayram@boun.edu.tr` as the public support contact (it's the address on the live support page)
-- [ ] Screenshots for both stores (iOS needs multiple device sizes; Play needs at least 2) — not something I can generate; needs real device/simulator captures once builds exist
+- [ ] Screenshots for both stores (iOS needs the 6.9" iPhone size at minimum; Play needs at least 2) — not something I can generate, no simulator/device access in this environment. Suggested shot list (6 screens, in this order so the store carousel tells a story): `WelcomeScreen` hook → `OnboardingScreen` (age-gate/consent visible, since Apple reviewers check for it) → `AnalyzeScreen` module picker → `CaptureScreen` mid-flow → `RevealScreen` with a card tapped open (the Oracle/Arcana deep-master-card redesign, the app's strongest visual) → `PaywallScreen`. The just-added "Choose from Library" option (10.28) means the capture flow can be screenshotted in the iOS Simulator with a stock photo instead of needing a real device with a working camera — `xcrun simctl io booted screenshot <name>.png` on each screen after building the dev client into the Simulator.
 - [ ] App preview video (optional, both stores)
 - [ ] Exact keyword string character count double-checked at submission time
