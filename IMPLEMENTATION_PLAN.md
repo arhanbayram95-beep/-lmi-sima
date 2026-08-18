@@ -1318,3 +1318,49 @@ was actually run throughout.
     surfaces the existing `capture.error.*` alert rather than silently
     dropping the pick. `tsc --noEmit` clean, frontend suite 30/30
     suites, 200/200 tests.
+
+- [x] **10.29 Fixed "Choose from Library" going to a black screen with
+  no picker and no error** — on-device report right after 10.28 shipped.
+  Root cause: 10.28's library button lived *inside* the live camera
+  view, so `ImagePicker.launchImageLibraryAsync()` was called while
+  `react-native-vision-camera`'s `<Camera isActive>` still held an open
+  `AVCaptureSession`. Presenting the system Photos picker on top of an
+  active camera session raced the two camera-adjacent native UIs for
+  the same hardware — a native-level resource conflict, not a JS
+  promise rejection, so the try/catch around the picker call had
+  nothing to catch: no picker sheet ever appeared, no error surfaced,
+  the preview just went black and stayed there.
+  - Also a direct product ask in the same report: "it should be
+    located before camera opens, dont add it next to the capture
+    button." Both problems shared one fix — restructure so the source
+    choice happens *before* `<Camera>` ever mounts, not as a control
+    layered on top of a live one.
+  - `CaptureScreen.tsx`: new `cameraReady` state, reset to `false` by a
+    `useEffect` keyed on `stepIndex` — every step (not just the first)
+    now opens on `PhotoSourceModal` with no `<Camera>` mounted at all.
+    "Take Photo" sets `cameraReady = true`, mounting the live camera
+    and the existing shutter flow unchanged; "Choose from Library"
+    calls the picker with nothing but the plain background behind it —
+    the `AVCaptureSession` is fully out of the picture for the whole
+    async gap, not just paused, so there's no session left to race.
+    Removed the `librarySideButton`/`shutterRow`/`shutterSideSlot`
+    styles and the manual trigger button from 10.28 — the shutter
+    reverts to a plain centered `Pressable`, and the now-unused
+    `capture.sourceModal.triggerLabel` i18n key was deleted.
+    `PhotoSourceModal`'s "Cancel" button now calls `handleCancel`
+    (aborts the whole capture, same as the existing ✕ button) instead
+    of just closing the sheet back onto a camera that no longer exists
+    at that point in the flow.
+  - `CaptureScreen.test.tsx`: rewrote every camera-path test to press
+    `photo-source-camera` first (each step now starts on the
+    source-choice screen, matching a real user), and dropped
+    `capture-library-trigger` since that button no longer exists. New
+    tests: the source screen shows before any camera mounts, "Take
+    Photo" reveals the camera, the screen asks again at the start of
+    every step (regression coverage for 10.28's per-step trigger
+    behavior), canceling the source screen aborts the capture, and the
+    camera never mounts while a library pick is in flight (regression
+    coverage for the actual bug — resolves a manually-controlled
+    picker promise mid-test and asserts `camera-preview` stays absent
+    throughout). `tsc --noEmit` clean, frontend suite 30/30 suites,
+    204/204 tests.

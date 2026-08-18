@@ -137,11 +137,6 @@ export const translations = {
     en: 'Cancel', zh: '取消', hi: 'रद्द करें', es: 'Cancelar', fr: 'Annuler', ar: 'إلغاء', bn: 'বাতিল করুন',
     pt: 'Cancelar', ru: 'Отмена', ur: 'منسوخ کریں',
   },
-  'capture.sourceModal.triggerLabel': {
-    en: 'Choose photo source', zh: '选择照片来源', hi: 'फ़ोटो स्रोत चुनें', es: 'Elegir origen de la foto',
-    fr: 'Choisir la source de la photo', ar: 'اختر مصدر الصورة', bn: 'ছবির উৎস বেছে নিন', pt: 'Escolher origem da foto',
-    ru: 'Выбрать источник фото', ur: 'تصویر کا ذریعہ منتخب کریں',
-  },
   'capture.sourceModal.title': {
     en: 'Add a Photo', zh: '添加照片', hi: 'फ़ोटो जोड़ें', es: 'Añadir una foto', fr: 'Ajouter une photo',
     ar: 'إضافة صورة', bn: 'ছবি যোগ করুন', pt: 'Adicionar uma foto', ru: 'Добавить фото', ur: 'تصویر شامل کریں',

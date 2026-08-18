@@ -74,6 +74,13 @@ function detectNoFace() {
   });
 }
 
+// Every step starts on the source-choice screen (PhotoSourceModal, shown
+// before any <Camera> mounts) — tests that exercise the live camera path
+// choose "Take Photo" first to reveal it, same as a real user would.
+function chooseCameraSource() {
+  fireEvent.press(screen.getByTestId('photo-source-camera'));
+}
+
 describe('CaptureScreen', () => {
   beforeEach(() => {
     mockCapturePhoto.mockClear();
@@ -111,11 +118,52 @@ describe('CaptureScreen', () => {
     expect(useAppStore.getState().screen).toBe('analyze');
   });
 
+  it('shows the source-choice screen before the camera opens, not a live camera immediately', () => {
+    render(<CaptureScreen />);
+
+    expect(screen.getByTestId('photo-source-modal')).toBeTruthy();
+    expect(screen.queryByTestId('camera-preview')).toBeNull();
+    expect(screen.queryByTestId('shutter-button')).toBeNull();
+  });
+
+  it('choosing "Take Photo" reveals the live camera for the current step', () => {
+    render(<CaptureScreen />);
+    chooseCameraSource();
+
+    expect(screen.getByTestId('camera-preview')).toBeTruthy();
+    expect(screen.getByTestId('shutter-button')).toBeTruthy();
+    expect(mockLaunchImageLibraryAsync).not.toHaveBeenCalled();
+  });
+
+  it('asks for the photo source again at the start of every step, not just the first', async () => {
+    render(<CaptureScreen />);
+
+    chooseCameraSource();
+    detectFace();
+    fireEvent.press(screen.getByTestId('shutter-button'));
+    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
+
+    expect(screen.getByTestId('photo-source-modal')).toBeTruthy();
+    expect(screen.queryByTestId('shutter-button')).toBeNull();
+  });
+
+  it('canceling the source-choice screen aborts the capture, same as the close button', () => {
+    useAppStore.getState().goToScreen('analyze');
+    useAppStore.getState().goToScreen('capture');
+
+    render(<CaptureScreen />);
+    fireEvent.press(screen.getByTestId('photo-source-cancel'));
+
+    expect(useAppStore.getState().screen).toBe('analyze');
+    expect(useAppStore.getState().images).toEqual([]);
+  });
+
   it('lets the user cancel mid-capture, discarding whatever was already taken', async () => {
     useAppStore.getState().goToScreen('analyze');
     useAppStore.getState().goToScreen('capture');
 
     render(<CaptureScreen />);
+    chooseCameraSource();
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
@@ -130,16 +178,19 @@ describe('CaptureScreen', () => {
     render(<CaptureScreen />);
 
     expect(screen.getByText('Rest')).toBeTruthy();
+    chooseCameraSource();
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
 
     expect(screen.getByText('Grin')).toBeTruthy();
+    chooseCameraSource();
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID', 'AQID']));
 
     expect(screen.getByText('Stern')).toBeTruthy();
+    chooseCameraSource();
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images).toHaveLength(3));
@@ -157,12 +208,14 @@ describe('CaptureScreen', () => {
     render(<CaptureScreen />);
 
     expect(screen.getByText('Person One')).toBeTruthy();
+    chooseCameraSource();
     expect(screen.getByTestId('camera-preview').props.device).toBe('front');
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
 
     expect(screen.getByText('Person Two')).toBeTruthy();
+    chooseCameraSource();
     expect(screen.getByTestId('camera-preview').props.device).toBe('back');
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
@@ -176,8 +229,9 @@ describe('CaptureScreen', () => {
     useAppStore.setState({ selectedModule: 'career-match' });
     render(<CaptureScreen />);
 
-    detectFace();
     expect(screen.getByText('Your Photo')).toBeTruthy();
+    chooseCameraSource();
+    detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
@@ -188,6 +242,7 @@ describe('CaptureScreen', () => {
   it('routes to the no-face-detected screen instead of capturing when no face is in frame', async () => {
     render(<CaptureScreen />);
 
+    chooseCameraSource();
     detectNoFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
 
@@ -200,10 +255,12 @@ describe('CaptureScreen', () => {
   it('discards already-captured photos in the sequence if a later step has no face', async () => {
     render(<CaptureScreen />);
 
+    chooseCameraSource();
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
     await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
 
+    chooseCameraSource();
     detectNoFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
 
@@ -212,14 +269,6 @@ describe('CaptureScreen', () => {
   });
 
   describe('choosing a photo from the library', () => {
-    it('opens the source menu and "Take Photo" just dismisses it without touching the picker', () => {
-      render(<CaptureScreen />);
-      fireEvent.press(screen.getByTestId('capture-library-trigger'));
-      fireEvent.press(screen.getByTestId('photo-source-camera'));
-
-      expect(mockLaunchImageLibraryAsync).not.toHaveBeenCalled();
-    });
-
     it('adds a picked photo and advances the step, same as a camera capture', async () => {
       mockLaunchImageLibraryAsync.mockResolvedValue({
         canceled: false,
@@ -228,7 +277,6 @@ describe('CaptureScreen', () => {
       useAppStore.setState({ selectedModule: 'career-match' });
       render(<CaptureScreen />);
 
-      fireEvent.press(screen.getByTestId('capture-library-trigger'));
       fireEvent.press(screen.getByTestId('photo-source-library'));
 
       await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
@@ -238,11 +286,28 @@ describe('CaptureScreen', () => {
       );
     });
 
+    it('never mounts the live camera while the library picker is in flight', async () => {
+      let resolvePick: (value: unknown) => void = () => {};
+      mockLaunchImageLibraryAsync.mockReturnValue(
+        new Promise((resolve) => {
+          resolvePick = resolve;
+        })
+      );
+      render(<CaptureScreen />);
+
+      fireEvent.press(screen.getByTestId('photo-source-library'));
+      expect(screen.queryByTestId('camera-preview')).toBeNull();
+
+      await act(async () => {
+        resolvePick({ canceled: true, assets: null });
+      });
+      expect(screen.queryByTestId('camera-preview')).toBeNull();
+    });
+
     it('does nothing when the library picker is canceled', async () => {
       mockLaunchImageLibraryAsync.mockResolvedValue({ canceled: true, assets: null });
       render(<CaptureScreen />);
 
-      fireEvent.press(screen.getByTestId('capture-library-trigger'));
       fireEvent.press(screen.getByTestId('photo-source-library'));
 
       await waitFor(() => expect(mockLaunchImageLibraryAsync).toHaveBeenCalledTimes(1));
@@ -258,7 +323,6 @@ describe('CaptureScreen', () => {
       });
       render(<CaptureScreen />);
 
-      fireEvent.press(screen.getByTestId('capture-library-trigger'));
       fireEvent.press(screen.getByTestId('photo-source-library'));
 
       await waitFor(() => expect(Alert.alert).toHaveBeenCalledWith('Capture Failed', expect.any(String)));

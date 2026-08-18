@@ -72,7 +72,19 @@ export default function CaptureScreen() {
   const { hasPermission, requestPermission } = useCameraPermission();
   const [stepIndex, setStepIndex] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
-  const [showSourceModal, setShowSourceModal] = useState(false);
+  // Asked fresh at the start of every step, before the Camera ever mounts —
+  // not a button living inside the live camera view. Two reasons: (1) the
+  // product ask was for the source choice to come "before camera opens",
+  // not as a control alongside the shutter; (2) on-device report: opening
+  // the system Photos picker while vision-camera's <Camera> was still
+  // mounted+active raced the two camera-adjacent native UIs for the same
+  // hardware session — screen went black and nothing else happened, no JS
+  // error, nothing the try/catch below could ever have caught since it's a
+  // native-level resource conflict, not a promise rejection. Not
+  // conditionally rendering <Camera> at all until "Take Photo" is chosen
+  // removes the live AVCaptureSession from the picture entirely instead of
+  // trying to time a pause/resume around the picker's async gap.
+  const [cameraReady, setCameraReady] = useState(false);
   // usePhotoOutput/outputs must stay reference-stable across renders — a
   // fresh options object or array literal here reconfigures (unbinds and
   // rebinds) the native camera session on every re-render, including the
@@ -103,6 +115,14 @@ export default function CaptureScreen() {
   };
 
   const steps = MODULE_STEPS[selectedModule];
+
+  // Every step starts back at the source-choice screen — the previous
+  // step's answer (camera vs. library) doesn't carry over, since a module
+  // like Relationship Harmony deliberately mixes front/back camera across
+  // steps and a picked photo is just as plausible for one step as another.
+  useEffect(() => {
+    setCameraReady(false);
+  }, [stepIndex]);
 
   useEffect(() => {
     Animated.loop(
@@ -164,14 +184,19 @@ export default function CaptureScreen() {
   // picked no-face photo falls through to the backend's existing
   // no-face-detected handling instead, same "validate at the boundary,
   // trust it past that point" tradeoff already made for the AI call itself.
+  //
+  // No <Camera> is mounted while this runs (cameraReady stays false the
+  // whole time) — see cameraReady's own comment for why that's load-bearing,
+  // not incidental.
   const handleChooseFromLibrary = async () => {
-    setShowSourceModal(false);
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: 'images',
         base64: true,
         quality: 0.6,
       });
+      // Canceled or failed: stay right here on the source-choice screen
+      // (cameraReady is still false) so the user can just pick again.
       if (result.canceled) return;
 
       const [asset] = result.assets;
@@ -186,6 +211,8 @@ export default function CaptureScreen() {
       Alert.alert(t('capture.error.title'), t('capture.error.body'));
     }
   };
+
+  const handleTakePhoto = () => setCameraReady(true);
 
   const handleCapture = async () => {
     if (isCapturing) return;
@@ -285,17 +312,19 @@ export default function CaptureScreen() {
 
   return (
     <View style={styles.container} testID="capture-screen">
-      <Camera
-        style={StyleSheet.absoluteFill}
-        isActive
-        device={currentStep.facing}
-        cameraFacing={currentStep.facing}
-        outputs={cameraOutputs}
-        onFacesDetected={handleFacesDetected}
-        onError={(error) => console.error('Camera error:', error)}
-      />
+      {cameraReady && (
+        <Camera
+          style={StyleSheet.absoluteFill}
+          isActive
+          device={currentStep.facing}
+          cameraFacing={currentStep.facing}
+          outputs={cameraOutputs}
+          onFacesDetected={handleFacesDetected}
+          onError={(error) => console.error('Camera error:', error)}
+        />
+      )}
 
-      <Animated.View pointerEvents="none" style={[styles.flashOverlay, { opacity: flash }]} />
+      {cameraReady && <Animated.View pointerEvents="none" style={[styles.flashOverlay, { opacity: flash }]} />}
 
       <View style={styles.overlay}>
         <Pressable
@@ -318,15 +347,14 @@ export default function CaptureScreen() {
         </View>
 
         <View style={styles.guideWrap}>
-          <Animated.View style={[styles.guideRing, { transform: [{ scale: pulse }] }]} />
+          {cameraReady && <Animated.View style={[styles.guideRing, { transform: [{ scale: pulse }] }]} />}
         </View>
 
         <View style={styles.footer}>
           <Text style={styles.stepTitle}>{currentTitle}</Text>
           <Text style={styles.stepPrompt}>{t(currentStep.promptKey)}</Text>
 
-          <View style={styles.shutterRow}>
-            <View style={styles.shutterSideSlot} />
+          {cameraReady && (
             <Pressable
               onPress={handleCapture}
               disabled={isCapturing}
@@ -337,24 +365,14 @@ export default function CaptureScreen() {
             >
               <View style={styles.shutterInner} />
             </Pressable>
-            <Pressable
-              onPress={() => setShowSourceModal(true)}
-              disabled={isCapturing}
-              accessibilityRole="button"
-              accessibilityLabel={t('capture.sourceModal.triggerLabel')}
-              testID="capture-library-trigger"
-              style={styles.librarySideButton}
-            >
-              <Text style={styles.libraryIcon}>🖼️</Text>
-            </Pressable>
-          </View>
+          )}
         </View>
       </View>
 
       <PhotoSourceModal
-        visible={showSourceModal}
-        onClose={() => setShowSourceModal(false)}
-        onTakePhoto={() => setShowSourceModal(false)}
+        visible={!cameraReady}
+        onClose={handleCancel}
+        onTakePhoto={handleTakePhoto}
         onChooseFromLibrary={handleChooseFromLibrary}
       />
     </View>
@@ -458,17 +476,6 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     marginBottom: Theme.spacing.sm,
   },
-  shutterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Theme.spacing.md,
-  },
-  // Mirrors librarySideButton's width so the shutter itself stays visually
-  // centered instead of getting pushed left by the button next to it.
-  shutterSideSlot: {
-    width: 48,
-  },
   shutterOuter: {
     width: 76,
     height: 76,
@@ -483,18 +490,5 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: Theme.radius.full,
     backgroundColor: Theme.colors.accent.goldSecondary,
-  },
-  librarySideButton: {
-    width: 48,
-    height: 48,
-    borderRadius: Theme.radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderWidth: 1,
-    borderColor: Theme.colors.surface.glassBorder,
-  },
-  libraryIcon: {
-    fontSize: 20,
   },
 });
