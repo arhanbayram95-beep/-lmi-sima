@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { ReadingModelClient } from '../services/geminiClient';
 import { RevenueCatClient } from '../services/revenueCatClient';
 import { generateReading, ReadingServiceError } from '../services/readingService';
+import { InvalidImageError } from '../services/imageValidation';
 import { createEntitlementCheck } from '../middleware/entitlement';
 import { READING_MODULE_IDS, ReadingModuleId } from '../services/readingSchema';
 
@@ -56,6 +57,11 @@ export function registerReadingRoutes(
         const result = await generateReading(readingModelClients[moduleId], request.body.photos, moduleId);
         return reply.status(200).send(result);
       } catch (error) {
+        if (error instanceof InvalidImageError) {
+          // A client/malformed-input problem, not an upstream failure — a
+          // 400, not the 502 ReadingServiceError gets below.
+          return reply.status(400).send({ error: error.message });
+        }
         if (error instanceof ReadingServiceError) {
           // The 502 body only ever carries the sanitized message (see
           // ReadingServiceError call sites in readingService.ts) — log the

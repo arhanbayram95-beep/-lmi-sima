@@ -1,5 +1,6 @@
 import { ApiError, Schema, Type } from '@google/genai';
 import { ReadingModelClient } from './geminiClient';
+import { assertLooksLikeJpeg } from './imageValidation';
 import {
   MODULE_PHOTO_COUNTS,
   MODULE_RESULT_KIND,
@@ -156,6 +157,13 @@ export async function generateReading(
       `The ${moduleId} reading needs exactly ${expectedCount} photo(s), got ${photos.length}.`
     );
   }
+
+  // Runs before the try/catch below on purpose — an InvalidImageError must
+  // propagate as itself (route layer maps it to a 400) rather than get
+  // caught and rewrapped as "Failed to reach the Gemini API", and rejecting
+  // here means a garbage/malicious payload never spends a paid Gemini call
+  // at all. See imageValidation.ts.
+  photos.forEach(assertLooksLikeJpeg);
 
   let responseText: string | undefined;
   try {

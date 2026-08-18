@@ -7,7 +7,14 @@ function textResponse(body: unknown) {
   return { text: JSON.stringify(body) };
 }
 
-const PHOTOS_3 = ['base64-calm', 'base64-bright', 'base64-deep'];
+// assertLooksLikeJpeg (imageValidation.ts) rejects anything that doesn't
+// start with the JPEG magic bytes, so fixtures meant to reach the (mocked)
+// Gemini call have to look like a real JPEG.
+function jpegBase64(label: string): string {
+  return Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), Buffer.from(label)]).toString('base64');
+}
+
+const PHOTOS_3 = [jpegBase64('calm'), jpegBase64('bright'), jpegBase64('deep')];
 
 // Shared by every deep master card across all three modules — see
 // MasterCardNarrative in readingSchema.ts.

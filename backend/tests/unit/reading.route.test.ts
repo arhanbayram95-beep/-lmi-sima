@@ -6,7 +6,14 @@ function textResponse(body: unknown) {
   return { text: JSON.stringify(body) };
 }
 
-const PHOTOS_3 = ['base64-calm', 'base64-bright', 'base64-deep'];
+// assertLooksLikeJpeg (imageValidation.ts) rejects anything that doesn't
+// start with the JPEG magic bytes, so every fixture meant to actually
+// reach the (mocked) Gemini call has to look like a real JPEG.
+function jpegBase64(label: string): string {
+  return Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), Buffer.from(label)]).toString('base64');
+}
+
+const PHOTOS_3 = [jpegBase64('calm'), jpegBase64('bright'), jpegBase64('deep')];
 const VALID_BODY = { photos: PHOTOS_3 };
 
 // Shared by every deep master card across all three modules — see
@@ -180,7 +187,7 @@ describe('POST /api/v1/reading/analyze', () => {
       method: 'POST',
       url: '/api/v1/reading/analyze',
       // career-match needs exactly 1 photo.
-      payload: { photos: ['solo-photo'], module: 'career-match' },
+      payload: { photos: [jpegBase64('solo')], module: 'career-match' },
     });
 
     expect(response.statusCode).toBe(200);
@@ -195,8 +202,11 @@ describe('POST /api/v1/reading/analyze', () => {
     // resolution phone photo at quality 0.6 (see CaptureScreen.tsx) -
     // comfortably exceeds Fastify's default 1 MiB *total* bodyLimit even
     // alone, which is what real camera captures hit in practice, not just
-    // a contrived edge case. Regression test for that gap.
-    const bigPhoto = 'A'.repeat(3_000_000);
+    // a contrived edge case. Regression test for that gap. Prefixed with
+    // the JPEG magic bytes so it still passes assertLooksLikeJpeg.
+    const bigPhoto = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), Buffer.alloc(3_000_000, 'A')]).toString(
+      'base64'
+    );
     const response = await app.inject({
       method: 'POST',
       url: '/api/v1/reading/analyze',

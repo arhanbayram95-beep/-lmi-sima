@@ -1,12 +1,21 @@
 import { ApiError } from '@google/genai';
 import { ReadingModelClient } from '../../src/services/geminiClient';
+import { InvalidImageError } from '../../src/services/imageValidation';
 import { generateReading, ReadingServiceError } from '../../src/services/readingService';
 import { READING_SCHEMAS, ReadingModuleId } from '../../src/services/readingSchema';
 import { READING_SYSTEM_PROMPTS } from '../../src/services/systemPrompt';
 
-const PHOTOS_3 = ['base64-calm', 'base64-bright', 'base64-deep'];
-const PHOTOS_2 = ['base64-person1', 'base64-person2'];
-const PHOTOS_1 = ['base64-solo'];
+// assertLooksLikeJpeg (imageValidation.ts) now rejects anything that
+// doesn't start with the JPEG magic bytes, so every fixture that's meant
+// to reach the (mocked) Gemini call has to actually look like a JPEG —
+// plain placeholder strings like 'base64-calm' no longer pass.
+function jpegBase64(label: string): string {
+  return Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), Buffer.from(label)]).toString('base64');
+}
+
+const PHOTOS_3 = [jpegBase64('calm'), jpegBase64('bright'), jpegBase64('deep')];
+const PHOTOS_2 = [jpegBase64('person1'), jpegBase64('person2')];
+const PHOTOS_1 = [jpegBase64('solo')];
 
 // Matches MODULE_PHOTO_COUNTS in readingSchema.ts — used by tests that need
 // a valid photo count for a given module without hardcoding it themselves.
@@ -430,6 +439,21 @@ describe('generateReading', () => {
     await expect(
       generateReading([makeClient(generateContent)], PHOTOS_1, 'three-expression')
     ).rejects.toBeInstanceOf(ReadingServiceError);
+    expect(generateContent).not.toHaveBeenCalled();
+  });
+
+  // Security boundary: a client that skipped the app entirely (or a
+  // rewritten frontend) could otherwise submit arbitrary non-image bytes
+  // and have this service forward them into Gemini's vision input on a
+  // paid call. Rejecting before generateContent is ever reached both
+  // closes that off and avoids wasting the call.
+  it('rejects a photo that is not a real JPEG, before calling the model', async () => {
+    const generateContent = jest.fn();
+    const notAPhoto = Buffer.from('definitely not an image').toString('base64');
+
+    await expect(
+      generateReading([makeClient(generateContent)], [notAPhoto, PHOTOS_3[1], PHOTOS_3[2]])
+    ).rejects.toBeInstanceOf(InvalidImageError);
     expect(generateContent).not.toHaveBeenCalled();
   });
 });
