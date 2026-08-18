@@ -50,8 +50,19 @@ const READING_TEMPERATURE = 1.3;
 // auth, unknown model) are the only things actually worth failing fast
 // on; everything else — 429, 5xx, a raw network error, a timeout abort —
 // is worth one more try before giving up.
+// 2026-08-18: a second Gemini key was added specifically to cut the
+// failure rate further ("minimize reading fails as much as you can with
+// those two keys") -- generateReading now takes an ordered list of
+// clients (server.ts puts each module's own key first, the other key
+// second) instead of one. Retries cycle through every client in the
+// list rather than hammering the same one, so a request can still
+// succeed on the second key even if the first is quota-exhausted or
+// mid-outage -- a purely module-based split doesn't help an individual
+// request when its assigned key is the one having a bad moment.
+// Attempts bumped 3 -> 4 so two clients each get a genuinely even two
+// tries rather than an uneven 2:1 split.
 const NON_RETRYABLE_STATUS_CODES = new Set([400, 401, 403, 404]);
-const MAX_GENERATION_ATTEMPTS = 3;
+const MAX_GENERATION_ATTEMPTS = 4;
 const RETRY_BASE_DELAY_MS = 600;
 const TIMEOUT_MS_PER_ATTEMPT = 25_000;
 
@@ -63,10 +74,11 @@ function isRetryableError(error: unknown): boolean {
 }
 
 async function generateContentWithRetry(
-  client: ReadingModelClient,
+  clients: ReadingModelClient[],
   params: Parameters<ReadingModelClient['models']['generateContent']>[0]
 ): ReturnType<ReadingModelClient['models']['generateContent']> {
   for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
+    const client = clients[(attempt - 1) % clients.length];
     try {
       return await client.models.generateContent(params);
     } catch (error) {
@@ -88,7 +100,7 @@ async function generateContentWithRetry(
 // returns. That is the extent "memory clearing" means in a Node/JS
 // process — there is no secure-wipe primitive to reach for here.
 export async function generateReading(
-  client: ReadingModelClient,
+  clients: ReadingModelClient[],
   photos: string[],
   moduleId: ReadingModuleId = 'three-expression'
 ): Promise<ReadingResult> {
@@ -101,7 +113,7 @@ export async function generateReading(
 
   let responseText: string | undefined;
   try {
-    const response = await generateContentWithRetry(client, {
+    const response = await generateContentWithRetry(clients, {
       model: MODEL,
       contents: [
         {

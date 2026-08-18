@@ -156,7 +156,7 @@ describe('generateReading', () => {
   it('returns the structured card stack parsed from the JSON response text', async () => {
     const generateContent = clientFor('three-expression');
 
-    const result = await generateReading(makeClient(generateContent), PHOTOS_3);
+    const result = await generateReading([makeClient(generateContent)], PHOTOS_3);
 
     expect(result).toMatchObject({ oracle_match_card: { archetype_tag: 'Analytical Visionary' } });
     expect(generateContent).toHaveBeenCalledTimes(1);
@@ -167,7 +167,7 @@ describe('generateReading', () => {
       textResponse({ ...MODULE_RESPONSES['career-match'], module: 'something_else' })
     );
 
-    const result = await generateReading(makeClient(generateContent), PHOTOS_1, 'career-match');
+    const result = await generateReading([makeClient(generateContent)], PHOTOS_1, 'career-match');
 
     expect(result.module).toBe('career_path');
   });
@@ -175,7 +175,7 @@ describe('generateReading', () => {
   it('sends the images before the text content, per PROJECT_SPEC.md §4', async () => {
     const generateContent = clientFor('three-expression');
 
-    await generateReading(makeClient(generateContent), PHOTOS_3);
+    await generateReading([makeClient(generateContent)], PHOTOS_3);
 
     const [[callArgs]] = generateContent.mock.calls;
     const parts = callArgs.contents[0].parts;
@@ -186,7 +186,7 @@ describe('generateReading', () => {
   it('forces JSON structured output via responseSchema', async () => {
     const generateContent = clientFor('three-expression');
 
-    await generateReading(makeClient(generateContent), PHOTOS_3);
+    await generateReading([makeClient(generateContent)], PHOTOS_3);
 
     const [[callArgs]] = generateContent.mock.calls;
     expect(callArgs.config.responseMimeType).toBe('application/json');
@@ -196,7 +196,7 @@ describe('generateReading', () => {
   it('raises the temperature above the default to widen variety in open-ended picks', async () => {
     const generateContent = clientFor('three-expression');
 
-    await generateReading(makeClient(generateContent), PHOTOS_3);
+    await generateReading([makeClient(generateContent)], PHOTOS_3);
 
     const [[callArgs]] = generateContent.mock.calls;
     expect(callArgs.config.temperature).toBeGreaterThan(1);
@@ -207,7 +207,7 @@ describe('generateReading', () => {
     async (moduleId) => {
       const generateContent = clientFor(moduleId);
 
-      await generateReading(makeClient(generateContent), MODULE_PHOTOS[moduleId], moduleId);
+      await generateReading([makeClient(generateContent)], MODULE_PHOTOS[moduleId], moduleId);
 
       const [[callArgs]] = generateContent.mock.calls;
       expect(callArgs.config.responseSchema).toBe(READING_SCHEMAS[moduleId]);
@@ -217,7 +217,7 @@ describe('generateReading', () => {
   it('wraps a network failure as a ReadingServiceError', async () => {
     const generateContent = jest.fn().mockRejectedValue(new Error('ECONNRESET'));
 
-    await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
+    await expect(generateReading([makeClient(generateContent)], PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
   });
 
   // 2026-08-15: live testing found gemini-flash-latest returning a real
@@ -231,7 +231,7 @@ describe('generateReading', () => {
       .mockRejectedValueOnce(new ApiError({ message: 'high demand', status: 503 }))
       .mockResolvedValueOnce(textResponse(MODULE_RESPONSES['three-expression']));
 
-    const result = await generateReading(makeClient(generateContent), PHOTOS_3);
+    const result = await generateReading([makeClient(generateContent)], PHOTOS_3);
 
     expect(result).toMatchObject({ oracle_match_card: { archetype_tag: 'Analytical Visionary' } });
     expect(generateContent).toHaveBeenCalledTimes(2);
@@ -240,16 +240,49 @@ describe('generateReading', () => {
   it('gives up as a ReadingServiceError after repeated 503s', async () => {
     const generateContent = jest.fn().mockRejectedValue(new ApiError({ message: 'high demand', status: 503 }));
 
-    await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
-    // Initial attempt + 2 retries, per MAX_GENERATION_ATTEMPTS.
-    expect(generateContent).toHaveBeenCalledTimes(3);
+    await expect(generateReading([makeClient(generateContent)], PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
+    // Initial attempt + 3 retries, per MAX_GENERATION_ATTEMPTS.
+    expect(generateContent).toHaveBeenCalledTimes(4);
   });
 
   it('does not retry a non-retryable API error (e.g. a real 400)', async () => {
     const generateContent = jest.fn().mockRejectedValue(new ApiError({ message: 'bad request', status: 400 }));
 
-    await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
+    await expect(generateReading([makeClient(generateContent)], PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
     expect(generateContent).toHaveBeenCalledTimes(1);
+  });
+
+  // 2026-08-18: a second Gemini key was added specifically to cut the
+  // failure rate ("minimize reading fails as much as you can with those
+  // two keys") — retries now cycle through every client passed in,
+  // trying the second key if the first fails, instead of hammering the
+  // same one four times.
+  it('falls over to the second client when the first is exhausted/erroring', async () => {
+    const failingContent = jest.fn().mockRejectedValue(new ApiError({ message: 'quota exceeded', status: 429 }));
+    const workingContent = jest.fn().mockResolvedValue(textResponse(MODULE_RESPONSES['three-expression']));
+
+    const result = await generateReading(
+      [makeClient(failingContent), makeClient(workingContent)],
+      PHOTOS_3
+    );
+
+    expect(result).toMatchObject({ oracle_match_card: { archetype_tag: 'Analytical Visionary' } });
+    expect(failingContent).toHaveBeenCalledTimes(1);
+    expect(workingContent).toHaveBeenCalledTimes(1);
+  });
+
+  it('cycles through both clients across all 4 attempts before giving up', async () => {
+    const clientA = jest.fn().mockRejectedValue(new ApiError({ message: 'high demand', status: 503 }));
+    const clientB = jest.fn().mockRejectedValue(new ApiError({ message: 'high demand', status: 503 }));
+
+    await expect(
+      generateReading([makeClient(clientA), makeClient(clientB)], PHOTOS_3)
+    ).rejects.toBeInstanceOf(ReadingServiceError);
+
+    // Attempts 1/3 hit client A, attempts 2/4 hit client B — an even
+    // two tries each, not a lopsided split.
+    expect(clientA).toHaveBeenCalledTimes(2);
+    expect(clientB).toHaveBeenCalledTimes(2);
   });
 
   // 2026-08-15 (later same day): a hung request in production showed the
@@ -265,7 +298,7 @@ describe('generateReading', () => {
       .mockRejectedValueOnce(new Error('The operation was aborted due to timeout'))
       .mockResolvedValueOnce(textResponse(MODULE_RESPONSES['three-expression']));
 
-    const result = await generateReading(makeClient(generateContent), PHOTOS_3);
+    const result = await generateReading([makeClient(generateContent)], PHOTOS_3);
 
     expect(result).toMatchObject({ oracle_match_card: { archetype_tag: 'Analytical Visionary' } });
     expect(generateContent).toHaveBeenCalledTimes(2);
@@ -274,20 +307,20 @@ describe('generateReading', () => {
   it('throws when the model responds with no text output', async () => {
     const generateContent = jest.fn().mockResolvedValue({ text: undefined });
 
-    await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
+    await expect(generateReading([makeClient(generateContent)], PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
   });
 
   it('throws when the response text is not valid JSON', async () => {
     const generateContent = jest.fn().mockResolvedValue({ text: 'not json' });
 
-    await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
+    await expect(generateReading([makeClient(generateContent)], PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
   });
 
   it('throws when a card the module renders is missing from the response', async () => {
     const { shadow_arcana_card, ...withoutShadowArcana } = MODULE_RESPONSES['three-expression'];
     const generateContent = jest.fn().mockResolvedValue(textResponse(withoutShadowArcana));
 
-    await expect(generateReading(makeClient(generateContent), PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
+    await expect(generateReading([makeClient(generateContent)], PHOTOS_3)).rejects.toBeInstanceOf(ReadingServiceError);
   });
 
   // Regression: a live Gemini response once came back with a card present
@@ -306,7 +339,7 @@ describe('generateReading', () => {
     const generateContent = jest.fn().mockResolvedValue(textResponse(malformed));
 
     await expect(
-      generateReading(makeClient(generateContent), PHOTOS_1, 'career-match')
+      generateReading([makeClient(generateContent)], PHOTOS_1, 'career-match')
     ).rejects.toBeInstanceOf(ReadingServiceError);
   });
 
@@ -321,14 +354,14 @@ describe('generateReading', () => {
     const generateContent = jest.fn().mockResolvedValue(textResponse(malformed));
 
     await expect(
-      generateReading(makeClient(generateContent), PHOTOS_1, 'career-match')
+      generateReading([makeClient(generateContent)], PHOTOS_1, 'career-match')
     ).rejects.toBeInstanceOf(ReadingServiceError);
   });
 
   it('defaults to the three-expression system prompt when no module is given', async () => {
     const generateContent = clientFor('three-expression');
 
-    await generateReading(makeClient(generateContent), PHOTOS_3);
+    await generateReading([makeClient(generateContent)], PHOTOS_3);
 
     const [[callArgs]] = generateContent.mock.calls;
     expect(callArgs.config.systemInstruction).toBe(READING_SYSTEM_PROMPTS['three-expression']);
@@ -339,7 +372,7 @@ describe('generateReading', () => {
     async (moduleId) => {
       const generateContent = clientFor(moduleId);
 
-      await generateReading(makeClient(generateContent), MODULE_PHOTOS[moduleId], moduleId);
+      await generateReading([makeClient(generateContent)], MODULE_PHOTOS[moduleId], moduleId);
 
       const [[callArgs]] = generateContent.mock.calls;
       expect(callArgs.config.systemInstruction).toBe(READING_SYSTEM_PROMPTS[moduleId]);
@@ -351,7 +384,7 @@ describe('generateReading', () => {
     async (moduleId) => {
       const generateContent = clientFor(moduleId);
 
-      await expect(generateReading(makeClient(generateContent), MODULE_PHOTOS[moduleId], moduleId)).resolves.toBeDefined();
+      await expect(generateReading([makeClient(generateContent)], MODULE_PHOTOS[moduleId], moduleId)).resolves.toBeDefined();
       expect(generateContent).toHaveBeenCalledTimes(1);
     }
   );
@@ -360,7 +393,7 @@ describe('generateReading', () => {
     const generateContent = jest.fn();
 
     await expect(
-      generateReading(makeClient(generateContent), PHOTOS_1, 'three-expression')
+      generateReading([makeClient(generateContent)], PHOTOS_1, 'three-expression')
     ).rejects.toBeInstanceOf(ReadingServiceError);
     expect(generateContent).not.toHaveBeenCalled();
   });

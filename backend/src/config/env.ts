@@ -10,6 +10,12 @@ config({ override: true });
 export interface AppEnv {
   port: number;
   geminiApiKey: string;
+  // Optional second Gemini key (2026-08-18 product decision) — splits
+  // reading generation across two keys by module (see server.ts) so the
+  // three modules don't share a single free-tier daily quota. Falls back
+  // to geminiApiKey everywhere if unset, so a deploy with only the one
+  // required key keeps working unchanged.
+  geminiApiKeySecondary?: string;
   revenueCatApiKey: string;
 }
 
@@ -25,6 +31,7 @@ export function loadEnv(): AppEnv {
   return {
     port: Number(process.env.PORT) || 3000,
     geminiApiKey,
+    geminiApiKeySecondary: process.env.GEMINI_API_KEY_SECONDARY || undefined,
     revenueCatApiKey: process.env.REVENUECAT_API_KEY ?? '',
   };
 }

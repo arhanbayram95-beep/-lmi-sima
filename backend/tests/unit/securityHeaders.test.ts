@@ -1,13 +1,13 @@
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/app';
-import { ReadingModelClient } from '../../src/services/geminiClient';
+import { everyModule, ReadingModelClient } from '../../src/services/geminiClient';
 
 describe('security headers', () => {
   let app: FastifyInstance;
 
   beforeEach(async () => {
     const readingModelClient: ReadingModelClient = { models: { generateContent: jest.fn() } };
-    app = await buildApp(readingModelClient);
+    app = await buildApp(everyModule([readingModelClient]));
   });
 
   afterEach(async () => {

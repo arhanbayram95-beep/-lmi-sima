@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/app';
-import { ReadingModelClient } from '../../src/services/geminiClient';
+import { everyModule, ReadingModelClient } from '../../src/services/geminiClient';
 import { RevenueCatClient } from '../../src/services/revenueCatClient';
 
 function textResponse(body: unknown) {
@@ -81,7 +81,7 @@ describe('entitlement check (monitor mode — never blocks yet)', () => {
 
   it('allows the request through and logs nothing when no RevenueCat client is configured', async () => {
     const readingModelClient: ReadingModelClient = { models: { generateContent } };
-    app = await buildApp(readingModelClient); // no revenueCatClient passed — matches an unset REVENUECAT_API_KEY
+    app = await buildApp(everyModule([readingModelClient])); // no revenueCatClient passed — matches an unset REVENUECAT_API_KEY
 
     const response = await app.inject({ method: 'POST', url: '/api/v1/reading/analyze', payload: { photos: PHOTOS_3 } });
 
@@ -92,7 +92,7 @@ describe('entitlement check (monitor mode — never blocks yet)', () => {
   it('allows the request through but warns when the client sends no app-user-id header', async () => {
     const revenueCatClient: RevenueCatClient = { fetchSubscriber: jest.fn() };
     const readingModelClient: ReadingModelClient = { models: { generateContent } };
-    app = await buildApp(readingModelClient, revenueCatClient);
+    app = await buildApp(everyModule([readingModelClient]), revenueCatClient);
 
     const response = await app.inject({ method: 'POST', url: '/api/v1/reading/analyze', payload: { photos: PHOTOS_3 } });
 
@@ -106,7 +106,7 @@ describe('entitlement check (monitor mode — never blocks yet)', () => {
       fetchSubscriber: jest.fn().mockResolvedValue({ entitlements: { aura_pro_access: { expires_date: null } } }),
     };
     const readingModelClient: ReadingModelClient = { models: { generateContent } };
-    app = await buildApp(readingModelClient, revenueCatClient);
+    app = await buildApp(everyModule([readingModelClient]), revenueCatClient);
 
     const response = await app.inject({
       method: 'POST',
@@ -125,7 +125,7 @@ describe('entitlement check (monitor mode — never blocks yet)', () => {
       fetchSubscriber: jest.fn().mockResolvedValue({ entitlements: {} }),
     };
     const readingModelClient: ReadingModelClient = { models: { generateContent } };
-    app = await buildApp(readingModelClient, revenueCatClient);
+    app = await buildApp(everyModule([readingModelClient]), revenueCatClient);
 
     const response = await app.inject({
       method: 'POST',
@@ -144,7 +144,7 @@ describe('entitlement check (monitor mode — never blocks yet)', () => {
       fetchSubscriber: jest.fn().mockRejectedValue(new Error('RevenueCat is down')),
     };
     const readingModelClient: ReadingModelClient = { models: { generateContent } };
-    app = await buildApp(readingModelClient, revenueCatClient);
+    app = await buildApp(everyModule([readingModelClient]), revenueCatClient);
 
     const response = await app.inject({
       method: 'POST',

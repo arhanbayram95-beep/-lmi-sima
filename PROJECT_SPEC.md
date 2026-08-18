@@ -417,6 +417,27 @@ decision for the product owner, not applied here.
   problems that retrying can't fix); everything else, including a raw
   non-`ApiError` failure, is now retried instead of silently treated as
   fatal just because its shape wasn't anticipated.
+* **Dual-key failover (2026-08-18):** a second Gemini API key
+  (`GEMINI_API_KEY_SECONDARY`, optional) now backs every module as a
+  failover pair rather than one key alone — direct product ask,
+  "minimize reading fails as much as you can with those two keys".
+  `generateReading` (`readingService.ts`) takes an ordered list of
+  clients instead of one; `generateContentWithRetry` cycles through
+  every client in the list across its attempts (now 4, up from 3, so
+  two clients each get a genuinely even two tries) rather than
+  hammering the same client repeatedly. `server.ts` puts each module's
+  own key first and the other key second — character analysis (the
+  app's main flow, highest traffic) prefers its own key so it isn't
+  competing with the other two modules' traffic by default, while
+  still falling back to the shared key under failure, and vice versa.
+  An earlier version of this split assigned one key per module
+  statically with no cross-key fallback — rejected once actually
+  building it out, since that doesn't help an individual request when
+  its one assigned key is the one having a bad moment, which is
+  exactly the case worth optimizing for. Unset `GEMINI_API_KEY_SECONDARY`
+  falls back to the primary client alone for every module (via
+  `geminiClient.ts`'s `everyModule()` helper), so a single-key deploy
+  keeps working unchanged — every environment before this one.
 
 ---
 

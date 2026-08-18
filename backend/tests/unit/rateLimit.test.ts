@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/app';
-import { ReadingModelClient } from '../../src/services/geminiClient';
+import { everyModule, ReadingModelClient } from '../../src/services/geminiClient';
 
 function textResponse(body: unknown) {
   return { text: JSON.stringify(body) };
@@ -70,7 +70,7 @@ describe('rate limiting on /api/v1/reading/analyze', () => {
   beforeEach(async () => {
     generateContent = jest.fn().mockResolvedValue(textResponse(CHARACTER_READING));
     const readingModelClient: ReadingModelClient = { models: { generateContent } };
-    app = await buildApp(readingModelClient);
+    app = await buildApp(everyModule([readingModelClient]));
   });
 
   afterEach(async () => {

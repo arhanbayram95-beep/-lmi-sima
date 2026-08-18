@@ -1,5 +1,6 @@
 import Fastify, { FastifyError, FastifyInstance } from 'fastify';
 import { ReadingModelClient } from './services/geminiClient';
+import { ReadingModuleId } from './services/readingSchema';
 import { RevenueCatClient } from './services/revenueCatClient';
 import { registerCors } from './middleware/cors';
 import { registerRateLimit } from './middleware/rateLimit';
@@ -17,7 +18,7 @@ import { registerReadingRoutes } from './routes/reading';
 const BODY_LIMIT_BYTES = 25 * 1024 * 1024;
 
 export async function buildApp(
-  readingModelClient: ReadingModelClient,
+  readingModelClients: Record<ReadingModuleId, ReadingModelClient[]>,
   revenueCatClient?: RevenueCatClient
 ): Promise<FastifyInstance> {
   const app = Fastify({ logger: false, bodyLimit: BODY_LIMIT_BYTES });
@@ -26,7 +27,7 @@ export async function buildApp(
   await registerCors(app);
   await registerRateLimit(app);
   await registerSecurityHeaders(app);
-  registerReadingRoutes(app, readingModelClient, revenueCatClient);
+  registerReadingRoutes(app, readingModelClients, revenueCatClient);
   registerLegalRoutes(app);
   registerHealthRoute(app);
 

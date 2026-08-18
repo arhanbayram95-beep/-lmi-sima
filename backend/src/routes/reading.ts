@@ -41,7 +41,7 @@ interface AnalyzeRequestBody {
 
 export function registerReadingRoutes(
   app: FastifyInstance,
-  readingModelClient: ReadingModelClient,
+  readingModelClients: Record<ReadingModuleId, ReadingModelClient[]>,
   revenueCatClient?: RevenueCatClient
 ): void {
   app.post<{ Body: AnalyzeRequestBody }>(
@@ -49,7 +49,11 @@ export function registerReadingRoutes(
     { preHandler: createEntitlementCheck(revenueCatClient), schema: { body: analyzeBodySchema } },
     async (request, reply) => {
       try {
-        const result = await generateReading(readingModelClient, request.body.photos, request.body.module);
+        // Same default as generateReading's own moduleId parameter — the
+        // client selected here has to match the module generateReading
+        // actually processes, not just whatever the client is keyed by.
+        const moduleId = request.body.module ?? 'three-expression';
+        const result = await generateReading(readingModelClients[moduleId], request.body.photos, moduleId);
         return reply.status(200).send(result);
       } catch (error) {
         if (error instanceof ReadingServiceError) {

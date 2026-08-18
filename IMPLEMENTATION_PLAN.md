@@ -1120,3 +1120,41 @@ was actually run throughout.
   on "The Hollow Reckoning", checked against every other string value
   in the fixture first. `tsc --noEmit` clean, frontend suite 30/30
   suites, 195/195 tests.
+- [x] **10.23 Dual Gemini key failover ("minimize reading fails as much
+  as you can with those two keys")** — after linking billing on the
+  original key, a second key was obtained (initially framed as "one key
+  per module" to spread quota). Implemented, then reconsidered per
+  explicit direction: a static module-to-key assignment doesn't help an
+  individual request when its one assigned key is the one having a bad
+  moment (quota blip, transient 503), so redesigned as a failover pair
+  instead — every request now retries across *both* clients.
+  - `readingService.ts`: `generateReading`/`generateContentWithRetry`
+    take an ordered `ReadingModelClient[]` instead of a single client;
+    retries cycle through the list (`clients[(attempt - 1) %
+    clients.length]`), and `MAX_GENERATION_ATTEMPTS` bumped 3 → 4 so
+    two clients each get an even two tries.
+  - `geminiClient.ts`'s `everyModule()` helper now wraps a client list
+    (not a single client) into a per-module map, used both by
+    `server.ts` (single-key fallback) and every test's `buildApp` call.
+  - `server.ts`: each module tries its own key first, the other key
+    second — character analysis (the app's main flow, highest traffic)
+    prefers its own key so it isn't competing with the other two
+    modules by default, while still falling back to the shared key
+    under failure.
+  - `app.ts`/`routes/reading.ts`: `buildApp`/`registerReadingRoutes`
+    now take `Record<ReadingModuleId, ReadingModelClient[]>`; the route
+    selects the client list for the request's module (defaulting to
+    `'three-expression'`, matching `generateReading`'s own default)
+    before calling `generateReading`.
+  - New env var `GEMINI_API_KEY_SECONDARY` (optional — unset falls back
+    to the primary client alone for every module, so every deploy
+    before this one keeps working unchanged). Added to `.env.example`
+    and the local `.env`; **still needs adding to Render's dashboard
+    env vars for production** — not something doable from here.
+  - `readingService.test.ts` gained 2 tests for the new behavior
+    (falls over to the second client when the first errors; cycles
+    through both clients evenly across all 4 attempts) plus a fix to
+    the existing exhausted-retries test's now-4 expected call count.
+    7 other test files updated their `buildApp(everyModule(...))` call
+    sites for the new array-wrapped signature. `tsc --noEmit` clean,
+    backend suite 9/9 suites, 60/60 tests.
