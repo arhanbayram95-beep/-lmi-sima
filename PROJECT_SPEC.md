@@ -585,3 +585,95 @@ already in `infoPlist` when the plugin option is undefined, which
 preserves the existing custom `NSCameraUsageDescription` copy already set
 directly in `ios.infoPlist` rather than overwriting it with the plugin's
 generic default text.
+
+**Fixed a real on-device crash — `react-native-vision-camera` 5.2.0 →
+5.2.2 (2026-08-18):** on-device report ("after second photo, app
+crashes" / full crash to Home Screen, live camera only, no library
+picker involved). User supplied the raw `.ips` crash log (readable
+without a Mac via Settings → Privacy & Security → Analytics &
+Improvements → Analytics Data) rather than a description — diagnosed
+directly from it instead of guessing:
+```
+EXC_CRASH / SIGABRT
+__pthread_kill → pthread_kill → abort → __assert_rtn
+-[AVCaptureOutput attachToFigCaptureSession:]_block_invoke.cold.1
+-[AVCaptureOutput attachToFigCaptureSession:]_block_invoke
+-[AVCaptureSession _makeConfigurationLive:]
+-[AVCaptureSession _handleConfigurationCommittedNotificationWithPayload:]
+```
+on thread `capture.output.FigCaptureSessionSyncQueue`, with a second
+thread named `com.margelo.camera.session` simultaneously inside
+`closure #1 in HybridCameraSession.start()` → `-[AVCaptureSession
+startRunning]` → `_buildAndRunGraph:`. Confirmed via
+`mrousavy/react-native-vision-camera` issue #3773 ("Race-condition
+crash in HybridCameraSession.start()") — an exact stack-trace match,
+line for line — as an upstream, already-diagnosed race: `start()`
+calls `session.startRunning()` immediately after `commitConfiguration()`
+returns, without waiting for CoreMedia's async "configuration
+committed" notification to actually finish; when that notification
+later fires on `FigCaptureSessionSyncQueue` and tries to attach
+outputs, it finds them already attached by the racing `startRunning()`
+call and hits an internal AVFoundation assertion — an uncatchable
+native abort, not a JS-catchable exception, so no try/catch anywhere
+in this app's code could ever have prevented or surfaced it. Fixed
+upstream by PR #4134, merged the same day (2026-08-05) as the 5.2.2
+release that first contains it — bumped via `npx expo install
+react-native-vision-camera@5.2.2`. `tsc --noEmit` and the full frontend
+suite (30/30 suites, 204/204 tests) stayed green across the bump; this
+needs a new native build (native dependency, not a JS-only change) to
+actually take effect on-device — an EAS `development`-profile build
+was queued right after this fix landed.
+
+**Backend: reject non-JPEG photo payloads before spending a Gemini call
+on them (2026-08-18):** prompted by a direct security ask ("File check
+what user uploads, dont create a security breach") after the "Choose
+from Library" feature shipped — the route layer's JSON schema
+(`analyzeBodySchema`, `routes/reading.ts`) only ever guaranteed each
+`photos` entry was *a string* within a length range, never that it
+actually decoded to a real photo. A client that skipped the app
+entirely (or a rewritten/malicious frontend) could submit arbitrary
+base64 garbage and have `generateReading` spend a paid Gemini call
+forwarding attacker-controlled bytes into the model's vision input,
+before anything checked what the "photo" actually was.
+- New `backend/src/services/imageValidation.ts` — a pure function,
+  `assertLooksLikeJpeg(base64Photo: string): void`, throwing a new
+  `InvalidImageError` when the decoded bytes don't start with the JPEG
+  SOI + marker prefix (`0xFF 0xD8 0xFF`). `Buffer.from(str, 'base64')`
+  never throws on malformed input in Node (it decodes leniently and
+  drops what it can't parse), so a garbage/non-base64 string just
+  surfaces as bytes that fail the magic-byte check — no separate
+  "is this valid base64" step needed.
+- JPEG-only is deliberate, not a gap: both capture paths this app
+  actually has always produce JPEG. The live camera does
+  (`usePhotoOutput`'s `containerFormat: 'jpeg'`), and so does the
+  library picker — confirmed from `expo-image-picker`'s own type docs:
+  "When the `base64` option is truthy, it is a Base64-encoded string
+  of the selected image's JPEG data" (it transcodes to JPEG
+  internally regardless of the source file's format, as long as
+  `quality` isn't exactly `1.0` with `allowsEditing` off — which this
+  app's picker call, `quality: 0.6`, never sets). No need to sniff
+  PNG/WebP/HEIC.
+- `readingService.ts`'s `generateReading()` calls
+  `photos.forEach(assertLooksLikeJpeg)` *before* the
+  `generateContentWithRetry` try/catch, not inside it — an
+  `InvalidImageError` has to propagate as itself so the route layer
+  can map it to a 400, not get caught and rewrapped as the generic
+  "Failed to reach the Gemini API" `ReadingServiceError` (502). Placing
+  it before the try block also means a garbage payload never spends
+  the paid call at all, not just that the error is labeled correctly.
+- `routes/reading.ts` catches `InvalidImageError` first (400 — a
+  client/input problem) ahead of the existing `ReadingServiceError`
+  catch (502 — an upstream/Gemini problem).
+- New `backend/tests/unit/imageValidation.test.ts` (accepts a real
+  JPEG prefix; rejects a PNG, plain text, non-base64 garbage, an empty
+  string, and a payload truncated shorter than the magic bytes
+  themselves). Every existing backend test fixture that used a
+  placeholder string like `'base64-calm'` for a photo — across
+  `readingService.test.ts`, `reading.route.test.ts`,
+  `rateLimit.test.ts`, and `entitlement.test.ts` — had to switch to a
+  real JPEG-magic-byte-prefixed base64 string to keep reaching the
+  (mocked) Gemini call at all; tests that reject *before* image
+  validation ever runs (missing `photos`, wrong array length, a
+  single oversized field, a photo-count mismatch) were unaffected,
+  since JSON-schema and photo-count checks both already run earlier in
+  the pipeline. `tsc --noEmit` clean, full backend suite green.

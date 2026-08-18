@@ -1364,3 +1364,68 @@ was actually run throughout.
     picker promise mid-test and asserts `camera-preview` stays absent
     throughout). `tsc --noEmit` clean, frontend suite 30/30 suites,
     204/204 tests.
+
+- [x] **10.30 Fixed a real on-device crash: `react-native-vision-camera`
+  5.2.0 → 5.2.2** — on-device report ("after second photo, app
+  crashes"), full crash to Home Screen, live camera only, on the build
+  that predates 10.29. User supplied the raw `.ips` crash log directly
+  (readable on-device via Settings → Privacy & Security → Analytics &
+  Improvements → Analytics Data, no Mac needed) instead of a
+  description — diagnosed from it rather than guessing.
+  - Crash: `EXC_CRASH`/`SIGABRT` via `__assert_rtn` inside `-
+    [AVCaptureOutput attachToFigCaptureSession:]_block_invoke`, called
+    from `-[AVCaptureSession _makeConfigurationLive:]` on thread
+    `capture.output.FigCaptureSessionSyncQueue`, with a second thread
+    (`com.margelo.camera.session`) simultaneously mid `closure #1 in
+    HybridCameraSession.start()` → `-[AVCaptureSession startRunning]`.
+    Matched `mrousavy/react-native-vision-camera` issue #3773
+    line-for-line — an upstream, already-diagnosed race: `start()`
+    calls `startRunning()` immediately after `commitConfiguration()`
+    returns, without waiting for CoreMedia's async "configuration
+    committed" notification to actually finish; when that notification
+    later fires and tries to attach outputs, it finds them already
+    attached by the racing `startRunning()` call and hits an internal
+    AVFoundation assertion — a native abort, uncatchable from JS, so no
+    try/catch anywhere in this app could have prevented or surfaced it.
+  - Fixed upstream by PR #4134, merged the same day (2026-08-05) as the
+    5.2.2 release that first contains it. Bumped via `npx expo install
+    react-native-vision-camera@5.2.2`. See PROJECT_SPEC.md's matching
+    entry for the full diagnostic trail.
+  - `tsc --noEmit` clean, full frontend suite 30/30 suites, 204/204
+    tests — unchanged by the bump, as expected for a native-only patch
+    fix. This needs a new native build (not a JS-only change) to take
+    effect on-device; queued right after landing.
+
+- [x] **10.31 Backend: reject non-JPEG photo payloads before spending a
+  Gemini call on them** — direct security ask following the "Choose
+  from Library" feature: "File check what user uploads, dont create a
+  security breach." The route layer's JSON schema only ever guaranteed
+  each `photos` entry was *a string* in a length range, never that it
+  decoded to a real photo — a client that skipped the app entirely
+  could submit arbitrary base64 garbage and have a paid Gemini call
+  forward attacker-controlled bytes into the model's vision input.
+  - New `backend/src/services/imageValidation.ts`:
+    `assertLooksLikeJpeg(base64Photo)` throws `InvalidImageError` when
+    the decoded bytes don't start with the JPEG SOI+marker prefix
+    (`0xFF 0xD8 0xFF`). JPEG-only is deliberate: both this app's real
+    capture paths always produce JPEG — the camera
+    (`usePhotoOutput`'s `containerFormat: 'jpeg'`) and, confirmed from
+    `expo-image-picker`'s own docs, the library picker too ("a
+    Base64-encoded string of the selected image's JPEG data" —
+    transcoded internally regardless of source format, at this app's
+    `quality: 0.6`).
+  - `readingService.ts` runs `photos.forEach(assertLooksLikeJpeg)`
+    *before* the Gemini call's try/catch, so `InvalidImageError`
+    propagates as itself (route layer → 400) instead of being caught
+    and rewrapped as the generic 502 `ReadingServiceError`, and so a
+    garbage payload never spends the paid call at all.
+    `routes/reading.ts` catches `InvalidImageError` → 400 ahead of the
+    existing `ReadingServiceError` → 502 catch.
+  - New `imageValidation.test.ts`; every backend test fixture using a
+    placeholder photo string (`readingService.test.ts`,
+    `reading.route.test.ts`, `rateLimit.test.ts`,
+    `entitlement.test.ts`) switched to a real JPEG-prefixed base64
+    string to keep reaching the mocked Gemini call — tests that reject
+    *before* image validation runs (missing/oversized/wrong-count
+    photos) were unaffected. `tsc --noEmit` clean, full backend suite
+    10/10 suites, 69/69 tests.
