@@ -74,12 +74,17 @@ function detectNoFace() {
   });
 }
 
-// Every step starts on the source-choice screen (PhotoSourceModal, shown
-// before any <Camera> mounts) — tests that exercise the live camera path
-// choose "Take Photo" first to reveal it, same as a real user would.
+// Source-choice is asked once per session, not per step — see
+// CaptureScreen.tsx's sourceMode comment. Tests that exercise the live
+// camera path choose "Take Photo" once, up front, same as a real user.
 function chooseCameraSource() {
   fireEvent.press(screen.getByTestId('photo-source-camera'));
 }
+
+// Every successful capture has a real 500ms settle delay before the step
+// advances (see handleCapture's comment) — long enough that a bare default
+// waitFor (1000ms) leaves too little margin to be reliably non-flaky.
+const CAPTURE_SETTLE_WAIT = { timeout: 3000 };
 
 describe('CaptureScreen', () => {
   beforeEach(() => {
@@ -135,16 +140,27 @@ describe('CaptureScreen', () => {
     expect(mockLaunchImageLibraryAsync).not.toHaveBeenCalled();
   });
 
-  it('asks for the photo source again at the start of every step, not just the first', async () => {
+  // Regression coverage for the actual on-device crash: an earlier version
+  // asked for the photo source again at the start of every step, which
+  // meant unmounting and remounting <Camera> once per step — confirmed via
+  // two on-device .ips crash logs to be a real trigger for a native
+  // AVFoundation session-race crash (see PROJECT_SPEC.md). The camera must
+  // now stay mounted continuously across steps once chosen.
+  it('keeps the camera mounted across steps once "Take Photo" is chosen, without asking again', async () => {
     render(<CaptureScreen />);
 
     chooseCameraSource();
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
 
-    expect(screen.getByTestId('photo-source-modal')).toBeTruthy();
-    expect(screen.queryByTestId('shutter-button')).toBeNull();
+    // The step only actually advances once the post-capture settle delay
+    // (handleCapture) elapses — images updates earlier than that, so the
+    // step text is the reliable signal the full cycle has completed.
+    await screen.findByText('Grin', {}, CAPTURE_SETTLE_WAIT);
+    expect(useAppStore.getState().images).toEqual(['AQID']);
+    // Still on the live camera for step 2 — no re-ask, no remount.
+    expect(screen.getByTestId('camera-preview')).toBeTruthy();
+    expect(screen.getByTestId('shutter-button')).toBeTruthy();
   });
 
   it('canceling the source-choice screen aborts the capture, same as the close button', () => {
@@ -166,7 +182,7 @@ describe('CaptureScreen', () => {
     chooseCameraSource();
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
+    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']), CAPTURE_SETTLE_WAIT);
 
     fireEvent.press(screen.getByTestId('capture-cancel-button'));
 
@@ -176,26 +192,27 @@ describe('CaptureScreen', () => {
 
   it('captures all three expressions in order and stores them, then moves to analysis', async () => {
     render(<CaptureScreen />);
+    chooseCameraSource();
 
     expect(screen.getByText('Rest')).toBeTruthy();
-    chooseCameraSource();
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
+    // The step only actually advances once the post-capture settle delay
+    // (handleCapture) elapses — the next step's title is the reliable
+    // signal that a full capture-and-advance cycle has completed.
+    await screen.findByText('Grin', {}, CAPTURE_SETTLE_WAIT);
+    expect(useAppStore.getState().images).toEqual(['AQID']);
 
-    expect(screen.getByText('Grin')).toBeTruthy();
-    chooseCameraSource();
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID', 'AQID']));
+    await screen.findByText('Stern', {}, CAPTURE_SETTLE_WAIT);
+    expect(useAppStore.getState().images).toEqual(['AQID', 'AQID']);
 
-    expect(screen.getByText('Stern')).toBeTruthy();
-    chooseCameraSource();
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images).toHaveLength(3));
 
-    await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'), CAPTURE_SETTLE_WAIT);
+    expect(useAppStore.getState().images).toHaveLength(3);
     expect(mockCapturePhoto).toHaveBeenCalledTimes(3);
     expect(mockDispose).toHaveBeenCalledTimes(3);
     expect(mockPlayCaptureChime).toHaveBeenCalledTimes(3);
@@ -206,21 +223,20 @@ describe('CaptureScreen', () => {
   it('captures 2 photos for Relationship Harmony — 1 per person, front then back camera', async () => {
     useAppStore.setState({ selectedModule: 'relationship-harmony' });
     render(<CaptureScreen />);
+    chooseCameraSource();
 
     expect(screen.getByText('Person One')).toBeTruthy();
-    chooseCameraSource();
     expect(screen.getByTestId('camera-preview').props.device).toBe('front');
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
+    await screen.findByText('Person Two', {}, CAPTURE_SETTLE_WAIT);
+    expect(useAppStore.getState().images).toEqual(['AQID']);
 
-    expect(screen.getByText('Person Two')).toBeTruthy();
-    chooseCameraSource();
     expect(screen.getByTestId('camera-preview').props.device).toBe('back');
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
 
-    await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'), CAPTURE_SETTLE_WAIT);
     expect(useAppStore.getState().images).toHaveLength(2);
     expect(mockCapturePhoto).toHaveBeenCalledTimes(2);
   });
@@ -228,21 +244,21 @@ describe('CaptureScreen', () => {
   it('captures a single photo for Career Match', async () => {
     useAppStore.setState({ selectedModule: 'career-match' });
     render(<CaptureScreen />);
-
-    expect(screen.getByText('Your Photo')).toBeTruthy();
     chooseCameraSource();
+
     detectFace();
+    expect(screen.getByText('Your Photo')).toBeTruthy();
     fireEvent.press(screen.getByTestId('shutter-button'));
 
-    await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'), CAPTURE_SETTLE_WAIT);
     expect(useAppStore.getState().images).toEqual(['AQID']);
     expect(mockCapturePhoto).toHaveBeenCalledTimes(1);
   });
 
   it('routes to the no-face-detected screen instead of capturing when no face is in frame', async () => {
     render(<CaptureScreen />);
-
     chooseCameraSource();
+
     detectNoFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
 
@@ -254,13 +270,15 @@ describe('CaptureScreen', () => {
 
   it('discards already-captured photos in the sequence if a later step has no face', async () => {
     render(<CaptureScreen />);
-
     chooseCameraSource();
+
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await waitFor(() => expect(useAppStore.getState().images).toEqual(['AQID']));
+    // Must wait for the full settle-and-advance cycle (not just the image
+    // being added) before the shutter is re-enabled for the next press.
+    await screen.findByText('Grin', {}, CAPTURE_SETTLE_WAIT);
+    expect(useAppStore.getState().images).toEqual(['AQID']);
 
-    chooseCameraSource();
     detectNoFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
 
@@ -286,6 +304,23 @@ describe('CaptureScreen', () => {
       );
     });
 
+    // Regression coverage: library mode must never touch the camera, on
+    // any step — that's the whole point of the crash-fix restructure.
+    it('auto-repeats the library picker for every remaining step, without ever mounting the camera', async () => {
+      mockLaunchImageLibraryAsync
+        .mockResolvedValueOnce({ canceled: false, assets: [{ base64: 'PICKED_1' }] })
+        .mockResolvedValueOnce({ canceled: false, assets: [{ base64: 'PICKED_2' }] })
+        .mockResolvedValueOnce({ canceled: false, assets: [{ base64: 'PICKED_3' }] });
+      render(<CaptureScreen />);
+
+      fireEvent.press(screen.getByTestId('photo-source-library'));
+
+      await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'));
+      expect(useAppStore.getState().images).toEqual(['PICKED_1', 'PICKED_2', 'PICKED_3']);
+      expect(mockLaunchImageLibraryAsync).toHaveBeenCalledTimes(3);
+      expect(screen.queryByTestId('camera-preview')).toBeNull();
+    });
+
     it('never mounts the live camera while the library picker is in flight', async () => {
       let resolvePick: (value: unknown) => void = () => {};
       mockLaunchImageLibraryAsync.mockReturnValue(
@@ -304,7 +339,7 @@ describe('CaptureScreen', () => {
       expect(screen.queryByTestId('camera-preview')).toBeNull();
     });
 
-    it('does nothing when the library picker is canceled', async () => {
+    it('falls back to the source-choice screen when the library picker is canceled', async () => {
       mockLaunchImageLibraryAsync.mockResolvedValue({ canceled: true, assets: null });
       render(<CaptureScreen />);
 
@@ -313,6 +348,7 @@ describe('CaptureScreen', () => {
       await waitFor(() => expect(mockLaunchImageLibraryAsync).toHaveBeenCalledTimes(1));
       expect(useAppStore.getState().images).toEqual([]);
       expect(useAppStore.getState().screen).toBe('capture');
+      expect(screen.getByTestId('photo-source-modal')).toBeTruthy();
     });
 
     it('shows the capture error alert if the picked asset has no photo data', async () => {

@@ -72,19 +72,39 @@ export default function CaptureScreen() {
   const { hasPermission, requestPermission } = useCameraPermission();
   const [stepIndex, setStepIndex] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
-  // Asked fresh at the start of every step, before the Camera ever mounts —
-  // not a button living inside the live camera view. Two reasons: (1) the
-  // product ask was for the source choice to come "before camera opens",
-  // not as a control alongside the shutter; (2) on-device report: opening
-  // the system Photos picker while vision-camera's <Camera> was still
-  // mounted+active raced the two camera-adjacent native UIs for the same
-  // hardware session — screen went black and nothing else happened, no JS
-  // error, nothing the try/catch below could ever have caught since it's a
-  // native-level resource conflict, not a promise rejection. Not
-  // conditionally rendering <Camera> at all until "Take Photo" is chosen
-  // removes the live AVCaptureSession from the picture entirely instead of
-  // trying to time a pause/resume around the picker's async gap.
-  const [cameraReady, setCameraReady] = useState(false);
+  // A session-wide choice, asked once before the Camera ever mounts for
+  // the first time — not per step, and not a button living inside the
+  // live camera view. 'unset' shows PhotoSourceModal with no <Camera>
+  // mounted; 'camera' mounts it once and keeps it mounted/running for
+  // every remaining step; 'library' auto-repeats the picker for every
+  // remaining step (see the stepIndex effect below), never touching the
+  // camera at all.
+  //
+  // This used to reset to 'unset' on every stepIndex change (asking
+  // fresh per step) to solve a real bug: opening the system Photos
+  // picker while vision-camera's <Camera> was still mounted+active raced
+  // the picker against the live AVCaptureSession and went to a black
+  // screen with no error. That fix was correct, but unmounting and
+  // remounting <Camera> on every single step turned out to be a second,
+  // worse problem: a real on-device SIGABRT crash confirmed via two
+  // separate .ips crash logs, both showing the identical stack --
+  // -[AVCaptureOutput attachToFigCaptureSession:]_block_invoke hitting
+  // an internal AVFoundation assertion on capture.output.
+  // FigCaptureSessionSyncQueue, racing HybridCameraSession.start() ->
+  // AVCaptureSession.startRunning() on vision-camera's own session
+  // queue (matches mrousavy/react-native-vision-camera#3773: start()
+  // calls startRunning() before CoreMedia's own prior commitConfiguration()
+  // notification has finished, so the notification later finds outputs
+  // already attached by the racing start() and asserts). The *first*
+  // ever occurrence of this predates today's restructure entirely -- it
+  // already happened on a build where <Camera> never unmounted at all,
+  // just from two capturePhoto() calls in a row -- so mounting the
+  // camera exactly once per session (matching that original, more
+  // stable shape) instead of once per step is the fix: it satisfies
+  // "ask before the camera opens" without repeatedly tearing the native
+  // session down and rebuilding it.
+  const [sourceMode, setSourceMode] = useState<'unset' | 'camera' | 'library'>('unset');
+  const cameraActive = sourceMode === 'camera';
   // usePhotoOutput/outputs must stay reference-stable across renders — a
   // fresh options object or array literal here reconfigures (unbinds and
   // rebinds) the native camera session on every re-render, including the
@@ -116,12 +136,20 @@ export default function CaptureScreen() {
 
   const steps = MODULE_STEPS[selectedModule];
 
-  // Every step starts back at the source-choice screen — the previous
-  // step's answer (camera vs. library) doesn't carry over, since a module
-  // like Relationship Harmony deliberately mixes front/back camera across
-  // steps and a picked photo is just as plausible for one step as another.
+  // Once in library mode, every subsequent step's photo is picked the same
+  // way, automatically -- re-showing PhotoSourceModal per step would mean
+  // re-offering "Take Photo" mid-flow, which is exactly the kind of
+  // camera-session churn the crash fix above is trying to avoid. Guarded
+  // by sourceMode (not just stepIndex) so this only fires for steps after
+  // the first -- the first library pick is triggered directly by the
+  // modal's own button press, not by this effect.
   useEffect(() => {
-    setCameraReady(false);
+    if (sourceMode === 'library') {
+      handleChooseFromLibrary();
+    }
+    // Only stepIndex should retrigger this — sourceMode itself changing
+    // (e.g. the first pick committing to 'library') must not re-invoke it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepIndex]);
 
   useEffect(() => {
@@ -185,9 +213,11 @@ export default function CaptureScreen() {
   // no-face-detected handling instead, same "validate at the boundary,
   // trust it past that point" tradeoff already made for the AI call itself.
   //
-  // No <Camera> is mounted while this runs (cameraReady stays false the
-  // whole time) — see cameraReady's own comment for why that's load-bearing,
-  // not incidental.
+  // No <Camera> is ever mounted for a library-mode session — sourceMode
+  // only flips to 'camera' from the modal's own "Take Photo" button, never
+  // from here — so the crash-prone AVCaptureSession start path this file's
+  // top-of-component comment describes is never touched at all on this
+  // path, no matter how many steps auto-repeat it.
   const handleChooseFromLibrary = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -195,9 +225,14 @@ export default function CaptureScreen() {
         base64: true,
         quality: 0.6,
       });
-      // Canceled or failed: stay right here on the source-choice screen
-      // (cameraReady is still false) so the user can just pick again.
-      if (result.canceled) return;
+      if (result.canceled) {
+        // Falls back to the source-choice screen rather than leaving the
+        // user on a dead screen with nothing to press — this covers both
+        // the very first pick (sourceMode is already 'unset') and a
+        // canceled auto-repeat on a later step (sourceMode was 'library').
+        setSourceMode('unset');
+        return;
+      }
 
       const [asset] = result.assets;
       if (!asset.base64) {
@@ -205,14 +240,16 @@ export default function CaptureScreen() {
       }
 
       addImage(asset.base64);
+      setSourceMode('library');
       advanceStep();
     } catch (error) {
       console.error('Photo library pick failed:', error);
       Alert.alert(t('capture.error.title'), t('capture.error.body'));
+      setSourceMode('unset');
     }
   };
 
-  const handleTakePhoto = () => setCameraReady(true);
+  const handleTakePhoto = () => setSourceMode('camera');
 
   const handleCapture = async () => {
     if (isCapturing) return;
@@ -284,6 +321,19 @@ export default function CaptureScreen() {
       return;
     }
 
+    // Extra settle time before the session is touched again — another
+    // capturePhoto() call, or (for Relationship Harmony) a front/back
+    // device switch — while isCapturing (and so the shutter) stays
+    // disabled. Same class of native session race as the crash this file's
+    // sourceMode comment describes, just on the success path instead of a
+    // failed capture: capturePhoto() appears to trigger its own session
+    // reconfigure, and the two on-device crash logs both showed that
+    // reconfigure's async completion notification racing a *second* one
+    // triggered too soon after. Not independently confirmed on-device
+    // (no native debugging tools available here) — a best-effort
+    // mitigation on top of the sourceMode restructure, not a guaranteed
+    // fix on its own.
+    await new Promise((resolve) => setTimeout(resolve, 500));
     setIsCapturing(false);
     advanceStep();
   };
@@ -312,7 +362,7 @@ export default function CaptureScreen() {
 
   return (
     <View style={styles.container} testID="capture-screen">
-      {cameraReady && (
+      {cameraActive && (
         <Camera
           style={StyleSheet.absoluteFill}
           isActive
@@ -324,7 +374,7 @@ export default function CaptureScreen() {
         />
       )}
 
-      {cameraReady && <Animated.View pointerEvents="none" style={[styles.flashOverlay, { opacity: flash }]} />}
+      {cameraActive && <Animated.View pointerEvents="none" style={[styles.flashOverlay, { opacity: flash }]} />}
 
       <View style={styles.overlay}>
         <Pressable
@@ -347,14 +397,14 @@ export default function CaptureScreen() {
         </View>
 
         <View style={styles.guideWrap}>
-          {cameraReady && <Animated.View style={[styles.guideRing, { transform: [{ scale: pulse }] }]} />}
+          {cameraActive && <Animated.View style={[styles.guideRing, { transform: [{ scale: pulse }] }]} />}
         </View>
 
         <View style={styles.footer}>
           <Text style={styles.stepTitle}>{currentTitle}</Text>
           <Text style={styles.stepPrompt}>{t(currentStep.promptKey)}</Text>
 
-          {cameraReady && (
+          {cameraActive && (
             <Pressable
               onPress={handleCapture}
               disabled={isCapturing}
@@ -370,7 +420,7 @@ export default function CaptureScreen() {
       </View>
 
       <PhotoSourceModal
-        visible={!cameraReady}
+        visible={sourceMode === 'unset'}
         onClose={handleCancel}
         onTakePhoto={handleTakePhoto}
         onChooseFromLibrary={handleChooseFromLibrary}

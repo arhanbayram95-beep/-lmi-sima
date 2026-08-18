@@ -677,3 +677,72 @@ before anything checked what the "photo" actually was.
   single oversized field, a photo-count mismatch) were unaffected,
   since JSON-schema and photo-count checks both already run earlier in
   the pipeline. `tsc --noEmit` clean, full backend suite green.
+
+**Correction — the vision-camera 5.2.2 bump did not fully fix the crash
+(2026-08-19):** a second on-device .ips crash log, same day, from the
+build that included both the 5.2.2 bump *and* 10.29's per-step
+source-choice restructure — user report: "Still crashes after first
+capture both at character analysis and relationship." The new log's
+crashing thread is byte-for-byte identical to the first one: `EXC_CRASH`/
+`SIGABRT` via `__assert_rtn` inside `-[AVCaptureOutput
+attachToFigCaptureSession:]_block_invoke`, on
+`capture.output.FigCaptureSessionSyncQueue`, racing `closure #1 in
+HybridCameraSession.start()` → `-[AVCaptureSession startRunning]` on
+`com.margelo.camera.session`. Two things this settles:
+- 5.2.2 (PR #4134) did not fully close this race, or closed a related
+  but distinct sub-case (its own description talks about
+  `AVCapturePreviewLayer` removal during `updateOutputs(..)`, not the
+  attach-side race in #3773 specifically).
+- 10.29's restructure made the crash *more* likely to hit, not less:
+  asking for the photo source fresh at the start of every step meant
+  `<Camera>` fully unmounted and remounted once per step, adding a new,
+  frequent trigger for exactly the same native session-start race —
+  layered on top of a trigger that was already there before 10.29 ever
+  existed (the very first crash log, from a build where `<Camera>`
+  never unmounted at all, already happened from two plain
+  `capturePhoto()` calls in a row).
+
+**Fixed: stopped tearing the camera session down between steps
+(2026-08-19):** `CaptureScreen.tsx`'s source choice is now a
+session-wide decision, asked once before the first step's camera would
+ever open, not per step — new `sourceMode: 'unset' | 'camera' |
+'library'` state replaces 10.29's `cameraReady` boolean.
+- `'camera'`: `<Camera>` mounts exactly once and stays mounted/running
+  continuously for every remaining step (matching the original,
+  pre-10.28 shape that was stable enough to get a user through a full
+  reading) — `device`/`cameraFacing` still update in place for
+  Relationship Harmony's front→back switch, but the component itself
+  never unmounts.
+- `'library'`: a `useEffect` keyed on `stepIndex` auto-repeats
+  `ImagePicker.launchImageLibraryAsync` for every remaining step once
+  the first pick succeeds, so a multi-photo module never needs the
+  source-choice screen shown again — and never touches the camera at
+  all, on any step, eliminating the crash risk entirely for that path.
+- A canceled or failed pick (first one or an auto-repeated later one)
+  falls back to `sourceMode: 'unset'`, re-showing `PhotoSourceModal`
+  rather than leaving the user on a screen with nothing to press.
+- Also added a 500ms settle delay after every successful capture,
+  before `advanceStep()` runs or the shutter re-enables (`handleCapture`)
+  — the *first* crash log already showed this race happening from two
+  `capturePhoto()` calls in a row with no unmount involved at all, so
+  reducing session churn alone might not be sufficient; this gives any
+  pending native session reconfiguration from the capture itself more
+  time to settle before anything touches the session again. Explicitly
+  **not** independently confirmed on-device — no native debugging
+  tools are available in this environment, so this is a best-effort
+  mitigation on top of the sourceMode restructure, not a claimed fix on
+  its own. On-device retest is the only way to confirm either change
+  actually resolves it.
+- `CaptureScreen.test.tsx` rewritten again: `chooseCameraSource()` is
+  now called once per test instead of once per step; new tests cover
+  the camera staying mounted (not re-asking) across a step transition,
+  and the library picker auto-repeating across steps without ever
+  mounting `<Camera>`. Every test that waits on a capture completing
+  now waits on the *next step's title text* (via `findByText`) rather
+  than on `images` updating — the 500ms delay means images update
+  before the step actually advances, so waiting on `images` alone
+  raced ahead of the shutter being re-enabled and produced false
+  failures ("Unable to find an element with text: Grin" — the
+  assertion checked before the delayed `advanceStep()` had run) until
+  corrected. `tsc --noEmit` clean, frontend suite 30/30 suites,
+  205/205 tests.

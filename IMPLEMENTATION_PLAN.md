@@ -1429,3 +1429,45 @@ was actually run throughout.
     *before* image validation runs (missing/oversized/wrong-count
     photos) were unaffected. `tsc --noEmit` clean, full backend suite
     10/10 suites, 69/69 tests.
+
+- [x] **10.32 The 5.2.2 bump didn't fully fix it — stopped tearing the
+  camera session down between steps** — on-device report the same day
+  as 10.30: "Still crashes after first capture both at character
+  analysis and relationship." A second .ips crash log matched the
+  first one byte-for-byte (see PROJECT_SPEC.md's "Correction" entry) —
+  the 5.2.2 bump apparently didn't fully close the upstream race, and
+  10.29's per-step source-choice restructure made it worse by
+  unmounting/remounting `<Camera>` once per step, a brand-new frequent
+  trigger for the same race stacked on top of one that was already
+  there (the very first crash log happened on a build where `<Camera>`
+  never unmounted at all).
+  - `CaptureScreen.tsx`: replaced 10.29's per-step `cameraReady`
+    boolean with a session-wide `sourceMode: 'unset' | 'camera' |
+    'library'`, asked once before the first step's camera would ever
+    open. `'camera'` mounts `<Camera>` exactly once and keeps it
+    mounted for every remaining step (reverting to the original,
+    proven-stable shape) instead of unmounting on every `stepIndex`
+    change. `'library'` auto-repeats the library picker for every
+    remaining step via a `stepIndex`-keyed effect, so a multi-photo
+    module never re-shows the source-choice screen and never touches
+    the camera on any step. A canceled/failed pick (first or
+    auto-repeated) falls back to `sourceMode: 'unset'` rather than
+    leaving the user on a dead screen.
+  - Also added a 500ms settle delay after every successful capture,
+    before `advanceStep()`/shutter re-enable — the *first* crash log
+    already showed this race from two plain `capturePhoto()` calls
+    with zero unmounting involved, so removing step-transition churn
+    alone might not be the whole story. Explicitly not independently
+    verifiable from here (no native debugging tools available) — a
+    best-effort layer on top of the sourceMode fix, not a second
+    claimed fix.
+  - `CaptureScreen.test.tsx`: `chooseCameraSource()` now called once
+    per test, not per step. New tests: camera stays mounted across a
+    step transition without re-asking, and the library picker
+    auto-repeats across steps while `camera-preview` never appears.
+    Every capture-completion wait switched from checking `images`
+    (which updates *before* the new delay) to `findByText` on the next
+    step's title (the delay-gated signal) — the images-based waits
+    started failing once the delay was in place, since they resolved
+    before the shutter was actually re-enabled. `tsc --noEmit` clean,
+    frontend suite 30/30 suites, 205/205 tests.
