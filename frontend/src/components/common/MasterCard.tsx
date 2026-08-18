@@ -4,6 +4,38 @@ import { MasterCardNarrative, MythicTale } from '../../api/types';
 import { useTranslation } from '../../i18n/useTranslation';
 import { Theme } from '../../ui/theme';
 
+// Bolds roughly the first sentence of a paragraph — an editorial "lead-in"
+// technique (the same idea as a magazine's bolded opening line) that gives
+// a long block of AI-generated prose a scannable entry point instead of
+// reading as one undifferentiated wall of text (product feedback: "a
+// little too text dumping... use fonts bold n other tools to make less
+// text more contentful"). Deliberately not full NLP/keyword
+// highlighting — there's no reliable way to know which *words* matter in
+// free-form generated text, but "the first sentence" is a structural
+// property every paragraph already has. Capped at 70 chars so one
+// unusually long opening sentence doesn't just bold the whole paragraph;
+// falls back to a flat character cut if there's no sentence-ending
+// punctuation within the cap, so a paragraph with no early "."/"!"/"?"
+// still gets a bolded lead instead of none at all.
+function splitLead(text: string): { lead: string; rest: string } {
+  const match = text.match(/^(.{1,70}?[.!?])\s*([\s\S]*)$/);
+  if (match) {
+    return { lead: match[1], rest: match[2] };
+  }
+  const cutoff = Math.min(70, text.length);
+  return { lead: text.slice(0, cutoff), rest: text.slice(cutoff) };
+}
+
+function LeadParagraph({ text, style }: { text: string; style: object }) {
+  const { lead, rest } = splitLead(text);
+  return (
+    <Text style={style}>
+      <Text style={styles.paragraphLead}>{lead}</Text>
+      {rest ? ` ${rest}` : ''}
+    </Text>
+  );
+}
+
 // The generic content renderer for every deep master card, across all
 // three reading modules — see MasterCardNarrative's own comment in
 // api/types.ts for why the shape has to be identical everywhere. Renders
@@ -47,7 +79,10 @@ export default function MasterCard({
       {statsSection}
 
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>{t('reveal.whatItSays')}</Text>
+        <View style={styles.sectionLabelRow}>
+          <View style={styles.sectionLabelBar} />
+          <Text style={styles.sectionLabel}>{t('reveal.whatItSays')}</Text>
+        </View>
         {narrative.anatomical_decoding.map((line, index) => (
           <View key={index} style={styles.bulletRow}>
             <Text style={styles.bulletGlyph}>◆</Text>
@@ -57,11 +92,12 @@ export default function MasterCard({
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>{t('reveal.livingScenario')}</Text>
+        <View style={styles.sectionLabelRow}>
+          <View style={styles.sectionLabelBar} />
+          <Text style={styles.sectionLabel}>{t('reveal.livingScenario')}</Text>
+        </View>
         {narrative.living_scenario.map((paragraph, index) => (
-          <Text key={index} style={styles.paragraph}>
-            {paragraph}
-          </Text>
+          <LeadParagraph key={index} text={paragraph} style={styles.paragraph} />
         ))}
       </View>
 
@@ -71,12 +107,18 @@ export default function MasterCard({
       </View>
 
       {mythicTale && (
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{mythicTale.tale_title}</Text>
+        // A visually distinct block (subtle tint + border), not just
+        // another `section` — it's the card's 4th-7th consecutive
+        // paragraph by this point, and giving it its own frame reads as a
+        // deliberate "bonus story" rather than the wall of text just
+        // continuing further.
+        <View style={styles.mythicBlock}>
+          <View style={styles.sectionLabelRow}>
+            <View style={styles.sectionLabelBar} />
+            <Text style={styles.mythicTitle}>{mythicTale.tale_title}</Text>
+          </View>
           {mythicTale.paragraphs.map((paragraph, index) => (
-            <Text key={index} style={styles.paragraph}>
-              {paragraph}
-            </Text>
+            <LeadParagraph key={index} text={paragraph} style={styles.paragraph} />
           ))}
         </View>
       )}
@@ -112,15 +154,32 @@ const styles = StyleSheet.create({
     marginBottom: Theme.spacing.sm,
   },
   section: {
-    marginTop: Theme.spacing.sm,
+    marginTop: Theme.spacing.md,
+    gap: 8,
+  },
+  sectionLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
+    marginBottom: 2,
+  },
+  // A short accent bar instead of a bare label — a small, cheap way to
+  // give each section a real visual anchor instead of every block just
+  // starting with a line of small grey caps that blurs together with the
+  // rest of the page on a quick scroll.
+  sectionLabelBar: {
+    width: 14,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: Theme.colors.accent.goldSecondary,
   },
   sectionLabel: {
     ...Theme.typography.labelSm,
     fontSize: 11,
+    fontWeight: '700',
     color: Theme.colors.text.muted,
     textTransform: 'uppercase',
-    letterSpacing: 1.4,
+    letterSpacing: 1.6,
   },
   bulletRow: {
     flexDirection: 'row',
@@ -141,8 +200,15 @@ const styles = StyleSheet.create({
   paragraph: {
     ...Theme.typography.bodyMd,
     fontSize: 14,
-    lineHeight: 21,
+    lineHeight: 22,
     color: Theme.colors.text.secondary,
+  },
+  // See splitLead/LeadParagraph — the opening sentence of a scenario or
+  // fable paragraph, bolded and lifted toward full-white as a scannable
+  // entry point into the rest of the (still-muted) paragraph.
+  paragraphLead: {
+    fontWeight: '700',
+    color: Theme.colors.text.primary,
   },
   insightCallout: {
     marginTop: Theme.spacing.sm,
@@ -162,5 +228,22 @@ const styles = StyleSheet.create({
     ...Theme.typography.bodyMd,
     fontSize: 13,
     color: Theme.colors.text.secondary,
+  },
+  mythicBlock: {
+    marginTop: Theme.spacing.md,
+    gap: 8,
+    borderRadius: Theme.radius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 201, 131, 0.25)',
+    backgroundColor: 'rgba(235, 201, 131, 0.05)',
+    padding: Theme.spacing.sm,
+  },
+  mythicTitle: {
+    ...Theme.typography.labelSm,
+    fontSize: 11,
+    fontWeight: '700',
+    color: Theme.colors.accent.goldSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 1.6,
   },
 });

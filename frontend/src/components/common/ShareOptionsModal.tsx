@@ -60,14 +60,24 @@ function PaletteSwatch({
       testID={`share-palette-${paletteId}`}
       style={styles.swatchWrap}
     >
-      <View
-        style={[
-          styles.swatch,
-          { backgroundColor: palette.background, borderColor: palette.accent },
-          selected && [styles.swatchSelected, { shadowColor: palette.accent }],
-        ]}
-      >
-        {selected && <Text style={[styles.swatchCheck, { color: palette.accent }]}>✓</Text>}
+      <View style={styles.swatchStack}>
+        {/* An actual circular ring behind the swatch, not a shadowRadius/
+            shadowOpacity glow — RN's shadow rasterizes to the view's
+            rectangular layer bounds, which on a circular swatch reads as a
+            soft rounded-*square* halo rather than a clean circular glow
+            (product feedback: "looks cheesy... as it is a square"). A real
+            circle sidesteps that platform quirk entirely instead of
+            fighting it. */}
+        {selected && <View style={[styles.swatchGlow, { backgroundColor: palette.accent }]} pointerEvents="none" />}
+        <View
+          style={[
+            styles.swatch,
+            { backgroundColor: palette.background, borderColor: palette.accent },
+            selected && styles.swatchSelected,
+          ]}
+        >
+          {selected && <Text style={[styles.swatchCheck, { color: palette.accent }]}>✓</Text>}
+        </View>
       </View>
       {/* Nine options now share only 3 accent colors between them — at
           this size two sharing an accent can look near-identical as a
@@ -395,6 +405,10 @@ const styles = StyleSheet.create({
     gap: 4,
     width: 64,
   },
+  swatchStack: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   swatch: {
     width: 56,
     height: 56,
@@ -403,6 +417,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // A real circle, not a CSS shadow — see the comment at its usage above.
+  // Sized a little larger than the swatch and centered behind it via
+  // absolute positioning, so it reads as a soft ring rather than a solid
+  // halo (low opacity does that job instead of a shadow's blur falloff).
+  swatchGlow: {
+    position: 'absolute',
+    width: 74,
+    height: 74,
+    borderRadius: Theme.radius.full,
+    opacity: 0.35,
+  },
   // Bigger, bolder selected state than a small centered dot — a full
   // checkmark plus a stronger glow and a slight scale-up, so the active
   // theme choice reads clearly at a glance instead of blending into the
@@ -410,9 +435,6 @@ const styles = StyleSheet.create({
   // real choice).
   swatchSelected: {
     transform: [{ scale: 1.1 }],
-    shadowOpacity: 0.85,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 0 },
   },
   swatchCheck: {
     fontSize: 20,

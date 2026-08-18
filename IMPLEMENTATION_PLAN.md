@@ -1238,3 +1238,40 @@ was actually run throughout.
     existing tests already covered) — first attempt primary, every
     retry after that the fallback, never retrying the primary itself.
     `tsc --noEmit` clean, backend suite 9/9 suites, 62/62 tests.
+- [x] **10.27 Reduced "text dumping" feel; fixed the cheesy square glow
+  on the palette picker** — product feedback: "a little too text
+  dumping... use fonts bold n other tools to make less text more
+  contentful", plus "the glow affect on sharing menu looks a little
+  cheesy as it is a square rn."
+  - `MasterCard.tsx`: new `splitLead()`/`LeadParagraph` — bolds roughly
+    the first sentence of each `living_scenario`/`mythic_tale`
+    paragraph (capped at 70 chars so one long opening sentence doesn't
+    just bold the whole thing), an editorial "lead-in" technique giving
+    a scannable entry point into AI-generated prose without needing to
+    know which specific *words* matter (there's no reliable way to
+    tell in free-form generated text — "the first sentence" is a
+    structural property every paragraph already has). Section labels
+    gained a small gold accent bar (`sectionLabelBar`) instead of
+    being a bare line of grey caps, and bumped to `fontWeight: '700'`.
+    The mythic tale — the card's 4th-7th consecutive paragraph by the
+    time it renders — moved from just another `section` block into a
+    visually distinct framed block (subtle tint + border,
+    `mythicBlock`), so it reads as a deliberate "bonus story" rather
+    than the wall of text simply continuing further.
+  - `ShareOptionsModal.tsx`: the selected-palette glow was built from
+    `shadowOpacity`/`shadowRadius`/`shadowOffset` on the circular
+    swatch itself — RN's shadow rasterizes to the view's rectangular
+    layer bounds, which on a circular swatch reads as a soft
+    rounded-*square* halo instead of a clean circular glow (exactly
+    the "looks cheesy... as it is a square" report). Replaced with an
+    actual circular `View` (`swatchGlow`, sized larger than the
+    swatch, centered behind it via absolute positioning + the parent's
+    `alignItems`/`justifyContent`, low opacity instead of a shadow
+    blur) — sidesteps the platform shadow-rasterization quirk entirely
+    instead of fighting it. `swatchSelected` kept only the scale-up
+    transform.
+  - No new tests needed — RNTL's `getByText` matches a `Text` tree's
+    full concatenated content regardless of nested bold spans, so
+    existing content-presence assertions cover this unchanged; styling
+    details aren't unit-tested elsewhere in this codebase either.
+    `tsc --noEmit` clean, frontend suite 30/30 suites, 196/196 tests.
