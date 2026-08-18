@@ -66,7 +66,10 @@ https://sites.google.com/view/face-app-main/home/privacy
 
 **Age Rating**: Apple's questionnaire tops out at 17+ (no 18+ tier exists on the App Store) — answer "Mature/Suggestive Themes: Infrequent/Mild" for the AI-generated personal commentary; the in-app self-certified 18+ gate is stricter than the store rating and that's fine, just don't expect the store badge itself to say "18+."
 
-**Copyright**: **[NEEDS YOU]** — the legal entity/individual name holding rights (matches whatever ends up in the Terms once an entity is settled).
+**Copyright**:
+```
+2026 Arhan Bayram
+```
 
 ---
 
@@ -93,7 +96,7 @@ Playful AI photo reads: your character, your chemistry, your career vibe.
 ## 3. Open items before either listing can actually be submitted
 
 - [x] Support URL/page — live at `sites.google.com/view/face-app-main/home/support`
-- [ ] **[NEEDS YOU]** Copyright holder name for App Store Connect
+- [x] Copyright holder name for App Store Connect — `2026 Arhan Bayram`
 - [x] Confirmed `fevzi.bayram@boun.edu.tr` as the public support contact (it's the address on the live support page)
 - [ ] Screenshots for both stores (iOS needs multiple device sizes; Play needs at least 2) — not something I can generate; needs real device/simulator captures once builds exist
 - [ ] App preview video (optional, both stores)
