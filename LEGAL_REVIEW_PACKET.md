@@ -135,9 +135,10 @@ page content reviewers see in-app.
   now the only export left in that file, the rest trimmed 2026-08-05 once
   the in-app modals reading from it were deleted; also duplicated as its own
   constant in `backend/src/routes/legal.ts`) is a personal `@boun.edu.tr`
-  address — confirm this is the intended contact of record for a
-  public-facing privacy policy, or swap it for a company address before
-  launch.
+  address. **Resolved (2026-08-18):** confirmed as the intended contact of
+  record — it's the address published on the live support page
+  (`sites.google.com/view/face-app-main/home/support`, see
+  `STORE_LISTING.md` §3), not a placeholder.
 
 ## 3. Terms & Conditions (backend/src/routes/legal.ts, `TERMS_SECTIONS`)
 

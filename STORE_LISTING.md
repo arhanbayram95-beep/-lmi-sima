@@ -50,9 +50,12 @@ face reader,ai face,physiognomy,vibe check,character analysis,face reading,fun a
 ```
 (check exact count before submitting — trim if over 100)
 
-**Support URL**: **[NEEDS YOU]** — no live support page exists yet. Options: add a "Support" page to the existing Google Sites (`sites.google.com/view/face-app-main`), or a minimal new page. A `mailto:` link alone doesn't satisfy Apple's Support URL field.
+**Support URL**:
+```
+https://sites.google.com/view/face-app-main/home/support
+```
 
-**Marketing URL** (optional): none yet — skip, or reuse the support URL once it exists.
+**Marketing URL** (optional): none yet — skip, or reuse the support URL above.
 
 **Privacy Policy URL** (already live):
 ```
@@ -79,7 +82,7 @@ Playful AI photo reads: your character, your chemistry, your career vibe.
 
 **Full description** (≤4000 chars): same copy as the iOS Description above — Play doesn't have a separate field-length constraint that would require trimming it.
 
-**Support email**: `fevzi.bayram@boun.edu.tr` (same as `LEGAL_CONTACT_EMAIL`) — **[NEEDS YOU]**: confirm this personal address is meant to be the public support contact, or swap it for something else before either store listing goes live (also flagged in `LEGAL_REVIEW_PACKET.md`).
+**Support email**: `fevzi.bayram@boun.edu.tr` (same as `LEGAL_CONTACT_EMAIL`) — confirmed as the public support contact: it's the address listed on the live support page above (account/purchases, subscription management, refunds, camera guidance, data-deletion requests).
 
 **Category**: Entertainment
 
@@ -89,9 +92,9 @@ Playful AI photo reads: your character, your chemistry, your career vibe.
 
 ## 3. Open items before either listing can actually be submitted
 
-- [ ] **[NEEDS YOU]** Support URL/page (blocks Apple; Play needs at minimum a support email, already have one pending confirmation)
+- [x] Support URL/page — live at `sites.google.com/view/face-app-main/home/support`
 - [ ] **[NEEDS YOU]** Copyright holder name for App Store Connect
-- [ ] **[NEEDS YOU]** Confirm `fevzi.bayram@boun.edu.tr` as the public support contact, or replace it
+- [x] Confirmed `fevzi.bayram@boun.edu.tr` as the public support contact (it's the address on the live support page)
 - [ ] Screenshots for both stores (iOS needs multiple device sizes; Play needs at least 2) — not something I can generate; needs real device/simulator captures once builds exist
 - [ ] App preview video (optional, both stores)
 - [ ] Exact keyword string character count double-checked at submission time
