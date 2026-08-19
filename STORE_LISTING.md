@@ -64,7 +64,12 @@ https://sites.google.com/view/face-app-main/home/privacy
 
 **Category**: Entertainment (primary) · Lifestyle (secondary, optional)
 
-**Age Rating**: Apple's questionnaire tops out at 17+ (no 18+ tier exists on the App Store) — answer "Mature/Suggestive Themes: Infrequent/Mild" for the AI-generated personal commentary; the in-app self-certified 18+ gate is stricter than the store rating and that's fine, just don't expect the store badge itself to say "18+."
+**Age Rating**: Apple overhauled this system in 2026 — a real 18+ tier now exists (4+/9+/13+/16+/18+), correcting the earlier note here that it topped out at 17+. Set up at App Information → Age Ratings → Set Up Age Ratings. Recommended answers for this app, category by category (everything not listed is "None"):
+- Mature or Suggestive Themes: **Infrequent** (the Oracle/Arcana mystical framing and relationship-chemistry content) — calculates to 9+ on its own, not 18+.
+- Medical or Treatment Information / Health or Wellness Topics: **None** — the entertainment-only framing and disclaimers (CLAUDE.md, locked) are specifically designed to keep this app out of these categories; answering otherwise would misrepresent it.
+- Age Assurance: **Present** — the app does implement one (the onboarding 18+ self-certification checkbox), though this descriptor alone doesn't drive the calculated rating up.
+- Everything else (violence, sexual content, gambling, drugs, unrestricted web access, user-generated content, social media, messaging, ads) — **None**, all accurate to what the app actually does.
+- **The calculated result from these answers alone will land around 9+, not 18+** — none of the individual descriptors hit "Frequent" intensity. Use **Override to Higher Age Rating → 18+** to match the in-app age gate and Terms of Use, rather than relying on the questionnaire to get there on its own.
 
 **Copyright**:
 ```
