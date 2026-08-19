@@ -746,3 +746,27 @@ ever open, not per step — new `sourceMode: 'unset' | 'camera' |
   assertion checked before the delayed `advanceStep()` had run) until
   corrected. `tsc --noEmit` clean, frontend suite 30/30 suites,
   205/205 tests.
+
+**Real RevenueCat public key wired in (2026-08-19):** a real RevenueCat
+project now exists with an `appl_...` public key (the In-App Purchase
+Key + App Store Server Notifications setup between App Store Connect
+and RevenueCat is done). Replaced the `test_...` Test Store key with
+the real one in `frontend/.env` and all three `eas.json` build profiles
+(`development`/`preview` already had the Test Store key; `production`
+was missing the variable entirely until now — a real production build
+would have shipped with no RevenueCat key at all). The backend secret
+key (`REVENUECAT_API_KEY` in `backend/.env`) is unchanged — RevenueCat
+secret keys are per-project, not per-store, so it didn't need to
+change when the project's store integration went from Test Store to
+real App Store products.
+- **Still not flipped to enforcement:** `requireActiveEntitlement`
+  stays in monitor-mode (see its own comment in `entitlement.ts`) —
+  confirmed the real weekly/monthly subscription *products* exist in
+  App Store Connect and are attached to a RevenueCat Offering before
+  flipping the two `console.warn`/`return` branches to real `403`s,
+  since flipping early with no purchasable product would lock every
+  user out with no way back in.
+- **Still needed:** confirm `REVENUECAT_API_KEY` (the secret key) is
+  actually set in Render's dashboard, not just locally in
+  `backend/.env` — no Render dashboard access from this environment to
+  verify directly.
