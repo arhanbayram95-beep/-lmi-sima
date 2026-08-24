@@ -770,3 +770,49 @@ real App Store products.
   actually set in Render's dashboard, not just locally in
   `backend/.env` — no Render dashboard access from this environment to
   verify directly.
+
+**Entitlement gate flipped from monitor-mode to enforcement (2026-08-24):**
+direct product ask ("Create the gate for usage") once real RevenueCat
+products/offering were confirmed attached. Product decision (explicit
+choice among options presented): a **hard gate, no free tier** — every
+`/api/v1/reading/analyze` call requires an active `aura_pro_access`
+entitlement, not a limited free allowance. This is a deliberate reversal
+of the earlier "lock deep-dive interpretations... behind a subscription"
+idea from the 5.1 groundwork entry above — the Oracle/Arcana redesign
+(2026-08-15) made every card a full "deep master card" uniformly, so
+there's no longer a natural shallow/deep split within a single reading
+left to gate partially; gating the whole reading is what's actually
+implementable against the current card architecture.
+- `backend/src/middleware/entitlement.ts`: the two `console.warn`/`return`
+  branches (missing app-user-id header, no active entitlement) now
+  `reply.status(403)` instead. A RevenueCat lookup failure also now
+  rejects (403) rather than warning-and-allowing — deliberately fails
+  **closed**, not open: this endpoint's only purpose is protecting a paid
+  Gemini call from being spent for free, and failing open on a lookup
+  error would make "trigger a lookup failure" the obvious bypass. The one
+  remaining no-op path is `revenueCatClient` itself being `undefined`
+  (`REVENUECAT_API_KEY` unset) — stays a total pass-through so local
+  dev/CI never needs a live RevenueCat account, unchanged from before.
+  Every 403 body carries a stable `{ code: 'ENTITLEMENT_REQUIRED' }` — a
+  machine-readable field the frontend keys off, not the human-readable
+  `error` message string.
+- `frontend/src/api/reading.ts`: `ReadingApiErrorCode` gained
+  `'ENTITLEMENT_REQUIRED'`; the `!response.ok` branch now special-cases a
+  403 by parsing the body for that code before falling back to the
+  generic `ReadingApiError`.
+- `frontend/src/screens/AnalyzingScreen.tsx`: `abandonReading` widened to
+  accept `'paywall'`; catches `ENTITLEMENT_REQUIRED` the same way it
+  already caught `NO_FACE_DETECTED`, purging the captured photos
+  (process-and-discard still applies to an abandoned-for-payment attempt,
+  same as any other abandoned one) and routing to the paywall instead of
+  showing a generic error screen. PaywallScreen's existing headline/
+  subtitle copy ("Unlock Full Face Insights" / "Experience unlimited face
+  readings...") already reads as a reasonable explanation for why the
+  user landed there — no separate toast/message added on top.
+- Backend `entitlement.test.ts` rewritten for enforcement semantics (403 +
+  `ENTITLEMENT_REQUIRED` instead of "always 200, sometimes warns");
+  `reading.route.test.ts`/`rateLimit.test.ts` unaffected (neither passes a
+  `revenueCatClient`, so the gate stays a no-op there, matching local
+  dev/CI). New frontend tests for the 403-parsing branch in
+  `reading.test.ts` and the paywall-routing branch in
+  `AnalyzingScreen.test.tsx`.

@@ -26,6 +26,38 @@ describe('analyzeReading (real API mode)', () => {
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
+  // entitlement.ts's hard gate (2026-08-24) — every reading requires an
+  // active subscription. AnalyzingScreen keys off the 'ENTITLEMENT_REQUIRED'
+  // code (not the message) to route straight to the paywall.
+  it('throws a ReadingApiError with code ENTITLEMENT_REQUIRED on a 403 from the entitlement gate', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: async () => ({ error: 'An active subscription is required to generate a reading.', code: 'ENTITLEMENT_REQUIRED' }),
+    });
+    const { analyzeReading, ReadingApiError } = require('./reading');
+
+    const promise = analyzeReading(PAYLOAD);
+    await expect(promise).rejects.toBeInstanceOf(ReadingApiError);
+    await expect(promise).rejects.toMatchObject({
+      code: 'ENTITLEMENT_REQUIRED',
+      message: 'An active subscription is required to generate a reading.',
+    });
+  });
+
+  it('throws a plain ReadingApiError on a 403 that is not the entitlement gate (no matching code)', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: async () => ({ error: 'Forbidden' }),
+    });
+    const { analyzeReading, ReadingApiError } = require('./reading');
+
+    const promise = analyzeReading(PAYLOAD);
+    await expect(promise).rejects.toBeInstanceOf(ReadingApiError);
+    await expect(promise).rejects.toMatchObject({ code: undefined });
+  });
+
   // 502 gets special-cased retry treatment — it's what Render's free tier
   // returns while a cold-started container is still booting (see
   // warmUpBackend's comment in reading.ts), not a normal failure. A raw

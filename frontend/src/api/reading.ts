@@ -18,7 +18,12 @@ export type {
 // so it never travels as an error code. This stays wired for the case where
 // the backend starts reporting it: AnalyzingScreen already routes it to
 // NoFaceDetectedScreen.
-export type ReadingApiErrorCode = 'NO_FACE_DETECTED';
+//
+// 'ENTITLEMENT_REQUIRED' is live: the backend hard-gates every reading
+// behind an active subscription (backend/src/middleware/entitlement.ts,
+// 2026-08-24 product decision — no free tier). AnalyzingScreen routes this
+// straight to the paywall instead of showing a generic error.
+export type ReadingApiErrorCode = 'NO_FACE_DETECTED' | 'ENTITLEMENT_REQUIRED';
 
 export class ReadingApiError extends Error {
   code?: ReadingApiErrorCode;
@@ -88,10 +93,12 @@ export async function analyzeReading(payload: AnalyzeReadingPayload): Promise<Re
   // crashing the app at launch.
   assertSecureApiBaseUrl(API_BASE_URL);
 
-  // Backend-side monitor-mode entitlement check (see backend/src/middleware/
-  // entitlement.ts) — omitted entirely, not sent empty, whenever RevenueCat
-  // isn't configured client-side yet, which is every environment as of this
-  // writing (PROJECT_SPEC.md §6).
+  // Backend-side hard entitlement gate (see backend/src/middleware/
+  // entitlement.ts) — every reading requires this header to resolve to an
+  // active "aura_pro_access" subscription. Omitted entirely, not sent
+  // empty, whenever RevenueCat isn't configured client-side (e.g. local
+  // dev without a key) — a missing header fails the same way an
+  // unentitled one does, not specially.
   const appUserId = await getCurrentAppUserId();
 
   let response: Response;
@@ -124,6 +131,19 @@ export async function analyzeReading(payload: AnalyzeReadingPayload): Promise<Re
   }
 
   if (!response.ok) {
+    // A 403 here always carries a { code: 'ENTITLEMENT_REQUIRED' } body
+    // (entitlement.ts's rejectMissingEntitlement) — parsed defensively
+    // since this branch also has to handle a body-less/plain-text error
+    // from something other than the entitlement gate.
+    if (response.status === 403) {
+      const body = await response.json().catch(() => null);
+      if (body?.code === 'ENTITLEMENT_REQUIRED') {
+        throw new ReadingApiError(
+          typeof body.error === 'string' ? body.error : 'An active subscription is required to generate a reading.',
+          'ENTITLEMENT_REQUIRED'
+        );
+      }
+    }
     throw new ReadingApiError(`Face Reader server returned an error (${response.status}).`);
   }
 

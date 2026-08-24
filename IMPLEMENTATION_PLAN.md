@@ -1504,3 +1504,37 @@ was actually run throughout.
     default), unchecking every section re-enables it, and checking the
     photo then disables every section. `tsc --noEmit` clean, frontend
     suite 30/30 suites, 206/206 tests.
+
+- [x] **10.34 Flipped the entitlement gate from monitor-mode to
+  enforcement — hard gate, no free tier** — direct ask ("Create the
+  gate for usage") once real RevenueCat products/offering were
+  confirmed attached. Explicit product choice among presented options:
+  every reading requires an active `aura_pro_access` entitlement, not
+  a limited free allowance — see PROJECT_SPEC.md's matching entry for
+  why a partial/shallow-vs-deep gate no longer fits the current
+  Oracle/Arcana card architecture.
+  - `backend/src/middleware/entitlement.ts`: both previously-`warn`-only
+    branches (missing app-user-id header, no active entitlement) now
+    `reply.status(403)` with a stable `{ code: 'ENTITLEMENT_REQUIRED' }`
+    body. A RevenueCat lookup failure now also rejects (fails closed,
+    not open — an outage-triggered lookup failure must not become the
+    obvious bypass for a gate whose entire purpose is protecting a paid
+    Gemini call). `revenueCatClient` undefined (`REVENUECAT_API_KEY`
+    unset) stays a total no-op, unchanged — local dev/CI still needs no
+    live RevenueCat account.
+  - `frontend/src/api/reading.ts`: new `'ENTITLEMENT_REQUIRED'`
+    `ReadingApiErrorCode`; the `!response.ok` branch parses a 403
+    body for that code before falling back to a generic error.
+  - `frontend/src/screens/AnalyzingScreen.tsx`: catches
+    `ENTITLEMENT_REQUIRED` the same way it already caught
+    `NO_FACE_DETECTED` — purges the captured photos and routes to the
+    paywall instead of a generic error screen. No new toast/message
+    added; the existing paywall copy already reads as an explanation
+    in context.
+  - Backend `entitlement.test.ts` rewritten for enforcement semantics;
+    `reading.route.test.ts`/`rateLimit.test.ts` confirmed unaffected
+    (neither passes a `revenueCatClient`). New frontend tests for the
+    403-parsing branch (`reading.test.ts`) and the paywall-routing
+    branch (`AnalyzingScreen.test.tsx`). `tsc --noEmit` clean on both
+    sides; backend 10/10 suites, 69/69 tests; frontend 30/30 suites,
+    210/210 tests.

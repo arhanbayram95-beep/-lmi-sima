@@ -93,6 +93,28 @@ describe('AnalyzingScreen', () => {
     await waitFor(() => expect(useAppStore.getState().screen).toBe('noFaceDetected'));
   });
 
+  // Hard entitlement gate (2026-08-24) — every reading requires an active
+  // subscription; a 403 from the backend routes straight to the paywall
+  // instead of showing a generic error screen.
+  it('routes to the paywall on an ENTITLEMENT_REQUIRED error', async () => {
+    mockAnalyzeReading.mockRejectedValue(
+      new ReadingApiError('An active subscription is required to generate a reading.', 'ENTITLEMENT_REQUIRED')
+    );
+    render(<AnalyzingScreen />);
+
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('paywall'));
+  });
+
+  it('discards the captured photos when routing to the paywall', async () => {
+    mockAnalyzeReading.mockRejectedValue(
+      new ReadingApiError('An active subscription is required to generate a reading.', 'ENTITLEMENT_REQUIRED')
+    );
+    render(<AnalyzingScreen />);
+
+    await waitFor(() => expect(useAppStore.getState().screen).toBe('paywall'));
+    expect(useAppStore.getState().images).toEqual([]);
+  });
+
   // Process-and-discard (PROJECT_SPEC.md §3): only the success path hands
   // the photos on to RevealScreen, which purges them on unmount. Every path
   // that abandons the reading has to purge them here instead, or they sit in

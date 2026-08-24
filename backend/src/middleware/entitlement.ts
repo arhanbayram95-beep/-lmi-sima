@@ -9,39 +9,53 @@ const ENTITLEMENT_ID = 'aura_pro_access';
 // under this header on the analyze request — see frontend/src/api/reading.ts.
 const APP_USER_ID_HEADER = 'x-revenuecat-app-user-id';
 
-// Monitor-mode, not enforcement (security review, 2026-08-11): the client
-// doesn't send a real app_user_id yet in production (EXPO_PUBLIC_
-// REVENUECAT_API_KEY is still unset there — see PROJECT_SPEC.md §6), and
-// there's no confirmed real store product a user could purchase to ever
-// pass a hard gate. Rejecting requests today would lock everyone out with
-// no way back in. Every branch below logs and returns (never blocks) so
-// this is safe to ship immediately and gives real signal — via the
-// warnings below, watch server logs — for exactly when it's safe to flip
-// the two `return;`s below into actual `reply.status(403)` rejections.
+// A stable machine-readable code, not just the message — AnalyzingScreen.tsx
+// keys off this (not the message string) to route straight to the paywall
+// instead of showing a generic error screen.
+const ENTITLEMENT_REQUIRED_CODE = 'ENTITLEMENT_REQUIRED';
+
+function rejectMissingEntitlement(reply: FastifyReply): void {
+  reply.status(403).send({
+    error: 'An active subscription is required to generate a reading.',
+    code: ENTITLEMENT_REQUIRED_CODE,
+  });
+}
+
+// Hard gate (2026-08-24 product decision): every reading requires an
+// active "aura_pro_access" entitlement — no free tier. This flips what was
+// previously monitor-mode (security review, 2026-08-11 — logged but never
+// blocked, since no real store product existed yet for anyone to pass the
+// gate with). Real RevenueCat products/offering now exist, so the two
+// `return;`s that used to just warn now reject with 403 instead.
 //
-// revenueCatClient is undefined whenever REVENUECAT_API_KEY isn't set
-// (see server.ts) — that's the common case for local dev/CI, and must
-// stay a total no-op with no lookups or warnings, not just "monitor mode
-// with an unusable client."
+// Fails CLOSED on every uncertain path (missing header, RevenueCat lookup
+// failure) — deliberately: this endpoint's only purpose is protecting a
+// paid Gemini call from being spent for free, and failing open on a lookup
+// error would make "trigger a lookup failure" the obvious bypass. The one
+// exception is revenueCatClient itself being undefined (REVENUECAT_API_KEY
+// unset, see server.ts) — that stays a total no-op with no lookups, same as
+// before, so local dev/CI never needs a live RevenueCat account.
 export function createEntitlementCheck(revenueCatClient?: RevenueCatClient) {
-  return async function requireActiveEntitlement(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
+  return async function requireActiveEntitlement(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     if (!revenueCatClient) return;
 
     const appUserId = request.headers[APP_USER_ID_HEADER];
     if (typeof appUserId !== 'string' || !appUserId) {
-      console.warn(`[entitlement] no ${APP_USER_ID_HEADER} header on the request — client isn't sending one yet.`);
+      rejectMissingEntitlement(reply);
       return;
     }
 
+    let subscriber;
     try {
-      const subscriber = await revenueCatClient.fetchSubscriber(appUserId);
-      if (!hasActiveEntitlement(subscriber, ENTITLEMENT_ID)) {
-        console.warn(`[entitlement] ${appUserId} has no active "${ENTITLEMENT_ID}" entitlement.`);
-      }
+      subscriber = await revenueCatClient.fetchSubscriber(appUserId);
     } catch (error) {
-      // Never let a RevenueCat outage or bad key take the whole app down
-      // while this is still monitor-only.
-      console.warn('[entitlement] RevenueCat subscriber lookup failed:', error);
+      console.error('[entitlement] RevenueCat subscriber lookup failed, rejecting:', error);
+      rejectMissingEntitlement(reply);
+      return;
+    }
+
+    if (!hasActiveEntitlement(subscriber, ENTITLEMENT_ID)) {
+      rejectMissingEntitlement(reply);
     }
   };
 }

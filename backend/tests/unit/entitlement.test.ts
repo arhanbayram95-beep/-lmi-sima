@@ -71,44 +71,44 @@ const CHARACTER_READING = {
   },
 };
 
-describe('entitlement check (monitor mode — never blocks yet)', () => {
+describe('entitlement check (hard gate — every reading requires an active subscription)', () => {
   let app: FastifyInstance;
   let generateContent: jest.Mock;
-  let warnSpy: jest.SpyInstance;
+  let errorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     generateContent = jest.fn().mockResolvedValue(textResponse(CHARACTER_READING));
-    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(async () => {
     await app.close();
-    warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
-  it('allows the request through and logs nothing when no RevenueCat client is configured', async () => {
+  it('allows the request through when no RevenueCat client is configured (local dev/CI)', async () => {
     const readingModelClient: ReadingModelClient = { models: { generateContent } };
     app = await buildApp(everyModule([readingModelClient])); // no revenueCatClient passed — matches an unset REVENUECAT_API_KEY
 
     const response = await app.inject({ method: 'POST', url: '/api/v1/reading/analyze', payload: { photos: PHOTOS_3 } });
 
     expect(response.statusCode).toBe(200);
-    expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it('allows the request through but warns when the client sends no app-user-id header', async () => {
+  it('rejects with 403 when the client sends no app-user-id header', async () => {
     const revenueCatClient: RevenueCatClient = { fetchSubscriber: jest.fn() };
     const readingModelClient: ReadingModelClient = { models: { generateContent } };
     app = await buildApp(everyModule([readingModelClient]), revenueCatClient);
 
     const response = await app.inject({ method: 'POST', url: '/api/v1/reading/analyze', payload: { photos: PHOTOS_3 } });
 
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({ code: 'ENTITLEMENT_REQUIRED' });
     expect(revenueCatClient.fetchSubscriber).not.toHaveBeenCalled();
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('no x-revenuecat-app-user-id header'));
+    expect(generateContent).not.toHaveBeenCalled();
   });
 
-  it('allows the request through without warning when the subscriber has an active entitlement', async () => {
+  it('allows the request through when the subscriber has an active entitlement', async () => {
     const revenueCatClient: RevenueCatClient = {
       fetchSubscriber: jest.fn().mockResolvedValue({ entitlements: { aura_pro_access: { expires_date: null } } }),
     };
@@ -124,10 +124,9 @@ describe('entitlement check (monitor mode — never blocks yet)', () => {
 
     expect(response.statusCode).toBe(200);
     expect(revenueCatClient.fetchSubscriber).toHaveBeenCalledWith('user-123');
-    expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it('allows the request through but warns when the subscriber has no active entitlement', async () => {
+  it('rejects with 403 when the subscriber has no active entitlement', async () => {
     const revenueCatClient: RevenueCatClient = {
       fetchSubscriber: jest.fn().mockResolvedValue({ entitlements: {} }),
     };
@@ -141,12 +140,12 @@ describe('entitlement check (monitor mode — never blocks yet)', () => {
       headers: { 'x-revenuecat-app-user-id': 'user-456' },
     });
 
-    expect(response.statusCode).toBe(200);
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('user-456'));
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('no active'));
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({ code: 'ENTITLEMENT_REQUIRED' });
+    expect(generateContent).not.toHaveBeenCalled();
   });
 
-  it('allows the request through even when the RevenueCat lookup itself fails', async () => {
+  it('rejects with 403 (fails closed) when the RevenueCat lookup itself fails', async () => {
     const revenueCatClient: RevenueCatClient = {
       fetchSubscriber: jest.fn().mockRejectedValue(new Error('RevenueCat is down')),
     };
@@ -160,7 +159,8 @@ describe('entitlement check (monitor mode — never blocks yet)', () => {
       headers: { 'x-revenuecat-app-user-id': 'user-789' },
     });
 
-    expect(response.statusCode).toBe(200);
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('lookup failed'), expect.any(Error));
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({ code: 'ENTITLEMENT_REQUIRED' });
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('lookup failed'), expect.any(Error));
   });
 });

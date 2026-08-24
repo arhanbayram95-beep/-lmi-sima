@@ -30,7 +30,7 @@ export default function AnalyzingScreen() {
   // append onto them, overshooting MODULE_PHOTO_COUNTS and failing the
   // count check above with a misleading "couldn't complete your reading."
   const abandonReading = useCallback(
-    (destination: 'analyze' | 'noFaceDetected') => {
+    (destination: 'analyze' | 'noFaceDetected' | 'paywall') => {
       clearImages();
       goToScreen(destination);
     },
@@ -102,6 +102,10 @@ export default function AnalyzingScreen() {
     } catch (cause) {
       if (cause instanceof ReadingApiError && cause.code === 'NO_FACE_DETECTED') {
         abandonReading('noFaceDetected');
+        return;
+      }
+      if (cause instanceof ReadingApiError && cause.code === 'ENTITLEMENT_REQUIRED') {
+        abandonReading('paywall');
         return;
       }
       setError(cause instanceof ReadingApiError ? cause.message : t('analyzing.error.body'));
