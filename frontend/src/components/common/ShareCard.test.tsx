@@ -42,7 +42,7 @@ describe('ShareCard', () => {
   });
 
   it('includes the photo when explicitly opted into', () => {
-    render(<ShareCard sections={SECTIONS} photo="ZmFrZS1iYXNlNjQ=" />);
+    render(<ShareCard sections={SECTIONS} photo="data:image/jpeg;base64,ZmFrZS1iYXNlNjQ=" />);
     expect(screen.getByTestId('share-card-photo')).toBeTruthy();
   });
 
@@ -91,7 +91,7 @@ describe('ShareCard', () => {
   // present, and the hero text itself gets a hard numberOfLines cap
   // rather than relying on the remaining space "probably" being enough.
   it('still renders the hero text when a photo is included in story layout', () => {
-    render(<ShareCard sections={STORY_SECTIONS} photo="ZmFrZS1iYXNlNjQ=" layout="story" />);
+    render(<ShareCard sections={STORY_SECTIONS} photo="data:image/jpeg;base64,ZmFrZS1iYXNlNjQ=" layout="story" />);
 
     expect(screen.getByTestId('share-card-photo')).toBeTruthy();
     expect(screen.getByTestId('share-card-hero')).toBeTruthy();
@@ -99,7 +99,7 @@ describe('ShareCard', () => {
   });
 
   it('drops to a single badge when a photo is also present in story layout, to guarantee the hero text room', () => {
-    render(<ShareCard sections={STORY_SECTIONS} photo="ZmFrZS1iYXNlNjQ=" layout="story" />);
+    render(<ShareCard sections={STORY_SECTIONS} photo="data:image/jpeg;base64,ZmFrZS1iYXNlNjQ=" layout="story" />);
 
     expect(screen.getByText('Work Catchphrase')).toBeTruthy();
     expect(screen.queryByText('Recommended Industries')).toBeNull();
@@ -107,7 +107,7 @@ describe('ShareCard', () => {
   });
 
   it('caps the hero text to fewer lines when a photo is present, more when it is not', () => {
-    const { rerender } = render(<ShareCard sections={STORY_SECTIONS} photo="ZmFrZS1iYXNlNjQ=" layout="story" />);
+    const { rerender } = render(<ShareCard sections={STORY_SECTIONS} photo="data:image/jpeg;base64,ZmFrZS1iYXNlNjQ=" layout="story" />);
     expect(screen.getByText('Encore of Thunder').props.numberOfLines).toBe(3);
 
     rerender(<ShareCard sections={STORY_SECTIONS} layout="story" />);
@@ -115,7 +115,7 @@ describe('ShareCard', () => {
   });
 
   it('caps the photo to a fixed height instead of a full square specifically in story layout', () => {
-    render(<ShareCard sections={STORY_SECTIONS} photo="ZmFrZS1iYXNlNjQ=" layout="story" />);
+    render(<ShareCard sections={STORY_SECTIONS} photo="data:image/jpeg;base64,ZmFrZS1iYXNlNjQ=" layout="story" />);
     const flatStyle = Object.assign(
       {},
       ...([] as object[]).concat(screen.getByTestId('share-card-photo').props.style)
@@ -125,7 +125,7 @@ describe('ShareCard', () => {
   });
 
   it('keeps the full-square photo in flexible layout, unaffected by the story-layout cap', () => {
-    render(<ShareCard sections={SECTIONS} photo="ZmFrZS1iYXNlNjQ=" />);
+    render(<ShareCard sections={SECTIONS} photo="data:image/jpeg;base64,ZmFrZS1iYXNlNjQ=" />);
     const flatStyle = Object.assign(
       {},
       ...([] as object[]).concat(screen.getByTestId('share-card-photo').props.style)

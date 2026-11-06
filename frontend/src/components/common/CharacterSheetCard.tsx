@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { abilityModifier, CharacterSheet, characterSubtitle, NamedFeature, Story } from '../../api/types';
 import { useTranslation } from '../../i18n/useTranslation';
 import { Theme } from '../../ui/theme';
@@ -41,10 +41,47 @@ function FeatureRow({ feature }: { feature: NamedFeature }) {
   );
 }
 
-export function IdentityCard({ sheet, icon = '🛡️' }: { sheet: CharacterSheet; icon?: string }) {
+export type PortraitStatus = 'idle' | 'painting' | 'failed';
+
+// Absent entirely when the captured photos are gone (e.g. a reading
+// reopened from history): a portrait can only be painted from the photo.
+export interface PortraitSlot {
+  uri?: string;
+  status: PortraitStatus;
+  onPaint: () => void;
+}
+
+function Portrait({ slot }: { slot: PortraitSlot }) {
+  const t = useTranslation();
+  if (slot.uri) {
+    return <Image source={{ uri: slot.uri }} style={styles.portrait} resizeMode="cover" testID="portrait-image" />;
+  }
+  const painting = slot.status === 'painting';
+  return (
+    <Pressable
+      onPress={slot.onPaint}
+      disabled={painting}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: painting, busy: painting }}
+      style={styles.paintButton}
+      testID="paint-portrait-button"
+    >
+      {painting ? <ActivityIndicator color={Theme.colors.accent.goldSecondary} /> : <Text style={styles.paintIcon}>🎨</Text>}
+      <View style={styles.paintText}>
+        <Text style={styles.paintLabel}>
+          {painting ? t('portrait.painting') : slot.status === 'failed' ? t('portrait.retry') : t('portrait.paint')}
+        </Text>
+        {slot.status === 'failed' && <Text style={styles.paintError}>{t('portrait.failed')}</Text>}
+      </View>
+    </Pressable>
+  );
+}
+
+export function IdentityCard({ sheet, icon = '🛡️', portrait }: { sheet: CharacterSheet; icon?: string; portrait?: PortraitSlot }) {
   const t = useTranslation();
   return (
     <View testID="identity-card">
+      {portrait && <Portrait slot={portrait} />}
       <CardHeader icon={icon} title={sheet.name} subtitle={sheet.epithet} />
       <View style={styles.classChip}>
         <Text style={styles.classChipText}>{characterSubtitle(sheet)}</Text>
@@ -201,6 +238,43 @@ export function FeatureListCard({
 }
 
 const styles = StyleSheet.create({
+  portrait: {
+    width: '100%',
+    aspectRatio: 3 / 4,
+    borderRadius: Theme.radius.lg,
+    marginBottom: Theme.spacing.sm,
+    backgroundColor: Theme.colors.surface.glassBackground,
+  },
+  paintButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Theme.spacing.xs,
+    marginBottom: Theme.spacing.sm,
+    borderRadius: Theme.radius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 201, 131, 0.45)',
+    backgroundColor: 'rgba(235, 201, 131, 0.08)',
+    paddingVertical: 12,
+    paddingHorizontal: Theme.spacing.sm,
+  },
+  paintIcon: {
+    fontSize: 22,
+  },
+  paintText: {
+    flex: 1,
+    gap: 2,
+  },
+  paintLabel: {
+    ...Theme.typography.headlineMd,
+    fontSize: 16,
+    color: Theme.colors.accent.goldSecondary,
+  },
+  paintError: {
+    ...Theme.typography.bodyMd,
+    fontSize: 12,
+    lineHeight: 16,
+    color: Theme.colors.status.error,
+  },
   headerBlock: {
     marginBottom: Theme.spacing.xs,
     gap: 2,

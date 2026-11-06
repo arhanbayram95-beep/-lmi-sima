@@ -1580,3 +1580,26 @@ was actually run throughout.
     to 2.1, check name availability, new screenshots).
   - `tsc --noEmit` clean on both sides; backend 11/11 suites, frontend 30/30
     suites, all green.
+
+- [x] **11.2 On-demand character portraits** — product ask ("we should also
+  generate images"). The product owner chose a likeness portrait (photo +
+  sheet) over a text-only one after the face-data tradeoff was laid out, and
+  chose on-demand over generating with every reading. See PROJECT_SPEC.md §0
+  "Portraits".
+  - Backend: `portraitService.ts` (`PORTRAIT_RULES` likeness guardrails,
+    primary/lite model fallback, clean 502 when the model returns no image,
+    e.g. a safety block) and `POST /api/v1/reading/portrait` (entitlement
+    gated, bounded body schema). `portrait.test.ts` plus an entitlement
+    test. **Flagged per CLAUDE.md:** `PORTRAIT_RULES` is new safety copy.
+  - Frontend: `generatePortrait` in `api/reading.ts` (no silent retry of a
+    paid call; mock mode echoes the photo), `portraits` in the capture slice
+    (cleared with the photos), a paint/painting/retry slot on
+    `IdentityCard`, and RevealScreen wiring that drops a late result after
+    unmount. The share card prefers the painted portrait over the selfie.
+    New `portrait.*` strings in all 10 languages. **Flagged per CLAUDE.md:**
+    the onboarding consent-step privacy line (`onboarding.step1.body`) now
+    mentions the optional portrait, in all languages.
+  - Privacy policy (Face Data, Third-Party Access, Retention) discloses
+    portraits; `legal-static/` regenerated; store description mentions it.
+  - Not verifiable here: the image model IDs (no key in this session).
+    The first demo build is the live test.

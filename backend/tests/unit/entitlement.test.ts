@@ -56,6 +56,31 @@ describe('entitlement check (hard gate — every reading requires an active subs
     expect(generateContent).not.toHaveBeenCalled();
   });
 
+  it('gates the portrait endpoint too, before any paid image call', async () => {
+    const revenueCatClient: RevenueCatClient = { fetchSubscriber: jest.fn() };
+    const readingModelClient: ReadingModelClient = { models: { generateContent } };
+    app = await buildApp(everyModule([readingModelClient]), revenueCatClient);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/reading/portrait',
+      payload: {
+        photo: PHOTOS_3[0],
+        character: {
+          name: 'Wren',
+          epithet: 'the Bold',
+          lineage: 'Elf',
+          character_class: 'Bard',
+          alignment: 'Chaotic Good',
+          starting_gear: ['Lute'],
+          companion_species: 'Owl',
+        },
+      },
+    });
+
+    expect([response.statusCode, generateContent.mock.calls.length]).toEqual([403, 0]);
+  });
+
   it('allows the request through when the subscriber has an active entitlement', async () => {
     const revenueCatClient: RevenueCatClient = {
       fetchSubscriber: jest.fn().mockResolvedValue({ entitlements: { aura_pro_access: { expires_date: null } } }),

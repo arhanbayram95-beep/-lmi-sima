@@ -214,3 +214,71 @@ describe('analyzeReading (pseudo-API mode)', () => {
     expect(kinds).toEqual(new Set(['hero_sheet', 'party_sheet', 'nemesis_sheet']));
   });
 });
+
+const PORTRAIT_PAYLOAD = {
+  photo: 'base64-calm',
+  villain: false,
+  character: {
+    name: 'Wren Ashdown',
+    epithet: 'the Unhurried Storm',
+    lineage: 'Halfling',
+    character_class: 'Bard',
+    alignment: 'Chaotic Good',
+    starting_gear: ['Lute'],
+    companion_species: 'Clockwork sparrow',
+  },
+};
+
+describe('generatePortrait (real API mode)', () => {
+  beforeEach(() => {
+    jest.resetModules();
+    delete process.env.EXPO_PUBLIC_USE_MOCK_API;
+    global.fetch = jest.fn();
+  });
+
+  it('posts to the portrait endpoint and returns the image', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => ({ mime_type: 'image/png', data: 'cG5n' }) });
+    const { generatePortrait } = require('./reading');
+
+    await expect(generatePortrait(PORTRAIT_PAYLOAD)).resolves.toEqual({ mime_type: 'image/png', data: 'cG5n' });
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/api/v1/reading/portrait'), expect.anything());
+  });
+
+  it('does not silently retry a failed paid image call', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 502 });
+    const { generatePortrait, ReadingApiError } = require('./reading');
+
+    await expect(generatePortrait(PORTRAIT_PAYLOAD)).rejects.toBeInstanceOf(ReadingApiError);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces the entitlement gate as ENTITLEMENT_REQUIRED', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: async () => ({ code: 'ENTITLEMENT_REQUIRED' }),
+    });
+    const { generatePortrait } = require('./reading');
+
+    await expect(generatePortrait(PORTRAIT_PAYLOAD)).rejects.toMatchObject({ code: 'ENTITLEMENT_REQUIRED' });
+  });
+});
+
+describe('generatePortrait (pseudo-API mode)', () => {
+  beforeEach(() => {
+    jest.resetModules();
+    process.env.EXPO_PUBLIC_USE_MOCK_API = 'true';
+    global.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    delete process.env.EXPO_PUBLIC_USE_MOCK_API;
+  });
+
+  it('echoes the photo back without calling fetch', async () => {
+    const { generatePortrait } = require('./reading');
+
+    await expect(generatePortrait(PORTRAIT_PAYLOAD)).resolves.toEqual({ mime_type: 'image/jpeg', data: 'base64-calm' });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+});

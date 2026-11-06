@@ -52,16 +52,16 @@ export const translations = {
     ar: 'قبل أن نبدأ', bn: 'শুরু করার আগে', pt: 'Antes de começar', ru: 'Прежде чем начать', ur: 'شروع کرنے سے پہلے',
   },
   'onboarding.step1.body': {
-    en: 'Your photos are only used as inspiration for a fictional character. They are processed instantly and never stored. Just for fun.',
-    zh: '你的照片仅用作虚构角色的灵感，会被即时处理且从不存储。仅供娱乐。',
-    hi: 'आपकी फ़ोटो केवल एक काल्पनिक किरदार की प्रेरणा के रूप में उपयोग होती हैं। वे तुरंत प्रोसेस होती हैं और कभी संग्रहीत नहीं होतीं। सिर्फ़ मनोरंजन के लिए।',
-    es: 'Tus fotos solo se usan como inspiración para un personaje ficticio. Se procesan al instante y nunca se guardan. Solo por diversión.',
-    fr: 'Vos photos servent uniquement d’inspiration pour un personnage fictif. Elles sont traitées instantanément et jamais conservées. Juste pour s’amuser.',
-    ar: 'تُستخدم صورك فقط كمصدر إلهام لشخصية خيالية. تُعالج فورًا ولا تُخزن أبدًا. للمتعة فقط.',
-    bn: 'আপনার ছবি শুধু একটি কাল্পনিক চরিত্রের অনুপ্রেরণা হিসেবে ব্যবহৃত হয়। তাৎক্ষণিকভাবে প্রক্রিয়া করা হয় এবং কখনো সংরক্ষণ করা হয় না। শুধুই মজার জন্য।',
-    pt: 'As suas fotos só servem de inspiração para uma personagem fictícia. São processadas na hora e nunca guardadas. Só por diversão.',
-    ru: 'Ваши фото используются только как вдохновение для вымышленного персонажа. Они обрабатываются мгновенно и никогда не хранятся. Просто для развлечения.',
-    ur: 'آپ کی تصاویر صرف ایک فرضی کردار کی تحریک کے طور پر استعمال ہوتی ہیں۔ فوراً پروسیس ہوتی ہیں اور کبھی محفوظ نہیں کی جاتیں۔ صرف تفریح کے لیے۔',
+    en: 'Your photos are only used to create your fictional character and, if you ask, an illustrated portrait. They are processed instantly and never stored. Just for fun.',
+    zh: '你的照片仅用于创建虚构角色，以及（应你要求）绘制插画肖像。会被即时处理且从不存储。仅供娱乐。',
+    hi: 'आपकी फ़ोटो केवल आपका काल्पनिक किरदार और, आपके कहने पर, एक चित्रित पोर्ट्रेट बनाने में उपयोग होती हैं। वे तुरंत प्रोसेस होती हैं और कभी संग्रहीत नहीं होतीं। सिर्फ़ मनोरंजन के लिए।',
+    es: 'Tus fotos solo se usan para crear tu personaje ficticio y, si lo pides, un retrato ilustrado. Se procesan al instante y nunca se guardan. Solo por diversión.',
+    fr: 'Vos photos servent uniquement à créer votre personnage fictif et, si vous le demandez, un portrait illustré. Elles sont traitées instantanément et jamais conservées. Juste pour s’amuser.',
+    ar: 'تُستخدم صورك فقط لإنشاء شخصيتك الخيالية، وصورة مرسومة إذا طلبت ذلك. تُعالج فورًا ولا تُخزن أبدًا. للمتعة فقط.',
+    bn: 'আপনার ছবি শুধু আপনার কাল্পনিক চরিত্র এবং, আপনি চাইলে, একটি আঁকা প্রতিকৃতি তৈরিতে ব্যবহৃত হয়। তাৎক্ষণিকভাবে প্রক্রিয়া করা হয় এবং কখনো সংরক্ষণ করা হয় না। শুধুই মজার জন্য।',
+    pt: 'As suas fotos só servem para criar a sua personagem fictícia e, se pedir, um retrato ilustrado. São processadas na hora e nunca guardadas. Só por diversão.',
+    ru: 'Ваши фото используются только для создания вымышленного персонажа и, по вашему запросу, иллюстрированного портрета. Они обрабатываются мгновенно и никогда не хранятся. Просто для развлечения.',
+    ur: 'آپ کی تصاویر صرف آپ کا فرضی کردار اور، آپ کے کہنے پر، ایک تصویری پورٹریٹ بنانے میں استعمال ہوتی ہیں۔ فوراً پروسیس ہوتی ہیں اور کبھی محفوظ نہیں کی جاتیں۔ صرف تفریح کے لیے۔',
   },
   'onboarding.ageCheckbox': {
     en: 'I confirm I am 18 years of age or older.', zh: '我确认我已年满18周岁。', hi: 'मैं पुष्टि करता/करती हूं कि मेरी आयु 18 वर्ष या उससे अधिक है।',
@@ -813,6 +813,26 @@ export const translations = {
   'sheet.weakness': {
     en: 'Fatal Weakness', zh: '致命弱点', hi: 'घातक कमज़ोरी', es: 'Debilidad fatal', fr: 'Faiblesse fatale',
     ar: 'نقطة الضعف القاتلة', bn: 'মারাত্মক দুর্বলতা', pt: 'Fraqueza fatal', ru: 'Роковая слабость', ur: 'مہلک کمزوری',
+  },
+  'portrait.paint': {
+    en: 'Paint My Portrait', zh: '绘制我的肖像', hi: 'मेरा पोर्ट्रेट बनाएँ', es: 'Pintar mi retrato', fr: 'Peindre mon portrait',
+    ar: 'ارسم صورتي', bn: 'আমার প্রতিকৃতি আঁকুন', pt: 'Pintar o meu retrato', ru: 'Нарисовать мой портрет',
+    ur: 'میری تصویر بنائیں',
+  },
+  'portrait.painting': {
+    en: 'Painting your portrait...', zh: '正在绘制你的肖像……', hi: 'आपका पोर्ट्रेट बन रहा है...', es: 'Pintando tu retrato...',
+    fr: 'Votre portrait est en cours...', ar: 'جارٍ رسم صورتك...', bn: 'আপনার প্রতিকৃতি আঁকা হচ্ছে...',
+    pt: 'A pintar o seu retrato...', ru: 'Рисуем ваш портрет...', ur: 'آپ کی تصویر بن رہی ہے...',
+  },
+  'portrait.retry': {
+    en: 'Try Painting Again', zh: '重新绘制', hi: 'फिर से बनाएँ', es: 'Volver a pintar', fr: 'Réessayer', ar: 'أعد المحاولة',
+    bn: 'আবার আঁকুন', pt: 'Tentar de novo', ru: 'Попробовать снова', ur: 'دوبارہ کوشش کریں',
+  },
+  'portrait.failed': {
+    en: 'The painter couldn\'t finish this one.', zh: '画师没能完成这幅画。', hi: 'चित्रकार इसे पूरा नहीं कर सका।',
+    es: 'El pintor no pudo terminar este.', fr: 'Le peintre n’a pas pu terminer celui-ci.',
+    ar: 'لم يتمكن الرسام من إنهاء هذه الصورة.', bn: 'চিত্রকর এটি শেষ করতে পারেননি।', pt: 'O pintor não conseguiu terminar este.',
+    ru: 'Художник не смог закончить портрет.', ur: 'مصور یہ تصویر مکمل نہیں کر سکا۔',
   },
 } satisfies Record<string, Record<LanguageCode, string>>;
 

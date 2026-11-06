@@ -4,6 +4,7 @@ import { RevenueCatClient } from '../services/revenueCatClient';
 import { generateReading, ReadingServiceError } from '../services/readingService';
 import { InvalidImageError } from '../services/imageValidation';
 import { createEntitlementCheck } from '../middleware/entitlement';
+import { generatePortrait, PortraitServiceError, PortraitSubject } from '../services/portraitService';
 import { READING_MODULE_IDS, ReadingModuleId } from '../services/readingSchema';
 
 // maxLength guards against a single grossly-oversized photo (e.g. abuse
@@ -34,6 +35,40 @@ const analyzeBodySchema = {
   },
   additionalProperties: false,
 } as const;
+
+const shortText = { type: 'string', minLength: 1, maxLength: 200 } as const;
+
+// One photo plus the few sheet fields the portrait prompt uses, never the
+// whole sheet: keeps the paid image call's input small and bounded.
+const portraitBodySchema = {
+  type: 'object',
+  required: ['photo', 'character'],
+  properties: {
+    photo: { type: 'string', minLength: 1, maxLength: 8_000_000 },
+    villain: { type: 'boolean' },
+    character: {
+      type: 'object',
+      required: ['name', 'epithet', 'lineage', 'character_class', 'alignment', 'starting_gear', 'companion_species'],
+      properties: {
+        name: shortText,
+        epithet: shortText,
+        lineage: shortText,
+        character_class: shortText,
+        alignment: shortText,
+        starting_gear: { type: 'array', minItems: 1, maxItems: 5, items: shortText },
+        companion_species: shortText,
+      },
+      additionalProperties: false,
+    },
+  },
+  additionalProperties: false,
+} as const;
+
+interface PortraitRequestBody {
+  photo: string;
+  villain?: boolean;
+  character: PortraitSubject;
+}
 
 interface AnalyzeRequestBody {
   photos: string[];
@@ -69,6 +104,27 @@ export function registerReadingRoutes(
           // schema mismatch is diagnosable from the terminal instead of
           // disappearing silently.
           console.error('Reading generation failed:', error.message, error.cause ?? '');
+          return reply.status(502).send({ error: error.message });
+        }
+        throw error;
+      }
+    }
+  );
+
+  app.post<{ Body: PortraitRequestBody }>(
+    '/api/v1/reading/portrait',
+    { preHandler: createEntitlementCheck(revenueCatClient), schema: { body: portraitBodySchema } },
+    async (request, reply) => {
+      try {
+        const { photo, character, villain } = request.body;
+        const portrait = await generatePortrait(readingModelClients.hero, photo, character, villain ?? false);
+        return reply.status(200).send(portrait);
+      } catch (error) {
+        if (error instanceof InvalidImageError) {
+          return reply.status(400).send({ error: error.message });
+        }
+        if (error instanceof PortraitServiceError) {
+          console.error('Portrait generation failed:', error.message, error.cause ?? '');
           return reply.status(502).send({ error: error.message });
         }
         throw error;

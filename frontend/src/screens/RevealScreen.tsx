@@ -12,6 +12,8 @@ import {
   BackstoryCard,
   FeatureListCard,
   IdentityCard,
+  PortraitSlot,
+  PortraitStatus,
   StoryCard,
 } from '../components/common/CharacterSheetCard';
 import PrimaryButton from '../components/common/PrimaryButton';
@@ -20,7 +22,8 @@ import ShareCard from '../components/common/ShareCard';
 import ShareOptionsModal, { MAX_SELECTABLE_SECTIONS } from '../components/common/ShareOptionsModal';
 import StoryProgressBar from '../components/common/StoryProgressBar';
 import TapToRevealCard from '../components/common/TapToRevealCard';
-import { CharacterSheet, ReadingResult, readingShareableSections } from '../api/types';
+import { generatePortrait } from '../api/reading';
+import { CharacterSheet, portraitPayload, ReadingResult, readingShareableSections } from '../api/types';
 import { useTranslation } from '../i18n/useTranslation';
 import { useAppStore } from '../state/useAppStore';
 import { DEFAULT_SHARE_PALETTE_ID, SharePaletteId, Theme } from '../ui/theme';
@@ -33,11 +36,20 @@ type Translate = ReturnType<typeof useTranslation>;
 // backstory to the mode's story last. Each page sits behind
 // TapToRevealCard's veil-then-flip ritual. Shapes are guaranteed by each
 // mode's response schema (backend readingSchema.ts).
-function sheetPages(prefix: string, sheet: CharacterSheet, t: Translate, identityIcon: string): React.ReactNode[] {
+// Character slot key -> which captured photo the portrait is painted from.
+type PortraitSlotFor = (key: string, sheet: CharacterSheet, photoIndex: number, villain: boolean) => PortraitSlot | undefined;
+
+function sheetPages(
+  prefix: string,
+  sheet: CharacterSheet,
+  t: Translate,
+  identityIcon: string,
+  portrait: PortraitSlot | undefined
+): React.ReactNode[] {
   const tapHint = t('reveal.tapToUnveil');
   return [
     <TapToRevealCard key={`${prefix}-identity`} icon={identityIcon} title={sheet.name} tapHint={tapHint} testID={`${prefix}-identity-page`}>
-      <IdentityCard sheet={sheet} icon={identityIcon} />
+      <IdentityCard sheet={sheet} icon={identityIcon} portrait={portrait} />
     </TapToRevealCard>,
     <TapToRevealCard key={`${prefix}-scores`} icon="🎲" title={t('sheet.abilityScores')} tapHint={tapHint} testID={`${prefix}-scores-page`}>
       <AbilityScoresCard sheet={sheet} />
@@ -51,7 +63,7 @@ function sheetPages(prefix: string, sheet: CharacterSheet, t: Translate, identit
   ];
 }
 
-function readingCards(reading: ReadingResult, images: string[], t: Translate): React.ReactNode[] {
+function readingCards(reading: ReadingResult, images: string[], t: Translate, slotFor: PortraitSlotFor): React.ReactNode[] {
   const photos = images.map((photo, i) => (
     <PhotoPageCard key={`photo-${i}`} photo={photo} testID={i === 0 ? 'reveal-photos' : undefined} />
   ));
@@ -61,7 +73,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
     case 'hero_sheet':
       return [
         ...photos,
-        ...sheetPages('hero', reading.hero, t, '🛡️'),
+        ...sheetPages('hero', reading.hero, t, '🛡️', slotFor('hero', reading.hero, 0, false)),
         <TapToRevealCard key="quest-hook" icon="🗺️" title={reading.quest_hook.title} tapHint={tapHint} testID="quest-hook-page">
           <StoryCard icon="🗺️" story={reading.quest_hook} testID="quest-hook-card" />
         </TapToRevealCard>,
@@ -69,7 +81,9 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
     case 'party_sheet':
       return [
         ...photos,
-        ...reading.heroes.flatMap((hero, index) => sheetPages(`party-${index}`, hero, t, index === 0 ? '🛡️' : '⚔️')),
+        ...reading.heroes.flatMap((hero, index) =>
+          sheetPages(`party-${index}`, hero, t, index === 0 ? '🛡️' : '⚔️', slotFor(`party-${index}`, hero, index, false))
+        ),
         <TapToRevealCard key="party-synergy" icon="🤝" title={reading.party_name} tapHint={tapHint} testID="party-synergy-page">
           <FeatureListCard
             icon="🤝"
@@ -85,7 +99,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
     case 'nemesis_sheet':
       return [
         ...photos,
-        ...sheetPages('villain', reading.villain, t, '😈'),
+        ...sheetPages('villain', reading.villain, t, '😈', slotFor('villain', reading.villain, 0, true)),
         <TapToRevealCard key="evil-scheme" icon="🕯️" title={t('sheet.evilScheme')} tapHint={tapHint} testID="evil-scheme-page">
           <FeatureListCard
             icon="🕯️"
@@ -109,6 +123,10 @@ export default function RevealScreen() {
   const reading = useAppStore((s) => s.reading);
   const images = useAppStore((s) => s.images);
   const clearImages = useAppStore((s) => s.clearImages);
+  const portraits = useAppStore((s) => s.portraits);
+  const setPortrait = useAppStore((s) => s.setPortrait);
+  const [portraitStatus, setPortraitStatus] = useState<Record<string, PortraitStatus>>({});
+  const mountedRef = useRef(true);
   const goToScreen = useAppStore((s) => s.goToScreen);
   const soundEnabled = useAppStore((s) => s.soundEnabled);
   const t = useTranslation();
@@ -125,7 +143,40 @@ export default function RevealScreen() {
   // persisted, per PROJECT_SPEC.md §3) — shown as the opening pages of the
   // card-by-card reveal below, then purged the moment the user leaves,
   // however they leave.
-  useEffect(() => clearImages, [clearImages]);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      clearImages();
+    };
+  }, [clearImages]);
+
+  // A portrait that finishes after the user has left must be dropped, not
+  // stored: the photos it came from were already purged on unmount.
+  const paintPortrait = async (key: string, sheet: CharacterSheet, photo: string, villain: boolean) => {
+    setPortraitStatus((current) => ({ ...current, [key]: 'painting' }));
+    try {
+      const result = await generatePortrait(portraitPayload(sheet, photo, villain));
+      if (!mountedRef.current) return;
+      setPortrait(key, `data:${result.mime_type};base64,${result.data}`);
+      setPortraitStatus((current) => ({ ...current, [key]: 'idle' }));
+    } catch {
+      if (!mountedRef.current) return;
+      setPortraitStatus((current) => ({ ...current, [key]: 'failed' }));
+    }
+  };
+
+  const slotFor: PortraitSlotFor = (key, sheet, photoIndex, villain) => {
+    const photo = images[photoIndex];
+    if (!photo && !portraits[key]) return undefined;
+    return {
+      uri: portraits[key],
+      status: portraitStatus[key] ?? 'idle',
+      onPaint: () => {
+        if (photo) paintPortrait(key, sheet, photo, villain);
+      },
+    };
+  };
 
   // Every section starts selected, up to MAX_SELECTABLE_SECTIONS — the
   // builder is an opt-out picker, not an opt-in one, so a user who never
@@ -179,7 +230,11 @@ export default function RevealScreen() {
   // Recomputed on every render rather than memoized — cheap pure functions
   // over already-fetched data, not worth the hook overhead (see CLAUDE.md
   // "don't add complexity beyond what the task requires").
-  const cards = readingCards(reading, images, t);
+  const cards = readingCards(reading, images, t, slotFor);
+  // The first character's painted portrait beats the raw selfie on a share
+  // card; the selfie is the fallback when nothing has been painted.
+  const firstSlotKey = reading.module === 'hero_sheet' ? 'hero' : reading.module === 'party_sheet' ? 'party-0' : 'villain';
+  const sharePhoto = portraits[firstSlotKey] ?? (images[0] ? `data:image/jpeg;base64,${images[0]}` : undefined);
   const lastPageIndex = cards.length - 1;
 
   // Same haptic treatment as a swipe (GestureCardDeck's own commitTo) —
@@ -258,7 +313,7 @@ export default function RevealScreen() {
         <ShareCard
           ref={shareCardRef}
           sections={readingShareableSections(reading).filter((section) => selectedSectionIds.has(section.id))}
-          photo={includePhotoInCard ? images[0] : undefined}
+          photo={includePhotoInCard ? sharePhoto : undefined}
           paletteId={selectedPaletteId}
           layout={storyLayout ? 'story' : 'flexible'}
         />

@@ -10,7 +10,13 @@ import { ReadingModuleId } from '../../api/types';
 export interface CaptureSlice {
   images: string[];
   addImage: (base64: string) => void;
+  // Also clears portraits: a portrait is derived from the photos and
+  // follows the same process-and-discard lifetime.
   clearImages: () => void;
+  // Painted portraits as data URIs, keyed by character slot (e.g. "hero",
+  // "party-1"). Memory only, like the photos.
+  portraits: Record<string, string>;
+  setPortrait: (key: string, dataUri: string) => void;
   // Which reading module the current capture session is for — set by
   // AnalyzeScreen before navigating into capture, read by CaptureScreen to
   // pick the right step sequence and by AnalyzingScreen when it calls the
@@ -24,7 +30,9 @@ export interface CaptureSlice {
 export const createCaptureSlice: StateCreator<CaptureSlice> = (set) => ({
   images: [],
   addImage: (base64) => set((state) => ({ images: [...state.images, base64] })),
-  clearImages: () => set({ images: [] }),
+  clearImages: () => set({ images: [], portraits: {} }),
+  portraits: {},
+  setPortrait: (key, dataUri) => set((state) => ({ portraits: { ...state.portraits, [key]: dataUri } })),
   selectedModule: 'hero',
   setSelectedModule: (module) => set({ selectedModule: module }),
 });

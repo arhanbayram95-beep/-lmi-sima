@@ -1,6 +1,6 @@
 import { API_BASE_URL, assertSecureApiBaseUrl, USE_MOCK_API } from './config';
-import { analyzeReadingMock } from './mockReading';
-import { AnalyzeReadingPayload, ReadingResult } from './types';
+import { analyzeReadingMock, generatePortraitMock } from './mockReading';
+import { AnalyzeReadingPayload, PortraitPayload, PortraitResult, ReadingResult } from './types';
 import { getCurrentAppUserId } from '../utils/purchases';
 
 export type {
@@ -148,4 +148,41 @@ export async function analyzeReading(payload: AnalyzeReadingPayload): Promise<Re
   }
 
   return (await response.json()) as ReadingResult;
+}
+
+// On-demand, so no retry loop like analyzeReading's: the reveal screen
+// shows a retry button instead, and a silent retry would double a paid
+// image call the user is actively watching.
+export async function generatePortrait(payload: PortraitPayload): Promise<PortraitResult> {
+  if (USE_MOCK_API) {
+    return generatePortraitMock(payload);
+  }
+  assertSecureApiBaseUrl(API_BASE_URL);
+  const appUserId = await getCurrentAppUserId();
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/api/v1/reading/portrait`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(appUserId ? { 'X-RevenueCat-App-User-Id': appUserId } : {}),
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (cause) {
+    const detail = cause instanceof Error ? cause.message : String(cause);
+    throw new ReadingApiError(`Could not reach the Questborn server. (${detail})`);
+  }
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      const body = await response.json().catch(() => null);
+      if (body?.code === 'ENTITLEMENT_REQUIRED') {
+        throw new ReadingApiError('An active subscription is required to paint a portrait.', 'ENTITLEMENT_REQUIRED');
+      }
+    }
+    throw new ReadingApiError(`Questborn server returned an error (${response.status}).`);
+  }
+  return (await response.json()) as PortraitResult;
 }

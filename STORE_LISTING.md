@@ -26,7 +26,7 @@ Strike a pose and get a full fantasy character sheet: class, stats, abilities, b
 ```
 (167 chars)
 
-**Description** (≤4000 chars, currently 1872):
+**Description** (≤4000 chars, currently 2089):
 ```
 Strike a pose. Meet your hero.
 
@@ -40,6 +40,9 @@ THREE WAYS TO PLAY
 • Assemble a Party: you and a friend become a two-hero adventuring party, with a team-up combo move and a shared first adventure.
 • Summon Your Nemesis: one photo becomes your gloriously over-the-top villain twin, with an evil scheme, a lair, and a very silly weakness.
 
+PAINT YOUR PORTRAIT
+Tap "Paint My Portrait" to see yourself painted as your character: a storybook-style illustration in your hero's costume, with their companion at your side.
+
 BUILT FOR THE TABLE
 Every character is playable: real ability scores and modifiers, abilities you can drop into a campaign, and roleplay hooks for trait, ideal, bond, and quirk. Use them as player characters, NPCs, or story inspiration.
 
@@ -47,7 +50,7 @@ BUILT TO SHARE
 Every character comes with a shareable card. Pick the sections and the color before you post.
 
 PRIVACY FIRST
-Your photos are only used as visual inspiration for your character. They're processed in memory, never saved to our servers, never used for identification, and never used to train AI models. Full details in our Privacy Policy.
+Your photos are only used as visual inspiration for your character and, if you ask, your painted portrait. They're processed in memory, never saved to our servers, never used for identification, and never used to train AI models. Full details in our Privacy Policy.
 
 Questborn creates fictional characters for entertainment. Must be 18 or older to use. Questborn is an independent app and is not affiliated with any tabletop game publisher.
 ```

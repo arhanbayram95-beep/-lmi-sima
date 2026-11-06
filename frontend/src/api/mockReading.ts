@@ -1,4 +1,4 @@
-import { AnalyzeReadingPayload, CharacterSheet, ReadingModuleId, ReadingResult, Story } from './types';
+import { AnalyzeReadingPayload, CharacterSheet, PortraitPayload, PortraitResult, ReadingModuleId, ReadingResult, Story } from './types';
 
 // Placeholder pseudo-API output for local development without a backend —
 // shaped exactly like each mode's response schema (backend readingSchema.ts).
@@ -73,4 +73,11 @@ const MOCK_LATENCY_MS = 1200;
 export async function analyzeReadingMock(payload: AnalyzeReadingPayload): Promise<ReadingResult> {
   await new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS));
   return MOCK_READING_RESULTS[payload.module];
+}
+
+// Echoes the captured photo back as the "portrait" so the paint flow can be
+// exercised end to end without the image model.
+export async function generatePortraitMock(payload: PortraitPayload): Promise<PortraitResult> {
+  await new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS));
+  return { mime_type: 'image/jpeg', data: payload.photo };
 }

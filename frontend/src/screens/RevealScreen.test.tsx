@@ -30,6 +30,11 @@ jest.mock('expo-sharing', () => ({
   shareAsync: (...args: unknown[]) => mockShareAsync(...args),
 }));
 
+const mockGeneratePortrait = jest.fn();
+jest.mock('../api/reading', () => ({
+  generatePortrait: (...args: unknown[]) => mockGeneratePortrait(...args),
+}));
+
 const READING = MOCK_READING_RESULTS.hero;
 
 const PARTY_READING = MOCK_READING_RESULTS.party;
@@ -48,6 +53,7 @@ describe('RevealScreen', () => {
     mockCaptureRef.mockClear();
     mockSetStringAsync.mockClear();
     mockShareAsync.mockClear();
+    mockGeneratePortrait.mockReset();
     jest.spyOn(Share, 'share').mockResolvedValue({ action: Share.sharedAction });
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   });
@@ -127,6 +133,69 @@ describe('RevealScreen', () => {
 
     expect(screen.getByText('Placeholder — a clocktower that runs backwards.')).toBeTruthy();
     expect(screen.getByText('Placeholder — cannot resist monologuing to pigeons.')).toBeTruthy();
+  });
+
+  it('offers to paint a portrait on the identity page while the photos are in memory', () => {
+    render(<RevealScreen />);
+    reveal('hero-identity-page');
+
+    expect(screen.getByTestId('paint-portrait-button')).toBeTruthy();
+  });
+
+  it('paints the portrait from the first photo and shows it in place of the button', async () => {
+    mockGeneratePortrait.mockResolvedValue({ mime_type: 'image/png', data: 'cG5n' });
+    render(<RevealScreen />);
+    reveal('hero-identity-page');
+
+    fireEvent.press(screen.getByTestId('paint-portrait-button'));
+
+    expect(await screen.findByTestId('portrait-image')).toBeTruthy();
+    expect(mockGeneratePortrait).toHaveBeenCalledWith(
+      expect.objectContaining({ photo: 'base64-calm', villain: false, character: expect.objectContaining({ name: 'Wren Ashdown' }) })
+    );
+  });
+
+  it('paints a nemesis portrait in villain mode', async () => {
+    mockGeneratePortrait.mockResolvedValue({ mime_type: 'image/png', data: 'cG5n' });
+    useAppStore.setState({ reading: NEMESIS_READING, images: ['base64-solo'] });
+    render(<RevealScreen />);
+    reveal('villain-identity-page');
+
+    fireEvent.press(screen.getByTestId('paint-portrait-button'));
+
+    await screen.findByTestId('portrait-image');
+    expect(mockGeneratePortrait).toHaveBeenCalledWith(expect.objectContaining({ villain: true }));
+  });
+
+  it('shows a retry state when painting fails', async () => {
+    mockGeneratePortrait.mockRejectedValue(new Error('no image'));
+    render(<RevealScreen />);
+    reveal('hero-identity-page');
+
+    fireEvent.press(screen.getByTestId('paint-portrait-button'));
+
+    expect(await screen.findByText('Try Painting Again')).toBeTruthy();
+  });
+
+  it('hides the paint option for a reading reopened from history, since the photos are gone', () => {
+    useAppStore.setState({ images: [] });
+    render(<RevealScreen />);
+    reveal('hero-identity-page');
+
+    expect(screen.queryByTestId('paint-portrait-button')).toBeNull();
+  });
+
+  it('drops a portrait that finishes after the user has left, keeping process-and-discard', async () => {
+    let finish: (value: unknown) => void = () => {};
+    mockGeneratePortrait.mockReturnValue(new Promise((resolve) => (finish = resolve)));
+    const { unmount } = render(<RevealScreen />);
+    reveal('hero-identity-page');
+    fireEvent.press(screen.getByTestId('paint-portrait-button'));
+
+    unmount();
+    await act(async () => finish({ mime_type: 'image/png', data: 'cG5n' }));
+
+    expect(useAppStore.getState().portraits).toEqual({});
   });
 
   it('prompts for a rating after each completed reading instead of dropping straight back home', () => {

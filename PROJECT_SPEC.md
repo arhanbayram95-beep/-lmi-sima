@@ -36,6 +36,27 @@ rendered by `frontend/src/components/common/CharacterSheetCard.tsx`. The old
 oracle/arcana master cards, face-shape/golden-ratio/polarity/aura/rarity
 metrics, `MasterCard*`, `PolarityMeterBar` and `FaceShapeIcon` are removed.
 
+**Portraits (added 2026-11-06, product owner's explicit choice):** on the
+reveal deck's identity page, "Paint My Portrait" calls
+`POST /api/v1/reading/portrait` (same entitlement gate) with one captured
+photo and a few sheet fields, and gets back a stylized illustration of the
+user *as* that character from Gemini's image model
+(`backend/src/services/portraitService.ts`, `gemini-3.1-flash-image` with a
+`-lite` fallback; IDs taken from third-party 2026 guides, so verify them in
+the first live test). This is a deliberate, informed exception to the
+"never facial anatomy" half of the fiction rule. The product owner chose a
+likeness over a text-only portrait after the tradeoff was laid out: face
+data reaches a second model call, and App Review may read it as an AI-avatar
+feature. Guardrails live in `PORTRAIT_RULES`: painted, never photorealistic;
+never alter apparent age, skin tone, ethnicity, body or features; no
+beautifying or sexualizing; no text or trademarks; and if the photo isn't
+one adult face, paint a gear-and-companion emblem instead of a person. It is
+on demand only (never part of the reading call) and memory-only like the
+photos: a portrait that finishes after the user has left the reveal screen
+is dropped. A painted portrait replaces the selfie on the share card when
+"include photo" is on. The text sheet is unchanged and still never
+describes the person.
+
 **Party mode replaces Relationship Harmony and drops pair scoring entirely.**
 No compatibility or synergy score exists; both heroes must come out equally
 appealing, and nothing may describe how the two real people relate. This also

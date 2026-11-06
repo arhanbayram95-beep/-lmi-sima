@@ -10,9 +10,8 @@ interface ShareCardProps {
   // module produced them, it just lays out whatever it's handed. An empty
   // selection still renders a valid (if sparse) card rather than erroring.
   sections: ShareableSection[];
-  // Base64 photo, opt-in only — the reading itself never requires a photo
-  // on the card, this is purely a user preference for a more personal
-  // share.
+  // Image URI (the painted portrait, or the captured photo as a data URI),
+  // opt-in only — purely a user preference for a more personal share.
   photo?: string;
   // Which of the locked SHARE_CARD_PALETTES (see theme.ts) the user picked
   // in the builder. Defaults to the app's own crimson-on-obsidian look.
@@ -74,7 +73,7 @@ const ShareCard = forwardRef<View, ShareCardProps>(
         <View style={[styles.body, isStory && styles.bodyStory]}>
           {photo && (
             <Image
-              source={{ uri: `data:image/jpeg;base64,${photo}` }}
+              source={{ uri: photo }}
               style={[styles.photo, isStory && styles.photoStory]}
               resizeMode="cover"
               testID="share-card-photo"

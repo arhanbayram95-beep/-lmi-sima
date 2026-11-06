@@ -206,3 +206,40 @@ export interface AnalyzeReadingPayload {
   photos: string[];
   module: ReadingModuleId;
 }
+
+// Only the sheet fields the portrait prompt uses — the backend rejects
+// anything bigger (routes/reading.ts portraitBodySchema).
+export interface PortraitPayload {
+  photo: string;
+  villain: boolean;
+  character: {
+    name: string;
+    epithet: string;
+    lineage: string;
+    character_class: string;
+    alignment: string;
+    starting_gear: string[];
+    companion_species: string;
+  };
+}
+
+export interface PortraitResult {
+  mime_type: string;
+  data: string;
+}
+
+export function portraitPayload(sheet: CharacterSheet, photo: string, villain: boolean): PortraitPayload {
+  return {
+    photo,
+    villain,
+    character: {
+      name: sheet.name,
+      epithet: sheet.epithet,
+      lineage: sheet.lineage,
+      character_class: sheet.character_class,
+      alignment: sheet.alignment,
+      starting_gear: sheet.starting_gear.slice(0, 5),
+      companion_species: sheet.companion.species,
+    },
+  };
+}
