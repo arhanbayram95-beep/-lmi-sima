@@ -1,16 +1,16 @@
-# Face Reader — AI Physiognomy Tool (Ilm-i Sima)
+# Questborn — AI Hero Creator (Ilm-i Sima)
 
-A React Native mobile app that gives users playful, AI-generated character and expression analysis from their own photos. Built for the US/EU entertainment-app market — think Co-Star/Nebula-style "vibe reading," not a clinical or diagnostic product. See `PROJECT_SPEC.md` for the full product spec and `DESIGN.md` for the visual system.
+A React Native mobile app that turns your selfies into original, fictional tabletop-RPG characters: a full character sheet, backstory, and opening quest. Formerly "Face Reader"; rebuilt on 2026-11-06 after an App Store 4.3(b) rejection (see `PROJECT_SPEC.md` §0). See `PROJECT_SPEC.md` for the full product spec and `DESIGN.md` for the visual system.
 
 ---
 
 ## Core Features
 
-* **Three reading modules**, all sharing the same capture mechanic, each with its own AI system prompt:
-  * **Character Analysis** — 3 photos (Calm, Bright, Deep expressions) of yourself.
-  * **Relationship Harmony** — 2 photos (you, then another person).
-  * **Career Match** — 1 photo of yourself.
-* **Multimodal AI Vision** — Google Gemini (`gemini-flash-latest`, Google's auto-updating flash alias) generates the structured reading. Anthropic Claude remains a candidate under pricing evaluation (see `PROJECT_SPEC.md` §4); the AI-calling code is isolated in `backend/src/services/` so switching providers again stays a contained change.
+* **Three creation modes**, all sharing the same capture mechanic, each with its own AI system prompt:
+  * **Forge a Hero** — 3 poses (Calm, Battle Cry, Brooding) become one character sheet and a quest hook.
+  * **Assemble a Party** — 2 photos (you, then a friend) become a two-hero party with a combo move.
+  * **Summon Your Nemesis** — 1 photo becomes a campy villain twin.
+* **Multimodal AI Vision** — Google Gemini (`gemini-flash-latest`, Google's auto-updating flash alias) generates the structured character sheet. Anthropic Claude remains a candidate under pricing evaluation (see `PROJECT_SPEC.md` §4); the AI-calling code is isolated in `backend/src/services/` so switching providers again stays a contained change.
 * **Real on-device face detection** — `react-native-vision-camera` + `react-native-vision-camera-face-detector` (ML Kit) reject non-face frames locally, before `capturePhoto` or any network call, per `PROJECT_SPEC.md` §2.2. Verified end-to-end on a physical Android device (2026-08-04). This replaced `expo-camera`, which is why the app now needs an EAS dev-client build instead of plain Expo Go — see "Running on a physical device" below.
 * **Privacy-first (process-and-discard)** — captured photos live in memory only, on both the client and the server, and are purged immediately after the API response returns. No image ever touches disk or a database.
 * **Story-ready share cards** — a builder UI (`ShareOptionsModal`) lets the user pick which reading sections to include and a color palette for the card, with an opt-in toggle to embed their captured photo, then renders a `react-native-view-shot` card sized to the content. Plain-text "Quick Message" and "Copy Text" options are also available, and image sharing goes through `expo-sharing` (needed for a real cross-platform file attachment — React Native's built-in `Share.share({ url })` is iOS-only).
@@ -66,7 +66,7 @@ Then start it:
 npm run dev
 ```
 
-You should see `Face Reader backend listening on port 3000`. Leave this running in its own terminal.
+You should see `Questborn backend listening on port 3000`. Leave this running in its own terminal.
 
 > **Model note:** the default is `gemini-flash-latest` (in `backend/src/services/readingService.ts`) — Google's auto-updating alias for the current recommended flash model, chosen so a dated model being retired doesn't need another manual swap. Two dated models were tried and dropped first: `gemini-2.0-flash` returned a `429` (zero free-tier quota), and `gemini-2.5-flash` started returning a `404` ("no longer available to new users") on newly-created API keys as of 2026-07-28. If you hit quota or availability errors, that's the first thing to check.
 

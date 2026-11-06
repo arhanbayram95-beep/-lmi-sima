@@ -32,6 +32,6 @@ export function buildContactMailUrl(ctx: ContactMailContext): string {
     ctx.signOff,
   ].join('\n');
 
-  const subject = 'Face Reader Support Request';
+  const subject = 'Questborn Support Request';
   return `mailto:${LEGAL_CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }

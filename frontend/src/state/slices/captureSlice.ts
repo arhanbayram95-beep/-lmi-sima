@@ -5,8 +5,8 @@ import { ReadingModuleId } from '../../api/types';
 // never persisted, and must be cleared once the backend response returns.
 // A plain ordered array rather than a fixed rest/grin/stern record because
 // the photo count and meaning of each slot now vary per module (see
-// MODULE_PHOTO_COUNTS in api/types.ts) — Character Analysis captures 3,
-// Relationship Harmony 2, Career Match 1.
+// MODULE_PHOTO_COUNTS in api/types.ts) — Hero captures 3,
+// Party 2, Nemesis 1.
 export interface CaptureSlice {
   images: string[];
   addImage: (base64: string) => void;
@@ -25,6 +25,6 @@ export const createCaptureSlice: StateCreator<CaptureSlice> = (set) => ({
   images: [],
   addImage: (base64) => set((state) => ({ images: [...state.images, base64] })),
   clearImages: () => set({ images: [] }),
-  selectedModule: 'three-expression',
+  selectedModule: 'hero',
   setSelectedModule: (module) => set({ selectedModule: module }),
 });

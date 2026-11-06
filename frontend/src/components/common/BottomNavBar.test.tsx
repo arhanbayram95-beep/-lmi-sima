@@ -10,13 +10,13 @@ describe('BottomNavBar', () => {
 
   it('navigates to the analyze hub when Analyze is pressed', () => {
     render(<BottomNavBar active="analyze" />);
-    fireEvent.press(screen.getByLabelText('Analyze'));
+    fireEvent.press(screen.getByLabelText('Create'));
     expect(useAppStore.getState().screen).toBe('analyze');
   });
 
   it('navigates to results when Results is pressed', () => {
     render(<BottomNavBar active="analyze" />);
-    fireEvent.press(screen.getByLabelText('Results'));
+    fireEvent.press(screen.getByLabelText('Heroes'));
     expect(useAppStore.getState().screen).toBe('results');
   });
 
@@ -29,6 +29,6 @@ describe('BottomNavBar', () => {
   it('marks the given tab as selected and leaves the rest unselected', () => {
     render(<BottomNavBar active="settings" />);
     expect(screen.getByLabelText('Settings').props.accessibilityState.selected).toBe(true);
-    expect(screen.getByLabelText('Analyze').props.accessibilityState.selected).toBe(false);
+    expect(screen.getByLabelText('Create').props.accessibilityState.selected).toBe(false);
   });
 });

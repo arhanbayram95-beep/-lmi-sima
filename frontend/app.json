@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Face Reader - AI Physiognomy Tool",
+    "name": "Questborn",
     "slug": "arhan",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,7 +10,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.arhanbayram.facereader",
       "infoPlist": {
-        "NSCameraUsageDescription": "Face Reader uses your camera to capture your photos for your reading. Photos are processed in memory and never stored.",
+        "NSCameraUsageDescription": "Questborn uses your camera to take the photos your fantasy character is based on. Photos are processed in memory and never stored.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -43,7 +43,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Face Reader uses your photo library so you can choose an existing photo for your reading. Photos are processed in memory and never stored.",
+          "photosPermission": "Questborn uses your photo library so you can choose an existing photo to base your character on. Photos are processed in memory and never stored.",
           "microphonePermission": false
         }
       ]

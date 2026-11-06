@@ -1,4 +1,4 @@
-const PAYLOAD = { photos: ['base64-calm', 'base64-bright', 'base64-deep'], module: 'three-expression' as const };
+const PAYLOAD = { photos: ['base64-calm', 'base64-bright', 'base64-deep'], module: 'hero' as const };
 
 describe('analyzeReading (real API mode)', () => {
   beforeEach(() => {
@@ -198,19 +198,19 @@ describe('analyzeReading (pseudo-API mode)', () => {
     const { analyzeReading } = require('./reading');
     const result = await analyzeReading(PAYLOAD);
 
-    expect(result.module).toBe('character_analysis');
-    expect(result.oracle_match_card.archetype_tag).toBeTruthy();
+    expect(result.module).toBe('hero_sheet');
+    expect(result.module === 'hero_sheet' && result.hero.name).toBeTruthy();
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it('returns a different canned reading per module', async () => {
     const { analyzeReading } = require('./reading');
 
-    const threeExpression = await analyzeReading({ ...PAYLOAD, module: 'three-expression' });
-    const relationship = await analyzeReading({ ...PAYLOAD, module: 'relationship-harmony' });
-    const career = await analyzeReading({ ...PAYLOAD, module: 'career-match' });
+    const hero = await analyzeReading({ ...PAYLOAD, module: 'hero' });
+    const party = await analyzeReading({ ...PAYLOAD, module: 'party' });
+    const nemesis = await analyzeReading({ ...PAYLOAD, module: 'nemesis' });
 
-    const kinds = new Set([threeExpression.module, relationship.module, career.module]);
-    expect(kinds).toEqual(new Set(['character_analysis', 'relationship_harmony', 'career_path']));
+    const kinds = new Set([hero.module, party.module, nemesis.module]);
+    expect(kinds).toEqual(new Set(['hero_sheet', 'party_sheet', 'nemesis_sheet']));
   });
 });

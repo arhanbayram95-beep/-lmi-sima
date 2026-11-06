@@ -1,9 +1,9 @@
 import React from 'react';
-import { Image, ImageSourcePropType, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomNavBar from '../components/common/BottomNavBar';
 import FadeInView from '../components/common/FadeInView';
 import GlassCard from '../components/common/GlassCard';
-import { ReadingModuleId } from '../api/types';
+import { MODULE_PHOTO_COUNTS, ReadingModuleId } from '../api/types';
 import { useTranslation } from '../i18n/useTranslation';
 import { TranslationKey } from '../i18n/translations';
 import { AppScreen } from '../state/slices/navigationSlice';
@@ -12,54 +12,35 @@ import { Theme } from '../ui/theme';
 
 interface AnalysisModule {
   id: ReadingModuleId;
+  icon: string;
   titleKey: TranslationKey;
-  card: ImageSourcePropType;
+  descriptionKey: TranslationKey;
   targetScreen: AppScreen;
   available: boolean;
 }
 
-// Full module cards (frontend/assets/modules/) — self-contained artwork with
-// background, title, description, and CTA already composed at design time,
-// at a fixed 385x172 aspect ratio (the PNGs are @2x exports at 770x344 —
-// source pixel density only affects sharpness; the rendered size is always
-// pinned to an explicit width/height computed from the screen, see
-// cardWidth/cardHeight in AnalyzeScreen below).
-// Static requires, not a dynamic map lookup, because Metro needs
-// require() calls to be statically analyzable.
-const MODULE_CARD_ASPECT_RATIO = 385 / 172;
-
-// Near-zero — the cards should read as almost edge-to-edge, with barely a
-// sliver of margin left. Drives both the card width calculation and the
-// screen's horizontal padding so the two stay in sync.
-const HORIZONTAL_MARGIN = 4;
-const MODULE_CARDS: Record<ReadingModuleId, ImageSourcePropType> = {
-  'three-expression': require('../../assets/modules/character-analysis.png'),
-  'relationship-harmony': require('../../assets/modules/relationship-harmony.png'),
-  'career-match': require('../../assets/modules/career-match.png'),
-};
-
-// Add future modules here — nothing else needs to change to surface them.
-// Each `id` must have a matching system prompt in
-// backend/src/services/systemPrompt.ts (see READING_SYSTEM_PROMPTS).
 const MODULES: AnalysisModule[] = [
   {
-    id: 'three-expression',
-    titleKey: 'analyze.module.threeExpression.title',
-    card: MODULE_CARDS['three-expression'],
+    id: 'hero',
+    icon: '🛡️',
+    titleKey: 'analyze.module.hero.title',
+    descriptionKey: 'analyze.module.hero.description',
     targetScreen: 'capture',
     available: true,
   },
   {
-    id: 'relationship-harmony',
-    titleKey: 'analyze.module.relationshipHarmony.title',
-    card: MODULE_CARDS['relationship-harmony'],
+    id: 'party',
+    icon: '⚔️',
+    titleKey: 'analyze.module.party.title',
+    descriptionKey: 'analyze.module.party.description',
     targetScreen: 'capture',
     available: true,
   },
   {
-    id: 'career-match',
-    titleKey: 'analyze.module.careerMatch.title',
-    card: MODULE_CARDS['career-match'],
+    id: 'nemesis',
+    icon: '😈',
+    titleKey: 'analyze.module.nemesis.title',
+    descriptionKey: 'analyze.module.nemesis.description',
     targetScreen: 'capture',
     available: true,
   },
@@ -69,16 +50,6 @@ export default function AnalyzeScreen() {
   const goToScreen = useAppStore((s) => s.goToScreen);
   const setSelectedModule = useAppStore((s) => s.setSelectedModule);
   const t = useTranslation();
-
-  // Computed in JS rather than a `width: '100%'` style: percentage width
-  // does not reliably resolve down through the ScrollView -> Animated.View
-  // (FadeInView) -> Pressable -> Image chain here, and was rendering each
-  // card at close to its native pixel size, overflowing off the right edge
-  // of the screen instead of filling it. An explicit pixel width sidesteps
-  // that chain entirely.
-  const { width: windowWidth } = useWindowDimensions();
-  const cardWidth = windowWidth - HORIZONTAL_MARGIN * 2;
-  const cardHeight = cardWidth / MODULE_CARD_ASPECT_RATIO;
 
   return (
     <View style={styles.container} testID="analyze-screen">
@@ -104,11 +75,16 @@ export default function AnalyzeScreen() {
                 testID={`analyze-module-${module.id}`}
                 style={!module.available && styles.moduleCardDisabled}
               >
-                <Image
-                  source={module.card}
-                  style={[styles.moduleCard, { width: cardWidth, height: cardHeight }]}
-                  resizeMode="contain"
-                />
+                <GlassCard style={styles.moduleCard}>
+                  <Text style={styles.moduleIcon}>{module.icon}</Text>
+                  <View style={styles.moduleText}>
+                    <Text style={styles.moduleTitle}>{title}</Text>
+                    <Text style={styles.moduleDescription}>{t(module.descriptionKey)}</Text>
+                    <Text style={styles.modulePhotos}>
+                      {t('analyze.photoCount', { n: MODULE_PHOTO_COUNTS[module.id] })}
+                    </Text>
+                  </View>
+                </GlassCard>
                 {!module.available && (
                   <View style={styles.comingSoonBadge}>
                     <Text style={styles.comingSoonBadgeText}>{t('analyze.comingSoonBadge')}</Text>
@@ -140,11 +116,6 @@ const styles = StyleSheet.create({
     // paddingTop stays at spacing.xl — there's no SafeAreaView in this app,
     // so this doubles as the status-bar/notch clearance on every screen,
     // not just visual breathing room.
-    // paddingHorizontal deliberately does NOT reuse HORIZONTAL_MARGIN (that
-    // near-zero value is only for the edge-to-edge module card art below) —
-    // it matches Theme.spacing.gutter, same as ResultsScreen/SettingsScreen
-    // headers, so the title sits at the same horizontal position on all
-    // three tabs instead of reading as misaligned against them.
     paddingTop: Theme.spacing.xl,
     paddingHorizontal: Theme.spacing.gutter,
     paddingBottom: Theme.spacing.xs,
@@ -160,16 +131,39 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
   },
   scrollContent: {
-    paddingHorizontal: HORIZONTAL_MARGIN,
+    paddingHorizontal: Theme.spacing.gutter,
     paddingBottom: 120,
+    gap: Theme.spacing.sm,
+  },
+  moduleCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Theme.spacing.sm,
+    paddingVertical: Theme.spacing.md,
+  },
+  moduleIcon: {
+    fontSize: 40,
+  },
+  moduleText: {
+    flex: 1,
     gap: 4,
   },
-  // Full self-contained card artwork (background, title, description, and
-  // CTA baked in at design time) — full width, edge-to-edge, like the
-  // original dynamic hub cards. width/height are computed in JS (see
-  // cardWidth/cardHeight above) and merged in at render time.
-  moduleCard: {
-    alignSelf: 'center',
+  moduleTitle: {
+    ...Theme.typography.headlineMd,
+    fontSize: 20,
+    color: Theme.colors.accent.goldSecondary,
+  },
+  moduleDescription: {
+    ...Theme.typography.bodyMd,
+    fontSize: 14,
+    lineHeight: 20,
+    color: Theme.colors.text.secondary,
+  },
+  modulePhotos: {
+    ...Theme.typography.labelSm,
+    fontSize: 11,
+    color: Theme.colors.text.muted,
+    textTransform: 'uppercase',
   },
   moduleCardDisabled: {
     opacity: 0.55,

@@ -1538,3 +1538,45 @@ was actually run throughout.
     branch (`AnalyzingScreen.test.tsx`). `tsc --noEmit` clean on both
     sides; backend 10/10 suites, 69/69 tests; frontend 30/30 suites,
     210/210 tests.
+
+## Phase 11 — Questborn pivot (App Store 4.3(b) rejection)
+
+- [x] **11.1 Rebuilt the app as "Questborn – AI Hero Creator"** — App Review
+  rejected Face Reader under Guideline 4.3(b) (fortune telling/astrology is a
+  saturated category) and asked 2.1 face-data questions. Product owner chose
+  to rebuild as a tabletop-RPG character generator. PROJECT_SPEC.md §0 is the
+  authoritative description; CLAUDE.md's Entertainment Framing updated to
+  match (fiction-only rule, IP rule, oracle/arcana style retired).
+  - Backend: `readingSchema.ts` rewritten around one shared `CharacterSheet`
+    shape across three modes (`hero` 3 photos / `party` 2 / `nemesis` 1, same
+    photo counts as before so capture is reused). `systemPrompt.ts`
+    rewritten. **Flagged per CLAUDE.md:** `SAFETY_RULES` carried over with
+    the original protections intact, adapted to fiction (no-face and minor
+    fallbacks now steer the sheet generic instead of writing a summary
+    note; "body size" added to the never-infer list), plus new
+    `FICTION_RULE` and `IP_RULE`. New `systemPrompt.test.ts` guards that
+    every mode keeps them. Shared test fixtures in `backend/tests/fixtures/`.
+  - Relationship Harmony's pair scoring is gone. Party mode has no score of
+    any kind, which also resolves §2.3's open legal item.
+  - Legal: privacy policy and terms rewritten for Questborn
+    (`routes/legal.ts`, regenerated `legal-static/`). Also fixed three
+    accuracy problems App Review would catch: Google's abuse-monitoring
+    retention on the paid Gemini tier (stated as up to 55 days, not
+    "seconds"), the reading history being in-memory only (not "until you
+    clear it"), and an explicit description of the on-device face-presence
+    check. Added a no-affiliation clause for tabletop publishers.
+  - Frontend: new `CharacterSheetCard.tsx` (identity, ability scores,
+    abilities/gear/companion, backstory/roleplay, story, feature list);
+    RevealScreen pages through it. `MasterCard`, `MasterCardStats`,
+    `PolarityMeterBar`, `FaceShapeIcon` and the baked-text module PNGs
+    deleted; Analyze hub cards are now coded. Capture prompts are now
+    Calm/Battle Cry/Brooding, Hero One/Two, Evil Twin. All concept-bearing
+    copy replaced in all 10 languages; new `sheet.*` keys. Brand renamed
+    everywhere user-visible (`app.json` name and permission strings, logo
+    wordmark, share/support text). Icon and logo assets regenerated as a gold
+    d20 on the locked palette. Bundle ID deliberately unchanged.
+  - STORE_LISTING.md rewritten (no trademarks in name/keywords, App Review
+    notes, new open items: update the live Google Sites policy pages, reply
+    to 2.1, check name availability, new screenshots).
+  - `tsc --noEmit` clean on both sides; backend 11/11 suites, frontend 30/30
+    suites, all green.

@@ -16,7 +16,7 @@ describe('NoFaceDetectedScreen', () => {
 
   it('routes to the analyze hub on back home', () => {
     render(<NoFaceDetectedScreen />);
-    fireEvent.press(screen.getByText('Back to Analyze'));
+    fireEvent.press(screen.getByText('Back to Create'));
     expect(useAppStore.getState().screen).toBe('analyze');
   });
 });

@@ -99,7 +99,7 @@ describe('SettingsScreen', () => {
 
     expect(Share.share).toHaveBeenCalledTimes(1);
     const [{ message }] = (Share.share as jest.Mock).mock.calls[0];
-    expect(message).toMatch(/Face Reader/);
+    expect(message).toMatch(/Questborn/);
   });
 
   it('re-renders every screen label in the newly selected language', () => {

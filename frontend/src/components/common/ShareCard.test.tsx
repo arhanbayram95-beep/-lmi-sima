@@ -5,12 +5,12 @@ import { ShareableSection } from '../../api/types';
 import { shareCardPalette } from '../../ui/theme';
 
 const SECTIONS: ShareableSection[] = [
-  { id: 'work', title: 'Career Archetype', body: 'Strategic Innovator — You read as someone people trust instantly.' },
+  { id: 'work', title: 'Signature Abilities', body: 'Encore of Thunder · Borrowed Courage' },
   { id: 'domains', title: 'Recommended Industries', body: 'Engineering & R&D' },
 ];
 
 const STORY_SECTIONS: ShareableSection[] = [
-  { id: 'work', title: 'Career Archetype', body: 'Strategic Innovator' },
+  { id: 'work', title: 'Signature Abilities', body: 'Encore of Thunder' },
   { id: 'catchphrase', title: 'Work Catchphrase', body: '"Built the Spreadsheet, Ran the Room"' },
   { id: 'domains', title: 'Recommended Industries', body: 'Engineering & R&D' },
   { id: 'growth', title: 'Strengths & Growth Areas', body: 'Structured Thinking' },
@@ -20,14 +20,14 @@ const STORY_SECTIONS: ShareableSection[] = [
 describe('ShareCard', () => {
   it('renders every selected section', () => {
     render(<ShareCard sections={SECTIONS} />);
-    expect(screen.getByText('Career Archetype')).toBeTruthy();
-    expect(screen.getByText(/Strategic Innovator/)).toBeTruthy();
+    expect(screen.getByText('Signature Abilities')).toBeTruthy();
+    expect(screen.getByText(/Encore of Thunder/)).toBeTruthy();
     expect(screen.getByText('Recommended Industries')).toBeTruthy();
   });
 
   it('renders only the sections it was given, not any others', () => {
     render(<ShareCard sections={[SECTIONS[0]]} />);
-    expect(screen.getByText('Career Archetype')).toBeTruthy();
+    expect(screen.getByText('Signature Abilities')).toBeTruthy();
     expect(screen.queryByText('Recommended Industries')).toBeNull();
   });
 
@@ -67,8 +67,8 @@ describe('ShareCard', () => {
   it('story layout makes the first section a hero and caps the rest at 3 compact badges', () => {
     render(<ShareCard sections={STORY_SECTIONS} layout="story" />);
     expect(screen.getByTestId('share-card-hero')).toBeTruthy();
-    expect(screen.getByText('Career Archetype')).toBeTruthy();
-    expect(screen.getByText('Strategic Innovator')).toBeTruthy();
+    expect(screen.getByText('Signature Abilities')).toBeTruthy();
+    expect(screen.getByText('Encore of Thunder')).toBeTruthy();
     // First 3 of the remaining 4 sections become badges...
     expect(screen.getByText('Work Catchphrase')).toBeTruthy();
     expect(screen.getByText('Recommended Industries')).toBeTruthy();
@@ -95,7 +95,7 @@ describe('ShareCard', () => {
 
     expect(screen.getByTestId('share-card-photo')).toBeTruthy();
     expect(screen.getByTestId('share-card-hero')).toBeTruthy();
-    expect(screen.getByText('Strategic Innovator')).toBeTruthy();
+    expect(screen.getByText('Encore of Thunder')).toBeTruthy();
   });
 
   it('drops to a single badge when a photo is also present in story layout, to guarantee the hero text room', () => {
@@ -108,10 +108,10 @@ describe('ShareCard', () => {
 
   it('caps the hero text to fewer lines when a photo is present, more when it is not', () => {
     const { rerender } = render(<ShareCard sections={STORY_SECTIONS} photo="ZmFrZS1iYXNlNjQ=" layout="story" />);
-    expect(screen.getByText('Strategic Innovator').props.numberOfLines).toBe(3);
+    expect(screen.getByText('Encore of Thunder').props.numberOfLines).toBe(3);
 
     rerender(<ShareCard sections={STORY_SECTIONS} layout="story" />);
-    expect(screen.getByText('Strategic Innovator').props.numberOfLines).toBe(5);
+    expect(screen.getByText('Encore of Thunder').props.numberOfLines).toBe(5);
   });
 
   it('caps the photo to a fixed height instead of a full square specifically in story layout', () => {

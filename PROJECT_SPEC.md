@@ -1,5 +1,65 @@
 # Product Specification & Architecture Document (PRD)
-## Project Name: Face Reader - AI Physiognomy Tool *(internally `Ilm-i Sima` — see §5 Naming Notes)*
+## Project Name: Questborn – AI Hero Creator *(internally `Ilm-i Sima` — see §5 Naming Notes)*
+
+---
+
+## 0. Questborn Pivot (2026-11-06) — AUTHORITATIVE, supersedes conflicting text below
+
+**Why:** App Store review rejected "Face Reader - AI Physiognomy Tool" under
+**Guideline 4.3(b) (Spam: saturated category)** — "astrology, horoscopes,
+palm reading, fortune telling or zodiac reports". Reading character from a
+face is fortune telling in Apple's taxonomy, so no wording change rescues the
+old concept. The product owner chose to rebuild it as a tabletop-RPG
+character generator ("like a DnD character generator").
+
+**What the product is now:** the user's photos are *costume/pose reference*
+for an **original fictional tabletop-RPG character**. The output is a
+character sheet (class, lineage, alignment, six ability scores, HP/AC,
+signature abilities, gear, companion, roleplay notes, backstory) plus a short
+story. Nothing describes, analyzes, scores or predicts anything about the
+real person. That rule is the product's reason to exist and is enforced in
+`backend/src/services/systemPrompt.ts` (`FICTION_RULE`) and guarded by
+`backend/tests/unit/systemPrompt.test.ts`.
+
+**Modes** (internal ids → result `module` discriminator; photo counts unchanged
+from the old modules so the capture flow is reused as-is):
+
+| Mode | id | Photos | Result |
+|---|---|---|---|
+| Forge a Hero | `hero` | 3 poses: Calm, Battle Cry, Brooding | `hero_sheet`: one `CharacterSheet` + `quest_hook` story |
+| Assemble a Party | `party` | 2: you (front cam), a friend with permission (back cam) | `party_sheet`: two sheets, `combo_move`, `party_dynamic`, `shared_quest` |
+| Summon Your Nemesis | `nemesis` | 1 | `nemesis_sheet`: a campy villain sheet, `evil_scheme`, `lair`, `comedic_weakness`, `showdown` |
+
+The response shapes live in `backend/src/services/readingSchema.ts`, mirrored
+in `frontend/src/api/types.ts`. One `CharacterSheet` shape serves every mode,
+rendered by `frontend/src/components/common/CharacterSheetCard.tsx`. The old
+oracle/arcana master cards, face-shape/golden-ratio/polarity/aura/rarity
+metrics, `MasterCard*`, `PolarityMeterBar` and `FaceShapeIcon` are removed.
+
+**Party mode replaces Relationship Harmony and drops pair scoring entirely.**
+No compatibility or synergy score exists; both heroes must come out equally
+appealing, and nothing may describe how the two real people relate. This also
+closes §2.3's open item about the old Privacy Policy claim on pair scoring.
+
+**IP rule:** generic tabletop vocabulary only (SRD-style classes, the six
+abilities, the nine-alignment grid). No trademarked game names, settings,
+branded monsters, or existing characters, in copy or generated output. The
+Terms state the app is not affiliated with any tabletop game publisher.
+Never market it as a "D&D" generator.
+
+**Tone:** a generous, funny game master. The 2026-08-15 oracle/arcana house
+style (§1) is retired. Its replacement is fantasy-adventure vocabulary,
+never fortune-telling, astrology, tarot, or "what your face reveals" framing.
+
+**Branding:** name "Questborn", App Store name "Questborn: AI Hero Creator",
+app icon/logo a gold d20 on the locked Crimson/Obsidian palette (DESIGN.md
+tokens unchanged). The bundle ID (`com.arhanbayram.facereader`) is kept on
+purpose: it is invisible to users, and changing it means a new App Store
+Connect record.
+
+**Unchanged:** stack, process-and-discard privacy, 18+ age gate, consent step,
+on-device face-presence check before capture, RevenueCat weekly/monthly
+subscription with frictionless cancel, 10-language UI.
 **Tech Blueprint:** React Native + TypeScript (Frontend) | Google Gemini (AI Core — see §4; provider still under evaluation against Anthropic Claude on pricing)
 **Target Market:** US & EU (primary), positioned in the mainstream "modern mystic" app category (Co-Star / Nebula / Sanctuary / Faladdin peer set)
 
@@ -468,6 +528,10 @@ decision for the product owner, not applied here.
 ---
 
 ## 5. Naming Notes
+
+**Superseded 2026-11-06:** the public name is now **"Questborn"** ("Questborn:
+AI Hero Creator" in the App Store). See §0. The 2026-07-24 decision below is
+kept for history only.
 
 **Decision (2026-07-24):** the public-facing name is **"Face Reader - AI
 Physiognomy Tool"** — "Face Reader" as the short form used in-app (logo
