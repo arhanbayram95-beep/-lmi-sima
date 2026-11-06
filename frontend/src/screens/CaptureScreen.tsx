@@ -46,24 +46,24 @@ interface CaptureStep {
   titleKey: TranslationKey;
   promptKey: TranslationKey;
   // Front camera for the user's own photo, back camera for photographing
-  // someone else — only Relationship Harmony's second photo uses 'back'.
+  // someone else — only the Party mode's second photo uses 'back'.
   facing: CameraPosition;
 }
 
-// One sequence per module, length matching MODULE_PHOTO_COUNTS
-// (api/types.ts) — Character Analysis captures 3 of the user, Relationship
-// Harmony 1 of the user then 1 of someone else, Career Match 1 of the user.
+// One sequence per mode, length matching MODULE_PHOTO_COUNTS
+// (api/types.ts) — Hero captures 3 poses of the user, Party 1 of the user
+// then 1 of a friend, Nemesis 1 of the user.
 const MODULE_STEPS: Record<ReadingModuleId, CaptureStep[]> = {
-  'three-expression': [
-    { key: 'rest', titleKey: 'capture.step.rest.title', promptKey: 'capture.step.rest.prompt', facing: 'front' },
-    { key: 'grin', titleKey: 'capture.step.grin.title', promptKey: 'capture.step.grin.prompt', facing: 'front' },
-    { key: 'stern', titleKey: 'capture.step.stern.title', promptKey: 'capture.step.stern.prompt', facing: 'front' },
+  hero: [
+    { key: 'calm', titleKey: 'capture.step.calm.title', promptKey: 'capture.step.calm.prompt', facing: 'front' },
+    { key: 'battleCry', titleKey: 'capture.step.battleCry.title', promptKey: 'capture.step.battleCry.prompt', facing: 'front' },
+    { key: 'brooding', titleKey: 'capture.step.brooding.title', promptKey: 'capture.step.brooding.prompt', facing: 'front' },
   ],
-  'relationship-harmony': [
+  party: [
     { key: 'person1', titleKey: 'capture.step.person1.title', promptKey: 'capture.step.person1.prompt', facing: 'front' },
     { key: 'person2', titleKey: 'capture.step.person2.title', promptKey: 'capture.step.person2.prompt', facing: 'back' },
   ],
-  'career-match': [
+  nemesis: [
     { key: 'solo', titleKey: 'capture.step.solo.title', promptKey: 'capture.step.solo.prompt', facing: 'front' },
   ],
 };
@@ -322,7 +322,7 @@ export default function CaptureScreen() {
     }
 
     // Extra settle time before the session is touched again — another
-    // capturePhoto() call, or (for Relationship Harmony) a front/back
+    // capturePhoto() call, or (for Party mode) a front/back
     // device switch — while isCapturing (and so the shutter) stays
     // disabled. Same class of native session race as the crash this file's
     // sourceMode comment describes, just on the success path instead of a

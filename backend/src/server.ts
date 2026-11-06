@@ -25,9 +25,9 @@ async function main(): Promise<void> {
   const secondaryClient = env.geminiApiKeySecondary ? createGeminiClient(env.geminiApiKeySecondary) : undefined;
   const readingModelClients: Record<ReadingModuleId, ReadingModelClient[]> = secondaryClient
     ? {
-        'three-expression': [primaryClient, secondaryClient],
-        'relationship-harmony': [secondaryClient, primaryClient],
-        'career-match': [secondaryClient, primaryClient],
+        hero: [primaryClient, secondaryClient],
+        party: [secondaryClient, primaryClient],
+        nemesis: [secondaryClient, primaryClient],
       }
     : everyModule([primaryClient]);
   // Undefined (not an empty-key client) whenever REVENUECAT_API_KEY isn't
@@ -38,10 +38,10 @@ async function main(): Promise<void> {
 
   // Port 3000, per project convention — the Expo frontend owns 8081.
   await app.listen({ port: env.port, host: '0.0.0.0' });
-  console.log(`Face Reader backend listening on port ${env.port}`);
+  console.log(`Questborn backend listening on port ${env.port}`);
 }
 
 main().catch((error) => {
-  console.error('Failed to start Face Reader backend:', error);
+  console.error('Failed to start Questborn backend:', error);
   process.exit(1);
 });

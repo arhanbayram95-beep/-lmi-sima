@@ -97,7 +97,7 @@ describe('CaptureScreen', () => {
     mockLaunchImageLibraryAsync.mockReset();
     mockHasPermission = true;
     latestOnFacesDetected = undefined;
-    useAppStore.setState({ screen: 'capture', images: [], selectedModule: 'three-expression' });
+    useAppStore.setState({ screen: 'capture', images: [], selectedModule: 'hero' });
   });
 
   it('pre-warms the backend on mount, to absorb a Render cold start during framing', () => {
@@ -156,7 +156,7 @@ describe('CaptureScreen', () => {
     // The step only actually advances once the post-capture settle delay
     // (handleCapture) elapses — images updates earlier than that, so the
     // step text is the reliable signal the full cycle has completed.
-    await screen.findByText('Grin', {}, CAPTURE_SETTLE_WAIT);
+    await screen.findByText('Battle Cry', {}, CAPTURE_SETTLE_WAIT);
     expect(useAppStore.getState().images).toEqual(['AQID']);
     // Still on the live camera for step 2 — no re-ask, no remount.
     expect(screen.getByTestId('camera-preview')).toBeTruthy();
@@ -190,22 +190,22 @@ describe('CaptureScreen', () => {
     expect(useAppStore.getState().images).toEqual([]);
   });
 
-  it('captures all three expressions in order and stores them, then moves to analysis', async () => {
+  it('captures all three hero poses in order and stores them, then moves to analysis', async () => {
     render(<CaptureScreen />);
     chooseCameraSource();
 
-    expect(screen.getByText('Rest')).toBeTruthy();
+    expect(screen.getByText('Calm')).toBeTruthy();
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
     // The step only actually advances once the post-capture settle delay
     // (handleCapture) elapses — the next step's title is the reliable
     // signal that a full capture-and-advance cycle has completed.
-    await screen.findByText('Grin', {}, CAPTURE_SETTLE_WAIT);
+    await screen.findByText('Battle Cry', {}, CAPTURE_SETTLE_WAIT);
     expect(useAppStore.getState().images).toEqual(['AQID']);
 
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await screen.findByText('Stern', {}, CAPTURE_SETTLE_WAIT);
+    await screen.findByText('Brooding', {}, CAPTURE_SETTLE_WAIT);
     expect(useAppStore.getState().images).toEqual(['AQID', 'AQID']);
 
     detectFace();
@@ -220,16 +220,16 @@ describe('CaptureScreen', () => {
     expect(mockPlayPromptChime).toHaveBeenCalledTimes(2);
   });
 
-  it('captures 2 photos for Relationship Harmony — 1 per person, front then back camera', async () => {
-    useAppStore.setState({ selectedModule: 'relationship-harmony' });
+  it('captures 2 photos for a Party — 1 per hero, front then back camera', async () => {
+    useAppStore.setState({ selectedModule: 'party' });
     render(<CaptureScreen />);
     chooseCameraSource();
 
-    expect(screen.getByText('Person One')).toBeTruthy();
+    expect(screen.getByText('Hero One')).toBeTruthy();
     expect(screen.getByTestId('camera-preview').props.device).toBe('front');
     detectFace();
     fireEvent.press(screen.getByTestId('shutter-button'));
-    await screen.findByText('Person Two', {}, CAPTURE_SETTLE_WAIT);
+    await screen.findByText('Hero Two', {}, CAPTURE_SETTLE_WAIT);
     expect(useAppStore.getState().images).toEqual(['AQID']);
 
     expect(screen.getByTestId('camera-preview').props.device).toBe('back');
@@ -241,13 +241,13 @@ describe('CaptureScreen', () => {
     expect(mockCapturePhoto).toHaveBeenCalledTimes(2);
   });
 
-  it('captures a single photo for Career Match', async () => {
-    useAppStore.setState({ selectedModule: 'career-match' });
+  it('captures a single photo for a Nemesis', async () => {
+    useAppStore.setState({ selectedModule: 'nemesis' });
     render(<CaptureScreen />);
     chooseCameraSource();
 
     detectFace();
-    expect(screen.getByText('Your Photo')).toBeTruthy();
+    expect(screen.getByText('Your Evil Twin')).toBeTruthy();
     fireEvent.press(screen.getByTestId('shutter-button'));
 
     await waitFor(() => expect(useAppStore.getState().screen).toBe('analyzing'), CAPTURE_SETTLE_WAIT);
@@ -276,7 +276,7 @@ describe('CaptureScreen', () => {
     fireEvent.press(screen.getByTestId('shutter-button'));
     // Must wait for the full settle-and-advance cycle (not just the image
     // being added) before the shutter is re-enabled for the next press.
-    await screen.findByText('Grin', {}, CAPTURE_SETTLE_WAIT);
+    await screen.findByText('Battle Cry', {}, CAPTURE_SETTLE_WAIT);
     expect(useAppStore.getState().images).toEqual(['AQID']);
 
     detectNoFace();
@@ -292,7 +292,7 @@ describe('CaptureScreen', () => {
         canceled: false,
         assets: [{ base64: 'PICKED_BASE64' }],
       });
-      useAppStore.setState({ selectedModule: 'career-match' });
+      useAppStore.setState({ selectedModule: 'nemesis' });
       render(<CaptureScreen />);
 
       fireEvent.press(screen.getByTestId('photo-source-library'));

@@ -20,7 +20,7 @@ interface ShareCardProps {
   // 'flexible' (default): height grows to fit however many sections are
   // selected — see the 2026-08-05 product decision below.
   // 'story': fixed 9:16, Instagram-Story-ready. The first selected section
-  // (in practice: the module's archetype/vibe/work-archetype card, since
+  // (in practice: the character's identity section, since
   // readingShareableSections always puts it first) becomes a big hero
   // treatment; everything else after it renders as compact badge chips
   // instead of full paragraphs, capped at 3 (or 1 when a photo is also

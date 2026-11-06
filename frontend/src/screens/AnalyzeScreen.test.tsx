@@ -5,14 +5,14 @@ import { useAppStore } from '../state/useAppStore';
 
 describe('AnalyzeScreen', () => {
   beforeEach(() => {
-    useAppStore.setState({ screen: 'analyze', selectedModule: 'three-expression' });
+    useAppStore.setState({ screen: 'analyze', selectedModule: 'hero' });
   });
 
-  it('lets the user pick the 3-expression reading module', () => {
+  it('lets the user pick the hero mode', () => {
     render(<AnalyzeScreen />);
-    fireEvent.press(screen.getByTestId('analyze-module-three-expression'));
+    fireEvent.press(screen.getByTestId('analyze-module-hero'));
     expect(useAppStore.getState().screen).toBe('capture');
-    expect(useAppStore.getState().selectedModule).toBe('three-expression');
+    expect(useAppStore.getState().selectedModule).toBe('hero');
   });
 
   it('does not jump straight into capture on its own', () => {
@@ -20,23 +20,23 @@ describe('AnalyzeScreen', () => {
     expect(useAppStore.getState().screen).toBe('analyze');
   });
 
-  it('lets the user pick the relationship harmony module', () => {
+  it('lets the user pick the party mode', () => {
     render(<AnalyzeScreen />);
-    expect(screen.getByLabelText('Relationship Harmony Analyzer')).toBeTruthy();
+    expect(screen.getByLabelText('Assemble a Party')).toBeTruthy();
 
-    fireEvent.press(screen.getByTestId('analyze-module-relationship-harmony'));
+    fireEvent.press(screen.getByTestId('analyze-module-party'));
 
     expect(useAppStore.getState().screen).toBe('capture');
-    expect(useAppStore.getState().selectedModule).toBe('relationship-harmony');
+    expect(useAppStore.getState().selectedModule).toBe('party');
   });
 
-  it('lets the user pick the career match module', () => {
+  it('lets the user pick the nemesis mode', () => {
     render(<AnalyzeScreen />);
-    expect(screen.getByLabelText('What Job Suits You')).toBeTruthy();
+    expect(screen.getByLabelText('Summon Your Nemesis')).toBeTruthy();
 
-    fireEvent.press(screen.getByTestId('analyze-module-career-match'));
+    fireEvent.press(screen.getByTestId('analyze-module-nemesis'));
 
     expect(useAppStore.getState().screen).toBe('capture');
-    expect(useAppStore.getState().selectedModule).toBe('career-match');
+    expect(useAppStore.getState().selectedModule).toBe('nemesis');
   });
 });

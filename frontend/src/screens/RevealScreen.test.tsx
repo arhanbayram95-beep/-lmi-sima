@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-
 import { Alert, Share } from 'react-native';
 import React from 'react';
 import RevealScreen from './RevealScreen';
-import { CharacterAnalysisResult, RelationshipHarmonyResult } from '../api/types';
+import { MOCK_READING_RESULTS } from '../api/mockReading';
 import { useAppStore } from '../state/useAppStore';
 
 const mockCaptureRef = jest.fn().mockResolvedValue('file://mock-share-card.png');
@@ -30,97 +30,11 @@ jest.mock('expo-sharing', () => ({
   shareAsync: (...args: unknown[]) => mockShareAsync(...args),
 }));
 
-// Shared by every deep master card across all three modules — see
-// MasterCardNarrative in api/types.ts.
-const narrative = (heroHook: string) => ({
-  hero_hook: heroHook,
-  anatomical_decoding: ['Jawline reads decisive.', 'Eyes read direct.', 'Brow line reads composed.'],
-  living_scenario: ['Paragraph one.', 'Paragraph two.', 'Paragraph three.'],
-  actionable_insight: { headline: 'Balance Point', description: 'A short growth note.' },
-});
+const READING = MOCK_READING_RESULTS.hero;
 
-const mythicTale = (title: string) => ({
-  tale_title: title,
-  paragraphs: ['Fable paragraph one.', 'Fable paragraph two.', 'Fable paragraph three.'],
-});
+const PARTY_READING = MOCK_READING_RESULTS.party;
 
-const READING: CharacterAnalysisResult = {
-  module: 'character_analysis',
-  oracle_match_card: {
-    title: 'The Archetype & Oracle Match',
-    archetype_tag: 'Analytical Visionary',
-    oracle_match_name: 'A Public Figure',
-    facial_landmark_resonance: { percent: 94, archetype_label: 'High-Brow Deadpan Archetypes' },
-    aura: { name: 'Crimson Ember', intensity_percent: 82, explanation: 'Driven by prominent brow tension.' },
-    ...narrative('You read as someone people trust instantly.'),
-  },
-  sacred_anatomy_card: {
-    title: 'Facial Geometry & Sacred Anatomy',
-    shape_tag: 'Oval',
-    golden_ratio_score: { percent: 91, explanation: 'Balanced proportions with a defined jawline.' },
-    structural_dominance: { brow_percent: 70, cheekbone_percent: 55, jaw_percent: 40 },
-    ...narrative('Geometry hero hook.'),
-  },
-  animal_totem_card: {
-    title: 'The Animal Totem & Primal Energy',
-    spirit_animal: 'Wolf',
-    instinctual_radar: [{ left_trait: 'Pack Loyalty', left_percent: 78, right_trait: 'Lone Independence' }],
-    ...narrative('A steady gaze and defined jawline read as sharp awareness.'),
-  },
-  trait_symphony_card: {
-    title: 'Trait Symphony & Behavioral Polarities',
-    polarity_meters: [{ left_trait: 'Observant Irony', left_percent: 78, right_trait: 'Direct Earnestness' }],
-    rarity_index: { one_in_n: 420, trait_reason: 'This exact eye-to-brow symmetry.' },
-    ...narrative('Symphony hero hook.'),
-  },
-  shadow_arcana_card: {
-    title: 'The Secret Signature & Shadow Arcana',
-    signature_catchphrase: '"Quiet Storm, Loud Impact"',
-    shadow_traits: ['Overthinking Under Pressure'],
-    life_advice: 'Lean into the pause before you speak.',
-    mythic_tale: mythicTale('The Hollow Reckoning'),
-    ...narrative('Same calm-under-pressure register.'),
-  },
-};
-
-const RELATIONSHIP_READING: RelationshipHarmonyResult = {
-  module: 'relationship_harmony',
-  bond_oracle_card: {
-    title: 'The Bond Archetype & Oracle Match',
-    bond_archetype_tag: 'Grounded & Playful Harmonizer',
-    duo_oracle_match: 'A Famous Duo',
-    bond_resonance: { percent: 88, archetype_label: 'Steady-Anchor & Spark Pairings' },
-    aura: { name: 'Amber Tide', intensity_percent: 76, explanation: 'Driven by complementary energy levels.' },
-    ...narrative('Two styles that meet in the middle.'),
-  },
-  chemistry_geometry_card: {
-    title: 'Chemistry Geometry & Synergy Score',
-    synergy_score: {
-      title: 'Synergy Score',
-      overall_score: 91,
-      breakdown_metrics: [
-        { label: 'Empathy', score: 88, icon: 'heart' },
-        { label: 'Communication', score: 84, icon: 'chat' },
-        { label: 'Attachment', score: 79, icon: 'shield' },
-        { label: 'Energy Match', score: 95, icon: 'zap' },
-      ],
-    },
-    ...narrative('The numbers back up what the vibe already says.'),
-  },
-  instinctual_dynamics_card: {
-    title: 'Instinctual Dynamics & Primal Rhythm',
-    dynamics_radar: [{ left_trait: 'Playful Push-Pull', left_percent: 78, right_trait: 'Steady Anchoring' }],
-    ...narrative('A rhythm that balances spark with steadiness.'),
-  },
-  bond_shadow_arcana_card: {
-    title: 'The Secret Signature & Shadow Arcana of the Bond',
-    duo_catchphrase: '"Calm Meets Chaos, On Purpose"',
-    shadow_traits: ['Overplanning Spontaneous Moments'],
-    guidance_checklist: [{ headline: 'Direct Communication', description: 'Say it early and plainly.' }],
-    mythic_tale: mythicTale('The Bound Wayfarers'),
-    ...narrative('Fits how these two balance each other.'),
-  },
-};
+const NEMESIS_READING = MOCK_READING_RESULTS.nemesis;
 
 const PHOTOS = ['base64-calm', 'base64-bright'];
 
@@ -142,72 +56,77 @@ describe('RevealScreen', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders the captured photos and every deep master card for the module', () => {
+  it('renders the captured photos and every character sheet page for a hero', () => {
     render(<RevealScreen />);
     expect(screen.getByTestId('reveal-photos')).toBeTruthy();
-    expect(screen.getByTestId('oracle-match-card')).toBeTruthy();
-    expect(screen.getByTestId('sacred-anatomy-card')).toBeTruthy();
-    expect(screen.getByTestId('animal-totem-card')).toBeTruthy();
-    expect(screen.getByTestId('trait-symphony-card')).toBeTruthy();
-    expect(screen.getByTestId('shadow-arcana-card')).toBeTruthy();
+    expect(screen.getByTestId('hero-identity-page')).toBeTruthy();
+    expect(screen.getByTestId('hero-scores-page')).toBeTruthy();
+    expect(screen.getByTestId('hero-abilities-page')).toBeTruthy();
+    expect(screen.getByTestId('hero-backstory-page')).toBeTruthy();
+    expect(screen.getByTestId('quest-hook-page')).toBeTruthy();
   });
 
-  it('veils every card until tapped, then unveils its content', () => {
+  it('veils every page until tapped, then unveils its content', () => {
     render(<RevealScreen />);
-    expect(screen.queryByText('You read as someone people trust instantly.')).toBeNull();
+    expect(screen.queryByText('“Play it louder!”')).toBeNull();
 
-    reveal('oracle-match-card');
+    reveal('hero-identity-page');
 
-    expect(screen.getByText('You read as someone people trust instantly.')).toBeTruthy();
+    expect(screen.getByText('“Play it louder!”')).toBeTruthy();
   });
 
-  it('unveils the oracle match card with its archetype tag, resonance and aura', () => {
+  it('unveils the identity page with class line, vitals and photo inspiration notes', () => {
     render(<RevealScreen />);
-    reveal('oracle-match-card');
+    reveal('hero-identity-page');
 
-    // The archetype tag also appears in the off-screen ShareCard used for
-    // react-native-view-shot capture, so there are legitimately two.
-    expect(screen.getAllByText('Analytical Visionary').length).toBeGreaterThan(0);
-    expect(screen.getByText(/94%/)).toBeTruthy();
-    expect(screen.getByText(/Crimson Ember/)).toBeTruthy();
+    expect(screen.getAllByText('Level 3 Halfling Bard · Chaotic Good').length).toBeGreaterThan(0);
+    expect(screen.getByText('21')).toBeTruthy();
+    expect(screen.getByText('Placeholder — that grin became the stage swagger.')).toBeTruthy();
   });
 
-  it('unveils the sacred anatomy and animal totem cards, grounded in physical features', () => {
+  it('unveils all six ability scores with their modifiers', () => {
     render(<RevealScreen />);
-    reveal('sacred-anatomy-card');
-    reveal('animal-totem-card');
+    reveal('hero-scores-page');
 
-    expect(screen.getByText('Oval')).toBeTruthy();
-    expect(screen.getAllByText(/Wolf/).length).toBeGreaterThan(0);
+    ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'].forEach((ability) => {
+      expect(screen.getByTestId(`ability-${ability}`)).toBeTruthy();
+    });
+    expect(screen.getByText('+3')).toBeTruthy();
   });
 
-  it('unveils the trait symphony card with polarity meters and a rarity index', () => {
+  it('unveils signature abilities, gear and companion', () => {
     render(<RevealScreen />);
-    reveal('trait-symphony-card');
+    reveal('hero-abilities-page');
 
-    expect(screen.getByText('Observant Irony')).toBeTruthy();
-    expect(screen.getByText('Direct Earnestness')).toBeTruthy();
-    expect(screen.getByText(/1 in 420/)).toBeTruthy();
+    expect(screen.getAllByText('Encore of Thunder').length).toBeGreaterThan(0);
+    expect(screen.getByText('A lute with one cursed string')).toBeTruthy();
+    expect(screen.getByText('Pip · Clockwork sparrow')).toBeTruthy();
   });
 
-  it('unveils the chemistry geometry card with the synergy score and every sub-metric for relationship_harmony', () => {
-    useAppStore.setState({ reading: RELATIONSHIP_READING });
+  it('unveils the quest hook story', () => {
     render(<RevealScreen />);
-    reveal('chemistry-geometry-card');
+    reveal('quest-hook-page');
 
-    expect(screen.getByText('Empathy')).toBeTruthy();
-    // The overall score also appears in the off-screen ShareCard, so there
-    // are legitimately two.
-    expect(screen.getAllByText('91').length).toBeGreaterThan(0);
+    expect(screen.getByText('Placeholder story paragraph two.')).toBeTruthy();
   });
 
-  it('unveils the shadow arcana card with its shadow traits and mythic tale', () => {
+  it('renders a full sheet for each party member plus the combo move', () => {
+    useAppStore.setState({ reading: PARTY_READING });
     render(<RevealScreen />);
-    reveal('shadow-arcana-card');
+    reveal('party-synergy-page');
 
-    expect(screen.getByText('Overthinking Under Pressure')).toBeTruthy();
-    expect(screen.getByText('The Hollow Reckoning')).toBeTruthy();
-    expect(screen.getByText('Fable paragraph one.')).toBeTruthy();
+    expect(screen.getByTestId('party-0-identity-page')).toBeTruthy();
+    expect(screen.getByTestId('party-1-identity-page')).toBeTruthy();
+    expect(screen.getAllByText('Lantern Gambit').length).toBeGreaterThan(0);
+  });
+
+  it('unveils the evil scheme, lair and weakness for a nemesis', () => {
+    useAppStore.setState({ reading: NEMESIS_READING, images: ['base64-solo'] });
+    render(<RevealScreen />);
+    reveal('evil-scheme-page');
+
+    expect(screen.getByText('Placeholder — a clocktower that runs backwards.')).toBeTruthy();
+    expect(screen.getByText('Placeholder — cannot resist monologuing to pigeons.')).toBeTruthy();
   });
 
   it('prompts for a rating after each completed reading instead of dropping straight back home', () => {
@@ -241,20 +160,19 @@ describe('RevealScreen', () => {
     fireEvent.press(screen.getByTestId('share-option-image'));
 
     expect(screen.getByTestId('share-include-photo-checkbox')).toBeTruthy();
-    expect(screen.getByTestId('share-section-oracle-match')).toBeTruthy();
-    expect(screen.getByTestId('share-section-shadow-arcana')).toBeTruthy();
+    expect(screen.getByTestId('share-section-hero-identity')).toBeTruthy();
+    expect(screen.getByTestId('share-section-quest-hook')).toBeTruthy();
   });
 
-  // character_analysis has exactly 5 shareable sections now (one per master
-  // card), matching MAX_SELECTABLE_SECTIONS exactly — every section starts
-  // selected and none is capped out, unlike the pre-redesign 6-card module.
-  it('offers every section pre-selected since the module has exactly 5 master cards', () => {
+  // A hero sheet has exactly 5 shareable sections, matching
+  // MAX_SELECTABLE_SECTIONS — every section starts selected, none capped out.
+  it('offers every section pre-selected since a hero sheet has exactly 5 sections', () => {
     render(<RevealScreen />);
     fireEvent.press(screen.getByTestId('share-reading-button'));
     fireEvent.press(screen.getByTestId('share-option-image'));
 
-    expect(screen.getByTestId('share-section-shadow-arcana').props.accessibilityState.checked).toBe(true);
-    expect(screen.getByTestId('share-section-shadow-arcana').props.accessibilityState.disabled).toBe(false);
+    expect(screen.getByTestId('share-section-quest-hook').props.accessibilityState.checked).toBe(true);
+    expect(screen.getByTestId('share-section-quest-hook').props.accessibilityState.disabled).toBe(false);
   });
 
   // Photo and text sections used to be freely combinable, which needed a
@@ -271,14 +189,14 @@ describe('RevealScreen', () => {
     // photo checkbox starts disabled.
     expect(screen.getByTestId('share-include-photo-checkbox').props.accessibilityState.disabled).toBe(true);
 
-    ['oracle-match', 'sacred-anatomy', 'animal-totem', 'trait-symphony', 'shadow-arcana'].forEach((id) => {
+    ['hero-identity', 'hero-stats', 'hero-abilities', 'hero-companion', 'quest-hook'].forEach((id) => {
       fireEvent.press(screen.getByTestId(`share-section-${id}`));
     });
 
     expect(screen.getByTestId('share-include-photo-checkbox').props.accessibilityState.disabled).toBe(false);
     fireEvent.press(screen.getByTestId('share-include-photo-checkbox'));
 
-    expect(screen.getByTestId('share-section-oracle-match').props.accessibilityState.disabled).toBe(true);
+    expect(screen.getByTestId('share-section-hero-identity').props.accessibilityState.disabled).toBe(true);
   });
 
   it('captures the share card and opens the native share sheet once the card is built', async () => {
@@ -298,17 +216,16 @@ describe('RevealScreen', () => {
 
   it('excludes an unchecked section from the off-screen share card', async () => {
     render(<RevealScreen />);
-    reveal('animal-totem-card');
-    // Present twice pre-uncheck: once in the unveiled animal totem card,
-    // once in the off-screen ShareCard (same reasoning as the archetype
-    // tag/score checks above — both render the reading simultaneously).
-    expect(screen.getAllByText(/Wolf/).length).toBe(2);
+    reveal('hero-abilities-page');
+    // Present twice pre-uncheck: once in the unveiled companion row, once
+    // in the off-screen ShareCard — both render the reading simultaneously.
+    expect(screen.getAllByText(/Clockwork sparrow/).length).toBe(2);
 
     fireEvent.press(screen.getByTestId('share-reading-button'));
     fireEvent.press(screen.getByTestId('share-option-image'));
-    fireEvent.press(screen.getByTestId('share-section-animal-totem'));
+    fireEvent.press(screen.getByTestId('share-section-hero-companion'));
 
-    expect(screen.getAllByText(/Wolf/).length).toBe(1);
+    expect(screen.getAllByText(/Clockwork sparrow/).length).toBe(1);
   });
 
   it('shares a text summary from the quick-message option', async () => {
@@ -317,7 +234,7 @@ describe('RevealScreen', () => {
     fireEvent.press(screen.getByTestId('share-option-text'));
 
     await waitFor(() =>
-      expect(Share.share).toHaveBeenCalledWith({ message: expect.stringContaining('Analytical Visionary') })
+      expect(Share.share).toHaveBeenCalledWith({ message: expect.stringContaining('Wren Ashdown, the Unhurried Storm') })
     );
   });
 
@@ -327,7 +244,7 @@ describe('RevealScreen', () => {
     fireEvent.press(screen.getByTestId('share-option-copy'));
 
     await waitFor(() =>
-      expect(mockSetStringAsync).toHaveBeenCalledWith(expect.stringContaining('Analytical Visionary'))
+      expect(mockSetStringAsync).toHaveBeenCalledWith(expect.stringContaining('Wren Ashdown, the Unhurried Storm'))
     );
   });
 
@@ -339,10 +256,9 @@ describe('RevealScreen', () => {
     fireEvent.press(screen.getByTestId('reveal-page-next'));
     expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(false);
 
-    // 2 captured photos + 5 character_analysis master cards (oracle match,
-    // sacred anatomy, animal totem, trait symphony, shadow arcana) = 7
-    // pages total; already moved forward once above, so 5 more presses
-    // reaches the last.
+    // 2 captured photos + 5 hero pages (identity, scores, abilities,
+    // backstory, quest hook) = 7 pages total; already moved forward once
+    // above, so 5 more presses reaches the last.
     for (let i = 0; i < 5; i++) fireEvent.press(screen.getByTestId('reveal-page-next'));
     expect(screen.getByTestId('reveal-page-next').props.accessibilityState.disabled).toBe(true);
   });
@@ -353,7 +269,7 @@ describe('RevealScreen', () => {
     expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(false);
 
     act(() => {
-      useAppStore.setState({ reading: RELATIONSHIP_READING });
+      useAppStore.setState({ reading: PARTY_READING });
     });
     expect(screen.getByTestId('reveal-page-prev').props.accessibilityState.disabled).toBe(true);
   });

@@ -149,7 +149,7 @@ async function generateContentWithRetry(
 export async function generateReading(
   clients: ReadingModelClient[],
   photos: string[],
-  moduleId: ReadingModuleId = 'three-expression'
+  moduleId: ReadingModuleId = 'hero'
 ): Promise<ReadingResult> {
   const expectedCount = MODULE_PHOTO_COUNTS[moduleId];
   if (photos.length !== expectedCount) {
@@ -207,8 +207,8 @@ export async function generateReading(
 // Walks the module's own responseSchema (readingSchema.ts) recursively,
 // rather than a hand-maintained list of top-level keys — Gemini's
 // `responseSchema` is a strong constraint but not a guarantee, and the
-// frontend's card renderers (ReadingCards.tsx) call .map() on nested arrays
-// like `domains_card.top_industry_pills` with no defensive fallback, per
+// frontend's sheet renderer (CharacterSheetCard.tsx) calls .map() on nested arrays
+// like `hero.ability_scores` with no defensive fallback, per
 // this project's "validate at the boundary, trust it past that point"
 // convention (CLAUDE.md). A response missing a nested array must fail here
 // as a clean 502, not reach RevealScreen as a render crash.

@@ -34,7 +34,7 @@ describe('AnalyzingScreen', () => {
       screen: 'analyzing',
       images: PHOTOS_3,
       reading: null,
-      selectedModule: 'three-expression',
+      selectedModule: 'hero',
     });
   });
 
@@ -43,7 +43,7 @@ describe('AnalyzingScreen', () => {
     const { unmount } = render(<AnalyzingScreen />);
 
     await waitFor(() =>
-      expect(mockAnalyzeReading).toHaveBeenCalledWith({ photos: PHOTOS_3, module: 'three-expression' })
+      expect(mockAnalyzeReading).toHaveBeenCalledWith({ photos: PHOTOS_3, module: 'hero' })
     );
     await waitFor(() => expect(useAppStore.getState().screen).toBe('reveal'));
     expect(useAppStore.getState().reading).toEqual(READING);
@@ -56,17 +56,17 @@ describe('AnalyzingScreen', () => {
   });
 
   it('sends whichever module was selected on the Analyze hub, with that module\'s own photo count', async () => {
-    useAppStore.setState({ selectedModule: 'career-match', images: PHOTOS_1 });
+    useAppStore.setState({ selectedModule: 'nemesis', images: PHOTOS_1 });
     mockAnalyzeReading.mockResolvedValue(READING);
     render(<AnalyzingScreen />);
 
     await waitFor(() =>
-      expect(mockAnalyzeReading).toHaveBeenCalledWith({ photos: PHOTOS_1, module: 'career-match' })
+      expect(mockAnalyzeReading).toHaveBeenCalledWith({ photos: PHOTOS_1, module: 'nemesis' })
     );
   });
 
   it('shows an error instead of calling the API when the photo count does not match the module', async () => {
-    useAppStore.setState({ selectedModule: 'career-match', images: PHOTOS_3 });
+    useAppStore.setState({ selectedModule: 'nemesis', images: PHOTOS_3 });
     render(<AnalyzingScreen />);
 
     await waitFor(() => expect(screen.getByTestId('analyzing-retry-button')).toBeTruthy());
@@ -74,7 +74,7 @@ describe('AnalyzingScreen', () => {
   });
 
   it('shows a retry option when the API call fails', async () => {
-    mockAnalyzeReading.mockRejectedValue(new ReadingApiError('Could not reach the Face Reader server. Check your connection and try again.'));
+    mockAnalyzeReading.mockRejectedValue(new ReadingApiError('Could not reach the Questborn server. Check your connection and try again.'));
     render(<AnalyzingScreen />);
 
     await waitFor(() => expect(screen.getByTestId('analyzing-retry-button')).toBeTruthy());
@@ -121,13 +121,13 @@ describe('AnalyzingScreen', () => {
   // the store indefinitely — and the next capture session appends onto them,
   // overshooting MODULE_PHOTO_COUNTS and failing with a misleading error.
   it('discards the captured photos when a failed reading is abandoned', async () => {
-    mockAnalyzeReading.mockRejectedValue(new ReadingApiError('Could not reach the Face Reader server.'));
+    mockAnalyzeReading.mockRejectedValue(new ReadingApiError('Could not reach the Questborn server.'));
     render(<AnalyzingScreen />);
 
     await waitFor(() => expect(screen.getByTestId('analyzing-retry-button')).toBeTruthy());
     expect(useAppStore.getState().images).toEqual(PHOTOS_3);
 
-    fireEvent.press(screen.getByText('Back to Analyze'));
+    fireEvent.press(screen.getByText('Back to Create'));
 
     expect(useAppStore.getState().screen).toBe('analyze');
     expect(useAppStore.getState().images).toEqual([]);

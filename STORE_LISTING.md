@@ -1,108 +1,122 @@
 # Store Listing Copy — Draft
 
-**Purpose:** ready-to-paste copy for App Store Connect / Google Play Console, written to Apple/Google field-length limits and consistent with `CLAUDE.md`'s locked "Entertainment Framing" rules (warm, modern "vibe reading" register; no clinical/diagnostic language; no medieval/Ottoman/fortune-telling tropes; entertainment-only, 18+). Not final — review before submitting, especially anything marked **[NEEDS YOU]**.
+**Purpose:** ready-to-paste copy for App Store Connect / Google Play Console, written to Apple/Google field-length limits and consistent with `CLAUDE.md`'s locked "Entertainment Framing" rules (fictional character creator; never a reading of the real person; no trademarks; entertainment-only, 18+). Not final — review before submitting, especially anything marked **[NEEDS YOU]**.
 
 ---
 
 ## 1. App Store (iOS) — App Store Connect
 
-**App Name** (≤30 chars — `app.json`'s current `name`, "Face Reader - AI Physiognomy Tool", is 33 chars and **will be rejected** at the App Store Connect field, even though it's fine as the on-device `app.json` name):
-```
-Face Reader: AI Physiognomy
-```
-(27 chars)
+**Pivot note (2026-11-06):** the previous "Face Reader: AI Physiognomy" listing was rejected under Guideline 4.3(b) (fortune telling is a saturated category). Everything below is rewritten for Questborn (PROJECT_SPEC.md §0). Do not reuse any of the old copy, keywords, or screenshots. Never use "D&D", "Dungeons & Dragons", or any other trademark in the name, subtitle, keywords, or screenshots (guideline 2.3.7, and it invites an IP complaint).
 
-**Subtitle** (≤30 chars, shown right under the name):
+**App Name** (≤30 chars) — check availability in App Store Connect first:
 ```
-Playful AI Character Reads
+Questborn: AI Hero Creator
 ```
-(27 chars)
+(26 chars)
 
-**Promotional Text** (≤170 chars — editable anytime without a new review, good for seasonal/launch messaging):
+**Subtitle** (≤30 chars):
 ```
-Point your camera, get a fun AI read on your vibe. Character, relationship chemistry, or career match — pick a mode and see what it says.
+Your Selfie as an RPG Hero
 ```
+(26 chars)
 
-**Description** (≤4000 chars):
+**Promotional Text** (≤170 chars):
 ```
-Ever wonder what your face says about your vibe? Face Reader is a playful AI photo experience that gives you a fun, shareable read on your character, your chemistry with someone, or your career energy — no filters, no judgment, just entertainment.
+Strike a pose and get a full fantasy character sheet: class, stats, abilities, backstory, and your first quest. Bring a friend to form a party, or summon your nemesis.
+```
+(167 chars)
+
+**Description** (≤4000 chars, currently 1872):
+```
+Strike a pose. Meet your hero.
+
+Questborn turns your selfies into an original fantasy RPG character, complete with a full character sheet, a backstory, and a quest to start. It's a character creator for tabletop fans, writers, and anyone who's ever wondered what kind of adventurer they'd be.
 
 HOW IT WORKS
-Snap a photo (or a couple, depending on the mode), and our AI vision model reads the moment — expression, energy, the details a good photo carries — and turns it into a fun, story-ready result.
+Strike three poses (Calm, Battle Cry, and your best Brooding look), and our AI game master uses them as costume and mood reference to forge a brand-new character. Your expression, outfit and vibe inspire the design. Everything it creates is invented fiction.
 
 THREE WAYS TO PLAY
-• Character Analysis — three quick expressions (calm, bright, deep) turn into your archetype, a spirit-animal match, and a celebrity vibe pairing.
-• Relationship Harmony — two photos, one yours and one of someone else, get read together for a chemistry score and relationship dynamics.
-• Career Match — one photo becomes a read on your work archetype and industries where your energy fits.
+• Forge a Hero: a complete character sheet with class, lineage, alignment, six ability scores, hit points and armor class, signature abilities, starting gear, an animal companion, roleplay notes, a backstory, and the opening scene of your first quest.
+• Assemble a Party: you and a friend become a two-hero adventuring party, with a team-up combo move and a shared first adventure.
+• Summon Your Nemesis: one photo becomes your gloriously over-the-top villain twin, with an evil scheme, a lair, and a very silly weakness.
+
+BUILT FOR THE TABLE
+Every character is playable: real ability scores and modifiers, abilities you can drop into a campaign, and roleplay hooks for trait, ideal, bond, and quirk. Use them as player characters, NPCs, or story inspiration.
 
 BUILT TO SHARE
-Every result comes with a shareable card, ready to post — pick which parts show and how it looks before you share.
+Every character comes with a shareable card. Pick the sections and the color before you post.
 
 PRIVACY FIRST
-Your photos are processed in memory only, on your device and on our server, and are never saved, stored, or used to train anything. They're gone the moment your result comes back. Full details in our Privacy Policy.
+Your photos are only used as visual inspiration for your character. They're processed in memory, never saved to our servers, never used for identification, and never used to train AI models. Full details in our Privacy Policy.
 
-Face Reader is entertainment only — it's not a psychological, medical, or diagnostic tool, and nothing in the app should be taken as professional advice. Must be 18 or older to use.
+Questborn creates fictional characters for entertainment. Must be 18 or older to use. Questborn is an independent app and is not affiliated with any tabletop game publisher.
 ```
 
-**Keywords** (≤100 chars total, comma-separated, no spaces after commas):
+**Keywords** (≤100 chars, currently 100):
 ```
-face reader,ai face,physiognomy,vibe check,character analysis,face reading,fun ai,chemistry test
+rpg character,hero maker,fantasy,tabletop,character sheet,ai avatar,dungeon,npc,quest,selfie,villain
 ```
-(check exact count before submitting — trim if over 100)
 
 **Support URL**:
 ```
 https://sites.google.com/view/face-app-main/home/support
 ```
+(Consider moving the Google Sites pages to a Questborn-named site. The old "face-app" path is visible to reviewers, and the pages' text must be updated either way; see section 3.)
 
-**Marketing URL** (optional): none yet — skip, or reuse the support URL above.
-
-**Privacy Policy URL** (already live):
+**Privacy Policy URL**:
 ```
 https://sites.google.com/view/face-app-main/home/privacy
 ```
 
-**Category**: Entertainment (primary) · Lifestyle (secondary, optional)
+**Category**: Entertainment (primary) · Games › Role Playing is a poor fit (there is no game loop); keep Entertainment.
 
-**Age Rating**: Apple overhauled this system in 2026 — a real 18+ tier now exists (4+/9+/13+/16+/18+), correcting the earlier note here that it topped out at 17+. Set up at App Information → Age Ratings → Set Up Age Ratings. Recommended answers for this app, category by category (everything not listed is "None"):
-- Mature or Suggestive Themes: **Infrequent** (the Oracle/Arcana mystical framing and relationship-chemistry content) — calculates to 9+ on its own, not 18+.
-- Medical or Treatment Information / Health or Wellness Topics: **None** — the entertainment-only framing and disclaimers (CLAUDE.md, locked) are specifically designed to keep this app out of these categories; answering otherwise would misrepresent it.
-- Age Assurance: **Present** — the app does implement one (the onboarding 18+ self-certification checkbox), though this descriptor alone doesn't drive the calculated rating up.
-- Everything else (violence, sexual content, gambling, drugs, unrestricted web access, user-generated content, social media, messaging, ads) — **None**, all accurate to what the app actually does.
-- **The calculated result from these answers alone will land around 9+, not 18+** — none of the individual descriptors hit "Frequent" intensity. Use **Override to Higher Age Rating → 18+** to match the in-app age gate and Terms of Use, rather than relying on the questionnaire to get there on its own.
+**Age Rating** (App Information → Age Ratings), category by category. Everything not listed is "None":
+- Cartoon or Fantasy Violence: **Infrequent/Mild** (battle cries, villains, showdown stories).
+- Mature or Suggestive Themes: **None** (the oracle/mystic content that justified "Infrequent" before is gone).
+- Medical or Treatment Information / Health or Wellness Topics: **None**.
+- Age Assurance: **Present** (the onboarding 18+ self-certification).
+- Use **Override to Higher Age Rating → 18+** to match the in-app age gate and Terms.
 
 **Copyright**:
 ```
 2026 Arhan Bayram
 ```
 
+**App Review notes** (paste into App Review Information → Notes):
+```
+Questborn is a fictional character creator. Photos are used only as costume/pose reference for an invented tabletop-RPG character (stats, abilities, backstory). The app makes no claims about the user's personality, future, or traits, and does not perform face reading, fortune telling, or facial recognition. Photos are processed in memory and never stored by us; see the face-data answers in our reply in App Store Connect. A demo account is not needed. Subscriptions are required for character generation; sandbox purchases work in the review environment.
+```
+
 ---
 
 ## 2. Google Play — Play Console
 
-**App name** (≤30 chars): same as iOS App Name above — `Face Reader: AI Physiognomy` (27 chars).
+**App name** (≤30 chars): `Questborn: AI Hero Creator`
 
 **Short description** (≤80 chars):
 ```
-Playful AI photo reads: your character, your chemistry, your career vibe.
+Turn your selfie into an original fantasy RPG hero, with stats and a backstory.
 ```
-(75 chars)
+(79 chars)
 
-**Full description** (≤4000 chars): same copy as the iOS Description above — Play doesn't have a separate field-length constraint that would require trimming it.
+**Full description**: same as the iOS Description above.
 
-**Support email**: `fevzi.bayram@boun.edu.tr` (same as `LEGAL_CONTACT_EMAIL`) — confirmed as the public support contact: it's the address listed on the live support page above (account/purchases, subscription management, refunds, camera guidance, data-deletion requests).
+**Support email**: `fevzi.bayram@boun.edu.tr`
 
 **Category**: Entertainment
 
-**Content rating**: run the IARC questionnaire — answer based on what the app actually does (AI-generated personal commentary from user photos, no violence/gambling/user-generated public content, no data sold). Play's rating system also has no exact "18+" tier by default (IARC ratings vary by region); the in-app self-certification is the real gate regardless of the badge Play assigns.
+**Content rating**: run the IARC questionnaire. Mild fantasy violence in text only; no gambling, no user-generated public content, no data sold.
 
 ---
 
 ## 3. Open items before either listing can actually be submitted
 
-- [x] Support URL/page — live at `sites.google.com/view/face-app-main/home/support`
+- [ ] **Update the live Google Sites privacy policy and terms pages** with the new text in `backend/src/legal-static/privacy.txt` and `terms.txt` (dated November 6, 2026). App Review compares the 2.1 face-data answers against the live page, so this must happen before replying.
+- [ ] **Reply to the Guideline 2.1 face-data questions** in App Store Connect. A draft is in the session scratchpad (`apple-2.1-face-data-reply.md`), and it quotes the new policy sections.
+- [ ] **Check that the name "Questborn" is available** in App Store Connect and do a basic trademark search before submitting.
+- [ ] **New screenshots for both stores**; none of the old ones can be reused. Shot list: Create hub (three modes) → onboarding with the 18+ and consent checkboxes visible → capture mid-flow ("Battle Cry" step) → identity page (name, class line, HP/AC/Level) → ability scores page → backstory or quest page → paywall. Use "Choose from Library" with stock photos in the iOS Simulator (`xcrun simctl io booted screenshot <name>.png`).
+- [ ] Replace the generated d20 icon with designer art if wanted (the current one is a clean SVG render on the locked palette, fine to ship).
+- [ ] Support URL/page — update the wording on `sites.google.com/view/face-app-main/home/support`, ideally on a Questborn-named site.
 - [x] Copyright holder name for App Store Connect — `2026 Arhan Bayram`
-- [x] Confirmed `fevzi.bayram@boun.edu.tr` as the public support contact (it's the address on the live support page)
-- [ ] Screenshots for both stores (iOS needs the 6.9" iPhone size at minimum; Play needs at least 2) — not something I can generate, no simulator/device access in this environment. Suggested shot list (6 screens, in this order so the store carousel tells a story): `WelcomeScreen` hook → `OnboardingScreen` (age-gate/consent visible, since Apple reviewers check for it) → `AnalyzeScreen` module picker → `CaptureScreen` mid-flow → `RevealScreen` with a card tapped open (the Oracle/Arcana deep-master-card redesign, the app's strongest visual) → `PaywallScreen`. The just-added "Choose from Library" option (10.28) means the capture flow can be screenshotted in the iOS Simulator with a stock photo instead of needing a real device with a working camera — `xcrun simctl io booted screenshot <name>.png` on each screen after building the dev client into the Simulator.
+- [x] Confirmed `fevzi.bayram@boun.edu.tr` as the public support contact
 - [ ] App preview video (optional, both stores)
-- [ ] Exact keyword string character count double-checked at submission time

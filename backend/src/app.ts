@@ -51,7 +51,7 @@ export async function buildApp(
       reply.status(429).send({ error: error.message });
       return;
     }
-    console.error('Unhandled error in Face Reader backend:', error);
+    console.error('Unhandled error in Questborn backend:', error);
     reply.status(500).send({ error: 'Something went wrong. Please try again.' });
   });
 

@@ -13,9 +13,9 @@ import { Theme } from '../ui/theme';
 import { buildContactMailUrl } from '../utils/contactMail';
 import { PRIVACY_POLICY_URL, TERMS_URL } from '../utils/legalLinks';
 
-// No published store URL yet — add it here once Face Reader is live on the
+// No published store URL yet — add it here once Questborn is live on the
 // App Store / Play Store so the share message includes a real link.
-const SHARE_MESSAGE = 'Check out Face Reader — playful character readings from your photos! ✦';
+const SHARE_MESSAGE = 'Check out Questborn — turn your selfies into fantasy RPG heroes! ⚔️';
 
 interface SettingsRowConfig {
   label: string;
@@ -86,7 +86,7 @@ function resolveOsVersionLabel(): string {
 function resolveSignOff(): string {
   if (Platform.OS === 'ios') return 'Sent from my iPhone';
   if (Platform.OS === 'android') return 'Sent from my Android device';
-  return 'Sent from Face Reader';
+  return 'Sent from Questborn';
 }
 
 function resolveBuildNumber(): string | null {

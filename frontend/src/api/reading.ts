@@ -5,11 +5,11 @@ import { getCurrentAppUserId } from '../utils/purchases';
 
 export type {
   AnalyzeReadingPayload,
-  CareerPathResult,
-  CharacterAnalysisResult,
+  HeroSheetResult,
+  NemesisSheetResult,
+  PartySheetResult,
   ReadingModuleId,
   ReadingResult,
-  RelationshipHarmonyResult,
 } from './types';
 
 // 'NO_FACE_DETECTED' is a forward-compatible hook that nothing raises yet.
@@ -119,7 +119,7 @@ export async function analyzeReading(payload: AnalyzeReadingPayload): Promise<Re
       }
       const detail = cause instanceof Error ? cause.message : String(cause);
       throw new ReadingApiError(
-        `Could not reach the Face Reader server. Check your connection and try again. (${detail})`
+        `Could not reach the Questborn server. Check your connection and try again. (${detail})`
       );
     }
 
@@ -144,7 +144,7 @@ export async function analyzeReading(payload: AnalyzeReadingPayload): Promise<Re
         );
       }
     }
-    throw new ReadingApiError(`Face Reader server returned an error (${response.status}).`);
+    throw new ReadingApiError(`Questborn server returned an error (${response.status}).`);
   }
 
   return (await response.json()) as ReadingResult;

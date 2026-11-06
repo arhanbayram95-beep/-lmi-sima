@@ -31,7 +31,7 @@ export default function AppLogo({ size = 'sm', showWordmark = false, layout = 'r
       </View>
       {showWordmark && (
         <Text style={[styles.wordmark, isLarge && styles.wordmarkLg, isStacked && styles.wordmarkStacked]}>
-          {isStacked ? 'Face\nReader' : 'Face Reader'}
+          Questborn
         </Text>
       )}
     </View>

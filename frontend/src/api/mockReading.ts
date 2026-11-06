@@ -1,176 +1,70 @@
-import { AnalyzeReadingPayload, ReadingModuleId, ReadingResult } from './types';
+import { AnalyzeReadingPayload, CharacterSheet, ReadingModuleId, ReadingResult, Story } from './types';
 
-// Shared by every deep master card across all three modules — see
-// MasterCardNarrative in api/types.ts.
-const narrative = (heroHook: string) => ({
-  hero_hook: heroHook,
-  anatomical_decoding: [
-    'Placeholder text — a steady jawline reads as quiet decisiveness.',
-    'Placeholder text — a direct gaze reads as unhurried confidence.',
-    'Placeholder text — a level brow line reads as composure under pressure.',
-  ],
-  living_scenario: [
-    'Placeholder pseudo-API output for testing, not a real reading. Paragraph one of a three-paragraph vignette.',
-    'Placeholder pseudo-API output for testing, not a real reading. Paragraph two of a three-paragraph vignette.',
-    'Placeholder pseudo-API output for testing, not a real reading. Paragraph three of a three-paragraph vignette.',
-  ],
-  actionable_insight: {
-    headline: 'Balance Point',
-    description: 'Placeholder text — a gentle growth edge, phrased as a tendency to balance, never a flaw.',
-  },
+// Placeholder pseudo-API output for local development without a backend —
+// shaped exactly like each mode's response schema (backend readingSchema.ts).
+export function mockCharacterSheet(name: string, alignment = 'Chaotic Good', backstoryParagraphs = 3): CharacterSheet {
+  return {
+    name,
+    epithet: 'the Unhurried Storm',
+    lineage: 'Halfling',
+    character_class: 'Bard',
+    alignment,
+    level: 3,
+    hit_points: 21,
+    armor_class: 14,
+    ability_scores: [
+      { ability: 'STR', score: 9, flair: 'Placeholder — carries a lute, not a sword, for a reason.' },
+      { ability: 'DEX', score: 15, flair: 'Placeholder — once caught a falling chandelier mid-verse.' },
+      { ability: 'CON', score: 12, flair: 'Placeholder — survived the Long Winter Tour.' },
+      { ability: 'INT', score: 13, flair: 'Placeholder — knows four hundred tavern songs by heart.' },
+      { ability: 'WIS', score: 11, flair: 'Placeholder — usually reads the room. Usually.' },
+      { ability: 'CHA', score: 17, flair: 'Placeholder — talked a troll into a duet.' },
+    ],
+    signature_abilities: [
+      { name: 'Encore of Thunder', description: 'Placeholder — a song that knocks foes back a few paces.' },
+      { name: 'Borrowed Courage', description: 'Placeholder — an ally rerolls one failed save.' },
+      { name: 'Tavern Rumor', description: 'Placeholder — learns one local secret per town.' },
+    ],
+    starting_gear: ['A lute with one cursed string', "Traveler's cloak", 'Three lucky dice'],
+    personality: {
+      trait: 'Placeholder — I narrate my own fights.',
+      ideal: 'Placeholder — every story deserves an audience.',
+      bond: "Placeholder — my mentor's battered songbook.",
+      quirk: 'Placeholder — I hum when I am nervous.',
+    },
+    companion: { name: 'Pip', species: 'Clockwork sparrow', description: 'Placeholder — steals shiny things and sings harmony.' },
+    battle_cry: 'Play it louder!',
+    backstory: Array.from({ length: backstoryParagraphs }, (_, i) => `Placeholder pseudo-API output — backstory paragraph ${i + 1}.`),
+    forged_from: ['Placeholder — that grin became the stage swagger.', 'Placeholder — the red scarf became the cloak.'],
+  };
+}
+
+const story = (title: string): Story => ({
+  title,
+  paragraphs: ['Placeholder story paragraph one.', 'Placeholder story paragraph two.', 'Placeholder story paragraph three.'],
 });
 
-const mythicTale = (title: string) => ({
-  tale_title: title,
-  paragraphs: [
-    'Placeholder pseudo-API output for testing, not a real reading. Fable paragraph one.',
-    'Placeholder pseudo-API output for testing, not a real reading. Fable paragraph two.',
-    'Placeholder pseudo-API output for testing, not a real reading. Fable paragraph three.',
-  ],
-});
-
-// Canned responses for USE_MOCK_API — lets the whole capture -> analyzing ->
-// reveal flow be exercised end to end with no backend running and no AI
-// provider key configured, one per module so mock mode can actually verify
-// each module's card stack differs. Shapes match the per-module response
-// schemas in backend/src/services/readingSchema.ts.
-// Remove alongside the config flag before public release.
-const MOCK_READING_RESULTS: Record<ReadingModuleId, ReadingResult> = {
-  'three-expression': {
-    module: 'character_analysis',
-    oracle_match_card: {
-      title: 'The Archetype & Oracle Match',
-      archetype_tag: 'Analytical Visionary',
-      oracle_match_name: 'A Well-Known Public Figure',
-      facial_landmark_resonance: { percent: 94, archetype_label: 'High-Brow Deadpan Archetypes' },
-      aura: { name: 'Crimson Ember', intensity_percent: 82, explanation: 'Placeholder text — driven by prominent brow tension and a level, unhurried gaze.' },
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
-    sacred_anatomy_card: {
-      title: 'Facial Geometry & Sacred Anatomy',
-      shape_tag: 'Oval',
-      golden_ratio_score: { percent: 91, explanation: 'Placeholder text — balanced proportions with a defined jawline and a forehead slightly wider than the chin.' },
-      structural_dominance: { brow_percent: 70, cheekbone_percent: 55, jaw_percent: 40 },
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
-    animal_totem_card: {
-      title: 'The Animal Totem & Primal Energy',
-      spirit_animal: 'Wolf',
-      instinctual_radar: [
-        { left_trait: 'Pack Loyalty', left_percent: 78, right_trait: 'Lone Independence' },
-        { left_trait: 'Watchful Patience', left_percent: 66, right_trait: 'Sudden Decisiveness' },
-      ],
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
-    trait_symphony_card: {
-      title: 'Trait Symphony & Behavioral Polarities',
-      polarity_meters: [
-        { left_trait: 'Observant Irony', left_percent: 78, right_trait: 'Direct Earnestness' },
-        { left_trait: 'Strategic Composure', left_percent: 86, right_trait: 'Raw Impulse' },
-        { left_trait: 'Quiet Authority', left_percent: 71, right_trait: 'Loud Persuasion' },
-      ],
-      rarity_index: { one_in_n: 420, trait_reason: 'Placeholder text — this exact eye-to-brow symmetry paired with a level, unhurried gaze.' },
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
-    shadow_arcana_card: {
-      title: 'The Secret Signature & Shadow Arcana',
-      signature_catchphrase: '"Quiet Storm, Loud Impact"',
-      shadow_traits: ['Overthinking Under Pressure', 'Over-Analyzing Small Decisions'],
-      life_advice: 'Placeholder text — lean into the pause before you speak; it already works for you.',
-      mythic_tale: mythicTale('The Trial of the Ember Wolf'),
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
+export const MOCK_READING_RESULTS: Record<ReadingModuleId, ReadingResult> = {
+  hero: {
+    module: 'hero_sheet',
+    hero: mockCharacterSheet('Wren Ashdown'),
+    quest_hook: story('The Bell Beneath the Lake'),
   },
-  'relationship-harmony': {
-    module: 'relationship_harmony',
-    bond_oracle_card: {
-      title: 'The Bond Archetype & Oracle Match',
-      bond_archetype_tag: 'Grounded & Playful Harmonizer',
-      duo_oracle_match: 'A Famous On-Screen Duo',
-      bond_resonance: { percent: 88, archetype_label: 'Steady-Anchor & Spark Pairings' },
-      aura: { name: 'Amber Tide', intensity_percent: 76, explanation: 'Placeholder text — driven by complementary energy levels that never quite match, and never need to.' },
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading. One brings steady reassurance, the other brings momentum — the two meet somewhere comfortable.'),
-    },
-    chemistry_geometry_card: {
-      title: 'Chemistry Geometry & Synergy Score',
-      synergy_score: {
-        title: 'Synergy Score',
-        overall_score: 92,
-        breakdown_metrics: [
-          { label: 'Empathy', score: 89, icon: 'heart' },
-          { label: 'Communication', score: 94, icon: 'chat' },
-          { label: 'Attachment', score: 82, icon: 'shield' },
-          { label: 'Energy Match', score: 96, icon: 'zap' },
-        ],
-      },
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
-    instinctual_dynamics_card: {
-      title: 'Instinctual Dynamics & Primal Rhythm',
-      dynamics_radar: [
-        { left_trait: 'Spontaneous Energy', left_percent: 68, right_trait: 'Grounded Calmness' },
-        { left_trait: 'Intellectual Spark', left_percent: 74, right_trait: 'Comfortable Silence' },
-      ],
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
-    bond_shadow_arcana_card: {
-      title: 'The Secret Signature & Shadow Arcana of the Bond',
-      duo_catchphrase: '"Calm Meets Chaos, On Purpose"',
-      shadow_traits: ['Overplanning Spontaneous Moments', 'Inconsistent Follow-Through'],
-      guidance_checklist: [
-        { headline: 'Direct Communication', description: 'Say what you need early, in plain calm language, rather than hinting.' },
-        { headline: 'Space & Autonomy', description: 'Deep closeness works best here with real personal room built in around it.' },
-      ],
-      mythic_tale: mythicTale('The Bound Wayfarers'),
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
+  party: {
+    module: 'party_sheet',
+    party_name: 'The Lantern Thieves',
+    heroes: [mockCharacterSheet('Wren Ashdown', 'Chaotic Good', 2), mockCharacterSheet('Corvin Vale', 'Lawful Good', 2)],
+    combo_move: { name: 'Lantern Gambit', description: 'Placeholder — one distracts, the other steals the light.' },
+    party_dynamic: 'Placeholder — they argue about maps and somehow never get lost.',
+    shared_quest: story('The Night Market Heist'),
   },
-  'career-match': {
-    module: 'career_path',
-    career_oracle_card: {
-      title: 'The Career Archetype & Oracle Match',
-      work_archetype_tag: 'Strategic Innovator',
-      career_oracle_match: 'A Well-Known Public Figure',
-      career_resonance: { percent: 90, archetype_label: 'Calm-Under-Fire Builders' },
-      aura: { name: 'Slate Ember', intensity_percent: 80, explanation: 'Placeholder text — driven by composed decision-making even when the room is loud.' },
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
-    industry_geometry_card: {
-      title: 'Industry Geometry & Work-Style Radar',
-      work_style_radar: [
-        { left_trait: 'Deep-Focus Craft', left_percent: 74, right_trait: 'Fast-Paced Hustle' },
-        { left_trait: 'Structured Planning', left_percent: 69, right_trait: 'Improvised Adaptation' },
-      ],
-      top_industry_pills: ['Engineering & R&D', 'Strategic Consulting', 'Creative Tech Leadership'],
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
-    career_trait_symphony_card: {
-      title: 'Trait Symphony & Working Polarities',
-      polarity_meters: [
-        { left_trait: 'Structured Thinking', left_percent: 82, right_trait: 'Improvised Adaptation' },
-        { left_trait: 'Calm Under Pressure', left_percent: 88, right_trait: 'Reactive Urgency' },
-      ],
-      rarity_index: { one_in_n: 310, trait_reason: 'Placeholder text — this exact pacing under deadline pressure.' },
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
-    career_shadow_arcana_card: {
-      title: 'The Secret Signature & Shadow Arcana',
-      work_catchphrase: '"Built the Spreadsheet, Ran the Room"',
-      shadow_traits: ['Over-Preparing for Small Stakes', 'Delegating Too Late'],
-      role_recommendations: [
-        {
-          headline: 'Systems Architect / Lead Engineer',
-          description: 'Leverages sustained focus and structured problem-solving when the pressure is on.',
-        },
-        {
-          headline: 'Product Strategist',
-          description: 'Pairs analytical range with the observational read that makes a room feel understood.',
-        },
-      ],
-      life_advice: 'Placeholder text — let one plan stay unfinished on purpose.',
-      mythic_tale: mythicTale('The Architect of the Long Road'),
-      ...narrative('Placeholder pseudo-API output for testing, not a real reading.'),
-    },
+  nemesis: {
+    module: 'nemesis_sheet',
+    villain: mockCharacterSheet('Baron Velvetgloom', 'Chaotic Evil', 2),
+    evil_scheme: 'Placeholder — replace every bell in the kingdom with kazoos.',
+    lair: 'Placeholder — a clocktower that runs backwards.',
+    comedic_weakness: 'Placeholder — cannot resist monologuing to pigeons.',
+    showdown: story('Midnight at the Backwards Tower'),
   },
 };
 

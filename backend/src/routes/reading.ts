@@ -29,7 +29,7 @@ const analyzeBodySchema = {
       items: { type: 'string', minLength: 1, maxLength: 8_000_000 },
     },
     // Optional + defaulted rather than required, so older/mocked clients
-    // that never send it still get the original three-expression reading.
+    // that never send it still get the default hero sheet.
     module: { type: 'string', enum: READING_MODULE_IDS },
   },
   additionalProperties: false,
@@ -53,7 +53,7 @@ export function registerReadingRoutes(
         // Same default as generateReading's own moduleId parameter — the
         // client selected here has to match the module generateReading
         // actually processes, not just whatever the client is keyed by.
-        const moduleId = request.body.module ?? 'three-expression';
+        const moduleId = request.body.module ?? 'hero';
         const result = await generateReading(readingModelClients[moduleId], request.body.photos, moduleId);
         return reply.status(200).send(result);
       } catch (error) {

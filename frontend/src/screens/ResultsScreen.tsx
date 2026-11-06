@@ -14,9 +14,9 @@ import { Theme } from '../ui/theme';
 // translation keys — same three modules, same names, already localized in
 // all 10 languages.
 const MODULE_META: Record<ModuleResultKind, { icon: string; titleKey: TranslationKey }> = {
-  character_analysis: { icon: '🎭', titleKey: 'analyze.module.threeExpression.title' },
-  relationship_harmony: { icon: '💞', titleKey: 'analyze.module.relationshipHarmony.title' },
-  career_path: { icon: '💼', titleKey: 'analyze.module.careerMatch.title' },
+  hero_sheet: { icon: '🛡️', titleKey: 'analyze.module.hero.title' },
+  party_sheet: { icon: '⚔️', titleKey: 'analyze.module.party.title' },
+  nemesis_sheet: { icon: '😈', titleKey: 'analyze.module.nemesis.title' },
 };
 
 export default function ResultsScreen() {
