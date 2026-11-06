@@ -33,18 +33,19 @@ type Translate = ReturnType<typeof useTranslation>;
 // backstory to the mode's story last. Each page sits behind
 // TapToRevealCard's veil-then-flip ritual. Shapes are guaranteed by each
 // mode's response schema (backend readingSchema.ts).
-function sheetPages(prefix: string, sheet: CharacterSheet, tapHint: string, identityIcon: string): React.ReactNode[] {
+function sheetPages(prefix: string, sheet: CharacterSheet, t: Translate, identityIcon: string): React.ReactNode[] {
+  const tapHint = t('reveal.tapToUnveil');
   return [
     <TapToRevealCard key={`${prefix}-identity`} icon={identityIcon} title={sheet.name} tapHint={tapHint} testID={`${prefix}-identity-page`}>
       <IdentityCard sheet={sheet} icon={identityIcon} />
     </TapToRevealCard>,
-    <TapToRevealCard key={`${prefix}-scores`} icon="🎲" title={sheet.name} tapHint={tapHint} testID={`${prefix}-scores-page`}>
+    <TapToRevealCard key={`${prefix}-scores`} icon="🎲" title={t('sheet.abilityScores')} tapHint={tapHint} testID={`${prefix}-scores-page`}>
       <AbilityScoresCard sheet={sheet} />
     </TapToRevealCard>,
-    <TapToRevealCard key={`${prefix}-abilities`} icon="✨" title={sheet.name} tapHint={tapHint} testID={`${prefix}-abilities-page`}>
+    <TapToRevealCard key={`${prefix}-abilities`} icon="✨" title={t('sheet.signatureAbilities')} tapHint={tapHint} testID={`${prefix}-abilities-page`}>
       <AbilitiesAndGearCard sheet={sheet} />
     </TapToRevealCard>,
-    <TapToRevealCard key={`${prefix}-backstory`} icon="📜" title={sheet.name} tapHint={tapHint} testID={`${prefix}-backstory-page`}>
+    <TapToRevealCard key={`${prefix}-backstory`} icon="📜" title={t('sheet.backstory')} tapHint={tapHint} testID={`${prefix}-backstory-page`}>
       <BackstoryCard sheet={sheet} />
     </TapToRevealCard>,
   ];
@@ -60,7 +61,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
     case 'hero_sheet':
       return [
         ...photos,
-        ...sheetPages('hero', reading.hero, tapHint, '🛡️'),
+        ...sheetPages('hero', reading.hero, t, '🛡️'),
         <TapToRevealCard key="quest-hook" icon="🗺️" title={reading.quest_hook.title} tapHint={tapHint} testID="quest-hook-page">
           <StoryCard icon="🗺️" story={reading.quest_hook} testID="quest-hook-card" />
         </TapToRevealCard>,
@@ -68,7 +69,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
     case 'party_sheet':
       return [
         ...photos,
-        ...reading.heroes.flatMap((hero, index) => sheetPages(`party-${index}`, hero, tapHint, index === 0 ? '🛡️' : '⚔️')),
+        ...reading.heroes.flatMap((hero, index) => sheetPages(`party-${index}`, hero, t, index === 0 ? '🛡️' : '⚔️')),
         <TapToRevealCard key="party-synergy" icon="🤝" title={reading.party_name} tapHint={tapHint} testID="party-synergy-page">
           <FeatureListCard
             icon="🤝"
@@ -84,7 +85,7 @@ function readingCards(reading: ReadingResult, images: string[], t: Translate): R
     case 'nemesis_sheet':
       return [
         ...photos,
-        ...sheetPages('villain', reading.villain, tapHint, '😈'),
+        ...sheetPages('villain', reading.villain, t, '😈'),
         <TapToRevealCard key="evil-scheme" icon="🕯️" title={t('sheet.evilScheme')} tapHint={tapHint} testID="evil-scheme-page">
           <FeatureListCard
             icon="🕯️"
